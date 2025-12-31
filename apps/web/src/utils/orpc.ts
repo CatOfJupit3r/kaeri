@@ -5,7 +5,7 @@ import { createIsomorphicFn } from '@tanstack/react-start';
 import { getRequestHeaders } from '@tanstack/react-start/server';
 import { isError } from 'lodash-es';
 
-import type { CONTRACT } from '@startername/shared';
+import type { CONTRACT } from '@kaeri/shared';
 
 import { getBackendURL, isOnClient } from './ssr-helpers';
 
@@ -37,6 +37,7 @@ const getORPCClient = createIsomorphicFn()
     const URL = getBackendURL('/rpc');
     const link = new RPCLink({
       url: URL,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       headers: () => getRequestHeaders(),
       interceptors: INTERCEPTORS,
     });

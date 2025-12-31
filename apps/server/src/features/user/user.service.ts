@@ -1,7 +1,7 @@
 import { inject, injectable } from 'tsyringe';
 
-import { errorCodes } from '@startername/shared';
-import type { BadgeId } from '@startername/shared/constants/badges';
+import { errorCodes } from '@kaeri/shared';
+import type { BadgeId } from '@kaeri/shared/constants/badges';
 
 import { generatePublicCode } from '@~/db/helpers';
 import { User } from '@~/db/models/auth.model';

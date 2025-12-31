@@ -1,6 +1,6 @@
 import { inject, singleton } from 'tsyringe';
 
-import type { UserAchievementId } from '@startername/shared/constants/achievements';
+import type { UserAchievementId } from '@kaeri/shared/constants/achievements';
 
 import { UserAchievementModel } from '@~/db/models/user-achievements.model';
 import { TOKENS } from '@~/di/tokens';

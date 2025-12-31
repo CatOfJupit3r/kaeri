@@ -61,7 +61,7 @@ const silenceOpinions = [
       'import-x/no-unresolved': [
         'error',
         {
-          ignore: ['^@startername/', '^@~/'],
+          ignore: ['^@kaeri/', '^@~/'],
         },
       ],
       'import-x/order': [
@@ -69,8 +69,8 @@ const silenceOpinions = [
         {
           groups: [['builtin', 'external'], 'internal', ['parent', 'sibling', 'index']],
           pathGroups: [
-            { pattern: '@startername/**', group: 'internal', position: 'before' },
-            { pattern: '@startername/shared', group: 'internal', position: 'after' },
+            { pattern: '@kaeri/**', group: 'internal', position: 'before' },
+            { pattern: '@kaeri/shared', group: 'internal', position: 'after' },
             { pattern: '@~/**', group: 'internal', position: 'after' },
           ],
           pathGroupsExcludedImportTypes: ['builtin'],

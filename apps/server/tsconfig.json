@@ -8,7 +8,7 @@
     "skipLibCheck": true,
     "paths": {
       "@~/*": ["./src/*"],
-      "@startername/shared/globals": ["../../packages/shared/src/globals.d.ts"]
+      "@kaeri/shared/globals": ["../../packages/shared/src/globals.d.ts"]
     },
     "outDir": "./dist",
     "types": ["bun"],

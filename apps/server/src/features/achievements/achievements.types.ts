@@ -1,4 +1,4 @@
-import type { UserAchievementId } from '@startername/shared/constants/achievements';
+import type { UserAchievementId } from '@kaeri/shared/constants/achievements';
 
 import type { iEventPayloadMap, EventType } from '@~/features/events/events.constants';
 

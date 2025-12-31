@@ -1,17 +1,17 @@
 name:
-  startername
+  kaeri
 services:
   mongo:
     image: mongo:8.0
-    container_name: startername-mongo
+    container_name: kaeri-mongo
     restart: unless-stopped
     environment:
-      - MONGO_INITDB_DATABASE=startername
+      - MONGO_INITDB_DATABASE=kaeri
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=verysecretpassword
       - MONGO_USER=username
       - MONGO_PASSWORD=password
-      - MONGO_DB=startername
+      - MONGO_DB=kaeri
     ports:
       - 6060:27017
     volumes:
@@ -19,7 +19,7 @@ services:
       - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
   valkey:
     image: valkey/valkey:8.0-alpine
-    container_name: startername-valkey
+    container_name: kaeri-valkey
     restart: unless-stopped
     ports:
       - 6379:6379

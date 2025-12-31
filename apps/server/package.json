@@ -17,7 +17,7 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
-    "@startername/shared": "workspace:*",
+    "@kaeri/shared": "workspace:*",
     "@hono/standard-validator": "0.2.1",
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",

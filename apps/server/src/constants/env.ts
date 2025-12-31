@@ -29,10 +29,10 @@ const envSchema = z.object({
   BETTER_AUTH_URL: z.url(),
 
   // DB CONFIG
-  MONGO_URI: z.url().optional().default('mongodb://localhost:6060/startername'),
+  MONGO_URI: z.url().optional().default('mongodb://localhost:6060/kaeri'),
   MONGO_USER: z.string().optional().default('username'),
   MONGO_PASSWORD: z.string().optional().default('password'),
-  MONGO_DATABASE_NAME: z.string().optional().default('startername'),
+  MONGO_DATABASE_NAME: z.string().optional().default('kaeri'),
 
   // VALKEY / REDIS CONFIG
   VALKEY_HOST: z.string().optional().default('localhost'),

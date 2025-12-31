@@ -1,5 +1,5 @@
-import type { iBadgeMeta } from '@startername/shared/constants/badges';
-import { BADGE_IDS } from '@startername/shared/constants/badges';
+import type { iBadgeMeta } from '@kaeri/shared/constants/badges';
+import { BADGE_IDS } from '@kaeri/shared/constants/badges';
 
 export const BADGES_META: iBadgeMeta[] = [
   {

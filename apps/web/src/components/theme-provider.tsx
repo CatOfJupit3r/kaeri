@@ -13,7 +13,7 @@ const userThemeValidator = userThemeZod.clone().catch(USER_THEME.dark);
 export type UserTheme = z.infer<typeof userThemeZod>;
 export type AppTheme = Exclude<UserTheme, 'system'>;
 
-const THEME_COOKIE = 'startername.theme';
+const THEME_COOKIE = 'kaeri.theme';
 
 export const getStoredTheme = createServerFn().handler(async () => userThemeValidator.parse(getCookie(THEME_COOKIE)));
 

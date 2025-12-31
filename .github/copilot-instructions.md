@@ -29,7 +29,7 @@ applyTo: '**/*.ts'
   export const USER_ROLES = userRolesSchema.enum;
   export type UserRole = z.infer<typeof userRolesSchema>;
   ```
-- If your variable is reused across server and client, define it in `packages/shared/src/constants` and import it from `@startername/shared/constants`. Only do this for non-sensitive data.
+- If your variable is reused across server and client, define it in `packages/shared/src/constants` and import it from `@kaeri/shared/constants`. Only do this for non-sensitive data.
 - When resolving warnings or errors, prefer addressing the root cause instead of using `// @ts-ignore` or `as unknown as <Type>`. Use these only as a last resort with a comment explaining why.
 - If you encounter eslint warnings, run `bun run lint` to fix them in the file.
 - When referencing values, that have enum, ALWAYS use the enum itself instead of hardcoding strings. Example:
@@ -60,8 +60,8 @@ applyTo: '**/*.ts'
 ### Environment and Configuration
 - Copy `.env.example` to `.env` in `apps/server` and `apps/web`; server validates configuration with `zod` in `src/constants/env.ts`.
 - The Better Auth server is mounted under `/auth/*` and expects HTTPS cookies (`sameSite: 'none'`, `secure: true`); keep this in mind when testing locally.
-- Aliases: `@~/` resolves to `apps/server/src` or `apps/web/src` depending on the package; `@startername/shared` surfaces shared types.
-- MongoDB runs at `mongodb://localhost:6060/startername` by default; adjust via env vars and update docker-compose if ports change.
+- Aliases: `@~/` resolves to `apps/server/src` or `apps/web/src` depending on the package; `@kaeri/shared` surfaces shared types.
+- MongoDB runs at `mongodb://localhost:6060/kaeri` by default; adjust via env vars and update docker-compose if ports change.
 
 ### Structure and Patterns
 

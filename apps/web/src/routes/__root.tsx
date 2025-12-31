@@ -39,8 +39,8 @@ export const Route = createRootRouteWithContext<iRouterAppContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       ...seo({
-        title: 'startername',
-        description: 'startername is a web application',
+        title: 'kaeri',
+        description: 'kaeri is a web application',
         image: '/social-preview.png',
       }),
     ],
