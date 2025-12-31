@@ -1,0 +1,75 @@
+{
+  "name": "@startername/shared",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./globals": {
+      "types": "./dist/globals.d.mts",
+      "default": "./dist/globals.d.mts"
+    },
+    "./constants/*": {
+      "types": "./dist/constants/*.d.mts",
+      "default": "./dist/constants/*.mjs"
+    },
+    "./enums/*": {
+      "types": "./dist/enums/*.d.mts",
+      "default": "./dist/enums/*.mjs"
+    },
+    "./contract/*": {
+      "types": "./dist/contract/*.d.mts",
+      "default": "./dist/contract/*.mjs"
+    },
+    "./helpers/*": {
+      "types": "./dist/helpers/*.d.mts",
+      "default": "./dist/helpers/*.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "prepare": "bun run build",
+    "dev": "tsdown --watch --no-clean",
+    "prettier": "prettier --write .",
+    "check-types": "tsgo --noEmit",
+    "lint": "eslint . --ext .ts"
+  },
+  "devDependencies": {
+    "@eslint/compat": "catalog:",
+    "@eslint/js": "catalog:",
+    "@stylistic/eslint-plugin": "catalog:",
+    "@trivago/prettier-plugin-sort-imports": "catalog:",
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-airbnb-extended": "catalog:",
+    "eslint-config-prettier": "catalog:",
+    "eslint-import-resolver-typescript": "catalog:",
+    "eslint-plugin-import-x": "catalog:",
+    "eslint-plugin-n": "catalog:",
+    "eslint-plugin-prettier": "catalog:",
+    "prettier": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "typescript-eslint": "catalog:",
+    "@typescript/native-preview": "catalog:"
+  },
+  "peerDependencies": {
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "@orpc/contract": "catalog:",
+    "dotenv": "catalog:",
+    "lodash-es": "catalog:",
+    "better-auth": "catalog:",
+    "zod": "catalog:"
+  }
+}

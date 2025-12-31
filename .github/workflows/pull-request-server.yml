@@ -1,0 +1,76 @@
+name: Pull Request | Server
+
+on:
+    pull_request:
+        types: [opened, synchronize, reopened]
+        paths:
+            - ".github/workflows/pull-request-coordinator.yml"
+            - "bun.lockb"
+            - "apps/server/**/*.ts"
+            - "apps/server/package.json"
+            - "apps/server/tsconfig.json"
+            - "apps/server/.eslintrc*"
+
+jobs:
+    validate:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ./apps/server
+        strategy:
+            matrix:
+                bun-version: ["latest"]
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Setup Bun ${{ matrix.bun-version }}
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: ${{ matrix.bun-version }}
+
+            - name: Install Node 24.11.1 for tsdown
+              uses: actions/setup-node@v4
+              with:
+                node-version: 24.11.1
+
+            - name: Cache bun dependencies
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.bun/install/cache
+                      node_modules
+                      apps/*/node_modules
+                      packages/*/node_modules
+                  key: bun-${{ runner.os }}-${{ hashFiles('bun.lockb') }}
+                  restore-keys: bun-${{ runner.os }}-
+
+            - name: Install dependencies (Server)
+              run: bun install --frozen-lockfile
+
+            - name: Restore mongodb-memory-server cache
+              uses: actions/cache@v4
+              with:
+                  path: ~/.cache/mongodb-binaries
+                  key: mongo-binaries-${{ runner.os }}-8.0.4
+                  restore-keys: mongo-binaries-${{ runner.os }}-
+
+            - name: Build dependencies
+              run: bun run build:deps
+              working-directory: ./
+
+            - name: Type check
+              run: bun run check-types
+
+            - name: Lint
+              run: bun run lint
+
+            - name: Test
+              run: bun run test
+              env:
+                  CI: true
+                  MONGOMS_DOWNLOAD_DIR: ~/.cache/mongodb-binaries
+                  MONGOMS_PREFER_GLOBAL_PATH: "1"
+
+            - name: Build
+              run: bun run build

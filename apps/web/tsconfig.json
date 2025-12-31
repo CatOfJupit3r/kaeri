@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "types": ["vite/client", "bun"],
+    "rootDirs": ["."],
+    "paths": {
+      "@~/*": ["./src/*"],
+      "@startername/shared/globals": ["../../packages/shared/src/globals.d.ts"]
+    },
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "exclude": ["./eslint.config.js"],
+  "files": [
+    "../../packages/shared/src/globals.d.ts"
+  ],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    "src/types.d.ts"
+  ],
+  "references": [
+    {
+      "path": "../../packages/shared"
+    }
+  ]
+}

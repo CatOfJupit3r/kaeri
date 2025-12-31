@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@~/*": ["./src/*"],
+      "@startername/shared/globals": ["../../packages/shared/src/globals.d.ts"]
+    },
+    "outDir": "./dist",
+    "types": ["bun"],
+    "composite": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "references": [
+    {
+      "path": "../../packages/shared"
+    }
+  ],
+  "files": [
+    "../../packages/shared/src/globals.d.ts"
+  ],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    "test/**/*.ts",
+    "test/**/*.tsx"
+  ]
+}
