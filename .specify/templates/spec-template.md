@@ -100,6 +100,14 @@
 - **[Entity 1]**: [What it represents, key attributes without implementation]
 - **[Entity 2]**: [What it represents, relationships to other entities]
 
+### Constitution Alignment
+
+- Contracts: enumerate oRPC procedures this feature adds/changes and confirm shared schemas/enums exist.
+- Canonical continuity: describe how characters/locations/props/timelines stay consistent across episodes and timelines.
+- Access & collaboration: define auth roles, visibility rules (NOT_FOUND vs FORBIDDEN), and any audit/change-tracking needs.
+- Quality gates: list required automated tests and lint/type commands; note any deterministic fixtures needed.
+- Observability/recovery: note logging/metrics for contract calls and any migration/backup implications for canon data.
+
 ## Success Criteria *(mandatory)*
 
 <!--

@@ -12,6 +12,8 @@ description: "Task list template for feature implementation"
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
+**Constitution Hooks**: Add tasks that ensure contract definitions in `packages/shared`, canonical continuity checks (characters/locations/props/timelines), access-control coverage (NOT_FOUND vs FORBIDDEN), required automated tests/linters, and observability/backups for canon-changing operations.
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)

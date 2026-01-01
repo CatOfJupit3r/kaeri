@@ -31,7 +31,11 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- Contract-first: list the oRPC contracts/endpoints in `packages/shared` required for this feature and confirm schemas + exports exist or are planned before implementation.
+- Canon continuity: identify the canonical entities (characters, locations, props, timelines, episodes) this feature touches and how referential integrity/timeline ordering will be maintained.
+- Collaboration & access: state auth/role implications and how resource invisibility (NOT_FOUND vs FORBIDDEN) will be preserved.
+- Quality gates: declare targeted tests and the commands (`bun run check-types`, `bun run lint`, focused tests) that will validate the change.
+- Observability & recovery: note required logging/metrics for contract calls and any backup/migration needs for canon-changing data.
 
 ## Project Structure
 
