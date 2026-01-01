@@ -1,4 +1,4 @@
-import { afterAll, afterEach } from 'bun:test';
+import { afterAll, afterEach, beforeAll } from 'bun:test';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import 'reflect-metadata';
@@ -35,4 +35,10 @@ afterAll(async () => {
     console.error('Error during teardown of in-memory MongoDB server:', error);
   }
   console.log('In-memory MongoDB server has been stopped.');
+});
+
+beforeAll(async () => {
+  const { resolve } = await import('@~/di/container');
+  const { TOKENS } = await import('@~/di/tokens');
+  resolve(TOKENS.LoggerFactory).silence();
 });

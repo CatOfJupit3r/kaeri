@@ -38,4 +38,14 @@ export class LoggerFactoryImpl {
   public global(): Logger {
     return this.instance;
   }
+
+  /**
+   * Silence all logging output from this logger instance.
+   * Useful for suppressing logs during tests.
+   */
+  public silence() {
+    this.instance.getWinstonLogger().transports.forEach((transport) => {
+      Object.assign(transport, { silent: true });
+    });
+  }
 }

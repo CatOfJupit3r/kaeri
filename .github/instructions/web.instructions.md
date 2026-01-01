@@ -5,7 +5,7 @@ applyTo: "apps/web/**/*.ts,packages/shared/**/*.ts"
 ## Overview
 - The web client lives in `apps/web` and is powered by React 19, Vite, TanStack Router/Query/Form, Tailwind CSS, and Sonner for toasts.
 - Shared backend contracts are consumed through the generated oRPC client (`@kaeri/shared`) so API calls stay fully typed.
-- Authentication relies on Better Auth's React client (`apps/web/src/services/auth-service.ts`) and uses secure cookies issued by the backend.
+- Authentication relies on Better Auth's React client (`apps/web/src/services/auth.service.ts`) and uses secure cookies issued by the backend.
 
 ## Environment & Bootstrapping
 - Run `bun run dev` at the repo root to start both the web app (`http://localhost:3001`) and the API; ensure Docker Desktop is running so Mongo boots successfully.
@@ -205,7 +205,7 @@ export function ChallengeFilters() {
 - **Helpers**: `apps/web/src/features/*/helpers/**/*.tsx`
 - **Routes**: `apps/web/src/routes/**/*.tsx`
 - **oRPC Setup**: `apps/web/src/utils/tanstack-orpc.ts`
-- **Auth Service**: `apps/web/src/services/auth-service.ts`
+- **Auth Service**: `apps/web/src/services/auth.service.ts`
 
 ## Forms, Feedback, and Styling
 - TanStack Form powers auth flows (`components/sign-in-form.tsx`, `sign-up-form.tsx`); keep validators in sync with shared `zod` schemas and show validation errors inline.

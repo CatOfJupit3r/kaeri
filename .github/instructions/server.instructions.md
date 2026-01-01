@@ -95,7 +95,7 @@ applyTo: "apps/server/**/*.ts,packages/shared/**/*.ts"
 ## Authentication & Sessions
 
 - Better Auth is configured in `apps/server/src/lib/auth.ts` with the Mongo adapter; session lookups happen in `createContext`.
-- The `/auth/*` route is mounted directly on Hono using `auth.handler`. Client code uses `better-auth/react` (`apps/web/src/services/auth-service.ts`).
+- The `/auth/*` route is mounted directly on Hono using `auth.handler`. Client code uses `better-auth/react` (`apps/web/src/services/auth.service.ts`).
 - If you add lifecycle hooks (e.g., after user creation), wrap them in try/catch, log meaningful errors, and avoid throwing unless the request must fail.
 
 ## Server Architecture
