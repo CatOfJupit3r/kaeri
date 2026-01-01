@@ -56,8 +56,8 @@ function RouteComponent() {
               <Card key={s._id} className="group cursor-pointer overflow-hidden transition-all hover:shadow-md">
                 <div className="p-5">
                   <h3 className="font-semibold text-foreground group-hover:text-primary">{s.title}</h3>
-                  {s.genre && <p className="text-xs text-muted-foreground">{s.genre}</p>}
-                  {s.logline && <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{s.logline}</p>}
+                  {s.genre ? <p className="text-xs text-muted-foreground">{s.genre}</p> : null}
+                  {s.logline ? <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{s.logline}</p> : null}
                   <div className="mt-4 text-xs text-muted-foreground">
                     Last edited: {new Date(s.lastEditedAt).toLocaleDateString()}
                   </div>
