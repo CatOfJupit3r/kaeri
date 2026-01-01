@@ -14,13 +14,13 @@
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
-- [ ] T004 Define shared enums/constants for entity types, relationship types, export formats in `packages/shared/src/enums/` and export index
-- [ ] T005 Add audit entry schemas/types in `packages/shared/src/constants` or `enums` (path: `packages/shared/src/enums/audit.ts`)
-- [ ] T006 Add continuity graph/audit contracts skeleton in `packages/shared/src/contract/continuity.contract.ts`
-- [ ] T007 Add series/script/KB/canvas/export contract skeletons in `packages/shared/src/contract/` (series, scripts, knowledge-base, canvas, export)
-- [ ] T008 Update `packages/shared/src/contract/index.ts` to export new contracts
-- [ ] T009 Create Typegoose models (Series, Script, Character, Location, Prop, TimelineEntry, WildCard, CanvasNode, CanvasEdge, AuditEntry) in `apps/server/src/features/**` per data model
-- [ ] T010 Register models/services tokens in `apps/server/src/di/tokens.ts` and `apps/server/src/di/container.ts`
+- [X] T004 Define shared enums/constants for entity types, relationship types, export formats in `packages/shared/src/enums/` and export index
+- [X] T005 Add audit entry schemas/types in `packages/shared/src/constants` or `enums` (path: `packages/shared/src/enums/audit.ts`)
+- [X] T006 Add continuity graph/audit contracts skeleton in `packages/shared/src/contract/continuity.contract.ts`
+- [X] T007 Add series/script/KB/canvas/export contract skeletons in `packages/shared/src/contract/` (series, scripts, knowledge-base, canvas, export)
+- [X] T008 Update `packages/shared/src/contract/index.ts` to export new contracts
+- [X] T009 Create Typegoose models (Series, Script, Character, Location, Prop, TimelineEntry, WildCard, CanvasNode, CanvasEdge, AuditEntry) in `apps/server/src/features/**` per data model
+- [X] T010 Register models/services tokens in `apps/server/src/di/tokens.ts` and `apps/server/src/di/container.ts`
 - [ ] T011 Add performance telemetry hooks (search/load/export timers) skeleton in `apps/server/src/lib` (new file) and wire logger factory
 - [ ] T012 Ensure auth/NOT_FOUND stance documented in `apps/server/src/routers/di-getter.ts` or middleware notes
 
@@ -30,8 +30,8 @@
 **Goal**: Create/manage a series and see scripts in library.
 **Independent Test**: Create series, add a script, reopen with persisted data.
 
-- [ ] T013 [P] [US1] Implement series contracts handlers in `apps/server/src/routers/series.router.ts`
-- [ ] T014 [P] [US1] Add series services for CRUD + lastEditedAt in `apps/server/src/features/series/series.service.ts`
+- [X] T013 [P] [US1] Implement series contracts handlers in `apps/server/src/routers/series.router.ts`
+- [X] T014 [P] [US1] Add series services for CRUD + lastEditedAt in `apps/server/src/features/series/series.service.ts`
 - [ ] T015 [P] [US1] Add series list/grid view and creation modal in `apps/web/src/features/series` and route `apps/web/src/routes/series/index.tsx`
 - [ ] T016 [US1] Wire series creation/editing forms with oRPC calls in `apps/web/src/features/series/components/series-modal.tsx`
 - [ ] T017 [US1] Add series library query hooks and optimistic updates in `apps/web/src/features/series/hooks/queries/use-series.ts`
