@@ -18,6 +18,8 @@ export async function registerServices() {
   const { TypedEventBus } = await import('@~/features/events/event-bus');
   const { ValkeyService } = await import('@~/features/valkey/valkey.service');
   const { SeriesService } = await import('@~/features/series/series.service');
+  const { ScriptsService } = await import('@~/features/scripts/scripts.service');
+  const { KnowledgeBaseService } = await import('@~/features/knowledge-base/knowledge-base.service');
 
   // Register singletons with their tokens
   container.registerSingleton(TOKENS.EventBus, TypedEventBus);
@@ -29,6 +31,8 @@ export async function registerServices() {
   container.registerSingleton(TOKENS.ValkeyService, ValkeyService);
   container.register(TOKENS.UserService, { useClass: UserService }, { lifecycle: Lifecycle.Transient });
   container.registerSingleton(TOKENS.SeriesService, SeriesService);
+  container.registerSingleton(TOKENS.ScriptsService, ScriptsService);
+  container.registerSingleton(TOKENS.KnowledgeBaseService, KnowledgeBaseService);
 }
 
 // Helper function to resolve services

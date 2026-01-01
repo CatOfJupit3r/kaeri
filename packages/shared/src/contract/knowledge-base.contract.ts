@@ -273,11 +273,11 @@ const removeVariation = authProcedure
 
 const knowledgeBaseContract = oc.prefix('/knowledge-base').router({
   searchKB,
-  ...characterCrud,
-  ...locationCrud,
-  ...propCrud,
-  ...timelineCrud,
-  ...wildCardCrud,
+  characters: characterCrud,
+  locations: locationCrud,
+  props: propCrud,
+  timeline: timelineCrud,
+  wildcards: wildCardCrud,
   addRelationship,
   removeRelationship,
   addAppearance,
