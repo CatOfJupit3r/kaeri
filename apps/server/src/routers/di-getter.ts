@@ -8,4 +8,5 @@ export const GETTERS = {
   UserService: () => resolve(TOKENS.UserService),
   DatabaseService: () => resolve(TOKENS.DatabaseService),
   EventBus: () => resolve(TOKENS.EventBus),
+  SeriesService: () => resolve(TOKENS.SeriesService),
 };

@@ -4,6 +4,7 @@ import type { AuthService } from '@~/features/auth/auth.service';
 import type { BadgesService } from '@~/features/badges/badges.service';
 import type { TypedEventBus } from '@~/features/events/event-bus';
 import type { LoggerFactory } from '@~/features/logger/logger.types';
+import type { SeriesService } from '@~/features/series/series.service';
 import type { UserService } from '@~/features/user/user.service';
 import type { ValkeyService } from '@~/features/valkey/valkey.service';
 
@@ -15,6 +16,7 @@ const eventBusToken: unique symbol = Symbol.for('EventBus');
 const userServiceToken: unique symbol = Symbol.for('UserService');
 const loggerFactoryToken: unique symbol = Symbol.for('LoggerFactory');
 const valkeyServiceToken: unique symbol = Symbol.for('ValkeyService');
+const seriesServiceToken: unique symbol = Symbol.for('SeriesService');
 
 // Service tokens for dependency injection (unique symbols for type-safe lookups)
 export const TOKENS = {
@@ -26,6 +28,7 @@ export const TOKENS = {
   UserService: userServiceToken,
   LoggerFactory: loggerFactoryToken,
   ValkeyService: valkeyServiceToken,
+  SeriesService: seriesServiceToken,
 } as const;
 
 export interface iTokenRegistry {
@@ -37,6 +40,7 @@ export interface iTokenRegistry {
   [TOKENS.UserService]: UserService;
   [TOKENS.LoggerFactory]: LoggerFactory;
   [TOKENS.ValkeyService]: ValkeyService;
+  [TOKENS.SeriesService]: SeriesService;
 }
 
 export type InjectionTokens = typeof TOKENS;
