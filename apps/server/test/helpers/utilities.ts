@@ -1,6 +1,11 @@
+import { expect } from 'bun:test';
+
 import { auth } from './instance';
 
 type UserData = NonNullable<Prettify<Parameters<typeof auth.api.signUpEmail>[0]>>['body'];
+
+export type TestUser = Awaited<ReturnType<typeof createUser>>;
+export type TestCtx = TestUser['ctx'];
 
 // ============================================================================
 // User Creation Utilities
@@ -48,4 +53,13 @@ export async function createUser(newUser: UserData = createRandomUser()) {
       },
     }),
   };
+}
+
+export async function expectErrorCode(fn: () => Promise<unknown>, code: string) {
+  try {
+    await fn();
+    expect(true).toBe(false);
+  } catch (error: any) {
+    expect(error.code).toBe(code);
+  }
 }
