@@ -7,9 +7,9 @@
 **Constitution Hooks**: Contract-first (`packages/shared`), continuity integrity, auth/NOT_FOUND stance, tests + lint/types, observability/audit.
 
 ## Phase 1: Setup (Shared Infrastructure)
-- [ ] T001 Document local env steps for feature in `specs/000-kaeri-baseline/quickstart.md` (create file)
-- [ ] T002 Verify `.env` copies for server/web and Docker running; note in `quickstart.md`
-- [ ] T003 [P] Add feature branch reference to README or internal notes (no code change paths)
+- [X] T001 Document local env steps for feature in `specs/000-kaeri-baseline/quickstart.md` (create file)
+- [X] T002 Verify `.env` copies for server/web and Docker running; note in `quickstart.md`
+- [X] T003 [P] Add feature branch reference to README or internal notes (no code change paths)
 
 ---
 
@@ -21,8 +21,8 @@
 - [X] T008 Update `packages/shared/src/contract/index.ts` to export new contracts
 - [X] T009 Create Typegoose models (Series, Script, Character, Location, Prop, TimelineEntry, WildCard, CanvasNode, CanvasEdge, AuditEntry) in `apps/server/src/features/**` per data model
 - [X] T010 Register models/services tokens in `apps/server/src/di/tokens.ts` and `apps/server/src/di/container.ts`
-- [ ] T011 Add performance telemetry hooks (search/load/export timers) skeleton in `apps/server/src/lib` (new file) and wire logger factory
-- [ ] T012 Ensure auth/NOT_FOUND stance documented in `apps/server/src/routers/di-getter.ts` or middleware notes
+- [X] T011 Add performance telemetry hooks (search/load/export timers) skeleton in `apps/server/src/lib` (new file) and wire logger factory
+- [X] T012 Ensure auth/NOT_FOUND stance documented in `apps/server/src/routers/di-getter.ts` or middleware notes
 
 ---
 
@@ -42,8 +42,8 @@
 **Goal**: Open script, edit text, split view with KB panel; autosave.
 **Independent Test**: Type, save/autosave, reopen script; KB panel visible.
 
-- [ ] T018 [P] [US2] Implement script CRUD + saveContent handlers in `apps/server/src/routers/scripts.router.ts`
-- [ ] T019 [US2] Implement script service with autosave and lastEditedAt updates in `apps/server/src/features/scripts/scripts.service.ts`
+- [X] T018 [P] [US2] Implement script CRUD + saveContent handlers in `apps/server/src/routers/scripts.router.ts`
+- [X] T019 [US2] Implement script service with autosave and lastEditedAt updates in `apps/server/src/features/scripts/scripts.service.ts`
 - [ ] T020 [P] [US2] Add script list/grid under series route `apps/web/src/routes/series/$seriesId/scripts.tsx`
 - [ ] T021 [US2] Build split editor layout (text left, KB tabs right) in `apps/web/src/features/scripts/components/split-editor.tsx`
 - [ ] T022 [US2] Add autosave + manual save hooks in `apps/web/src/features/scripts/hooks/use-save-script.ts`
