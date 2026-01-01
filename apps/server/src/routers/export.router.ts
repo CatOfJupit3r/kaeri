@@ -1,12 +1,15 @@
 import { base, protectedProcedure } from '@~/lib/orpc';
 
-// TODO: Implement export service and handlers
+import { GETTERS } from './di-getter';
+
 export const exportRouter = base.export.router({
-  exportScriptPdf: protectedProcedure.export.exportScriptPdf.handler(async () => {
-    throw new Error('Not implemented');
+  exportScriptPdf: protectedProcedure.export.exportScriptPdf.handler(async ({ input }) => {
+    const exportService = GETTERS.ExportService();
+    return exportService.exportScriptPdf(input.scriptId);
   }),
 
-  exportSeriesJson: protectedProcedure.export.exportSeriesJson.handler(async () => {
-    throw new Error('Not implemented');
+  exportSeriesJson: protectedProcedure.export.exportSeriesJson.handler(async ({ input }) => {
+    const exportService = GETTERS.ExportService();
+    return exportService.exportSeriesJson(input.seriesId);
   }),
 });

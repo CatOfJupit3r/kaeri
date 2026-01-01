@@ -20,6 +20,9 @@ export async function registerServices() {
   const { SeriesService } = await import('@~/features/series/series.service');
   const { ScriptsService } = await import('@~/features/scripts/scripts.service');
   const { KnowledgeBaseService } = await import('@~/features/knowledge-base/knowledge-base.service');
+  const { CanvasService } = await import('@~/features/canvas/canvas.service');
+  const { ExportService } = await import('@~/features/export/export.service');
+  const { ContinuityService } = await import('@~/features/continuity/continuity.service');
 
   // Register singletons with their tokens
   container.registerSingleton(TOKENS.EventBus, TypedEventBus);
@@ -33,6 +36,9 @@ export async function registerServices() {
   container.registerSingleton(TOKENS.SeriesService, SeriesService);
   container.registerSingleton(TOKENS.ScriptsService, ScriptsService);
   container.registerSingleton(TOKENS.KnowledgeBaseService, KnowledgeBaseService);
+  container.registerSingleton(TOKENS.CanvasService, CanvasService);
+  container.registerSingleton(TOKENS.ExportService, ExportService);
+  container.registerSingleton(TOKENS.ContinuityService, ContinuityService);
 }
 
 // Helper function to resolve services

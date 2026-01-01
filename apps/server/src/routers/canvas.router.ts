@@ -1,24 +1,30 @@
 import { base, protectedProcedure } from '@~/lib/orpc';
 
-// TODO: Implement canvas service and handlers
+import { GETTERS } from './di-getter';
+
 export const canvasRouter = base.canvas.router({
-  getCanvas: protectedProcedure.canvas.getCanvas.handler(async () => {
-    throw new Error('Not implemented');
+  getCanvas: protectedProcedure.canvas.getCanvas.handler(async ({ input }) => {
+    const canvasService = GETTERS.CanvasService();
+    return canvasService.getCanvas(input.seriesId);
   }),
 
-  upsertNodes: protectedProcedure.canvas.upsertNodes.handler(async () => {
-    throw new Error('Not implemented');
+  upsertNodes: protectedProcedure.canvas.upsertNodes.handler(async ({ input }) => {
+    const canvasService = GETTERS.CanvasService();
+    return canvasService.upsertNodes(input.seriesId, input.nodes);
   }),
 
-  upsertEdges: protectedProcedure.canvas.upsertEdges.handler(async () => {
-    throw new Error('Not implemented');
+  upsertEdges: protectedProcedure.canvas.upsertEdges.handler(async ({ input }) => {
+    const canvasService = GETTERS.CanvasService();
+    return canvasService.upsertEdges(input.seriesId, input.edges);
   }),
 
-  deleteNodes: protectedProcedure.canvas.deleteNodes.handler(async () => {
-    throw new Error('Not implemented');
+  deleteNodes: protectedProcedure.canvas.deleteNodes.handler(async ({ input }) => {
+    const canvasService = GETTERS.CanvasService();
+    return canvasService.deleteNodes(input.seriesId, input.nodeIds);
   }),
 
-  deleteEdges: protectedProcedure.canvas.deleteEdges.handler(async () => {
-    throw new Error('Not implemented');
+  deleteEdges: protectedProcedure.canvas.deleteEdges.handler(async ({ input }) => {
+    const canvasService = GETTERS.CanvasService();
+    return canvasService.deleteEdges(input.seriesId, input.edgeIds);
   }),
 });

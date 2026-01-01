@@ -11,4 +11,7 @@ export const GETTERS = {
   SeriesService: () => resolve(TOKENS.SeriesService),
   ScriptsService: () => resolve(TOKENS.ScriptsService),
   KnowledgeBaseService: () => resolve(TOKENS.KnowledgeBaseService),
+  CanvasService: () => resolve(TOKENS.CanvasService),
+  ExportService: () => resolve(TOKENS.ExportService),
+  ContinuityService: () => resolve(TOKENS.ContinuityService),
 };
