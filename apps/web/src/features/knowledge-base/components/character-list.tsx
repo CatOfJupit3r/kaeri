@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@~/components/ui/avatar';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
-import { useCharacterList } from '@~/features/kaeri/hooks/queries/use-character-list';
+import { useCharacterList } from '@~/features/knowledge-base/hooks/queries/use-character-list';
 
 import { CharacterForm } from './character-form';
 

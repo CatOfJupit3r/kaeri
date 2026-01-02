@@ -16,7 +16,7 @@ import { useAppForm } from '@~/components/ui/field';
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
 
-import { useCreateCharacter } from '../../hooks/mutations/use-create-character';
+import { useCreateCharacter } from '../hooks/mutations/use-create-character';
 
 interface iCharacterFormProps {
   seriesId: string;

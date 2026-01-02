@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { LuBookUser, LuGlobe, LuPackage, LuCalendar, LuSparkles } from 'react-icons/lu';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
-import { CharacterList } from '@~/features/kaeri/components/kb/character-list';
+import { CharacterList } from '@~/features/knowledge-base/components/character-list';
 
 export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-base')({
   component: RouteComponent,

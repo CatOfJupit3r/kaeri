@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { Button } from '@~/components/ui/button';
 import { Card } from '@~/components/ui/card';
-import { useSeriesList } from '@~/features/kaeri/hooks/queries/use-series-list';
+import { useSeriesList } from '@~/features/series/hooks/queries/use-series-list';
 
 export const Route = createFileRoute('/_auth_only/projects')({
   component: RouteComponent,

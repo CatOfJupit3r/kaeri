@@ -32,13 +32,13 @@ This document breaks down the remaining Foundation Platform implementation into 
    - Basic layout with tabs for entity types
    - Tab navigation (Characters, Locations, Props, Timeline, Wild Cards)
 
-2. Create Character list component: `apps/web/src/features/kaeri/components/kb/character-list.tsx`
+2. Create Character list component: `apps/web/src/features/knowledge-base/components/character-list.tsx`
    - Grid/list view of characters
    - Show: name, avatar, trait count, relationship count
    - Empty state when no characters
    - "New Character" button
 
-3. Create query hook: `apps/web/src/features/kaeri/hooks/queries/use-character-list.ts`
+3. Create query hook: `apps/web/src/features/knowledge-base/hooks/queries/use-character-list.ts`
    - Use `tanstackRPC.knowledgeBase.characters.list`
    - Pagination support (limit, offset)
    - Integrate with TanStack Query
@@ -51,8 +51,8 @@ This document breaks down the remaining Foundation Platform implementation into 
 
 **Files to Create**:
 - `apps/web/src/routes/_auth_only/series/$seriesId/knowledge-base.tsx`
-- `apps/web/src/features/kaeri/components/kb/character-list.tsx`
-- `apps/web/src/features/kaeri/hooks/queries/use-character-list.ts`
+- `apps/web/src/features/knowledge-base/components/character-list.tsx`
+- `apps/web/src/features/knowledge-base/hooks/queries/use-character-list.ts`
 
 ---
 
@@ -61,12 +61,12 @@ This document breaks down the remaining Foundation Platform implementation into 
 **Estimated Time**: 45-60 minutes
 
 **Deliverables**:
-1. Create Character form component: `apps/web/src/features/kaeri/components/kb/character-form.tsx`
+1. Create Character form component: `apps/web/src/features/knowledge-base/components/character-form.tsx`
    - Form fields: name (required), description, traits (multi-input), avatarUrl
    - Use TanStack Form for validation
    - Modal/dialog wrapper
 
-2. Create mutation hook: `apps/web/src/features/kaeri/hooks/mutations/use-create-character.ts`
+2. Create mutation hook: `apps/web/src/features/knowledge-base/hooks/mutations/use-create-character.ts`
    - Use `tanstackRPC.knowledgeBase.characters.create`
    - Optimistic updates for character list
    - Success/error toasts
@@ -83,11 +83,11 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Error handling with error toast
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/components/kb/character-form.tsx`
-- `apps/web/src/features/kaeri/hooks/mutations/use-create-character.ts`
+- `apps/web/src/features/knowledge-base/components/character-form.tsx`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-create-character.ts`
 
 **Files to Update**:
-- `apps/web/src/features/kaeri/components/kb/character-list.tsx` (add modal integration)
+- `apps/web/src/features/knowledge-base/components/character-list.tsx` (add modal integration)
 
 ---
 
@@ -97,8 +97,8 @@ This document breaks down the remaining Foundation Platform implementation into 
 
 **Deliverables**:
 1. Create mutation hooks:
-   - `apps/web/src/features/kaeri/hooks/mutations/use-update-character.ts`
-   - `apps/web/src/features/kaeri/hooks/mutations/use-delete-character.ts`
+   - `apps/web/src/features/knowledge-base/hooks/mutations/use-update-character.ts`
+   - `apps/web/src/features/knowledge-base/hooks/mutations/use-delete-character.ts`
    - Both with optimistic updates
 
 2. Update character-form.tsx to support edit mode
@@ -119,12 +119,12 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Both operations show appropriate success/error toasts
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/hooks/mutations/use-update-character.ts`
-- `apps/web/src/features/kaeri/hooks/mutations/use-delete-character.ts`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-update-character.ts`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-delete-character.ts`
 
 **Files to Update**:
-- `apps/web/src/features/kaeri/components/kb/character-form.tsx` (edit mode support)
-- `apps/web/src/features/kaeri/components/kb/character-list.tsx` (add edit/delete actions)
+- `apps/web/src/features/knowledge-base/components/character-form.tsx` (edit mode support)
+- `apps/web/src/features/knowledge-base/components/character-list.tsx` (add edit/delete actions)
 
 ---
 
@@ -133,19 +133,19 @@ This document breaks down the remaining Foundation Platform implementation into 
 **Estimated Time**: 45-60 minutes
 
 **Deliverables**:
-1. Create Location list: `apps/web/src/features/kaeri/components/kb/location-list.tsx`
+1. Create Location list: `apps/web/src/features/knowledge-base/components/location-list.tsx`
    - Grid/list view with name, description preview, tag count
    - "New Location" button
 
-2. Create Location form: `apps/web/src/features/kaeri/components/kb/location-form.tsx`
+2. Create Location form: `apps/web/src/features/knowledge-base/components/location-form.tsx`
    - Fields: name (required), description, tags (multi-input)
    - Support create and edit modes
 
 3. Create hooks:
-   - `apps/web/src/features/kaeri/hooks/queries/use-location-list.ts`
-   - `apps/web/src/features/kaeri/hooks/mutations/use-create-location.ts`
-   - `apps/web/src/features/kaeri/hooks/mutations/use-update-location.ts`
-   - `apps/web/src/features/kaeri/hooks/mutations/use-delete-location.ts`
+   - `apps/web/src/features/knowledge-base/hooks/queries/use-location-list.ts`
+   - `apps/web/src/features/knowledge-base/hooks/mutations/use-create-location.ts`
+   - `apps/web/src/features/knowledge-base/hooks/mutations/use-update-location.ts`
+   - `apps/web/src/features/knowledge-base/hooks/mutations/use-delete-location.ts`
 
 4. Wire to Locations tab in knowledge-base.tsx route
 
@@ -155,12 +155,12 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Pattern matches Character implementation for consistency
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/components/kb/location-list.tsx`
-- `apps/web/src/features/kaeri/components/kb/location-form.tsx`
-- `apps/web/src/features/kaeri/hooks/queries/use-location-list.ts`
-- `apps/web/src/features/kaeri/hooks/mutations/use-create-location.ts`
-- `apps/web/src/features/kaeri/hooks/mutations/use-update-location.ts`
-- `apps/web/src/features/kaeri/hooks/mutations/use-delete-location.ts`
+- `apps/web/src/features/knowledge-base/components/location-list.tsx`
+- `apps/web/src/features/knowledge-base/components/location-form.tsx`
+- `apps/web/src/features/knowledge-base/hooks/queries/use-location-list.ts`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-create-location.ts`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-update-location.ts`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-delete-location.ts`
 
 **Files to Update**:
 - `apps/web/src/routes/_auth_only/series/$seriesId/knowledge-base.tsx` (wire Locations tab)
@@ -172,17 +172,17 @@ This document breaks down the remaining Foundation Platform implementation into 
 **Estimated Time**: 45-60 minutes
 
 **Deliverables**:
-1. Create Prop list: `apps/web/src/features/kaeri/components/kb/prop-list.tsx`
+1. Create Prop list: `apps/web/src/features/knowledge-base/components/prop-list.tsx`
    - Grid/list view with name, description preview
 
-2. Create Prop form: `apps/web/src/features/kaeri/components/kb/prop-form.tsx`
+2. Create Prop form: `apps/web/src/features/knowledge-base/components/prop-form.tsx`
    - Fields: name (required), description, associations (text area for JSON or links)
 
 3. Create hooks:
-   - `apps/web/src/features/kaeri/hooks/queries/use-prop-list.ts`
-   - `apps/web/src/features/kaeri/hooks/mutations/use-create-prop.ts`
-   - `apps/web/src/features/kaeri/hooks/mutations/use-update-prop.ts`
-   - `apps/web/src/features/kaeri/hooks/mutations/use-delete-prop.ts`
+   - `apps/web/src/features/knowledge-base/hooks/queries/use-prop-list.ts`
+   - `apps/web/src/features/knowledge-base/hooks/mutations/use-create-prop.ts`
+   - `apps/web/src/features/knowledge-base/hooks/mutations/use-update-prop.ts`
+   - `apps/web/src/features/knowledge-base/hooks/mutations/use-delete-prop.ts`
 
 4. Wire to Props tab in knowledge-base.tsx route
 
@@ -191,12 +191,12 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Pattern matches Character/Location implementations
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/components/kb/prop-list.tsx`
-- `apps/web/src/features/kaeri/components/kb/prop-form.tsx`
-- `apps/web/src/features/kaeri/hooks/queries/use-prop-list.ts`
-- `apps/web/src/features/kaeri/hooks/mutations/use-create-prop.ts`
-- `apps/web/src/features/kaeri/hooks/mutations/use-update-prop.ts`
-- `apps/web/src/features/kaeri/hooks/mutations/use-delete-prop.ts`
+- `apps/web/src/features/knowledge-base/components/prop-list.tsx`
+- `apps/web/src/features/knowledge-base/components/prop-form.tsx`
+- `apps/web/src/features/knowledge-base/hooks/queries/use-prop-list.ts`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-create-prop.ts`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-update-prop.ts`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-delete-prop.ts`
 
 **Files to Update**:
 - `apps/web/src/routes/_auth_only/series/$seriesId/knowledge-base.tsx`
@@ -208,17 +208,17 @@ This document breaks down the remaining Foundation Platform implementation into 
 **Estimated Time**: 45-60 minutes
 
 **Deliverables**:
-1. Create Timeline list: `apps/web/src/features/kaeri/components/kb/timeline-list.tsx`
+1. Create Timeline list: `apps/web/src/features/knowledge-base/components/timeline-list.tsx`
    - List view (chronological if date provided) with label, date, description preview
 
-2. Create Timeline form: `apps/web/src/features/kaeri/components/kb/timeline-form.tsx`
+2. Create Timeline form: `apps/web/src/features/knowledge-base/components/timeline-form.tsx`
    - Fields: label (required), date (optional date picker), description, links (text area)
 
 3. Create hooks:
-   - `apps/web/src/features/kaeri/hooks/queries/use-timeline-list.ts`
-   - `apps/web/src/features/kaeri/hooks/mutations/use-create-timeline.ts`
-   - `apps/web/src/features/kaeri/hooks/mutations/use-update-timeline.ts`
-   - `apps/web/src/features/kaeri/hooks/mutations/use-delete-timeline.ts`
+   - `apps/web/src/features/knowledge-base/hooks/queries/use-timeline-list.ts`
+   - `apps/web/src/features/knowledge-base/hooks/mutations/use-create-timeline.ts`
+   - `apps/web/src/features/knowledge-base/hooks/mutations/use-update-timeline.ts`
+   - `apps/web/src/features/knowledge-base/hooks/mutations/use-delete-timeline.ts`
 
 4. Wire to Timeline tab in knowledge-base.tsx route
 
@@ -228,12 +228,12 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Entries display in chronological order if dates present
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/components/kb/timeline-list.tsx`
-- `apps/web/src/features/kaeri/components/kb/timeline-form.tsx`
-- `apps/web/src/features/kaeri/hooks/queries/use-timeline-list.ts`
-- `apps/web/src/features/kaeri/hooks/mutations/use-create-timeline.ts`
-- `apps/web/src/features/kaeri/hooks/mutations/use-update-timeline.ts`
-- `apps/web/src/features/kaeri/hooks/mutations/use-delete-timeline.ts`
+- `apps/web/src/features/knowledge-base/components/timeline-list.tsx`
+- `apps/web/src/features/knowledge-base/components/timeline-form.tsx`
+- `apps/web/src/features/knowledge-base/hooks/queries/use-timeline-list.ts`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-create-timeline.ts`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-update-timeline.ts`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-delete-timeline.ts`
 
 **Files to Update**:
 - `apps/web/src/routes/_auth_only/series/$seriesId/knowledge-base.tsx`
@@ -245,17 +245,17 @@ This document breaks down the remaining Foundation Platform implementation into 
 **Estimated Time**: 45-60 minutes
 
 **Deliverables**:
-1. Create Wild Card list: `apps/web/src/features/kaeri/components/kb/wildcard-list.tsx`
+1. Create Wild Card list: `apps/web/src/features/knowledge-base/components/wildcard-list.tsx`
    - Grid/card view with title, content preview, tags
 
-2. Create Wild Card form: `apps/web/src/features/kaeri/components/kb/wildcard-form.tsx`
+2. Create Wild Card form: `apps/web/src/features/knowledge-base/components/wildcard-form.tsx`
    - Fields: title (required), content (textarea), tags (multi-input)
 
 3. Create hooks:
-   - `apps/web/src/features/kaeri/hooks/queries/use-wildcard-list.ts`
-   - `apps/web/src/features/kaeri/hooks/mutations/use-create-wildcard.ts`
-   - `apps/web/src/features/kaeri/hooks/mutations/use-update-wildcard.ts`
-   - `apps/web/src/features/kaeri/hooks/mutations/use-delete-wildcard.ts`
+   - `apps/web/src/features/knowledge-base/hooks/queries/use-wildcard-list.ts`
+   - `apps/web/src/features/knowledge-base/hooks/mutations/use-create-wildcard.ts`
+   - `apps/web/src/features/knowledge-base/hooks/mutations/use-update-wildcard.ts`
+   - `apps/web/src/features/knowledge-base/hooks/mutations/use-delete-wildcard.ts`
 
 4. Wire to Wild Cards tab in knowledge-base.tsx route
 
@@ -265,12 +265,12 @@ This document breaks down the remaining Foundation Platform implementation into 
 - All 5 KB entity types now fully functional
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/components/kb/wildcard-list.tsx`
-- `apps/web/src/features/kaeri/components/kb/wildcard-form.tsx`
-- `apps/web/src/features/kaeri/hooks/queries/use-wildcard-list.ts`
-- `apps/web/src/features/kaeri/hooks/mutations/use-create-wildcard.ts`
-- `apps/web/src/features/kaeri/hooks/mutations/use-update-wildcard.ts`
-- `apps/web/src/features/kaeri/hooks/mutations/use-delete-wildcard.ts`
+- `apps/web/src/features/knowledge-base/components/wildcard-list.tsx`
+- `apps/web/src/features/knowledge-base/components/wildcard-form.tsx`
+- `apps/web/src/features/knowledge-base/hooks/queries/use-wildcard-list.ts`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-create-wildcard.ts`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-update-wildcard.ts`
+- `apps/web/src/features/knowledge-base/hooks/mutations/use-delete-wildcard.ts`
 
 **Files to Update**:
 - `apps/web/src/routes/_auth_only/series/$seriesId/knowledge-base.tsx`
@@ -282,12 +282,12 @@ This document breaks down the remaining Foundation Platform implementation into 
 **Estimated Time**: 45-60 minutes
 
 **Deliverables**:
-1. Create search component: `apps/web/src/features/kaeri/components/kb/kb-search.tsx`
+1. Create search component: `apps/web/src/features/knowledge-base/components/kb-search.tsx`
    - Search input with debounce (300ms)
    - Results display all entity types with type badge
    - Click result to navigate to entity or open detail modal
 
-2. Create search hook: `apps/web/src/features/kaeri/hooks/queries/use-kb-search.ts`
+2. Create search hook: `apps/web/src/features/knowledge-base/hooks/queries/use-kb-search.ts`
    - Use `tanstackRPC.knowledgeBase.searchKB`
    - Handle debounced input
    - Return results with type discriminator
@@ -304,8 +304,8 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Empty search shows no results overlay
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/components/kb/kb-search.tsx`
-- `apps/web/src/features/kaeri/hooks/queries/use-kb-search.ts`
+- `apps/web/src/features/knowledge-base/components/kb-search.tsx`
+- `apps/web/src/features/knowledge-base/hooks/queries/use-kb-search.ts`
 
 **Files to Update**:
 - `apps/web/src/routes/_auth_only/series/$seriesId/knowledge-base.tsx` (add search component)
@@ -317,7 +317,7 @@ This document breaks down the remaining Foundation Platform implementation into 
 **Estimated Time**: 45-60 minutes
 
 **Deliverables**:
-1. Create relationship picker: `apps/web/src/features/kaeri/components/kb/relationship-picker.tsx`
+1. Create relationship picker: `apps/web/src/features/knowledge-base/components/relationship-picker.tsx`
    - Select target character from dropdown (other characters in series)
    - Select relationship type (from KAERI_ENUMS.RELATIONSHIP_TYPES)
    - Optional note field
@@ -337,10 +337,10 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Target dropdown only shows other characters (not self)
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/components/kb/relationship-picker.tsx`
+- `apps/web/src/features/knowledge-base/components/relationship-picker.tsx`
 
 **Files to Update**:
-- `apps/web/src/features/kaeri/components/kb/character-form.tsx` (add relationships)
+- `apps/web/src/features/knowledge-base/components/character-form.tsx` (add relationships)
 - Character list view should show relationship count
 
 ---
@@ -350,7 +350,7 @@ This document breaks down the remaining Foundation Platform implementation into 
 **Estimated Time**: 45-60 minutes
 
 **Deliverables**:
-1. Create appearance picker: `apps/web/src/features/kaeri/components/kb/appearance-picker.tsx`
+1. Create appearance picker: `apps/web/src/features/knowledge-base/components/appearance-picker.tsx`
    - Select script from dropdown (scripts in series)
    - Scene reference input (string/textarea)
    - Optional location selector (locations in KB)
@@ -370,10 +370,10 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Location dropdown shows locations in KB
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/components/kb/appearance-picker.tsx`
+- `apps/web/src/features/knowledge-base/components/appearance-picker.tsx`
 
 **Files to Update**:
-- `apps/web/src/features/kaeri/components/kb/character-form.tsx` (add appearances)
+- `apps/web/src/features/knowledge-base/components/character-form.tsx` (add appearances)
 - Character list view should show appearance count
 
 ---
@@ -391,12 +391,12 @@ This document breaks down the remaining Foundation Platform implementation into 
    - "New Script" button
    - Click script to navigate to editor
 
-2. Create script list component: `apps/web/src/features/kaeri/components/scripts/script-list.tsx`
+2. Create script list component: `apps/web/src/features/series/components/script-list.tsx`
    - Reusable script grid/list
    - Empty state
    - Loading state
 
-3. Create query hook: `apps/web/src/features/kaeri/hooks/queries/use-script-list.ts`
+3. Create query hook: `apps/web/src/features/series/hooks/queries/use-script-list.ts`
    - Use `tanstackRPC.scripts.listScriptsBySeries`
    - Pagination support
 
@@ -408,8 +408,8 @@ This document breaks down the remaining Foundation Platform implementation into 
 
 **Files to Create**:
 - `apps/web/src/routes/_auth_only/series/$seriesId/scripts.tsx`
-- `apps/web/src/features/kaeri/components/scripts/script-list.tsx`
-- `apps/web/src/features/kaeri/hooks/queries/use-script-list.ts`
+- `apps/web/src/features/series/components/script-list.tsx`
+- `apps/web/src/features/series/hooks/queries/use-script-list.ts`
 
 ---
 
@@ -418,14 +418,14 @@ This document breaks down the remaining Foundation Platform implementation into 
 **Estimated Time**: 45-60 minutes
 
 **Deliverables**:
-1. Create script form: `apps/web/src/features/kaeri/components/scripts/script-form.tsx`
+1. Create script form: `apps/web/src/features/series/components/script-form.tsx`
    - Fields: title (required), authors (multi-input), genre, logline, coverUrl
    - Modal/dialog wrapper
    - Create mode only (editing in separate session)
 
 2. Create mutation hooks:
-   - `apps/web/src/features/kaeri/hooks/mutations/use-create-script.ts`
-   - `apps/web/src/features/kaeri/hooks/mutations/use-delete-script.ts`
+   - `apps/web/src/features/series/hooks/mutations/use-create-script.ts`
+   - `apps/web/src/features/series/hooks/mutations/use-delete-script.ts`
    - Both with optimistic updates
 
 3. Wire to "New Script" button in script list
@@ -439,12 +439,12 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Success/error toasts for both operations
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/components/scripts/script-form.tsx`
-- `apps/web/src/features/kaeri/hooks/mutations/use-create-script.ts`
-- `apps/web/src/features/kaeri/hooks/mutations/use-delete-script.ts`
+- `apps/web/src/features/series/components/script-form.tsx`
+- `apps/web/src/features/series/hooks/mutations/use-create-script.ts`
+- `apps/web/src/features/series/hooks/mutations/use-delete-script.ts`
 
 **Files to Update**:
-- `apps/web/src/features/kaeri/components/scripts/script-list.tsx` (add delete action)
+- `apps/web/src/features/series/components/script-list.tsx` (add delete action)
 
 ---
 
@@ -458,13 +458,13 @@ This document breaks down the remaining Foundation Platform implementation into 
    - Loading state
    - Error state (script not found)
 
-2. Create split editor layout: `apps/web/src/features/kaeri/components/scripts/split-editor-layout.tsx`
+2. Create split editor layout: `apps/web/src/features/series/components/split-editor-layout.tsx`
    - Left panel: text editor (placeholder textarea for now)
    - Right panel: tabs (KB, Canvas - canvas tab can be disabled/stub)
    - Responsive split (e.g., 60/40 or 70/30)
    - Resizable divider (optional, use fixed split if complex)
 
-3. Create query hook: `apps/web/src/features/kaeri/hooks/queries/use-script.ts`
+3. Create query hook: `apps/web/src/features/series/hooks/queries/use-script.ts`
    - Use `tanstackRPC.scripts.getScript`
    - Load script by ID
 
@@ -477,8 +477,8 @@ This document breaks down the remaining Foundation Platform implementation into 
 
 **Files to Create**:
 - `apps/web/src/routes/_auth_only/series/$seriesId/scripts/$scriptId.tsx`
-- `apps/web/src/features/kaeri/components/scripts/split-editor-layout.tsx`
-- `apps/web/src/features/kaeri/hooks/queries/use-script.ts`
+- `apps/web/src/features/series/components/split-editor-layout.tsx`
+- `apps/web/src/features/series/hooks/queries/use-script.ts`
 
 ---
 
@@ -487,14 +487,14 @@ This document breaks down the remaining Foundation Platform implementation into 
 **Estimated Time**: 45-60 minutes
 
 **Deliverables**:
-1. Create text editor component: `apps/web/src/features/kaeri/components/scripts/script-text-editor.tsx`
+1. Create text editor component: `apps/web/src/features/series/components/script-text-editor.tsx`
    - Controlled textarea with monospace font (Courier New)
    - Track cursor position (selectionStart)
    - Save button in toolbar
    - Save status indicator (saved, unsaved, saving...)
    - Character/word count (optional)
 
-2. Create save mutation hook: `apps/web/src/features/kaeri/hooks/mutations/use-save-script.ts`
+2. Create save mutation hook: `apps/web/src/features/series/hooks/mutations/use-save-script.ts`
    - Use `tanstackRPC.scripts.saveScriptContent`
    - Include cursor position in save
    - Optimistic update
@@ -511,11 +511,11 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Cursor position preserved after save
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/components/scripts/script-text-editor.tsx`
-- `apps/web/src/features/kaeri/hooks/mutations/use-save-script.ts`
+- `apps/web/src/features/series/components/script-text-editor.tsx`
+- `apps/web/src/features/series/hooks/mutations/use-save-script.ts`
 
 **Files to Update**:
-- `apps/web/src/features/kaeri/components/scripts/split-editor-layout.tsx` (integrate editor)
+- `apps/web/src/features/series/components/split-editor-layout.tsx` (integrate editor)
 
 ---
 
@@ -524,7 +524,7 @@ This document breaks down the remaining Foundation Platform implementation into 
 **Estimated Time**: 30-45 minutes
 
 **Deliverables**:
-1. Create autosave hook: `apps/web/src/features/kaeri/hooks/use-autosave.ts`
+1. Create autosave hook: `apps/web/src/features/series/hooks/use-autosave.ts`
    - Debounced save (2-3 seconds after typing stops)
    - Use existing use-save-script mutation
    - Skip if no changes
@@ -543,10 +543,10 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Cursor position preserved during autosave
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/hooks/use-autosave.ts`
+- `apps/web/src/features/series/hooks/use-autosave.ts`
 
 **Files to Update**:
-- `apps/web/src/features/kaeri/components/scripts/script-text-editor.tsx` (integrate autosave)
+- `apps/web/src/features/series/components/script-text-editor.tsx` (integrate autosave)
 
 ---
 
@@ -555,7 +555,7 @@ This document breaks down the remaining Foundation Platform implementation into 
 **Estimated Time**: 45-60 minutes
 
 **Deliverables**:
-1. Create KB panel component: `apps/web/src/features/kaeri/components/scripts/kb-panel.tsx`
+1. Create KB panel component: `apps/web/src/features/series/components/kb-panel.tsx`
    - Mini search bar (reuse kb-search logic)
    - Quick-add buttons for each entity type
    - Entity list (compact view)
@@ -565,7 +565,7 @@ This document breaks down the remaining Foundation Platform implementation into 
    - Integrate kb-panel.tsx in right panel KB tab
    - Tab should be default active
 
-3. Create quick-add modal: `apps/web/src/features/kaeri/components/scripts/kb-quick-add.tsx`
+3. Create quick-add modal: `apps/web/src/features/series/components/kb-quick-add.tsx`
    - Simplified forms for each entity type
    - Inline creation without leaving editor
 
@@ -577,11 +577,11 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Clicking entity shows detail (modal or inline)
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/components/scripts/kb-panel.tsx`
-- `apps/web/src/features/kaeri/components/scripts/kb-quick-add.tsx`
+- `apps/web/src/features/series/components/kb-panel.tsx`
+- `apps/web/src/features/series/components/kb-quick-add.tsx`
 
 **Files to Update**:
-- `apps/web/src/features/kaeri/components/scripts/split-editor-layout.tsx` (wire KB panel)
+- `apps/web/src/features/series/components/split-editor-layout.tsx` (wire KB panel)
 
 ---
 
@@ -594,7 +594,7 @@ This document breaks down the remaining Foundation Platform implementation into 
    - Accept initial data for editing
    - Update form title and button text
 
-2. Create mutation hook: `apps/web/src/features/kaeri/hooks/mutations/use-update-script.ts`
+2. Create mutation hook: `apps/web/src/features/series/hooks/mutations/use-update-script.ts`
    - Use `tanstackRPC.scripts.updateScript`
    - Optimistic updates
 
@@ -609,10 +609,10 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Success/error toasts
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/hooks/mutations/use-update-script.ts`
+- `apps/web/src/features/series/hooks/mutations/use-update-script.ts`
 
 **Files to Update**:
-- `apps/web/src/features/kaeri/components/scripts/script-form.tsx` (edit mode)
+- `apps/web/src/features/series/components/script-form.tsx` (edit mode)
 - `apps/web/src/routes/_auth_only/series/$seriesId/scripts/$scriptId.tsx` (add edit button)
 
 ---
@@ -624,7 +624,7 @@ This document breaks down the remaining Foundation Platform implementation into 
 **Estimated Time**: 45-60 minutes
 
 **Deliverables**:
-1. Create series modal component: `apps/web/src/features/kaeri/components/series/series-modal.tsx`
+1. Create series modal component: `apps/web/src/features/series/components/series-modal.tsx`
    - Form fields: title (required), genre, logline, coverUrl
    - Use TanStack Form
    - Modal/dialog wrapper
@@ -642,7 +642,7 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Error handling with toast
 
 **Files to Create**:
-- `apps/web/src/features/kaeri/components/series/series-modal.tsx`
+- `apps/web/src/features/series/components/series-modal.tsx`
 
 **Files to Update**:
 - `apps/web/src/routes/_auth_only/projects.tsx` (wire button to modal)
@@ -675,7 +675,7 @@ This document breaks down the remaining Foundation Platform implementation into 
 - Success/error toasts
 
 **Files to Update**:
-- `apps/web/src/features/kaeri/components/series/series-modal.tsx` (edit mode)
+- `apps/web/src/features/series/components/series-modal.tsx` (edit mode)
 - `apps/web/src/routes/_auth_only/projects.tsx` (add edit/delete actions)
 
 ---
