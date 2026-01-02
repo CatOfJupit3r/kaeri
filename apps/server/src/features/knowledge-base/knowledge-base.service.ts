@@ -66,6 +66,9 @@ export class KnowledgeBaseService implements iWithLogger {
       description?: string;
       traits?: string[];
       avatarUrl?: string;
+      relationships?: Array<{ targetId: string; type: string; note?: string }>;
+      variations?: Array<{ scriptId: string; label: string; notes?: string }>;
+      appearances?: Array<{ scriptId: string; sceneRef: string; locationId?: string }>;
     },
   ) {
     const series = await SeriesModel.findById(seriesId);
@@ -82,9 +85,9 @@ export class KnowledgeBaseService implements iWithLogger {
       name: data.name,
       description: data.description,
       traits: data.traits ?? [],
-      relationships: [],
-      variations: [],
-      appearances: [],
+      relationships: data.relationships ?? [],
+      variations: data.variations ?? [],
+      appearances: data.appearances ?? [],
       avatarUrl: data.avatarUrl,
     });
 
@@ -100,6 +103,9 @@ export class KnowledgeBaseService implements iWithLogger {
       description?: string;
       traits?: string[];
       avatarUrl?: string;
+      relationships?: Array<{ targetId: string; type: string; note?: string }>;
+      variations?: Array<{ scriptId: string; label: string; notes?: string }>;
+      appearances?: Array<{ scriptId: string; sceneRef: string; locationId?: string }>;
     },
   ) {
     const character = await CharacterModel.findOne({ _id: id, seriesId });
@@ -111,6 +117,9 @@ export class KnowledgeBaseService implements iWithLogger {
     if (patch.description !== undefined) character.description = patch.description;
     if (patch.traits !== undefined) character.traits = patch.traits;
     if (patch.avatarUrl !== undefined) character.avatarUrl = patch.avatarUrl;
+    if (patch.relationships !== undefined) character.relationships = patch.relationships;
+    if (patch.variations !== undefined) character.variations = patch.variations;
+    if (patch.appearances !== undefined) character.appearances = patch.appearances;
 
     await character.save();
     this.logger.info('Character updated', { characterId: id });
