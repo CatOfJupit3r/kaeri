@@ -6,6 +6,7 @@ import { CharacterList } from '@~/features/knowledge-base/components/character-l
 import { LocationList } from '@~/features/knowledge-base/components/location-list';
 import { PropList } from '@~/features/knowledge-base/components/prop-list';
 import { TimelineList } from '@~/features/knowledge-base/components/timeline-list';
+import { WildcardList } from '@~/features/knowledge-base/components/wildcard-list';
 
 export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-base')({
   component: RouteComponent,
@@ -71,9 +72,7 @@ function RouteComponent() {
           </TabsContent>
 
           <TabsContent value="wildcards" className="mt-6 space-y-4">
-            <div className="flex h-64 items-center justify-center rounded-lg border border-dashed">
-              <p className="text-muted-foreground">Wild Cards coming soon...</p>
-            </div>
+            <WildcardList seriesId={seriesId} />
           </TabsContent>
         </Tabs>
       </div>
