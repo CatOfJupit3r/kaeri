@@ -31,6 +31,11 @@ interface iCharacter {
     type: string;
     note?: string;
   }>;
+  appearances?: Array<{
+    scriptId: string;
+    sceneRef: string;
+    locationId?: string;
+  }>;
 }
 
 interface iCharacterListProps {
@@ -133,6 +138,7 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
           {characters.map((character) => {
             const traitCount = character.traits?.length ?? 0;
             const relationshipCount = character.relationships?.length ?? 0;
+            const appearanceCount = character.appearances?.length ?? 0;
             const initials = character.name
               .split(' ')
               .map((n) => n[0])
@@ -163,6 +169,9 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
                         </span>
                         <span>
                           {relationshipCount} {relationshipCount === 1 ? 'relationship' : 'relationships'}
+                        </span>
+                        <span>
+                          {appearanceCount} {appearanceCount === 1 ? 'appearance' : 'appearances'}
                         </span>
                       </div>
 

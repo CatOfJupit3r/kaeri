@@ -19,12 +19,19 @@ import { Label } from '@~/components/ui/label';
 import { useCreateCharacter } from '../hooks/mutations/use-create-character';
 import { useUpdateCharacter } from '../hooks/mutations/use-update-character';
 import { useCharacterList } from '../hooks/queries/use-character-list';
+import { AppearancePicker } from './appearance-picker';
 import { RelationshipPicker } from './relationship-picker';
 
 interface iRelationship {
   targetId: string;
   type: string;
   note?: string;
+}
+
+interface iAppearance {
+  scriptId: string;
+  sceneRef: string;
+  locationId?: string;
 }
 
 interface iCharacter {
@@ -34,6 +41,7 @@ interface iCharacter {
   avatarUrl?: string;
   traits?: string[];
   relationships?: iRelationship[];
+  appearances?: iAppearance[];
 }
 
 interface iCharacterFormProps {
@@ -47,6 +55,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
   const [traits, setTraits] = useState<string[]>([]);
   const [traitInput, setTraitInput] = useState('');
   const [relationships, setRelationships] = useState<iRelationship[]>([]);
+  const [appearances, setAppearances] = useState<iAppearance[]>([]);
   const { createCharacter, isPending: isCreating } = useCreateCharacter();
   const { updateCharacter, isPending: isUpdating } = useUpdateCharacter();
   const { data: characterListData } = useCharacterList(seriesId);
@@ -72,6 +81,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
               avatarUrl: value.avatarUrl || undefined,
               traits: traits.length > 0 ? traits : undefined,
               relationships: relationships.length > 0 ? relationships : undefined,
+              appearances: appearances.length > 0 ? appearances : undefined,
             },
           },
           {
@@ -90,6 +100,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
               avatarUrl: value.avatarUrl || undefined,
               traits: traits.length > 0 ? traits : undefined,
               relationships: relationships.length > 0 ? relationships : undefined,
+              appearances: appearances.length > 0 ? appearances : undefined,
             },
           },
           {
@@ -99,6 +110,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
               setTraits([]);
               setTraitInput('');
               setRelationships([]);
+              setAppearances([]);
             },
           },
         );
@@ -125,6 +137,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
       setTraits(initialData.traits ?? []);
       setTraitInput('');
       setRelationships(initialData.relationships ?? []);
+      setAppearances(initialData.appearances ?? []);
     } else if (!open) {
       form.reset({
         name: '',
@@ -134,6 +147,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
       setTraits([]);
       setTraitInput('');
       setRelationships([]);
+      setAppearances([]);
     }
   }, [open, initialData, form]);
 
@@ -231,6 +245,18 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
                   currentCharacterId={initialData?._id}
                   relationships={relationships}
                   onChange={setRelationships}
+                  disabled={isPending}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="character-appearances">Appearances</Label>
+              <div id="character-appearances">
+                <AppearancePicker
+                  seriesId={seriesId}
+                  appearances={appearances}
+                  onChange={setAppearances}
                   disabled={isPending}
                 />
               </div>
