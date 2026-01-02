@@ -1,13 +1,37 @@
 import { useState } from 'react';
-import { LuUsers } from 'react-icons/lu';
+import { LuPencil, LuTrash2, LuUsers } from 'react-icons/lu';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@~/components/ui/alert-dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@~/components/ui/avatar';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { useCharacterList } from '@~/features/knowledge-base/hooks/queries/use-character-list';
 
+import { useDeleteCharacter } from '../hooks/mutations/use-delete-character';
 import { CharacterForm } from './character-form';
+
+interface iCharacter {
+  _id: string;
+  name: string;
+  description?: string;
+  avatarUrl?: string;
+  traits?: string[];
+  relationships?: Array<{
+    targetId: string;
+    type: string;
+    note?: string;
+  }>;
+}
 
 interface iCharacterListProps {
   seriesId: string;
@@ -15,7 +39,42 @@ interface iCharacterListProps {
 
 export function CharacterList({ seriesId }: iCharacterListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingCharacter, setEditingCharacter] = useState<iCharacter | undefined>(undefined);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [characterToDelete, setCharacterToDelete] = useState<iCharacter | undefined>(undefined);
   const { data, isLoading, error } = useCharacterList(seriesId);
+  const { deleteCharacter, isPending: isDeleting } = useDeleteCharacter();
+
+  const handleEditClick = (character: iCharacter) => {
+    setEditingCharacter(character);
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteClick = (character: iCharacter) => {
+    setCharacterToDelete(character);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (characterToDelete) {
+      deleteCharacter(
+        { id: characterToDelete._id, seriesId },
+        {
+          onSuccess: () => {
+            setIsDeleteDialogOpen(false);
+            setCharacterToDelete(undefined);
+          },
+        },
+      );
+    }
+  };
+
+  const handleFormOpenChange = (open: boolean) => {
+    setIsFormOpen(open);
+    if (!open) {
+      setEditingCharacter(undefined);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -50,7 +109,12 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
             <Button onClick={() => setIsFormOpen(true)}>New Character</Button>
           </EmptyContent>
         </Empty>
-        <CharacterForm seriesId={seriesId} open={isFormOpen} onOpenChange={setIsFormOpen} />
+        <CharacterForm
+          seriesId={seriesId}
+          open={isFormOpen}
+          onOpenChange={handleFormOpenChange}
+          initialData={editingCharacter}
+        />
       </>
     );
   }
@@ -77,7 +141,7 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
               .slice(0, 2);
 
             return (
-              <Card key={character._id} className="group cursor-pointer overflow-hidden transition-all hover:shadow-md">
+              <Card key={character._id} className="group overflow-hidden transition-all hover:shadow-md">
                 <CardContent className="flex gap-4 p-4">
                   <Avatar className="size-12">
                     {character.avatarUrl ? <AvatarImage src={character.avatarUrl} alt={character.name} /> : null}
@@ -92,13 +156,40 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
                       <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{character.description}</p>
                     ) : null}
 
-                    <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
-                      <span>
-                        {traitCount} {traitCount === 1 ? 'trait' : 'traits'}
-                      </span>
-                      <span>
-                        {relationshipCount} {relationshipCount === 1 ? 'relationship' : 'relationships'}
-                      </span>
+                    <div className="mt-2 flex items-center justify-between gap-4">
+                      <div className="flex gap-4 text-xs text-muted-foreground">
+                        <span>
+                          {traitCount} {traitCount === 1 ? 'trait' : 'traits'}
+                        </span>
+                        <span>
+                          {relationshipCount} {relationshipCount === 1 ? 'relationship' : 'relationships'}
+                        </span>
+                      </div>
+
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditClick(character);
+                          }}
+                          className="size-8 p-0"
+                        >
+                          <LuPencil className="size-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(character);
+                          }}
+                          className="size-8 p-0 text-destructive hover:text-destructive"
+                        >
+                          <LuTrash2 className="size-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -107,7 +198,28 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
           })}
         </div>
       </div>
-      <CharacterForm seriesId={seriesId} open={isFormOpen} onOpenChange={setIsFormOpen} />
+      <CharacterForm
+        seriesId={seriesId}
+        open={isFormOpen}
+        onOpenChange={handleFormOpenChange}
+        initialData={editingCharacter}
+      />
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Character</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{characterToDelete?.name}&quot;? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} disabled={isDeleting}>
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

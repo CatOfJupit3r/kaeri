@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LuX } from 'react-icons/lu';
 import z from 'zod';
 
@@ -17,44 +17,78 @@ import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
 
 import { useCreateCharacter } from '../hooks/mutations/use-create-character';
+import { useUpdateCharacter } from '../hooks/mutations/use-update-character';
+
+interface iCharacter {
+  _id: string;
+  name: string;
+  description?: string;
+  avatarUrl?: string;
+  traits?: string[];
+}
 
 interface iCharacterFormProps {
   seriesId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialData?: iCharacter;
 }
 
-export function CharacterForm({ seriesId, open, onOpenChange }: iCharacterFormProps) {
+export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCharacterFormProps) {
   const [traits, setTraits] = useState<string[]>([]);
   const [traitInput, setTraitInput] = useState('');
-  const { createCharacter, isPending } = useCreateCharacter();
+  const { createCharacter, isPending: isCreating } = useCreateCharacter();
+  const { updateCharacter, isPending: isUpdating } = useUpdateCharacter();
+
+  const isPending = isCreating || isUpdating;
+  const isEditMode = !!initialData;
 
   const form = useAppForm({
     defaultValues: {
-      name: '',
-      description: '',
-      avatarUrl: '',
+      name: initialData?.name ?? '',
+      description: initialData?.description ?? '',
+      avatarUrl: initialData?.avatarUrl ?? '',
     },
     onSubmit: async ({ value }) => {
-      createCharacter(
-        {
-          seriesId,
-          value: {
-            name: value.name,
-            description: value.description || undefined,
-            avatarUrl: value.avatarUrl || undefined,
-            traits: traits.length > 0 ? traits : undefined,
+      if (isEditMode && initialData) {
+        updateCharacter(
+          {
+            id: initialData._id,
+            seriesId,
+            patch: {
+              name: value.name,
+              description: value.description || undefined,
+              avatarUrl: value.avatarUrl || undefined,
+              traits: traits.length > 0 ? traits : undefined,
+            },
           },
-        },
-        {
-          onSuccess: () => {
-            onOpenChange(false);
-            form.reset();
-            setTraits([]);
-            setTraitInput('');
+          {
+            onSuccess: () => {
+              onOpenChange(false);
+            },
           },
-        },
-      );
+        );
+      } else {
+        createCharacter(
+          {
+            seriesId,
+            value: {
+              name: value.name,
+              description: value.description || undefined,
+              avatarUrl: value.avatarUrl || undefined,
+              traits: traits.length > 0 ? traits : undefined,
+            },
+          },
+          {
+            onSuccess: () => {
+              onOpenChange(false);
+              form.reset();
+              setTraits([]);
+              setTraitInput('');
+            },
+          },
+        );
+      }
     },
     validators: {
       onSubmit: z.object({
@@ -66,6 +100,26 @@ export function CharacterForm({ seriesId, open, onOpenChange }: iCharacterFormPr
       }),
     },
   });
+
+  useEffect(() => {
+    if (open && initialData) {
+      form.reset({
+        name: initialData.name,
+        description: initialData.description ?? '',
+        avatarUrl: initialData.avatarUrl ?? '',
+      });
+      setTraits(initialData.traits ?? []);
+      setTraitInput('');
+    } else if (!open) {
+      form.reset({
+        name: '',
+        description: '',
+        avatarUrl: '',
+      });
+      setTraits([]);
+      setTraitInput('');
+    }
+  }, [open, initialData, form]);
 
   const addTrait = () => {
     const trimmedTrait = traitInput.trim();
@@ -90,8 +144,12 @@ export function CharacterForm({ seriesId, open, onOpenChange }: iCharacterFormPr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Character</DialogTitle>
-          <DialogDescription>Add a new character to your series. Fill in the details below.</DialogDescription>
+          <DialogTitle>{isEditMode ? 'Edit Character' : 'Create Character'}</DialogTitle>
+          <DialogDescription>
+            {isEditMode
+              ? 'Update the character details below.'
+              : 'Add a new character to your series. Fill in the details below.'}
+          </DialogDescription>
         </DialogHeader>
 
         <form.AppForm>
@@ -155,7 +213,14 @@ export function CharacterForm({ seriesId, open, onOpenChange }: iCharacterFormPr
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
             Cancel
           </Button>
-          <form.SubmitButton isDisabled={isPending}>{isPending ? 'Creating...' : 'Create Character'}</form.SubmitButton>
+          <form.SubmitButton isDisabled={isPending}>
+            {(() => {
+              if (isPending) {
+                return isEditMode ? 'Updating...' : 'Creating...';
+              }
+              return isEditMode ? 'Update Character' : 'Create Character';
+            })()}
+          </form.SubmitButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>
