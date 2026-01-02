@@ -1,8 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 import { LuBookUser, LuGlobe, LuPackage, LuCalendar, LuSparkles } from 'react-icons/lu';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
 import { CharacterList } from '@~/features/knowledge-base/components/character-list';
+import { KBSearch } from '@~/features/knowledge-base/components/kb-search';
 import { LocationList } from '@~/features/knowledge-base/components/location-list';
 import { PropList } from '@~/features/knowledge-base/components/prop-list';
 import { TimelineList } from '@~/features/knowledge-base/components/timeline-list';
@@ -14,6 +16,22 @@ export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-bas
 
 function RouteComponent() {
   const { seriesId } = Route.useParams();
+  const [activeTab, setActiveTab] = useState('characters');
+
+  const handleResultClick = (entityId: string, entityType: string) => {
+    const tabMap: Record<string, string> = {
+      character: 'characters',
+      location: 'locations',
+      prop: 'props',
+      timeline: 'timeline',
+      wildcard: 'wildcards',
+    };
+
+    const targetTab = tabMap[entityType];
+    if (targetTab) {
+      setActiveTab(targetTab);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -31,7 +49,12 @@ function RouteComponent() {
 
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <Tabs defaultValue="characters" className="w-full">
+        {/* Search */}
+        <div className="mb-6">
+          <KBSearch seriesId={seriesId} onResultClick={handleResultClick} />
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="characters" className="gap-2">
               <LuBookUser className="size-4" />
