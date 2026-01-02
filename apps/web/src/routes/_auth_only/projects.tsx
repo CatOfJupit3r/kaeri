@@ -1,7 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 
 import { Button } from '@~/components/ui/button';
 import { Card } from '@~/components/ui/card';
+import { SeriesModal } from '@~/features/series/components/series-modal';
 import { useSeriesList } from '@~/features/series/hooks/queries/use-series-list';
 
 export const Route = createFileRoute('/_auth_only/projects')({
@@ -9,6 +11,7 @@ export const Route = createFileRoute('/_auth_only/projects')({
 });
 
 function RouteComponent() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: seriesListData, isLoading, error } = useSeriesList();
 
   if (isLoading) {
@@ -38,7 +41,7 @@ function RouteComponent() {
             <p className="text-sm text-muted-foreground">Manage all your series and screenplays</p>
           </div>
 
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
             <span>New Project</span>
           </Button>
         </div>
@@ -67,6 +70,8 @@ function RouteComponent() {
           </div>
         )}
       </div>
+
+      <SeriesModal open={isModalOpen} onOpenChange={setIsModalOpen} />
     </div>
   );
 }
