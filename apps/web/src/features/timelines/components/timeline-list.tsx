@@ -14,7 +14,7 @@ import {
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
-import { useTimelineList } from '@~/features/knowledge-base/hooks/queries/use-timeline-list';
+import { useTimelineList } from '@~/features/timelines/hooks/queries/use-timeline-list';
 
 import { useDeleteTimeline } from '../hooks/mutations/use-delete-timeline';
 import { TimelineForm } from './timeline-form';

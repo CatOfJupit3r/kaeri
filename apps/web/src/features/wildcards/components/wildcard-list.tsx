@@ -15,7 +15,7 @@ import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
-import { useWildcardList } from '@~/features/knowledge-base/hooks/queries/use-wildcard-list';
+import { useWildcardList } from '@~/features/wildcards/hooks/queries/use-wildcard-list';
 
 import { useDeleteWildcard } from '../hooks/mutations/use-delete-wildcard';
 import { WildcardForm } from './wildcard-form';
