@@ -169,6 +169,16 @@ export const knowledgeBaseRouter = base.knowledgeBase.router({
     GETTERS.KnowledgeBaseService().addVariation(input.seriesId, input.characterId, input.variation),
   ),
 
+  updateVariation: protectedProcedure.knowledgeBase.updateVariation.handler(async ({ input }) =>
+    GETTERS.KnowledgeBaseService().updateVariation(
+      input.seriesId,
+      input.characterId,
+      input.scriptId,
+      input.label,
+      input.patch,
+    ),
+  ),
+
   removeVariation: protectedProcedure.knowledgeBase.removeVariation.handler(async ({ input }) =>
     GETTERS.KnowledgeBaseService().removeVariation(input.seriesId, input.characterId, input.scriptId, input.label),
   ),
