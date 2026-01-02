@@ -86,7 +86,6 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Pre-download MongoDB Memory Server binary (LLM env)
-        if: steps.cache-mongodb.outputs.cache-hit != 'true'
         shell: bash
         run: |
           node --input-type=module - <<'NODE'
