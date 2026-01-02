@@ -2,7 +2,8 @@
     "cSpell.words": [
         "orpc",
         "trivago",
-        "valkey"
+        "valkey",
+        "kaeri"
     ],
     "typescript.preferences.autoImportFileExcludePatterns": [
         "@radix-ui/*"

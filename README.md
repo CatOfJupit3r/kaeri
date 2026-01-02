@@ -1,15 +1,13 @@
-# Ultimate Starter
+# Kaeri
 
-This starter is designed for me by me with all the shiny new things! (as of now)
+**A screenwriting platform for collaborative story development.**
 
-To finish setup, run `Replace All` to replace `kaeri` with name of your project.
-Also, make sure to customize `.github/instructions/workspace.instructions.md` with description of you project
-so that agentic tools work efficiently.
+Kaeri helps writers create and manage screenplays with integrated knowledge base tracking for characters, locations, props, and timelines. Built for single-user mode initially, with multi-user collaboration support planned.
 
 ## Project Overview
 
 - **Contract-first development.** API endpoints start as shared `zod` schemas in `packages/shared`, ensuring server and client stay type-safe.
-- **Real-time challenge lifecycle.** Hono-based routes expose public and authenticated procedures, backed by MongoDB via Typegoose models.
+- **Real-time script lifecycle.** Hono-based routes expose public and authenticated procedures, backed by MongoDB via Typegoose models.
 - **Typed React client.** The web app consumes the generated oRPC client, TanStack Router, and Query utilities for fully typed data interactions.
 - **Developer-focused tooling.** Bun 1.2.21, Turborepo, and Husky hooks enable quick local feedback loops and consistent commits.
 

@@ -1,6 +1,6 @@
-# Feature Specification: Kaeri Baseline (Single-User) Platform
+# Feature Specification: Foundation Platform (Single-User)
 
-**Feature Branch**: `[000-kaeri-baseline-platform]`  
+**Feature Branch**: `[000-foundation-platform]`  
 **Created**: 2026-01-01  
 **Status**: Draft  
 **Input**: User description provided (single-user first, multi-user later; PC-only focus)

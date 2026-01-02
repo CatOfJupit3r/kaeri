@@ -197,7 +197,7 @@ const silenceOpinions = [
       'no-underscore-dangle': [
         'error',
         {
-          allow: ['__dirname', '__filename', '_id', '_doc', '_meta'],
+          allow: ['__dirname', '__filename', '_id', '_doc', '_meta', '_type'],
         },
       ],
     },
@@ -236,7 +236,7 @@ export default [
   // Ignore .gitignore files/folder in eslint
   includeIgnoreFile(gitignorePath),
   {
-    ignores: ['eslint.config.mjs', 'tests/**', 'dist/**', './src/routeTree.gen.ts', "vite.config.ts"],
+    ignores: ['eslint.config.mjs', 'tests/**', 'dist/**', './src/routeTree.gen.ts', 'vite.config.ts'],
   },
   {
     settings: {

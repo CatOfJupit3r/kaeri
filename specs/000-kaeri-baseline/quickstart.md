@@ -1,4 +1,4 @@
-# Quickstart: Kaeri Baseline Platform
+# Quickstart: Foundation Platform
 
 ## Prerequisites
 - Bun 1.2.21 installed.

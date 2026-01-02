@@ -1,11 +1,11 @@
-# Kaeri Baseline Implementation Status
+# Foundation Platform Implementation Status
 
 **Date**: 2026-01-01
-**Branch**: copilot/resolve-kaeri-baseline-issue-again
+**Branch**: copilot/resolve-foundation-platform-issue-again
 
 ## Summary
 
-This document outlines the current implementation status of the Kaeri Baseline platform. The foundational infrastructure has been successfully implemented, providing the base for the complete feature set.
+This document outlines the current implementation status of the foundation platform features for Kaeri. The foundational infrastructure has been successfully implemented, providing the base for the complete feature set.
 
 ## Completed Work
 
@@ -234,7 +234,7 @@ All oRPC contracts were already defined in `packages/shared/src/contract/`:
 - `apps/server/src/di/container.ts` - Registered SeriesService
 - `apps/server/src/routers/di-getter.ts` - Added SeriesService getter
 - `apps/server/src/routers/index.ts` - Registered all Kaeri routers
-- `specs/000-kaeri-baseline/tasks.md` - Marked completed tasks
+- `specs/000-foundation-platform/tasks.md` - Marked completed tasks
 
 ## Build & Validation
 
@@ -246,4 +246,4 @@ All changes pass:
 
 ## Conclusion
 
-The foundational infrastructure for the Kaeri Baseline platform has been successfully implemented. This provides a solid base for completing the remaining user stories and features. The architecture is clean, type-safe, and follows the established patterns in the codebase.
+The foundational infrastructure for the foundation platform features has been successfully implemented. This provides a solid base for completing the remaining user stories and features. The architecture is clean, type-safe, and follows the established patterns in the codebase.

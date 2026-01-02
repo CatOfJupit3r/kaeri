@@ -17,6 +17,7 @@ import { Route as Auth_onlyProfileRouteImport } from './routes/_auth_only/profil
 import { Route as Auth_onlyDashboardRouteImport } from './routes/_auth_only/dashboard';
 import { Route as generalTo_dashboardRouteImport } from './routes/(general)/_to_dashboard';
 import { Route as generalTo_dashboardAuthRouteImport } from './routes/(general)/_to_dashboard.auth';
+import { Route as Auth_onlySeriesSeriesIdKnowledgeBaseRouteImport } from './routes/_auth_only/series/$seriesId/knowledge-base';
 
 const Auth_onlyRoute = Auth_onlyRouteImport.update({
   id: '/_auth_only',
@@ -56,6 +57,12 @@ const generalTo_dashboardAuthRoute = generalTo_dashboardAuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => generalTo_dashboardRoute,
 } as any);
+const Auth_onlySeriesSeriesIdKnowledgeBaseRoute =
+  Auth_onlySeriesSeriesIdKnowledgeBaseRouteImport.update({
+    id: '/series/$seriesId/knowledge-base',
+    path: '/series/$seriesId/knowledge-base',
+    getParentRoute: () => Auth_onlyRoute,
+  } as any);
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute;
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/projects': typeof Auth_onlyProjectsRoute;
   '/settings': typeof Auth_onlySettingsRoute;
   '/auth': typeof generalTo_dashboardAuthRoute;
+  '/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRoute;
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute;
@@ -72,6 +80,7 @@ export interface FileRoutesByTo {
   '/projects': typeof Auth_onlyProjectsRoute;
   '/settings': typeof Auth_onlySettingsRoute;
   '/auth': typeof generalTo_dashboardAuthRoute;
+  '/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -83,6 +92,7 @@ export interface FileRoutesById {
   '/_auth_only/projects': typeof Auth_onlyProjectsRoute;
   '/_auth_only/settings': typeof Auth_onlySettingsRoute;
   '/(general)/_to_dashboard/auth': typeof generalTo_dashboardAuthRoute;
+  '/_auth_only/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
@@ -92,9 +102,17 @@ export interface FileRouteTypes {
     | '/profile'
     | '/projects'
     | '/settings'
-    | '/auth';
+    | '/auth'
+    | '/series/$seriesId/knowledge-base';
   fileRoutesByTo: FileRoutesByTo;
-  to: '/' | '/dashboard' | '/profile' | '/projects' | '/settings' | '/auth';
+  to:
+    | '/'
+    | '/dashboard'
+    | '/profile'
+    | '/projects'
+    | '/settings'
+    | '/auth'
+    | '/series/$seriesId/knowledge-base';
   id:
     | '__root__'
     | '/'
@@ -104,7 +122,8 @@ export interface FileRouteTypes {
     | '/_auth_only/profile'
     | '/_auth_only/projects'
     | '/_auth_only/settings'
-    | '/(general)/_to_dashboard/auth';
+    | '/(general)/_to_dashboard/auth'
+    | '/_auth_only/series/$seriesId/knowledge-base';
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -171,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof generalTo_dashboardAuthRouteImport;
       parentRoute: typeof generalTo_dashboardRoute;
     };
+    '/_auth_only/series/$seriesId/knowledge-base': {
+      id: '/_auth_only/series/$seriesId/knowledge-base';
+      path: '/series/$seriesId/knowledge-base';
+      fullPath: '/series/$seriesId/knowledge-base';
+      preLoaderRoute: typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteImport;
+      parentRoute: typeof Auth_onlyRoute;
+    };
   }
 }
 
@@ -179,6 +205,7 @@ interface Auth_onlyRouteChildren {
   Auth_onlyProfileRoute: typeof Auth_onlyProfileRoute;
   Auth_onlyProjectsRoute: typeof Auth_onlyProjectsRoute;
   Auth_onlySettingsRoute: typeof Auth_onlySettingsRoute;
+  Auth_onlySeriesSeriesIdKnowledgeBaseRoute: typeof Auth_onlySeriesSeriesIdKnowledgeBaseRoute;
 }
 
 const Auth_onlyRouteChildren: Auth_onlyRouteChildren = {
@@ -186,6 +213,8 @@ const Auth_onlyRouteChildren: Auth_onlyRouteChildren = {
   Auth_onlyProfileRoute: Auth_onlyProfileRoute,
   Auth_onlyProjectsRoute: Auth_onlyProjectsRoute,
   Auth_onlySettingsRoute: Auth_onlySettingsRoute,
+  Auth_onlySeriesSeriesIdKnowledgeBaseRoute:
+    Auth_onlySeriesSeriesIdKnowledgeBaseRoute,
 };
 
 const Auth_onlyRouteWithChildren = Auth_onlyRoute._addFileChildren(

@@ -1,13 +1,13 @@
-# Tasks: Kaeri Baseline Platform
+# Tasks: Foundation Platform
 
-**Input**: Design documents from `/specs/000-kaeri-baseline/`
+**Input**: Design documents from `/specs/000-foundation-platform/`
 **Prerequisites**: plan.md (done), spec.md (done), research.md, data-model.md, contracts/
 **Tests**: Include targeted tests where specified; performance checks per SCs.
 **Organization**: Tasks grouped by phase and user story for independent delivery.
 **Constitution Hooks**: Contract-first (`packages/shared`), continuity integrity, auth/NOT_FOUND stance, tests + lint/types, observability/audit.
 
 ## Phase 1: Setup (Shared Infrastructure)
-- [X] T001 Document local env steps for feature in `specs/000-kaeri-baseline/quickstart.md` (create file)
+- [X] T001 Document local env steps for feature in `specs/000-foundation-platform/quickstart.md` (create file)
 - [X] T002 Verify `.env` copies for server/web and Docker running; note in `quickstart.md`
 - [X] T003 [P] Add feature branch reference to README or internal notes (no code change paths)
 
@@ -109,15 +109,15 @@
 - [ ] T043 Add structured logging for canon mutations and export paths in `apps/server/src/lib/logger` usage sites
 - [ ] T044 Add performance telemetry (search/load/export timers) reporting in `apps/server/src/lib/telemetry.ts`
 - [ ] T045 Add targeted tests: contracts parity, continuity (relationships/appearances/graph), canvas persistence, export timing in `apps/server/test/`
-- [ ] T046 [P] Add frontend integration tests/smoke (if applicable) or test plan in `specs/000-kaeri-baseline/quickstart.md`
-- [ ] T047 Run and document `bun run check-types` and `bun run lint` results in `specs/000-kaeri-baseline/quickstart.md`
+- [ ] T046 [P] Add frontend integration tests/smoke (if applicable) or test plan in `specs/000-foundation-platform/quickstart.md`
+- [ ] T047 Run and document `bun run check-types` and `bun run lint` results in `specs/000-foundation-platform/quickstart.md`
 
 ---
 
 ## Phase 11: Polish & Cross-Cutting
 - [ ] T048 [P] Documentation updates for KB/canvas/export/continuity in `README.md` or feature docs
 - [ ] T049 Code cleanup and refactors after tests in touched files
-- [ ] T050 [P] Validate backup/export JSON path and recovery steps in `specs/000-kaeri-baseline/quickstart.md`
+- [ ] T050 [P] Validate backup/export JSON path and recovery steps in `specs/000-foundation-platform/quickstart.md`
 
 ## Dependencies & Execution Order
 - Setup → Foundational → US1 (MVP) → US2/US3 (parallel after foundational) → US4 → US5 → US6 → Continuity/Audit → Quality → Polish.
