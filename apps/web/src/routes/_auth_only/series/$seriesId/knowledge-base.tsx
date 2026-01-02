@@ -3,8 +3,8 @@ import { LuBookUser, LuGlobe, LuPackage, LuCalendar, LuSparkles } from 'react-ic
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
 import { CharacterList } from '@~/features/knowledge-base/components/character-list';
-import { PropList } from '@~/features/knowledge-base/components/prop-list';
 import { LocationList } from '@~/features/knowledge-base/components/location-list';
+import { PropList } from '@~/features/knowledge-base/components/prop-list';
 
 export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-base')({
   component: RouteComponent,
