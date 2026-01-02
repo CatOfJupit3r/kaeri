@@ -1,4 +1,4 @@
-# Kaeri Baseline - Task Breakdown for LLM Agent Sessions
+# Foundation Platform - Task Breakdown for LLM Agent Sessions
 
 **Created**: 2026-01-02
 **Focus**: Knowledge Base → Script Editor → Series Management Polish
@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document breaks down the remaining Kaeri Baseline implementation into discrete, completable sessions. Each task is designed to be completed by an LLM agent in one session (~30-60 minutes of focused work).
+This document breaks down the remaining Foundation Platform implementation into discrete, completable sessions. Each task is designed to be completed by an LLM agent in one session (~30-60 minutes of focused work).
 
 **Current State**:
 - ✅ Backend fully implemented (Series, Scripts, Knowledge Base services)

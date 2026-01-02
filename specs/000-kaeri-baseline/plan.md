@@ -1,11 +1,11 @@
-# Implementation Plan: Kaeri Baseline Platform
+# Implementation Plan: Foundation Platform
 
-**Branch**: `[000-kaeri-baseline-platform]` | **Date**: 2026-01-01 | **Spec**: ../000-kaeri-baseline/spec.md
-**Input**: Feature specification from `/specs/000-kaeri-baseline/spec.md`
+**Branch**: `[000-foundation-platform]` | **Date**: 2026-01-01 | **Spec**: ../000-foundation-platform/spec.md
+**Input**: Feature specification from `/specs/000-foundation-platform/spec.md`
 
 ## Summary
 
-Deliver a single-user Kaeri platform that lets writers create/manage a Series, author scripts in a split-screen editor, manage knowledge base entities (characters, locations, props, timeline, wild cards), view character detail/appearances, use a per-series canvas, and export scripts to PDF with basic screenplay formatting. PC-only UX focus; future multi-user workspaces are out-of-scope but data model should stay multi-user-ready (canonical IDs, auth gates).
+Deliver the foundation platform features for Kaeri (a screenwriting tool) in single-user mode: writers can create/manage a Series, author scripts in a split-screen editor, manage knowledge base entities (characters, locations, props, timeline, wild cards), view character detail/appearances, use a per-series canvas, and export scripts to PDF with basic screenplay formatting. PC-only UX focus; future multi-user workspaces are out-of-scope but data model should stay multi-user-ready (canonical IDs, auth gates).
 
 ## Technical Context
 
@@ -85,7 +85,7 @@ Deliver a single-user Kaeri platform that lets writers create/manage a Series, a
 ### Documentation (this feature)
 
 ```
-specs/000-kaeri-baseline/
+specs/000-foundation-platform/
 ├── plan.md              # This file
 ├── research.md          # Phase 0 output (TBD)
 ├── data-model.md        # Phase 1 output (TBD)

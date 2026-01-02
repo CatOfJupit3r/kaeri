@@ -1,4 +1,4 @@
-# Data Model: Kaeri Baseline Platform
+# Data Model: Foundation Platform
 
 ## Entities & Fields (proposed)
 

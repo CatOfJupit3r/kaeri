@@ -1,4 +1,4 @@
-# Research: Kaeri Baseline Platform
+# Research: Foundation Platform
 
 ## Goals
 - Pick practical libraries/patterns for PDF export (screenplay-friendly), search, autosave, and audit logging.
