@@ -13,37 +13,69 @@ import {
 import { useAppForm } from '@~/components/ui/field';
 
 import { useCreateSeries } from '../hooks/mutations/use-create-series';
+import { useUpdateSeries } from '../hooks/mutations/use-update-series';
+
+interface iSeriesData {
+  _id: string;
+  title: string;
+  genre?: string;
+  logline?: string;
+  coverUrl?: string;
+}
 
 interface iSeriesModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialData?: iSeriesData;
 }
 
-export function SeriesModal({ open, onOpenChange }: iSeriesModalProps) {
-  const { createSeries, isPending } = useCreateSeries();
+export function SeriesModal({ open, onOpenChange, initialData }: iSeriesModalProps) {
+  const { createSeries, isPending: isCreating } = useCreateSeries();
+  const { updateSeries, isPending: isUpdating } = useUpdateSeries();
+  const isPending = isCreating || isUpdating;
+  const isEditMode = !!initialData;
 
   const form = useAppForm({
     defaultValues: {
-      title: '',
-      genre: '',
-      logline: '',
-      coverUrl: '',
+      title: initialData?.title ?? '',
+      genre: initialData?.genre ?? '',
+      logline: initialData?.logline ?? '',
+      coverUrl: initialData?.coverUrl ?? '',
     },
     onSubmit: async ({ value }) => {
-      createSeries(
-        {
-          title: value.title,
-          genre: value.genre || undefined,
-          logline: value.logline || undefined,
-          coverUrl: value.coverUrl || undefined,
-        },
-        {
-          onSuccess: () => {
-            onOpenChange(false);
-            form.reset();
+      if (isEditMode) {
+        updateSeries(
+          {
+            seriesId: initialData._id,
+            patch: {
+              title: value.title,
+              genre: value.genre || undefined,
+              logline: value.logline || undefined,
+              coverUrl: value.coverUrl || undefined,
+            },
           },
-        },
-      );
+          {
+            onSuccess: () => {
+              onOpenChange(false);
+            },
+          },
+        );
+      } else {
+        createSeries(
+          {
+            title: value.title,
+            genre: value.genre || undefined,
+            logline: value.logline || undefined,
+            coverUrl: value.coverUrl || undefined,
+          },
+          {
+            onSuccess: () => {
+              onOpenChange(false);
+              form.reset();
+            },
+          },
+        );
+      }
     },
     validators: {
       onSubmit: z.object({
@@ -56,7 +88,14 @@ export function SeriesModal({ open, onOpenChange }: iSeriesModalProps) {
   });
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      form.reset({
+        title: initialData?.title ?? '',
+        genre: initialData?.genre ?? '',
+        logline: initialData?.logline ?? '',
+        coverUrl: initialData?.coverUrl ?? '',
+      });
+    } else if (!isEditMode) {
       form.reset({
         title: '',
         genre: '',
@@ -64,14 +103,18 @@ export function SeriesModal({ open, onOpenChange }: iSeriesModalProps) {
         coverUrl: '',
       });
     }
-  }, [open, form]);
+  }, [open, form, initialData, isEditMode]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Create New Project</DialogTitle>
-          <DialogDescription>Create a new series project. Fill in the details below to get started.</DialogDescription>
+          <DialogTitle>{isEditMode ? 'Edit Project' : 'Create New Project'}</DialogTitle>
+          <DialogDescription>
+            {isEditMode
+              ? 'Update your series project details below.'
+              : 'Create a new series project. Fill in the details below to get started.'}
+          </DialogDescription>
         </DialogHeader>
 
         <form.AppForm>
@@ -100,7 +143,12 @@ export function SeriesModal({ open, onOpenChange }: iSeriesModalProps) {
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
             Cancel
           </Button>
-          <form.SubmitButton isDisabled={isPending}>{isPending ? 'Creating...' : 'Create Project'}</form.SubmitButton>
+          <form.SubmitButton isDisabled={isPending}>
+            {(() => {
+              if (isPending) return isEditMode ? 'Saving...' : 'Creating...';
+              return isEditMode ? 'Save Changes' : 'Create Project';
+            })()}
+          </form.SubmitButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>
