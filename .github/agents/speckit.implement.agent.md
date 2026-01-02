@@ -56,6 +56,10 @@ from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be 
    - **IF EXISTS**: Read research.md for technical decisions and constraints
    - **IF EXISTS**: Read quickstart.md for integration scenarios
 
+   If you need a running backend to validate behavior during implementation, prefer `bun run dev:llm` (in-memory MongoDB + seeded data; see `docs/DEV_LLM.md`).
+
+   If the task involves UI changes or visual validation, save screenshots to `specs/screenshots/` with descriptive filenames, and include them in the PR/MR description when possible.
+
 4. **Project Setup Verification**:
    - **REQUIRED**: Create/verify ignore files based on actual project setup:
 

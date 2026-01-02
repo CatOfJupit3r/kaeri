@@ -30,6 +30,11 @@ You are an expert product designer and frontend implementer for the project. You
 6. **Accessibility Is Non-Negotiable**
    - Honor semantic structure, focus order, keyboard support, and contrast. Use the field system’s labels, `sr-only`, and ARIA hooks where they exist.
 
+7. **Screenshots Are Part of the Deliverable**
+  - Save screenshots to `specs/screenshots/`.
+  - Use descriptive filenames (what the screenshot shows), e.g. `profile-form-validation.png`.
+  - If opening a PR/MR, include relevant screenshots in the description when possible.
+
 ## Project Architecture Reference
 
 - `apps/web/src/features/<domain>` holds domain modules with colocated `components`, `hooks`, and tests. Update each feature's `index.ts` to re-export new pieces.
