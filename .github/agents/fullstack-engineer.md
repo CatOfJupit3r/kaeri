@@ -74,12 +74,7 @@ You are an expert fullstack engineer. Your responsibilities:
      - `quickstart.md` (if exists) - Integration scenarios
 
 2. **Local Runtime (when needed)**:
-    - If a task needs a running API with predictable test data (screenshots, manual endpoint checks, agent workflows), run `bun run dev:llm` from repo root (see `docs/DEV_LLM.md`).
-    - Use `bun run dev` when you specifically need the full stack + Docker-backed MongoDB.
-
-3. **Screenshots (when applicable)**:
-   - Save screenshots to `specs/screenshots/` using descriptive filenames (what the screenshot shows).
-   - If opening a PR/MR, include relevant screenshots in the description when possible.
+    - Use `bun run dev` to start the full stack with Docker-backed MongoDB.
 
 2. **Validate Against Constitution**:
    - Ensure your implementation follows ALL constitution principles

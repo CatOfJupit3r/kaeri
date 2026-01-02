@@ -62,7 +62,6 @@ applyTo: '**/*.ts'
 - The Better Auth server is mounted under `/auth/*` and expects HTTPS cookies (`sameSite: 'none'`, `secure: true`); keep this in mind when testing locally.
 - Aliases: `@~/` resolves to `apps/server/src` or `apps/web/src` depending on the package; `@kaeri/shared` surfaces shared types.
 - MongoDB runs at `mongodb://localhost:6060/kaeri` by default; adjust via env vars and update docker-compose if ports change.
-- For agent-friendly local runtime (no Docker Mongo), use `bun run dev:llm` to start the API with in-memory MongoDB + seeded mock data (see `docs/DEV_LLM.md`).
 
 ### Structure and Patterns
 
@@ -98,11 +97,6 @@ apps/<workspace>/test/
 ### Product Context
 
 TODO: Replace this with actual product documentation later.
-
-### Screenshots (Agent Workflow)
-- Save screenshots to `specs/screenshots/`.
-- Use descriptive filenames (what the screenshot shows), e.g. `login-page-error-toast.png`, `series-detail-empty-state.png`.
-- If you open a PR/MR, include relevant screenshots in the description when possible.
 
 ## Specialized Guides
 - Backend-specific processes: see `server.instructions.md` for contract extensions, router wiring, authentication context, and Typegoose modeling patterns.

@@ -45,7 +45,6 @@
   },
   "scripts": {
     "dev": "docker compose -f ./docker-compose.dev.yml up -d &&turbo dev",
-    "dev:llm": "turbo -F server llm",
     "build": "turbo build",
     "test": "turbo test",
     "check-types": "turbo check-types",
