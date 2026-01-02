@@ -2,8 +2,21 @@
 
 **Feature Branch**: `[000-foundation-platform]`  
 **Created**: 2026-01-01  
+**Last Updated**: 2026-01-02  
 **Status**: Draft  
 **Input**: User description provided (single-user first, multi-user later; PC-only focus)
+
+> [!NOTE]
+> This specification has been separated into domain-specific specs for better organization.
+> See `domains/` directory for detailed specifications:
+> - [Series Management](domains/01-series.md) - P1 (MVP)
+> - [Script Authoring](domains/02-scripts.md) - P1 (MVP)
+> - [Knowledge Base](domains/03-knowledge-base.md) - P1-P2
+> - [Canvas](domains/04-canvas.md) - P3 (Post-MVP)
+> - [Export](domains/05-export.md) - P3 (Post-MVP)
+> - [Continuity & Audit](domains/06-continuity.md) - P3 (Post-MVP)
+>
+> [Domain Specs Index](domains/README.md)
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -18,6 +31,8 @@ A writer creates a series, configures metadata (title, genre, logline), and mana
 1. Given no series, when the writer creates one with required fields, then the series is saved and visible in library.
 2. Given an existing series, when the writer edits metadata, then updates persist and show last-edited timestamp.
 
+**Detailed Specification**: See [Series Management Domain Spec](domains/01-series.md)
+
 ---
 
 ### User Story 2 - Write Script with Split Editor (Priority: P1)
@@ -30,6 +45,8 @@ A writer opens a script and writes in the split editor while viewing the knowled
 **Acceptance Scenarios**:
 1. Given a script, when opened, then a split layout shows text editor (left) and knowledge base tabs (right).
 2. Given text changes, when user saves or autosave triggers, then content persists and reloads accurately.
+
+**Detailed Specification**: See [Script Authoring Domain Spec](domains/02-scripts.md)
 
 ---
 
@@ -44,6 +61,8 @@ A writer creates and edits Characters, Locations, Props, Timeline items, and Wil
 1. Given the knowledge base, when a new character is added with traits and relationships, then it appears in search and detail view.
 2. Given multiple entities, when the writer searches, then results include all matching entities across types.
 
+**Detailed Specification**: See [Knowledge Base Domain Spec](domains/03-knowledge-base.md)
+
 ---
 
 ### User Story 4 - Character Detail & Appearances (Priority: P2)
@@ -56,6 +75,8 @@ A writer views character overview, script variations, and appearances linked to 
 **Acceptance Scenarios**:
 1. Given a character with relationships, when viewing Overview, then linked characters show hover previews.
 2. Given appearances tagged in a script, when opening Appearances, then scene references list with locations.
+
+**Detailed Specification**: See [Knowledge Base Domain Spec](domains/03-knowledge-base.md)
 
 ---
 
@@ -70,6 +91,8 @@ A writer uses the canvas to place notes/shapes and link ideas while drafting.
 1. Given a series, when the user opens Canvas, then tools for text/shapes/lines are available and state persists.
 2. Given placed nodes, when reconnecting later, then nodes and connections reload.
 
+**Detailed Specification**: See [Canvas Domain Spec](domains/04-canvas.md)
+
 ---
 
 ### User Story 6 - Export Draft (Priority: P3)
@@ -83,6 +106,8 @@ A writer exports a script to PDF with screenplay-friendly formatting (basic).
 1. Given a saved script, when export is triggered, then a PDF downloads with scene headings and dialogue indentation preserved.
 2. Given invalid/unsaved script, when export is triggered, then user is prompted to save first.
 
+**Detailed Specification**: See [Export Domain Spec](domains/05-export.md)
+
 ---
 
 ### Edge Cases
@@ -91,6 +116,18 @@ A writer exports a script to PDF with screenplay-friendly formatting (basic).
 - Offline/unsynced changes? → Out of scope for baseline; fail gracefully with clear status.
 
 ## Requirements *(mandatory)*
+
+> [!NOTE]
+> Detailed requirements, data models, contracts, and implementation details have been moved to domain-specific specs.
+> See the [Domain Specs Index](domains/README.md) for comprehensive documentation.
+>
+> This section provides a high-level overview. For full details, refer to individual domain specs:
+> - [Series](domains/01-series.md) - FR-001, FR-008, FR-009, FR-010
+> - [Scripts](domains/02-scripts.md) - FR-002, FR-003, FR-008
+> - [Knowledge Base](domains/03-knowledge-base.md) - FR-004, FR-005, FR-010, FR-011
+> - [Canvas](domains/04-canvas.md) - FR-006
+> - [Export](domains/05-export.md) - FR-007
+> - [Continuity](domains/06-continuity.md) - FR-011
 
 ### Functional Requirements
 
@@ -108,14 +145,18 @@ A writer exports a script to PDF with screenplay-friendly formatting (basic).
 
 ### Key Entities *(include if feature involves data)*
 
-- **Series**: Container for scripts, knowledge base, canvas, settings. Attributes: id, title, genre, logline, cover, lastEditedAt.
-- **Script**: Belongs to Series. Attributes: id, seriesId, title, authors, genre, logline, cover, content (structured/plain), lastEditedAt.
-- **Character**: Attributes: id, seriesId, name, description, traits, relationships (character-character), variations, appearances (scene refs), cover/avatar.
-- **Location**: Attributes: id, seriesId, name, description, tags, appearances.
-- **Prop**: Attributes: id, seriesId, name, description, associations.
-- **Timeline Entry**: Attributes: id, seriesId, label, timestamp/order, linked scenes/entities.
-- **Wild Card**: Flexible note/entity with type/tag.
-- **Canvas Node/Edge**: Per-series persisted nodes (text/shape) and connections.
+> [!NOTE]
+> Complete data models with full schemas, relationships, and examples are available in domain specs.
+> See [Domain Specs Index](domains/README.md) for detailed entity definitions.
+
+- **Series**: Container for scripts, knowledge base, canvas, settings. Attributes: id, title, genre, logline, cover, lastEditedAt. [Details](domains/01-series.md#data-model)
+- **Script**: Belongs to Series. Attributes: id, seriesId, title, authors, genre, logline, cover, content (structured/plain), lastEditedAt. [Details](domains/02-scripts.md#data-model)
+- **Character**: Attributes: id, seriesId, name, description, traits, relationships (character-character), variations, appearances (scene refs), cover/avatar. [Details](domains/03-knowledge-base.md#data-model)
+- **Location**: Attributes: id, seriesId, name, description, tags, appearances. [Details](domains/03-knowledge-base.md#data-model)
+- **Prop**: Attributes: id, seriesId, name, description, associations. [Details](domains/03-knowledge-base.md#data-model)
+- **Timeline Entry**: Attributes: id, seriesId, label, timestamp/order, linked scenes/entities. [Details](domains/03-knowledge-base.md#data-model)
+- **Wild Card**: Flexible note/entity with type/tag. [Details](domains/03-knowledge-base.md#data-model)
+- **Canvas Node/Edge**: Per-series persisted nodes (text/shape) and connections. [Details](domains/04-canvas.md#data-model)
 
 ### Constitution Alignment
 
@@ -129,8 +170,63 @@ A writer exports a script to PDF with screenplay-friendly formatting (basic).
 
 ### Measurable Outcomes
 
-- **SC-001**: A new Series with at least one Script can be created, reopened, and edited within 2s load time on desktop.
-- **SC-002**: Knowledge base search returns relevant entities across all types with <300ms backend response on a dataset of 500 entities.
-- **SC-003**: Character detail Appearances tab correctly lists 95%+ tagged scenes in a 120-page script test corpus.
-- **SC-004**: Script export completes within 5s for a 120-page script and produces a valid PDF download.
+- **SC-001**: A new Series with at least one Script can be created, reopened, and edited within 2s load time on desktop. [Details](domains/01-series.md#success-criteria)
+- **SC-002**: Knowledge base search returns relevant entities across all types with <300ms backend response on a dataset of 500 entities. [Details](domains/03-knowledge-base.md#success-criteria)
+- **SC-003**: Character detail Appearances tab correctly lists 95%+ tagged scenes in a 120-page script test corpus. [Details](domains/03-knowledge-base.md#success-criteria)
+- **SC-004**: Script export completes within 5s for a 120-page script and produces a valid PDF download. [Details](domains/05-export.md#success-criteria)
 - **SC-005**: All contract endpoints pass automated tests and type checks (`bun run check-types`, `bun run lint`, targeted test suite) in CI.
+
+---
+
+## Domain Organization
+
+This specification has been organized into domain-specific documents for improved maintainability and clarity. Each domain spec contains:
+
+- **Overview**: High-level description of the domain
+- **User Stories**: Acceptance criteria and test scenarios
+- **Functional Requirements**: Detailed requirements (FR-XXX references)
+- **Data Model**: Complete entity schemas with relationships
+- **Contracts (oRPC)**: API endpoints and Zod schemas
+- **Implementation Status**: Backend/frontend completion percentages
+- **Tasks**: Specific work items with file paths and deliverables
+- **Success Criteria**: Measurable outcomes (SC-XXX references)
+- **UI/UX Specifications**: Visual layouts and interaction patterns
+- **Constitution Alignment**: Adherence to project principles
+- **Edge Cases**: Known problem areas and handling strategies
+- **Dependencies**: Upstream/downstream domain relationships
+- **Future Enhancements**: Post-MVP feature ideas
+
+### Domain Structure
+
+```
+specs/000-kaeri-baseline/domains/
+├── README.md                  # Index with status overview
+├── 01-series.md              # Series Management (P1)
+├── 02-scripts.md             # Script Authoring (P1)
+├── 03-knowledge-base.md      # Knowledge Base (P1-P2)
+├── 04-canvas.md              # Canvas (P3)
+├── 05-export.md              # Export (P3)
+└── 06-continuity.md          # Continuity & Audit (P3)
+```
+
+### Related Documentation
+
+- **Domain Specs Index**: [domains/README.md](domains/README.md) - Comprehensive overview with quick status reference
+- **Implementation Plan**: [plan.md](plan.md) - Technical context and execution phases
+- **Task List**: [tasks.md](tasks.md) - Granular tasks with dependencies
+- **Task Breakdown**: [TASK_BREAKDOWN.md](TASK_BREAKDOWN.md) - Session-based task organization
+- **Implementation Status**: [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) - Current progress analysis
+- **Data Model**: [data-model.md](data-model.md) - Consolidated entity schemas
+- **Contracts**: [contracts/](contracts/) - oRPC contract definitions
+- **Quickstart**: [quickstart.md](quickstart.md) - Local development setup
+
+### Benefits of Domain Separation
+
+1. **Modularity**: Each domain can be understood and worked on independently
+2. **Clarity**: Reduced cognitive load by focusing on one area at a time
+3. **Maintainability**: Updates to one domain don't require editing the entire spec
+4. **Parallel Work**: Multiple developers can reference different domain specs simultaneously
+5. **Traceability**: Clear mapping from requirements (FR-XXX) to implementation tasks
+6. **Onboarding**: New team members can learn one domain at a time
+7. **Progress Tracking**: Domain-level completion percentages show granular progress
+
