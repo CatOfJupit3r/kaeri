@@ -18,6 +18,14 @@ import { Label } from '@~/components/ui/label';
 
 import { useCreateCharacter } from '../hooks/mutations/use-create-character';
 import { useUpdateCharacter } from '../hooks/mutations/use-update-character';
+import { useCharacterList } from '../hooks/queries/use-character-list';
+import { RelationshipPicker } from './relationship-picker';
+
+interface iRelationship {
+  targetId: string;
+  type: string;
+  note?: string;
+}
 
 interface iCharacter {
   _id: string;
@@ -25,6 +33,7 @@ interface iCharacter {
   description?: string;
   avatarUrl?: string;
   traits?: string[];
+  relationships?: iRelationship[];
 }
 
 interface iCharacterFormProps {
@@ -37,8 +46,10 @@ interface iCharacterFormProps {
 export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCharacterFormProps) {
   const [traits, setTraits] = useState<string[]>([]);
   const [traitInput, setTraitInput] = useState('');
+  const [relationships, setRelationships] = useState<iRelationship[]>([]);
   const { createCharacter, isPending: isCreating } = useCreateCharacter();
   const { updateCharacter, isPending: isUpdating } = useUpdateCharacter();
+  const { data: characterListData } = useCharacterList(seriesId);
 
   const isPending = isCreating || isUpdating;
   const isEditMode = !!initialData;
@@ -60,6 +71,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
               description: value.description || undefined,
               avatarUrl: value.avatarUrl || undefined,
               traits: traits.length > 0 ? traits : undefined,
+              relationships: relationships.length > 0 ? relationships : undefined,
             },
           },
           {
@@ -77,6 +89,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
               description: value.description || undefined,
               avatarUrl: value.avatarUrl || undefined,
               traits: traits.length > 0 ? traits : undefined,
+              relationships: relationships.length > 0 ? relationships : undefined,
             },
           },
           {
@@ -85,6 +98,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
               form.reset();
               setTraits([]);
               setTraitInput('');
+              setRelationships([]);
             },
           },
         );
@@ -110,6 +124,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
       });
       setTraits(initialData.traits ?? []);
       setTraitInput('');
+      setRelationships(initialData.relationships ?? []);
     } else if (!open) {
       form.reset({
         name: '',
@@ -118,6 +133,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
       });
       setTraits([]);
       setTraitInput('');
+      setRelationships([]);
     }
   }, [open, initialData, form]);
 
@@ -205,6 +221,19 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
                   ))}
                 </div>
               ) : null}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="character-relationships">Relationships</Label>
+              <div id="character-relationships">
+                <RelationshipPicker
+                  characters={characterListData?.items ?? []}
+                  currentCharacterId={initialData?._id}
+                  relationships={relationships}
+                  onChange={setRelationships}
+                  disabled={isPending}
+                />
+              </div>
             </div>
           </form.Form>
         </form.AppForm>
