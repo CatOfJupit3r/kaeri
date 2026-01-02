@@ -86,30 +86,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Pre-download MongoDB Memory Server binary (LLM env)
-        shell: bash
-        run: |
-          node --input-type=module - <<'NODE'
-          import { MongoBinary } from "mongodb-memory-server-core";
-          import { mkdir } from "node:fs/promises";
-
-          const downloadDir = process.env.MONGOMS_DOWNLOAD_DIR;
-          const version = process.env.MONGOMS_VERSION;
-
-          if (!downloadDir) {
-            console.error("Missing required env var: MONGOMS_DOWNLOAD_DIR");
-            process.exit(1);
-          }
-          if (!version) {
-            console.error("Missing required env var: MONGOMS_VERSION");
-            process.exit(1);
-          }
-
-          await mkdir(downloadDir, { recursive: true });
-
-          console.log(`Downloading MongoDB binary v${version} into ${downloadDir}`);
-          const downloadedPath = await MongoBinary.download({ downloadDir, version });
-          console.log(`MongoDB binary download complete: ${downloadedPath}`);
-          NODE
+        run: bun run scripts/predownload-mongodb.ts
         env:
           MONGOMS_DOWNLOAD_MIRROR: https://fastdl.mongodb.org
 
