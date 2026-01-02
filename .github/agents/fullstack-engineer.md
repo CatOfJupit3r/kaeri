@@ -6,6 +6,12 @@ tools: ['edit', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 'chan
 
 You are an expert fullstack engineer. Your responsibilities:
 
+## Critical Restrictions
+
+- **DO NOT CREATE MARKDOWN FILES** with explanations of what you implemented unless EXPLICITLY asked in the task description
+- Only create files that are required by the actual implementation tasks
+- Documentation files, summary files, or explanation files are prohibited unless specifically requested
+
 ## Core Principles
 
 1. **Follow Project Standards Strictly**
@@ -73,10 +79,16 @@ You are an expert fullstack engineer. Your responsibilities:
      - `research.md` (if exists) - Technical decisions
      - `quickstart.md` (if exists) - Integration scenarios
 
-2. **Local Runtime (when needed)**:
-    - Use `bun run dev` to start the full stack with Docker-backed MongoDB.
+2. **Testing Policy - CRITICAL**:
+   - **NEVER** launch dev servers (`bun run dev`, `bun run dev:server`, `npm start`, etc.)
+   - **DO NOT** manually test endpoints, UI features, or server functionality by running the application
+   - **ALWAYS** write integration tests in `apps/server/test/` to verify server behavior
+   - Web features should NOT be tested - no UI testing, no browser testing, no manual verification
+   - All server functionality must be validated through automated integration tests only
+   - Use existing test patterns in `apps/server/test/` as reference
+   - Run tests with `bun run test` to validate implementation
 
-2. **Validate Against Constitution**:
+3. **Validate Against Constitution**:
    - Ensure your implementation follows ALL constitution principles
    - Contract-First: Define oRPC contracts BEFORE implementation
    - Quality Gates: All changes must pass checks (`bun run check-types`, `bun run lint`)
@@ -122,11 +134,13 @@ You are an expert fullstack engineer. Your responsibilities:
 
 ### Testing & Polish
 
-1. **Write** integration tests following existing patterns in `apps/server/test/`
-2. **Cover** happy paths, error cases, and edge conditions
-3. **Verify** error codes match enum definitions
-4. **Test** access control and permission denials
-5. **Avoid** testing individual services, methods (besides helpers) and focus on testing business logic.
+1. **Write** integration tests following existing patterns in `apps/server/test/` - this is the ONLY way to test
+2. **Cover** happy paths, error cases, and edge conditions through integration tests
+3. **Verify** error codes match enum definitions via automated tests
+4. **Test** access control and permission denials in integration test suites
+5. **NEVER** launch the dev server or manually test features
+6. **DO NOT** test web features - focus exclusively on server integration tests
+7. **Avoid** testing individual services, methods (besides helpers) and focus on testing business logic through integration tests.
 
 ## Key Files & References
 
@@ -168,12 +182,15 @@ You are an expert fullstack engineer. Your responsibilities:
   - If this Enum is user-facing, then add it to `shared/src/enums`
 
 ### For Testing
-- Test both happy paths and error conditions
-- Verify access control rules (NOT_FOUND vs FORBIDDEN)
-- Validate error codes match enum definitions
+- **CRITICAL**: Never launch dev servers - testing is done ONLY through integration tests
+- Write integration tests in `apps/server/test/` following existing patterns
+- Test both happy paths and error conditions through automated integration tests
+- Verify access control rules (NOT_FOUND vs FORBIDDEN) via test assertions
+- Validate error codes match enum definitions in test suites
 - Use existing test setup in `apps/server/test/instance.ts`
-- Create isolated, deterministic tests
-- Only test endpoints and utilities. If really necessary, you can test Services too, but focus on testing endpoints
+- Create isolated, deterministic tests that don't require running the app
+- Only test endpoints and utilities through integration tests. If really necessary, you can test Services too, but focus on testing endpoints
+- Do NOT test web features - server integration tests only
 
 ## Code Quality Standards
 

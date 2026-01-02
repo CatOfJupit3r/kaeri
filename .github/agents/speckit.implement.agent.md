@@ -10,6 +10,12 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## Critical Restrictions
+
+- **DO NOT CREATE MARKDOWN FILES** with explanations of what you implemented unless EXPLICITLY asked in the task description
+- Only create files that are required by the actual implementation tasks
+- Documentation files, summary files, or explanation files are prohibited unless specifically requested
+
 ## Outline
 
 1. Run 
@@ -55,6 +61,13 @@ from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be 
    - **IF EXISTS**: Read contracts/ for API specifications and test requirements
    - **IF EXISTS**: Read research.md for technical decisions and constraints
    - **IF EXISTS**: Read quickstart.md for integration scenarios
+
+   **CRITICAL - Testing Requirements**:
+   - **NEVER** launch dev servers (`bun run dev`, `npm start`, etc.) for testing purposes
+   - **DO NOT** manually test endpoints, web features, or server functionality
+   - **ALWAYS** write integration tests in `apps/server/test/` to verify server functionality
+   - Web features should NOT be tested - focus only on server-side integration tests
+   - All server behavior validation must be done through automated integration tests
 
 4. **Project Setup Verification**:
    - **REQUIRED**: Create/verify ignore files based on actual project setup:
