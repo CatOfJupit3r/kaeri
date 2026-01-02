@@ -16,6 +16,10 @@ jobs:
   copilot-setup-steps:
     runs-on: ubuntu-latest
 
+    env:
+      MONGOMS_DOWNLOAD_DIR: ${{ github.workspace }}/apps/server/.mongodb-binaries
+      MONGOMS_VERSION: 7.0.14
+
     # Set the permissions to the lowest permissions possible needed for your steps.
     # Copilot will be given its own token for its operations.
     permissions:
@@ -48,31 +52,43 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: Restore MongoDB binary cache
+      - name: Restore Bun download cache
         uses: actions/cache@v4
         with:
-          path: ~/.cache/mongodb-binaries
-          key: ${{ runner.os }}-mongodb-${{ hashFiles('apps/server/package.json') }}
+          path: |
+            ~/.bun/install/cache
+            ~/.cache/bun
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Restore MongoDB binary cache
+        id: cache-mongodb
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.MONGOMS_DOWNLOAD_DIR }}
+          key: ${{ runner.os }}-mongodb-${{ env.MONGOMS_VERSION }}
           restore-keys: |
             ${{ runner.os }}-mongodb-
 
       - name: Install project dependencies
-        run: bun install --no-verify
+        run: bun install --no-verify --frozen-lockfile
         continue-on-error: true
 
       - name: Retry install without --no-verify
-        run: bun install
+        run: bun install --frozen-lockfile
         if: failure()
 
       - name: Build dependencies
         run: bun run build:deps
 
-      - name: Reinstall after build
-        run: bun install
+      - name: Install deps once again to ensure build artifacts are present
+        run: bun install --frozen-lockfile
 
-      - name: Pre-download MongoDB Memory Server
+      - name: Pre-download MongoDB Memory Server binary (LLM env)
+        if: steps.cache-mongodb.outputs.cache-hit != 'true'
         run: |
-          bun run test
+          bunx mongodb-memory-server-download --downloadDir "$MONGOMS_DOWNLOAD_DIR" --version "$MONGOMS_VERSION"
         env:
           MONGOMS_DOWNLOAD_MIRROR: http://downloads.mongodb.org
         continue-on-error: true

@@ -54,28 +54,28 @@ Charlie: charlie@example.com / password123
 
 ### MongoDB Binary Download
 
-On the first run, MongoDB Memory Server needs to download a MongoDB binary (~100MB). This may fail in restricted network environments or CI/CD systems.
+The script uses a workspace-local cache at `apps/server/.mongodb-binaries` so agents do **not** need outbound network access at runtime. On first run the binary (~100MB) must be downloaded into that folder.
 
 **Solutions:**
 
-1. **Pre-download the binary** (recommended for CI):
+1. **Pre-download to the workspace path (recommended for CI and Copilot agents):**
 
    ```bash
-   # Set download mirror if needed
-   export MONGOMS_DOWNLOAD_MIRROR=https://fastdl.mongodb.org
-
-   # Download binary ahead of time
-   bunx mongodb-memory-server-download
+   export MONGOMS_DOWNLOAD_DIR=apps/server/.mongodb-binaries
+   export MONGOMS_VERSION=7.0.14
+   bunx mongodb-memory-server-download --downloadDir "$MONGOMS_DOWNLOAD_DIR" --version "$MONGOMS_VERSION"
    ```
+
+   Cache `apps/server/.mongodb-binaries` if your CI allows it; this folder is inside the repo workspace so it is preserved for downstream agent runs.
 
 2. **Use system MongoDB** (alternative):
 
    - Instead of in-memory MongoDB, connect to a local MongoDB instance
    - Modify `dev-llm.ts` to use `mongoose.connect('mongodb://localhost:27017/kaeri-dev')`
 
-3. **Cache the binary** (CI/CD):
-   - Cache `~/.cache/mongodb-binaries` directory
-   - The binary only needs to be downloaded once
+3. **Network-restricted environments:**
+   - Point `MONGOMS_DOWNLOAD_MIRROR` to an internal mirror if external downloads are blocked
+   - Ensure `MONGOMS_DOWNLOAD_DIR` is writable inside the workspace
 
 ### Network Restrictions
 

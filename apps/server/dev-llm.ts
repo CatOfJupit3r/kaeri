@@ -2,6 +2,9 @@ import { call } from '@orpc/server';
 // eslint-disable-next-line import-x/no-extraneous-dependencies -- dev script uses devDependencies
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import 'reflect-metadata';
 
 /**
@@ -21,18 +24,26 @@ process.env.SERVER_PORT = '3000';
 process.env.SERVER_HOST = 'localhost';
 process.env.CORS_ORIGIN = 'http://localhost:3001';
 
-process.env.NODE_ENV = 'test';
-process.env.BETTER_AUTH_SECRET = 'dev-llm-secret-key-for-testing-only';
-process.env.BETTER_AUTH_URL = 'http://localhost:3000';
-process.env.SERVER_PORT = '3000';
-process.env.SERVER_HOST = 'localhost';
-process.env.CORS_ORIGIN = 'http://localhost:3001';
+// Resolve a repository-local MongoDB binary cache so agents do not need network access
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const mongoDownloadDir = process.env.MONGOMS_DOWNLOAD_DIR ?? path.join(__dirname, '.mongodb-binaries');
+const mongoBinaryVersion = process.env.MONGOMS_VERSION ?? '7.0.14';
+
+await fs.mkdir(mongoDownloadDir, { recursive: true });
+process.env.MONGOMS_DOWNLOAD_DIR = mongoDownloadDir;
+process.env.MONGOMS_VERSION = mongoBinaryVersion;
 
 console.log('🤖 Starting LLM Development Environment...\n');
+console.log(`📦 Using MongoDB binary cache at: ${mongoDownloadDir}`);
+console.log(`   MongoDB version: ${mongoBinaryVersion}\n`);
 
 // Setup in-memory MongoDB
 console.log('📦 Creating in-memory MongoDB server...');
 const mongo = await MongoMemoryServer.create({
+  binary: {
+    downloadDir: mongoDownloadDir,
+    version: mongoBinaryVersion,
+  },
   instance: {
     storageEngine: 'ephemeralForTest',
   },
