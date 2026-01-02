@@ -254,6 +254,24 @@ const addVariation = authProcedure
   )
   .output(characterSchema);
 
+const updateVariation = authProcedure
+  .route({
+    path: '/characters/update-variation',
+    method: 'PUT',
+    summary: 'Update a character variation',
+    description: 'Updates a script-specific variation for a character by scriptId and label.',
+  })
+  .input(
+    z.object({
+      seriesId: z.string(),
+      characterId: z.string(),
+      scriptId: z.string(),
+      label: z.string(),
+      patch: variationSchema.partial().omit({ scriptId: true }),
+    }),
+  )
+  .output(characterSchema);
+
 const removeVariation = authProcedure
   .route({
     path: '/characters/remove-variation',
@@ -283,6 +301,7 @@ const knowledgeBaseContract = oc.prefix('/knowledge-base').router({
   addAppearance,
   removeAppearance,
   addVariation,
+  updateVariation,
   removeVariation,
 });
 
