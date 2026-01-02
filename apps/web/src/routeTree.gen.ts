@@ -8,94 +8,104 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root';
-import { Route as Auth_onlyRouteImport } from './routes/_auth_only';
-import { Route as IndexRouteImport } from './routes/index';
-import { Route as Auth_onlySettingsRouteImport } from './routes/_auth_only/settings';
-import { Route as Auth_onlyProjectsRouteImport } from './routes/_auth_only/projects';
-import { Route as Auth_onlyProfileRouteImport } from './routes/_auth_only/profile';
-import { Route as Auth_onlyDashboardRouteImport } from './routes/_auth_only/dashboard';
-import { Route as generalTo_dashboardRouteImport } from './routes/(general)/_to_dashboard';
-import { Route as generalTo_dashboardAuthRouteImport } from './routes/(general)/_to_dashboard.auth';
-import { Route as Auth_onlySeriesSeriesIdKnowledgeBaseRouteImport } from './routes/_auth_only/series/$seriesId/knowledge-base';
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as Auth_onlyRouteImport } from './routes/_auth_only'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as Auth_onlySettingsRouteImport } from './routes/_auth_only/settings'
+import { Route as Auth_onlyProjectsRouteImport } from './routes/_auth_only/projects'
+import { Route as Auth_onlyProfileRouteImport } from './routes/_auth_only/profile'
+import { Route as Auth_onlyDashboardRouteImport } from './routes/_auth_only/dashboard'
+import { Route as generalTo_dashboardRouteImport } from './routes/(general)/_to_dashboard'
+import { Route as generalTo_dashboardAuthRouteImport } from './routes/(general)/_to_dashboard.auth'
+import { Route as Auth_onlySeriesSeriesIdIndexRouteImport } from './routes/_auth_only/series/$seriesId/index'
+import { Route as Auth_onlySeriesSeriesIdKnowledgeBaseRouteImport } from './routes/_auth_only/series/$seriesId/knowledge-base'
 
 const Auth_onlyRoute = Auth_onlyRouteImport.update({
   id: '/_auth_only',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const Auth_onlySettingsRoute = Auth_onlySettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => Auth_onlyRoute,
-} as any);
+} as any)
 const Auth_onlyProjectsRoute = Auth_onlyProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
   getParentRoute: () => Auth_onlyRoute,
-} as any);
+} as any)
 const Auth_onlyProfileRoute = Auth_onlyProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => Auth_onlyRoute,
-} as any);
+} as any)
 const Auth_onlyDashboardRoute = Auth_onlyDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => Auth_onlyRoute,
-} as any);
+} as any)
 const generalTo_dashboardRoute = generalTo_dashboardRouteImport.update({
   id: '/(general)/_to_dashboard',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const generalTo_dashboardAuthRoute = generalTo_dashboardAuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => generalTo_dashboardRoute,
-} as any);
+} as any)
+const Auth_onlySeriesSeriesIdIndexRoute =
+  Auth_onlySeriesSeriesIdIndexRouteImport.update({
+    id: '/series/$seriesId/',
+    path: '/series/$seriesId/',
+    getParentRoute: () => Auth_onlyRoute,
+  } as any)
 const Auth_onlySeriesSeriesIdKnowledgeBaseRoute =
   Auth_onlySeriesSeriesIdKnowledgeBaseRouteImport.update({
     id: '/series/$seriesId/knowledge-base',
     path: '/series/$seriesId/knowledge-base',
     getParentRoute: () => Auth_onlyRoute,
-  } as any);
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute;
-  '/dashboard': typeof Auth_onlyDashboardRoute;
-  '/profile': typeof Auth_onlyProfileRoute;
-  '/projects': typeof Auth_onlyProjectsRoute;
-  '/settings': typeof Auth_onlySettingsRoute;
-  '/auth': typeof generalTo_dashboardAuthRoute;
-  '/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRoute;
+  '/': typeof IndexRoute
+  '/dashboard': typeof Auth_onlyDashboardRoute
+  '/profile': typeof Auth_onlyProfileRoute
+  '/projects': typeof Auth_onlyProjectsRoute
+  '/settings': typeof Auth_onlySettingsRoute
+  '/auth': typeof generalTo_dashboardAuthRoute
+  '/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRoute
+  '/series/$seriesId': typeof Auth_onlySeriesSeriesIdIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute;
-  '/dashboard': typeof Auth_onlyDashboardRoute;
-  '/profile': typeof Auth_onlyProfileRoute;
-  '/projects': typeof Auth_onlyProjectsRoute;
-  '/settings': typeof Auth_onlySettingsRoute;
-  '/auth': typeof generalTo_dashboardAuthRoute;
-  '/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRoute;
+  '/': typeof IndexRoute
+  '/dashboard': typeof Auth_onlyDashboardRoute
+  '/profile': typeof Auth_onlyProfileRoute
+  '/projects': typeof Auth_onlyProjectsRoute
+  '/settings': typeof Auth_onlySettingsRoute
+  '/auth': typeof generalTo_dashboardAuthRoute
+  '/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRoute
+  '/series/$seriesId': typeof Auth_onlySeriesSeriesIdIndexRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  '/': typeof IndexRoute;
-  '/_auth_only': typeof Auth_onlyRouteWithChildren;
-  '/(general)/_to_dashboard': typeof generalTo_dashboardRouteWithChildren;
-  '/_auth_only/dashboard': typeof Auth_onlyDashboardRoute;
-  '/_auth_only/profile': typeof Auth_onlyProfileRoute;
-  '/_auth_only/projects': typeof Auth_onlyProjectsRoute;
-  '/_auth_only/settings': typeof Auth_onlySettingsRoute;
-  '/(general)/_to_dashboard/auth': typeof generalTo_dashboardAuthRoute;
-  '/_auth_only/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/_auth_only': typeof Auth_onlyRouteWithChildren
+  '/(general)/_to_dashboard': typeof generalTo_dashboardRouteWithChildren
+  '/_auth_only/dashboard': typeof Auth_onlyDashboardRoute
+  '/_auth_only/profile': typeof Auth_onlyProfileRoute
+  '/_auth_only/projects': typeof Auth_onlyProjectsRoute
+  '/_auth_only/settings': typeof Auth_onlySettingsRoute
+  '/(general)/_to_dashboard/auth': typeof generalTo_dashboardAuthRoute
+  '/_auth_only/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRoute
+  '/_auth_only/series/$seriesId/': typeof Auth_onlySeriesSeriesIdIndexRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/dashboard'
@@ -103,8 +113,9 @@ export interface FileRouteTypes {
     | '/projects'
     | '/settings'
     | '/auth'
-    | '/series/$seriesId/knowledge-base';
-  fileRoutesByTo: FileRoutesByTo;
+    | '/series/$seriesId/knowledge-base'
+    | '/series/$seriesId'
+  fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/dashboard'
@@ -112,7 +123,8 @@ export interface FileRouteTypes {
     | '/projects'
     | '/settings'
     | '/auth'
-    | '/series/$seriesId/knowledge-base';
+    | '/series/$seriesId/knowledge-base'
+    | '/series/$seriesId'
   id:
     | '__root__'
     | '/'
@@ -123,89 +135,98 @@ export interface FileRouteTypes {
     | '/_auth_only/projects'
     | '/_auth_only/settings'
     | '/(general)/_to_dashboard/auth'
-    | '/_auth_only/series/$seriesId/knowledge-base';
-  fileRoutesById: FileRoutesById;
+    | '/_auth_only/series/$seriesId/knowledge-base'
+    | '/_auth_only/series/$seriesId/'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  Auth_onlyRoute: typeof Auth_onlyRouteWithChildren;
-  generalTo_dashboardRoute: typeof generalTo_dashboardRouteWithChildren;
+  IndexRoute: typeof IndexRoute
+  Auth_onlyRoute: typeof Auth_onlyRouteWithChildren
+  generalTo_dashboardRoute: typeof generalTo_dashboardRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/_auth_only': {
-      id: '/_auth_only';
-      path: '';
-      fullPath: '';
-      preLoaderRoute: typeof Auth_onlyRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/_auth_only'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof Auth_onlyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
-      id: '/';
-      path: '/';
-      fullPath: '/';
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_auth_only/settings': {
-      id: '/_auth_only/settings';
-      path: '/settings';
-      fullPath: '/settings';
-      preLoaderRoute: typeof Auth_onlySettingsRouteImport;
-      parentRoute: typeof Auth_onlyRoute;
-    };
+      id: '/_auth_only/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof Auth_onlySettingsRouteImport
+      parentRoute: typeof Auth_onlyRoute
+    }
     '/_auth_only/projects': {
-      id: '/_auth_only/projects';
-      path: '/projects';
-      fullPath: '/projects';
-      preLoaderRoute: typeof Auth_onlyProjectsRouteImport;
-      parentRoute: typeof Auth_onlyRoute;
-    };
+      id: '/_auth_only/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof Auth_onlyProjectsRouteImport
+      parentRoute: typeof Auth_onlyRoute
+    }
     '/_auth_only/profile': {
-      id: '/_auth_only/profile';
-      path: '/profile';
-      fullPath: '/profile';
-      preLoaderRoute: typeof Auth_onlyProfileRouteImport;
-      parentRoute: typeof Auth_onlyRoute;
-    };
+      id: '/_auth_only/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof Auth_onlyProfileRouteImport
+      parentRoute: typeof Auth_onlyRoute
+    }
     '/_auth_only/dashboard': {
-      id: '/_auth_only/dashboard';
-      path: '/dashboard';
-      fullPath: '/dashboard';
-      preLoaderRoute: typeof Auth_onlyDashboardRouteImport;
-      parentRoute: typeof Auth_onlyRoute;
-    };
+      id: '/_auth_only/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof Auth_onlyDashboardRouteImport
+      parentRoute: typeof Auth_onlyRoute
+    }
     '/(general)/_to_dashboard': {
-      id: '/(general)/_to_dashboard';
-      path: '';
-      fullPath: '';
-      preLoaderRoute: typeof generalTo_dashboardRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+      id: '/(general)/_to_dashboard'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof generalTo_dashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(general)/_to_dashboard/auth': {
-      id: '/(general)/_to_dashboard/auth';
-      path: '/auth';
-      fullPath: '/auth';
-      preLoaderRoute: typeof generalTo_dashboardAuthRouteImport;
-      parentRoute: typeof generalTo_dashboardRoute;
-    };
+      id: '/(general)/_to_dashboard/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof generalTo_dashboardAuthRouteImport
+      parentRoute: typeof generalTo_dashboardRoute
+    }
+    '/_auth_only/series/$seriesId/': {
+      id: '/_auth_only/series/$seriesId/'
+      path: '/series/$seriesId'
+      fullPath: '/series/$seriesId'
+      preLoaderRoute: typeof Auth_onlySeriesSeriesIdIndexRouteImport
+      parentRoute: typeof Auth_onlyRoute
+    }
     '/_auth_only/series/$seriesId/knowledge-base': {
-      id: '/_auth_only/series/$seriesId/knowledge-base';
-      path: '/series/$seriesId/knowledge-base';
-      fullPath: '/series/$seriesId/knowledge-base';
-      preLoaderRoute: typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteImport;
-      parentRoute: typeof Auth_onlyRoute;
-    };
+      id: '/_auth_only/series/$seriesId/knowledge-base'
+      path: '/series/$seriesId/knowledge-base'
+      fullPath: '/series/$seriesId/knowledge-base'
+      preLoaderRoute: typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteImport
+      parentRoute: typeof Auth_onlyRoute
+    }
   }
 }
 
 interface Auth_onlyRouteChildren {
-  Auth_onlyDashboardRoute: typeof Auth_onlyDashboardRoute;
-  Auth_onlyProfileRoute: typeof Auth_onlyProfileRoute;
-  Auth_onlyProjectsRoute: typeof Auth_onlyProjectsRoute;
-  Auth_onlySettingsRoute: typeof Auth_onlySettingsRoute;
-  Auth_onlySeriesSeriesIdKnowledgeBaseRoute: typeof Auth_onlySeriesSeriesIdKnowledgeBaseRoute;
+  Auth_onlyDashboardRoute: typeof Auth_onlyDashboardRoute
+  Auth_onlyProfileRoute: typeof Auth_onlyProfileRoute
+  Auth_onlyProjectsRoute: typeof Auth_onlyProjectsRoute
+  Auth_onlySettingsRoute: typeof Auth_onlySettingsRoute
+  Auth_onlySeriesSeriesIdKnowledgeBaseRoute: typeof Auth_onlySeriesSeriesIdKnowledgeBaseRoute
+  Auth_onlySeriesSeriesIdIndexRoute: typeof Auth_onlySeriesSeriesIdIndexRoute
 }
 
 const Auth_onlyRouteChildren: Auth_onlyRouteChildren = {
@@ -215,37 +236,29 @@ const Auth_onlyRouteChildren: Auth_onlyRouteChildren = {
   Auth_onlySettingsRoute: Auth_onlySettingsRoute,
   Auth_onlySeriesSeriesIdKnowledgeBaseRoute:
     Auth_onlySeriesSeriesIdKnowledgeBaseRoute,
-};
+  Auth_onlySeriesSeriesIdIndexRoute: Auth_onlySeriesSeriesIdIndexRoute,
+}
 
 const Auth_onlyRouteWithChildren = Auth_onlyRoute._addFileChildren(
   Auth_onlyRouteChildren,
-);
+)
 
 interface generalTo_dashboardRouteChildren {
-  generalTo_dashboardAuthRoute: typeof generalTo_dashboardAuthRoute;
+  generalTo_dashboardAuthRoute: typeof generalTo_dashboardAuthRoute
 }
 
 const generalTo_dashboardRouteChildren: generalTo_dashboardRouteChildren = {
   generalTo_dashboardAuthRoute: generalTo_dashboardAuthRoute,
-};
+}
 
 const generalTo_dashboardRouteWithChildren =
-  generalTo_dashboardRoute._addFileChildren(generalTo_dashboardRouteChildren);
+  generalTo_dashboardRoute._addFileChildren(generalTo_dashboardRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   Auth_onlyRoute: Auth_onlyRouteWithChildren,
   generalTo_dashboardRoute: generalTo_dashboardRouteWithChildren,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
-
-import type { getRouter } from './router.tsx';
-import type { createStart } from '@tanstack/react-start';
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true;
-    router: Awaited<ReturnType<typeof getRouter>>;
-  }
-}
+  ._addFileTypes<FileRouteTypes>()
