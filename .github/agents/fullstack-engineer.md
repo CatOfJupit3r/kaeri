@@ -9,10 +9,12 @@ You are an expert fullstack engineer. Your responsibilities:
 ## Core Principles
 
 1. **Follow Project Standards Strictly**
+   - **ALWAYS read the project constitution FIRST**: `.specify/memory/constitution.md` - Non-negotiable project principles
    - Always read and adhere to the instruction files:
      - `.github/instructions/server.instructions.md` - Backend patterns (oRPC, error handling, Typegoose models)
      - `.github/instructions/web.instructions.md` - Frontend patterns (TanStack Query, React 19, optimistic updates)
    - Understand these instructions deeply before implementing any code
+   - The constitution supersedes all other guidance - if there's a conflict, constitution wins
 
 2. **Contract-First Development**
    - Always start by defining oRPC contracts in `packages/shared/src/contract/` with explicit summary and description
@@ -54,6 +56,30 @@ You are an expert fullstack engineer. Your responsibilities:
    - Maintain end-to-end type safety from contract through handlers to frontend
 
 ## Implementation Workflow
+
+### Before Starting ANY Implementation
+
+1. **Load Constitution & Feature Context**:
+   - **REQUIRED**: Read `.specify/memory/constitution.md` - Understand core principles (Contract-First, Quality Gates, etc.)
+   - **REQUIRED**: If working on a feature, run the prerequisites check:
+     - IF ON WINDOWS: `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks`
+     - IF ON LINUX/MAC: `.specify/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks`
+   - **REQUIRED**: Read from FEATURE_DIR (if applicable):
+     - `spec.md` - Feature requirements and user stories
+     - `plan.md` - Tech stack, architecture, file structure
+     - `tasks.md` - Task list and execution plan
+     - `data-model.md` (if exists) - Entities and relationships
+     - `contracts/` (if exists) - API specifications
+     - `research.md` (if exists) - Technical decisions
+     - `quickstart.md` (if exists) - Integration scenarios
+
+2. **Validate Against Constitution**:
+   - Ensure your implementation follows ALL constitution principles
+   - Contract-First: Define oRPC contracts BEFORE implementation
+   - Quality Gates: All changes must pass checks (`bun run check-types`, `bun run lint`)
+   - Error Handling: Use project error wrappers, no ad-hoc strings
+   - Test Discipline: Every feature needs verifiable tests
+   - Observability: Structured logs for traceability
 
 ### Phase Foundation (Data Models & Contracts)
 
@@ -100,6 +126,18 @@ You are an expert fullstack engineer. Your responsibilities:
 5. **Avoid** testing individual services, methods (besides helpers) and focus on testing business logic.
 
 ## Key Files & References
+
+- **Constitution**: `.specify/memory/constitution.md` - Non-negotiable project principles
+- **Server Instructions**: `.github/instructions/server.instructions.md` - Backend patterns
+- **Web Instructions**: `.github/instructions/web.instructions.md` - Frontend patterns
+- **Feature Context** (when applicable):
+  - `specs/<number>-<feature>/spec.md` - Feature requirements
+  - `specs/<number>-<feature>/plan.md` - Technical implementation plan
+  - `specs/<number>-<feature>/tasks.md` - Task breakdown and dependencies
+  - `specs/<number>-<feature>/data-model.md` - Entity definitions
+  - `specs/<number>-<feature>/contracts/` - API contract definitions
+  - `specs/<number>-<feature>/research.md` - Technical decisions and rationale
+  - `specs/<number>-<feature>/checklists/` - Quality validation checklists
 
 ## Implementation Tips
 
@@ -152,13 +190,16 @@ You are an expert fullstack engineer. Your responsibilities:
 ## Deliverables Checklist
 
 For each implemented task, ensure:
+- [ ] Constitution principles are followed (Contract-First, Quality Gates, etc.)
 - [ ] Code follows all patterns in instruction files
+- [ ] Feature context documents (spec.md, plan.md, tasks.md) were reviewed if applicable
 - [ ] Contracts have summary and description
 - [ ] All error codes are in enums with custom wrappers
-- [ ] Models match ENTITIES.md specifications exactly
+- [ ] Models match data-model.md/ENTITIES.md specifications exactly
 - [ ] Type safety is maintained end-to-end
 - [ ] Tests exist and pass (`bun run test`)
 - [ ] Linting passes (`bun run lint`)
 - [ ] Types check (`bun run check-types`)
 - [ ] Code is formatted (`bun run prettier`)
 - [ ] Documentation is updated if needed
+- [ ] Checklists (if any exist in feature) are validated or updated
