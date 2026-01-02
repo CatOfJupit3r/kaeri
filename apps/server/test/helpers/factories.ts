@@ -62,6 +62,9 @@ export async function createCharacter(
     description?: string;
     traits?: string[];
     avatarUrl?: string;
+    relationships?: Array<{ targetId: string; type: string; note?: string }>;
+    variations?: Array<{ scriptId: string; label: string; notes?: string }>;
+    appearances?: Array<{ scriptId: string; sceneRef: string; locationId?: string }>;
   } = {},
 ) {
   return call(

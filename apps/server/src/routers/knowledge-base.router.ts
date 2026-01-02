@@ -11,7 +11,15 @@ export const knowledgeBaseRouter = base.knowledgeBase.router({
     create: protectedProcedure.knowledgeBase.characters.create.handler(async ({ input }) =>
       GETTERS.KnowledgeBaseService().createCharacter(
         input.seriesId,
-        input.value as { name: string; description?: string; traits?: string[]; avatarUrl?: string },
+        input.value as {
+          name: string;
+          description?: string;
+          traits?: string[];
+          avatarUrl?: string;
+          relationships?: Array<{ targetId: string; type: string; note?: string }>;
+          variations?: Array<{ scriptId: string; label: string; notes?: string }>;
+          appearances?: Array<{ scriptId: string; sceneRef: string; locationId?: string }>;
+        },
       ),
     ),
 

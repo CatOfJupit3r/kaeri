@@ -490,4 +490,105 @@ describe('Knowledge Base API - Characters', () => {
       expect(result.variations?.length).toBe(0);
     });
   });
+
+  describe('Create and Update with Appearances', () => {
+    it('should create a character with appearances', async () => {
+      const { ctx, series } = await createSeriesWithUser();
+
+      const script = await createScript(ctx, series._id, { title: 'Episode 1' });
+      const location = await createLocation(ctx, series._id, { name: 'Café' });
+
+      const character = await createCharacter(ctx, series._id, {
+        name: 'Hero',
+        appearances: [
+          { scriptId: script._id, sceneRef: 'Scene 1', locationId: location._id },
+          { scriptId: script._id, sceneRef: 'Scene 5' },
+        ],
+      });
+
+      expect(character.appearances?.length).toBe(2);
+      expect(character.appearances?.[0].scriptId).toBe(script._id);
+      expect(character.appearances?.[0].sceneRef).toBe('Scene 1');
+      expect(character.appearances?.[0].locationId).toBe(location._id);
+      expect(character.appearances?.[1].sceneRef).toBe('Scene 5');
+      expect(character.appearances?.[1].locationId).toBeUndefined();
+    });
+
+    it('should update character appearances via patch', async () => {
+      const { ctx, series } = await createSeriesWithUser();
+
+      const script1 = await createScript(ctx, series._id, { title: 'Episode 1' });
+      const script2 = await createScript(ctx, series._id, { title: 'Episode 2' });
+
+      const character = await createCharacter(ctx, series._id, {
+        name: 'Hero',
+        appearances: [{ scriptId: script1._id, sceneRef: 'Scene 1' }],
+      });
+
+      expect(character.appearances?.length).toBe(1);
+
+      const updated = await call(
+        appRouter.knowledgeBase.characters.update,
+        {
+          id: character._id,
+          seriesId: series._id,
+          patch: {
+            appearances: [
+              { scriptId: script1._id, sceneRef: 'Scene 1' },
+              { scriptId: script2._id, sceneRef: 'Scene 3' },
+            ],
+          },
+        },
+        ctx(),
+      );
+
+      expect(updated.appearances?.length).toBe(2);
+      expect(updated.appearances?.[1].scriptId).toBe(script2._id);
+    });
+
+    it('should create character with relationships and appearances', async () => {
+      const { ctx, series } = await createSeriesWithUser();
+
+      const script = await createScript(ctx, series._id, { title: 'Episode 1' });
+      const char2 = await createCharacter(ctx, series._id, { name: 'Friend' });
+
+      const character = await createCharacter(ctx, series._id, {
+        name: 'Hero',
+        relationships: [{ targetId: char2._id, type: 'friend', note: 'Best friend' }],
+        appearances: [{ scriptId: script._id, sceneRef: 'Scene 1' }],
+      });
+
+      expect(character.relationships?.length).toBe(1);
+      expect(character.relationships?.[0].targetId).toBe(char2._id);
+      expect(character.appearances?.length).toBe(1);
+      expect(character.appearances?.[0].scriptId).toBe(script._id);
+    });
+
+    it('should clear appearances by passing empty array', async () => {
+      const { ctx, series } = await createSeriesWithUser();
+
+      const script = await createScript(ctx, series._id, { title: 'Episode 1' });
+
+      const character = await createCharacter(ctx, series._id, {
+        name: 'Hero',
+        appearances: [{ scriptId: script._id, sceneRef: 'Scene 1' }],
+      });
+
+      expect(character.appearances?.length).toBe(1);
+
+      const updated = await call(
+        appRouter.knowledgeBase.characters.update,
+        {
+          id: character._id,
+          seriesId: series._id,
+          patch: {
+            appearances: [],
+          },
+        },
+        ctx(),
+      );
+
+      expect(updated.appearances?.length).toBe(0);
+    });
+  });
 });
