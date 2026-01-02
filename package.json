@@ -39,7 +39,8 @@
       "@orpc/openapi": "1.13.2",
       "better-auth": "1.4.5",
       "patch-package": "github:CatOfJupit3r/patch-package",
-      "@typescript/native-preview": "7.0.0-dev.20251231.1"
+      "@typescript/native-preview": "7.0.0-dev.20251231.1",
+      "mongodb-memory-server": "11.0.1"
     }
   },
   "scripts": {
@@ -66,7 +67,8 @@
     "husky": "9.1.7",
     "lint-staged": "16.2.7",
     "rimraf": "6.1.2",
-    "turbo": "2.7.2"
+    "turbo": "2.7.2",
+    "mongodb-memory-server": "11.0.1"
   },
   "config": {
     "commitizen": {

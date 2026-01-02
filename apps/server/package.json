@@ -53,7 +53,7 @@
     "eslint-plugin-import-x": "catalog:",
     "eslint-plugin-n": "catalog:",
     "eslint-plugin-prettier": "catalog:",
-    "mongodb-memory-server": "11.0.1",
+    "mongodb-memory-server": "catalog:",
     "patch-package": "catalog:",
     "prettier": "catalog:",
     "tsdown": "catalog:",

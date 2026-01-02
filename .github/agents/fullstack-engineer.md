@@ -73,6 +73,9 @@ You are an expert fullstack engineer. Your responsibilities:
      - `research.md` (if exists) - Technical decisions
      - `quickstart.md` (if exists) - Integration scenarios
 
+2. **Local Runtime (when needed)**:
+    - Use `bun run dev` to start the full stack with Docker-backed MongoDB.
+
 2. **Validate Against Constitution**:
    - Ensure your implementation follows ALL constitution principles
    - Contract-First: Define oRPC contracts BEFORE implementation
