@@ -54,10 +54,11 @@ Given that feature description, do this:
       - Find the highest number N
       - Use N+1 for the new branch number
 
-   d. Run the script `.specify/scripts/powershell/create-new-feature.ps1 -Json "$ARGUMENTS"` with the calculated number and short-name:
-      - Pass `--number N+1` and `--short-name "your-short-name"` along with the feature description
-      - Bash example: `.specify/scripts/powershell/create-new-feature.ps1 -Json "$ARGUMENTS" --json --number 5 --short-name "user-auth" "Add user authentication"`
-      - PowerShell example: `.specify/scripts/powershell/create-new-feature.ps1 -Json "$ARGUMENTS" -Json -Number 5 -ShortName "user-auth" "Add user authentication"`
+   d. Run the feature creation script with the calculated number and short-name:
+      - IF ON WINDOWS: `.specify/scripts/powershell/create-new-feature.ps1 -Json "$ARGUMENTS" -Number N+1 -ShortName "your-short-name" "Feature description"`
+      - IF ON LINUX/MAC: `.specify/scripts/bash/create-new-feature.sh --json "$ARGUMENTS" --number N+1 --short-name "your-short-name" "Feature description"`
+      - Example (Windows): `.specify/scripts/powershell/create-new-feature.ps1 -Json -Number 5 -ShortName "user-auth" "Add user authentication"`
+      - Example (Linux/Mac): `.specify/scripts/bash/create-new-feature.sh --json --number 5 --short-name "user-auth" "Add user authentication"`
 
    **IMPORTANT**:
    - Check all three sources (remote branches, local branches, specs directories) to find the highest number
