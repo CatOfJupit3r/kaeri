@@ -15,7 +15,7 @@ import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
-import { useLocationList } from '@~/features/knowledge-base/hooks/queries/use-location-list';
+import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
 
 import { useDeleteLocation } from '../hooks/mutations/use-delete-location';
 import { LocationForm } from './location-form';

@@ -3,12 +3,12 @@ import { useState } from 'react';
 import { LuBookUser, LuGlobe, LuPackage, LuCalendar, LuSparkles } from 'react-icons/lu';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
-import { CharacterList } from '@~/features/knowledge-base/components/character-list';
+import { CharacterList } from '@~/features/characters/components/character-list';
 import { KBSearch } from '@~/features/knowledge-base/components/kb-search';
-import { LocationList } from '@~/features/knowledge-base/components/location-list';
-import { PropList } from '@~/features/knowledge-base/components/prop-list';
-import { TimelineList } from '@~/features/knowledge-base/components/timeline-list';
-import { WildcardList } from '@~/features/knowledge-base/components/wildcard-list';
+import { LocationList } from '@~/features/locations/components/location-list';
+import { PropList } from '@~/features/props/components/prop-list';
+import { TimelineList } from '@~/features/timelines/components/timeline-list';
+import { WildcardList } from '@~/features/wildcards/components/wildcard-list';
 
 export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-base')({
   component: RouteComponent,
