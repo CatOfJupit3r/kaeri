@@ -14,7 +14,7 @@ import {
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
-import { usePropList } from '@~/features/knowledge-base/hooks/queries/use-prop-list';
+import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
 
 import { useDeleteProp } from '../hooks/mutations/use-delete-prop';
 import { PropForm } from './prop-form';
