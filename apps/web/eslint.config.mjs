@@ -197,7 +197,7 @@ const silenceOpinions = [
       'no-underscore-dangle': [
         'error',
         {
-          allow: ['__dirname', '__filename', '_id', '_doc', '_meta'],
+          allow: ['__dirname', '__filename', '_id', '_doc', '_meta', '_type'],
         },
       ],
     },
