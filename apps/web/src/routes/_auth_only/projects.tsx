@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { LuEllipsisVertical, LuPencil, LuTrash2 } from 'react-icons/lu';
 
@@ -115,10 +115,10 @@ function RouteComponent() {
               <Card key={s._id} className="group overflow-hidden transition-all hover:shadow-md">
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 cursor-pointer">
+                    <Link to="/series/$seriesId" params={{ seriesId: s._id }} className="flex-1 cursor-pointer">
                       <h3 className="font-semibold text-foreground group-hover:text-primary">{s.title}</h3>
                       {s.genre ? <p className="text-xs text-muted-foreground">{s.genre}</p> : null}
-                    </div>
+                    </Link>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm" className="size-8 p-0">
