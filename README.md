@@ -63,6 +63,7 @@ bun install
 ## Workspace Commands
 
 - `bun run dev` – start API, web app, and MongoDB
+- `bun run dev:llm` – start API with in-memory MongoDB and mock data (for LLM agents and testing)
 - `bun run check-types` – TypeScript project references (server + shared)
 - `bun run lint` – ESLint across the monorepo
 - `bun run prettier` – formatting audit (no write)
