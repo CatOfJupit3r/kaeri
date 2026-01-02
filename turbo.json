@@ -24,6 +24,11 @@
 			"cache": false,
 			"persistent": true
 		},
+		"llm": {
+			"dependsOn": ["@kaeri/shared#build"],
+			"cache": false,
+			"persistent": true
+		},
 		"prettier": {
 			"dependsOn": ["^prettier"]
 		}
