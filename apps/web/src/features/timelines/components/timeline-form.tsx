@@ -43,20 +43,22 @@ const TimelineFormFields = withForm({
   render: function Render({ form, isPending, onCancel, isEditMode }) {
     return (
       <>
-        <form.AppField name="label">
-          {(field) => <field.TextField label="Label" placeholder="Enter timeline label" required />}
-        </form.AppField>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <form.AppField name="label">
+            {(field) => <field.TextField label="Label" placeholder="Enter timeline label" required />}
+          </form.AppField>
 
-        <form.AppField name="timestamp">
-          {(field) => (
-            <field.TextField
-              label="Date"
-              placeholder="YYYY-MM-DD"
-              type="date"
-              description="Optional: Provide a date for chronological ordering (YYYY-MM-DD)"
-            />
-          )}
-        </form.AppField>
+          <form.AppField name="timestamp">
+            {(field) => (
+              <field.TextField
+                label="Date"
+                placeholder="YYYY-MM-DD"
+                type="date"
+                description="Optional: Provide a date for chronological ordering (YYYY-MM-DD)"
+              />
+            )}
+          </form.AppField>
+        </div>
 
         <DialogFooter>
           <form.FormActions
@@ -150,7 +152,7 @@ export function TimelineForm({ seriesId, open, onOpenChange, initialData }: iTim
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'Edit Timeline Entry' : 'Create Timeline Entry'}</DialogTitle>
           <DialogDescription>

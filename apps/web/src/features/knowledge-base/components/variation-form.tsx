@@ -95,7 +95,7 @@ export function VariationForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'Edit Variation' : 'Add Variation'}</DialogTitle>
           <DialogDescription>
@@ -105,27 +105,29 @@ export function VariationForm({
 
         <form.AppForm>
           <form.Form className="space-y-4 p-0">
-            <form.AppField name="scriptId">
-              {(field) => (
-                <div className="space-y-2">
-                  <Label htmlFor={field.name}>Script</Label>
-                  <SingleSelect
-                    value={field.state.value}
-                    onValueChange={(value: string | null) => field.handleChange(value ?? '')}
-                    options={scriptOptions}
-                    placeholder="Select a script"
-                    isDisabled={isPending || isEditMode}
-                  />
-                  {field.state.meta.errors.length > 0 ? (
-                    <p className="text-sm text-destructive">{String(field.state.meta.errors[0])}</p>
-                  ) : null}
-                </div>
-              )}
-            </form.AppField>
+            <div className="grid grid-cols-2 gap-4">
+              <form.AppField name="scriptId">
+                {(field) => (
+                  <div className="space-y-2">
+                    <Label htmlFor={field.name}>Script</Label>
+                    <SingleSelect
+                      value={field.state.value}
+                      onValueChange={(value: string | null) => field.handleChange(value ?? '')}
+                      options={scriptOptions}
+                      placeholder="Select a script"
+                      isDisabled={isPending || isEditMode}
+                    />
+                    {field.state.meta.errors.length > 0 ? (
+                      <p className="text-sm text-destructive">{String(field.state.meta.errors[0])}</p>
+                    ) : null}
+                  </div>
+                )}
+              </form.AppField>
 
-            <form.AppField name="label">
-              {(field) => <field.TextField label="Label" placeholder="e.g., Timeline A, Alternate Ending" required />}
-            </form.AppField>
+              <form.AppField name="label">
+                {(field) => <field.TextField label="Label" placeholder="e.g., Timeline A, Alternate Ending" required />}
+              </form.AppField>
+            </div>
 
             <form.AppField name="notes">
               {(field) => (

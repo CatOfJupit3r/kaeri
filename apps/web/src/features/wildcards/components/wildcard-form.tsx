@@ -42,9 +42,17 @@ const WildcardFormFields = withForm({
   render: function Render({ form, isPending, onCancel, isEditMode }) {
     return (
       <>
-        <form.AppField name="title">
-          {(field) => <field.TextField label="Title" placeholder="Enter Wild Card title" required />}
-        </form.AppField>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="col-span-2">
+            <form.AppField name="title">
+              {(field) => <field.TextField label="Title" placeholder="Enter Wild Card title" required />}
+            </form.AppField>
+          </div>
+
+          <form.AppField name="tag">
+            {(field) => <field.TextField label="Tag" placeholder="Optional tag" maxLength={50} />}
+          </form.AppField>
+        </div>
 
         <form.AppField name="body">
           {(field) => (
@@ -55,10 +63,6 @@ const WildcardFormFields = withForm({
               maxLength={1000}
             />
           )}
-        </form.AppField>
-
-        <form.AppField name="tag">
-          {(field) => <field.TextField label="Tag" placeholder="Optional tag for categorization" maxLength={50} />}
         </form.AppField>
 
         <DialogFooter>
@@ -155,7 +159,7 @@ export function WildcardForm({ seriesId, open, onOpenChange, initialData }: iWil
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'Edit Wild Card' : 'Create Wild Card'}</DialogTitle>
           <DialogDescription>

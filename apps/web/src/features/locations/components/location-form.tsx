@@ -113,7 +113,7 @@ export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLoc
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'Edit Location' : 'Create Location'}</DialogTitle>
           <DialogDescription>
@@ -125,20 +125,22 @@ export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLoc
 
         <form.AppForm>
           <form.Form className="space-y-4 p-0">
-            <form.AppField name="name">
-              {(field) => <field.TextField label="Name" placeholder="Enter location name" required />}
-            </form.AppField>
+            <div className="grid gap-4">
+              <form.AppField name="name">
+                {(field) => <field.TextField label="Name" placeholder="Enter location name" required />}
+              </form.AppField>
 
-            <form.AppField name="description">
-              {(field) => (
-                <field.TextareaField
-                  label="Description"
-                  placeholder="Describe the location..."
-                  rows={3}
-                  maxLength={500}
-                />
-              )}
-            </form.AppField>
+              <form.AppField name="description">
+                {(field) => (
+                  <field.TextareaField
+                    label="Description"
+                    placeholder="Describe the location..."
+                    rows={3}
+                    maxLength={500}
+                  />
+                )}
+              </form.AppField>
+            </div>
 
             <form.Field name="tags" mode="array">
               {(field) => {

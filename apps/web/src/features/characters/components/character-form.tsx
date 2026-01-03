@@ -151,7 +151,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'Edit Character' : 'Create Character'}</DialogTitle>
           <DialogDescription>
@@ -163,9 +163,15 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
 
         <form.AppForm>
           <form.Form className="space-y-4 p-0">
-            <form.AppField name="name">
-              {(field) => <field.TextField label="Name" placeholder="Enter character name" required />}
-            </form.AppField>
+            <div className="grid grid-cols-2 gap-4">
+              <form.AppField name="name">
+                {(field) => <field.TextField label="Name" placeholder="Enter character name" required />}
+              </form.AppField>
+
+              <form.AppField name="avatarUrl">
+                {(field) => <field.TextField label="Avatar URL" placeholder="https://example.com/avatar.jpg" />}
+              </form.AppField>
+            </div>
 
             <form.AppField name="description">
               {(field) => (
@@ -176,10 +182,6 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
                   maxLength={500}
                 />
               )}
-            </form.AppField>
-
-            <form.AppField name="avatarUrl">
-              {(field) => <field.TextField label="Avatar URL" placeholder="https://example.com/avatar.jpg" />}
             </form.AppField>
 
             <form.Field name="traits" mode="array">

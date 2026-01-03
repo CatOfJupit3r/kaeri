@@ -217,15 +217,17 @@ const PropFormFields = withForm({
   render: function Render({ form, isPending, onCancel, isEditMode, isOpen }) {
     return (
       <>
-        <form.AppField name="name">
-          {(field) => <field.TextField label="Name" placeholder="Enter prop name" required />}
-        </form.AppField>
+        <div className="grid gap-4">
+          <form.AppField name="name">
+            {(field) => <field.TextField label="Name" placeholder="Enter prop name" required />}
+          </form.AppField>
 
-        <form.AppField name="description">
-          {(field) => (
-            <field.TextareaField label="Description" placeholder="Describe the prop..." rows={3} maxLength={500} />
-          )}
-        </form.AppField>
+          <form.AppField name="description">
+            {(field) => (
+              <field.TextareaField label="Description" placeholder="Describe the prop..." rows={3} maxLength={500} />
+            )}
+          </form.AppField>
+        </div>
 
         <form.Field name="associations" mode="array">
           {(field) => (
@@ -364,7 +366,7 @@ export function PropForm({ seriesId, open, onOpenChange, initialData }: iPropFor
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'Edit Prop' : 'Create Prop'}</DialogTitle>
           <DialogDescription>

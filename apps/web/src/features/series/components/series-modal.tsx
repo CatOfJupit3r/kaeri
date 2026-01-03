@@ -43,22 +43,26 @@ const SeriesFormFields = withForm({
   render: function Render({ form, isPending, onCancel, isEditMode }) {
     return (
       <>
-        <form.AppField name="title">
-          {(field) => <field.TextField label="Title" placeholder="Enter series title" required />}
-        </form.AppField>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2">
+            <form.AppField name="title">
+              {(field) => <field.TextField label="Title" placeholder="Enter series title" required />}
+            </form.AppField>
+          </div>
 
-        <form.AppField name="genre">
-          {(field) => <field.TextField label="Genre" placeholder="e.g., Drama, Comedy, Thriller" />}
-        </form.AppField>
+          <form.AppField name="genre">
+            {(field) => <field.TextField label="Genre" placeholder="e.g., Drama, Comedy, Thriller" />}
+          </form.AppField>
+
+          <form.AppField name="coverUrl">
+            {(field) => <field.TextField label="Cover URL" placeholder="https://example.com/cover.jpg" />}
+          </form.AppField>
+        </div>
 
         <form.AppField name="logline">
           {(field) => (
             <field.TextareaField label="Logline" placeholder="Brief description of your series..." rows={3} />
           )}
-        </form.AppField>
-
-        <form.AppField name="coverUrl">
-          {(field) => <field.TextField label="Cover URL" placeholder="https://example.com/cover.jpg" />}
         </form.AppField>
 
         <DialogFooter>
@@ -152,7 +156,7 @@ export function SeriesModal({ open, onOpenChange, initialData }: iSeriesModalPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'Edit Project' : 'Create New Project'}</DialogTitle>
           <DialogDescription>
