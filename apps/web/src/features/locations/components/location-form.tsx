@@ -196,22 +196,22 @@ export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLoc
                 </div>
               ) : null}
             </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+                Cancel
+              </Button>
+              <form.SubmitButton isDisabled={isPending}>
+                {(() => {
+                  if (isPending) {
+                    return isEditMode ? 'Updating...' : 'Creating...';
+                  }
+                  return isEditMode ? 'Update Location' : 'Create Location';
+                })()}
+              </form.SubmitButton>
+            </DialogFooter>
           </form.Form>
         </form.AppForm>
-
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            Cancel
-          </Button>
-          <form.SubmitButton isDisabled={isPending}>
-            {(() => {
-              if (isPending) {
-                return isEditMode ? 'Updating...' : 'Creating...';
-              }
-              return isEditMode ? 'Update Location' : 'Create Location';
-            })()}
-          </form.SubmitButton>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

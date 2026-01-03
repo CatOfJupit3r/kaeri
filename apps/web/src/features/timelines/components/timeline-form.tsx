@@ -136,22 +136,22 @@ export function TimelineForm({ seriesId, open, onOpenChange, initialData }: iTim
                 />
               )}
             </form.AppField>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+                Cancel
+              </Button>
+              <form.SubmitButton isDisabled={isPending}>
+                {(() => {
+                  if (isPending) {
+                    return isEditMode ? 'Updating...' : 'Creating...';
+                  }
+                  return isEditMode ? 'Update Entry' : 'Create Entry';
+                })()}
+              </form.SubmitButton>
+            </DialogFooter>
           </form.Form>
         </form.AppForm>
-
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            Cancel
-          </Button>
-          <form.SubmitButton isDisabled={isPending}>
-            {(() => {
-              if (isPending) {
-                return isEditMode ? 'Updating...' : 'Creating...';
-              }
-              return isEditMode ? 'Update Entry' : 'Create Entry';
-            })()}
-          </form.SubmitButton>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

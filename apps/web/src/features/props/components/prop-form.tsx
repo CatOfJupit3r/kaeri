@@ -180,22 +180,22 @@ export function PropForm({ seriesId, open, onOpenChange, initialData }: iPropFor
                 />
               )}
             </form.AppField>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+                Cancel
+              </Button>
+              <form.SubmitButton isDisabled={isPending}>
+                {(() => {
+                  if (isPending) {
+                    return isEditMode ? 'Updating...' : 'Creating...';
+                  }
+                  return isEditMode ? 'Update Prop' : 'Create Prop';
+                })()}
+              </form.SubmitButton>
+            </DialogFooter>
           </form.Form>
         </form.AppForm>
-
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            Cancel
-          </Button>
-          <form.SubmitButton isDisabled={isPending}>
-            {(() => {
-              if (isPending) {
-                return isEditMode ? 'Updating...' : 'Creating...';
-              }
-              return isEditMode ? 'Update Prop' : 'Create Prop';
-            })()}
-          </form.SubmitButton>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

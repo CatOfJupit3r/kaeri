@@ -136,20 +136,20 @@ export function SeriesModal({ open, onOpenChange, initialData }: iSeriesModalPro
             <form.AppField name="coverUrl">
               {(field) => <field.TextField label="Cover URL" placeholder="https://example.com/cover.jpg" />}
             </form.AppField>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+                Cancel
+              </Button>
+              <form.SubmitButton isDisabled={isPending}>
+                {(() => {
+                  if (isPending) return isEditMode ? 'Saving...' : 'Creating...';
+                  return isEditMode ? 'Save Changes' : 'Create Project';
+                })()}
+              </form.SubmitButton>
+            </DialogFooter>
           </form.Form>
         </form.AppForm>
-
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            Cancel
-          </Button>
-          <form.SubmitButton isDisabled={isPending}>
-            {(() => {
-              if (isPending) return isEditMode ? 'Saving...' : 'Creating...';
-              return isEditMode ? 'Save Changes' : 'Create Project';
-            })()}
-          </form.SubmitButton>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

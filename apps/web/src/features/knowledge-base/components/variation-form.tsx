@@ -187,22 +187,22 @@ export function VariationForm({
                 </div>
               ) : null}
             </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+                Cancel
+              </Button>
+              <form.SubmitButton isDisabled={isPending}>
+                {(() => {
+                  if (isPending) {
+                    return isEditMode ? 'Updating...' : 'Adding...';
+                  }
+                  return isEditMode ? 'Update Variation' : 'Add Variation';
+                })()}
+              </form.SubmitButton>
+            </DialogFooter>
           </form.Form>
         </form.AppForm>
-
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            Cancel
-          </Button>
-          <form.SubmitButton isDisabled={isPending}>
-            {(() => {
-              if (isPending) {
-                return isEditMode ? 'Updating...' : 'Adding...';
-              }
-              return isEditMode ? 'Update Variation' : 'Add Variation';
-            })()}
-          </form.SubmitButton>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

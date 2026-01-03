@@ -121,41 +121,39 @@ export function WildcardForm({ seriesId, open, onOpenChange, initialData }: iWil
         </DialogHeader>
 
         <form.AppForm>
-          <form.Form className="space-y-4 p-0">
-            <form.AppField name="title">
-              {(field) => <field.TextField label="Title" placeholder="Enter Wild Card title" required />}
-            </form.AppField>
+          <form.AppField name="title">
+            {(field) => <field.TextField label="Title" placeholder="Enter Wild Card title" required />}
+          </form.AppField>
 
-            <form.AppField name="body">
-              {(field) => (
-                <field.TextareaField
-                  label="Content"
-                  placeholder="Enter the Wild Card content..."
-                  rows={5}
-                  maxLength={1000}
-                />
-              )}
-            </form.AppField>
+          <form.AppField name="body">
+            {(field) => (
+              <field.TextareaField
+                label="Content"
+                placeholder="Enter the Wild Card content..."
+                rows={5}
+                maxLength={1000}
+              />
+            )}
+          </form.AppField>
 
-            <form.AppField name="tag">
-              {(field) => <field.TextField label="Tag" placeholder="Optional tag for categorization" maxLength={50} />}
-            </form.AppField>
-          </form.Form>
+          <form.AppField name="tag">
+            {(field) => <field.TextField label="Tag" placeholder="Optional tag for categorization" maxLength={50} />}
+          </form.AppField>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+              Cancel
+            </Button>
+            <form.SubmitButton isDisabled={isPending}>
+              {(() => {
+                if (isPending) {
+                  return isEditMode ? 'Updating...' : 'Creating...';
+                }
+                return isEditMode ? 'Update Wild Card' : 'Create Wild Card';
+              })()}
+            </form.SubmitButton>
+          </DialogFooter>
         </form.AppForm>
-
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            Cancel
-          </Button>
-          <form.SubmitButton isDisabled={isPending}>
-            {(() => {
-              if (isPending) {
-                return isEditMode ? 'Updating...' : 'Creating...';
-              }
-              return isEditMode ? 'Update Wild Card' : 'Create Wild Card';
-            })()}
-          </form.SubmitButton>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
