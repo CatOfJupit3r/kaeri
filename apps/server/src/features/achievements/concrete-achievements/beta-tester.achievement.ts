@@ -2,12 +2,13 @@ import { USER_ACHIEVEMENTS } from '@kaeri/shared/constants/achievements';
 
 import { EVENTS } from '@~/features/events/events.constants';
 
-import type { iAchievementContext, iAchievementDefinition } from '../achievements.types';
+import { defineAchievement } from '../achievements.types';
+import type { iAchievementContext } from '../achievements.types';
 
-export const betaTesterAchievement: iAchievementDefinition = {
+export const betaTesterAchievement = defineAchievement({
   id: USER_ACHIEVEMENTS.BETA_TESTER,
-  listensTo: [EVENTS.BETA_EVENT],
-  async handle(payload, context: iAchievementContext) {
+  listensTo: [EVENTS.BETA_EVENT] as const,
+  async handle(payload, _, context: iAchievementContext) {
     await context.unlock(payload.userId, USER_ACHIEVEMENTS.BETA_TESTER, {});
   },
-};
+});

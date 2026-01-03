@@ -10,8 +10,19 @@ export interface iAchievementContext {
   ) => Promise<unknown>;
 }
 
-export interface iAchievementDefinition<T extends EventType = EventType> {
+export interface iAchievementDefinition<TEvents extends readonly EventType[]> {
   id: UserAchievementId;
-  listensTo: T[];
-  handle: (payload: iEventPayloadMap[T], context: iAchievementContext) => Promise<unknown>;
+  listensTo: TEvents;
+
+  handle: <E extends TEvents[number]>(
+    payload: iEventPayloadMap[E],
+    event: E,
+    context: iAchievementContext,
+  ) => Promise<unknown>;
+}
+
+export function defineAchievement<const TEvents extends readonly EventType[]>(
+  def: iAchievementDefinition<TEvents>,
+): iAchievementDefinition<TEvents> {
+  return def;
 }

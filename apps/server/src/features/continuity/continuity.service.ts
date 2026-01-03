@@ -11,13 +11,19 @@ import { SeriesModel } from '@~/db/models/series.model';
 import { TimelineEntryModel } from '@~/db/models/timeline-entry.model';
 import { TOKENS } from '@~/di/tokens';
 import type { LoggerFactory, iWithLogger } from '@~/features/logger/logger.types';
+import { buildCacheKey, CACHE_TTL } from '@~/features/valkey/valkey.constants';
 import { ORPCNotFoundError } from '@~/lib/orpc-error-wrapper';
+
+import type { ValkeyService } from '../valkey/valkey.service';
 
 @injectable()
 export class ContinuityService implements iWithLogger {
   public logger: ReturnType<LoggerFactory['create']>;
 
-  constructor(@inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory) {
+  constructor(
+    @inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory,
+    @inject(TOKENS.ValkeyService) private readonly valkey: ValkeyService,
+  ) {
     this.logger = loggerFactory.create('continuity-service');
   }
 
@@ -25,124 +31,134 @@ export class ContinuityService implements iWithLogger {
    * Build continuity graph with nodes (entities) and edges (relationships)
    */
   public async continuityGraph(seriesId: string) {
-    const series = await SeriesModel.findById(seriesId);
-    if (!series) {
-      throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
-    }
-
-    // Fetch all entities that form the graph nodes
-    const [characters, locations, props, scripts, timeline] = await Promise.all([
-      CharacterModel.find({ seriesId }).lean(),
-      LocationModel.find({ seriesId }).lean(),
-      PropModel.find({ seriesId }).lean(),
-      ScriptModel.find({ seriesId }).select('-content -contentVersion').lean(),
-      TimelineEntryModel.find({ seriesId }).lean(),
-    ]);
-
-    // Build nodes with type discriminator
-    const nodes = [
-      // eslint-disable-next-line @typescript-eslint/no-misused-spread
-      ...characters.map((c) => ({ ...c, type: 'character' as const })),
-      // eslint-disable-next-line @typescript-eslint/no-misused-spread
-      ...locations.map((l) => ({ ...l, type: 'location' as const })),
-      // eslint-disable-next-line @typescript-eslint/no-misused-spread
-      ...props.map((p) => ({ ...p, type: 'prop' as const })),
-      // eslint-disable-next-line @typescript-eslint/no-misused-spread
-      ...scripts.map((s) => ({ ...s, type: 'script' as const })),
-      // eslint-disable-next-line @typescript-eslint/no-misused-spread
-      ...timeline.map((t) => ({ ...t, type: 'timeline' as const })),
-    ];
-
-    // Build edges from relationships and appearances
-    const edges = [];
-
-    // Character relationships
-    for (const char of characters) {
-      if (char.relationships) {
-        for (const rel of char.relationships) {
-          edges.push({
-            type: 'relationship' as const,
-            fromId: char._id,
-            toId: rel.targetId,
-            metadata: { note: rel.note ?? rel.type },
-          });
-        }
+    return this.valkey.cached(buildCacheKey.continuityGraph(seriesId), CACHE_TTL.AGGREGATION_MEDIUM, async () => {
+      this.logger.debug('Building continuity graph from database', { seriesId });
+      const series = await SeriesModel.findById(seriesId);
+      if (!series) {
+        throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
       }
 
-      // Character appearances
-      if (char.appearances) {
-        for (const appearance of char.appearances) {
-          edges.push({
-            type: 'appearance' as const,
-            fromId: char._id,
-            toId: appearance.scriptId,
-            metadata: {
-              sceneRef: appearance.sceneRef,
-              locationId: appearance.locationId,
-            },
-          });
+      // Fetch all entities that form the graph nodes
+      const [characters, locations, props, scripts, timeline] = await Promise.all([
+        CharacterModel.find({ seriesId }).lean(),
+        LocationModel.find({ seriesId }).lean(),
+        PropModel.find({ seriesId }).lean(),
+        ScriptModel.find({ seriesId }).select('-content -contentVersion').lean(),
+        TimelineEntryModel.find({ seriesId }).lean(),
+      ]);
 
-          // Link to location if present
-          if (appearance.locationId) {
+      // Build nodes with type discriminator
+      const nodes = [
+        // eslint-disable-next-line @typescript-eslint/no-misused-spread
+        ...characters.map((c) => ({ ...c, type: 'character' as const })),
+        // eslint-disable-next-line @typescript-eslint/no-misused-spread
+        ...locations.map((l) => ({ ...l, type: 'location' as const })),
+        // eslint-disable-next-line @typescript-eslint/no-misused-spread
+        ...props.map((p) => ({ ...p, type: 'prop' as const })),
+        // eslint-disable-next-line @typescript-eslint/no-misused-spread
+        ...scripts.map((s) => ({ ...s, type: 'script' as const })),
+        // eslint-disable-next-line @typescript-eslint/no-misused-spread
+        ...timeline.map((t) => ({ ...t, type: 'timeline' as const })),
+      ];
+
+      // Build edges from relationships and appearances
+      const edges = [];
+
+      // Character relationships
+      for (const char of characters) {
+        if (char.relationships) {
+          for (const rel of char.relationships) {
             edges.push({
-              type: 'location-of' as const,
-              fromId: appearance.locationId,
+              type: 'relationship' as const,
+              fromId: char._id,
+              toId: rel.targetId,
+              metadata: { note: rel.note ?? rel.type },
+            });
+          }
+        }
+
+        // Character appearances
+        if (char.appearances) {
+          for (const appearance of char.appearances) {
+            edges.push({
+              type: 'appearance' as const,
+              fromId: char._id,
               toId: appearance.scriptId,
-              metadata: { sceneRef: appearance.sceneRef },
+              metadata: {
+                sceneRef: appearance.sceneRef,
+                locationId: appearance.locationId,
+              },
             });
+
+            // Link to location if present
+            if (appearance.locationId) {
+              edges.push({
+                type: 'location-of' as const,
+                fromId: appearance.locationId,
+                toId: appearance.scriptId,
+                metadata: { sceneRef: appearance.sceneRef },
+              });
+            }
           }
         }
       }
-    }
 
-    // Prop associations (prop appears in script)
-    for (const prop of props) {
-      if (prop.associations) {
-        for (const assoc of prop.associations) {
-          if (assoc.scriptId) {
-            edges.push({
-              type: 'prop-in-scene' as const,
-              fromId: prop._id,
-              toId: assoc.scriptId,
-              metadata: { note: assoc.note },
-            });
+      // Prop associations (prop appears in script)
+      for (const prop of props) {
+        if (prop.associations) {
+          for (const assoc of prop.associations) {
+            if (assoc.scriptId) {
+              edges.push({
+                type: 'prop-in-scene' as const,
+                fromId: prop._id,
+                toId: assoc.scriptId,
+                metadata: { note: assoc.note },
+              });
+            }
           }
         }
       }
-    }
 
-    this.logger.info('Continuity graph built', {
-      seriesId,
-      nodeCount: nodes.length,
-      edgeCount: edges.length,
+      this.logger.info('Continuity graph built', {
+        seriesId,
+        nodeCount: nodes.length,
+        edgeCount: edges.length,
+      });
+
+      return { nodes, edges };
     });
-
-    return { nodes, edges };
   }
 
   /**
    * Get all appearances for a specific character
    */
   public async appearancesByCharacter(seriesId: string, characterId: string) {
-    const series = await SeriesModel.findById(seriesId);
-    if (!series) {
-      throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
-    }
+    return this.valkey.cached(
+      buildCacheKey.appearancesByCharacter(seriesId, characterId),
+      CACHE_TTL.ENTITY_MEDIUM,
+      async () => {
+        this.logger.debug('Fetching character appearances from database', { seriesId, characterId });
+        const series = await SeriesModel.findById(seriesId);
+        if (!series) {
+          throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
+        }
 
-    const character = await CharacterModel.findOne({ _id: characterId, seriesId });
-    if (!character) {
-      throw ORPCNotFoundError(errorCodes.CHARACTER_NOT_FOUND);
-    }
+        const character = await CharacterModel.findOne({ _id: characterId, seriesId });
+        if (!character) {
+          throw ORPCNotFoundError(errorCodes.CHARACTER_NOT_FOUND);
+        }
 
-    const appearances = character.appearances ?? [];
+        const appearances = character.appearances ?? [];
 
-    this.logger.info('Character appearances retrieved', {
-      seriesId,
-      characterId,
-      appearanceCount: appearances.length,
-    });
+        this.logger.info('Character appearances retrieved', {
+          seriesId,
+          characterId,
+          appearanceCount: appearances.length,
+        });
 
-    return appearances as Array<{ scriptId: string; sceneRef: string; locationId?: string }>;
+        return appearances as Array<{ scriptId: string; sceneRef: string; locationId?: string }>;
+      },
+    );
   }
 
   /**

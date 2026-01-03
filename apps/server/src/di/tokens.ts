@@ -11,6 +11,7 @@ import type { LoggerFactory } from '@~/features/logger/logger.types';
 import type { ScriptsService } from '@~/features/scripts/scripts.service';
 import type { SeriesService } from '@~/features/series/series.service';
 import type { UserService } from '@~/features/user/user.service';
+import type { CacheInvalidationService } from '@~/features/valkey/cache-invalidation.service';
 import type { ValkeyService } from '@~/features/valkey/valkey.service';
 
 const databaseServiceToken: unique symbol = Symbol.for('DatabaseService');
@@ -21,6 +22,7 @@ const eventBusToken: unique symbol = Symbol.for('EventBus');
 const userServiceToken: unique symbol = Symbol.for('UserService');
 const loggerFactoryToken: unique symbol = Symbol.for('LoggerFactory');
 const valkeyServiceToken: unique symbol = Symbol.for('ValkeyService');
+const cacheInvalidationServiceToken: unique symbol = Symbol.for('CacheInvalidationService');
 const seriesServiceToken: unique symbol = Symbol.for('SeriesService');
 const scriptsServiceToken: unique symbol = Symbol.for('ScriptsService');
 const knowledgeBaseServiceToken: unique symbol = Symbol.for('KnowledgeBaseService');
@@ -38,6 +40,7 @@ export const TOKENS = {
   UserService: userServiceToken,
   LoggerFactory: loggerFactoryToken,
   ValkeyService: valkeyServiceToken,
+  CacheInvalidationService: cacheInvalidationServiceToken,
   SeriesService: seriesServiceToken,
   ScriptsService: scriptsServiceToken,
   KnowledgeBaseService: knowledgeBaseServiceToken,
@@ -55,6 +58,7 @@ export interface iTokenRegistry {
   [TOKENS.UserService]: UserService;
   [TOKENS.LoggerFactory]: LoggerFactory;
   [TOKENS.ValkeyService]: ValkeyService;
+  [TOKENS.CacheInvalidationService]: CacheInvalidationService;
   [TOKENS.SeriesService]: SeriesService;
   [TOKENS.ScriptsService]: ScriptsService;
   [TOKENS.KnowledgeBaseService]: KnowledgeBaseService;

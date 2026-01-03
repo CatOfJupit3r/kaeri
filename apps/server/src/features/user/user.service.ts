@@ -9,6 +9,7 @@ import { UserAchievementModel } from '@~/db/models/user-achievements.model';
 import { UserProfileModel } from '@~/db/models/user-profile.model';
 import { TOKENS } from '@~/di/tokens';
 import { BADGES_META } from '@~/features/badges/badges.constants';
+import { buildCacheKey, CACHE_TTL } from '@~/features/valkey/valkey.constants';
 import {
   ORPCBadRequestError,
   ORPCForbiddenError,
@@ -17,19 +18,26 @@ import {
 } from '@~/lib/orpc-error-wrapper';
 
 import type { iWithLogger, LoggerFactory } from '../logger/logger.types';
+import type { ValkeyService } from '../valkey/valkey.service';
 
 @injectable()
 export class UserService implements iWithLogger {
   public readonly logger: iWithLogger['logger'];
 
-  constructor(@inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory) {
+  constructor(
+    @inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory,
+    @inject(TOKENS.ValkeyService) private readonly valkey: ValkeyService,
+  ) {
     this.logger = loggerFactory.create('user-service');
   }
 
   public async getUserProfile(userId: string) {
-    const userProfile = await UserProfileModel.findOne({ userId });
-    if (!userProfile) throw ORPCNotFoundError(errorCodes.USER_PROFILE_NOT_FOUND);
-    return userProfile;
+    return this.valkey.cached(buildCacheKey.userProfile(userId), CACHE_TTL.USER_DATA, async () => {
+      this.logger.debug('Fetching user profile from database', { userId });
+      const userProfile = await UserProfileModel.findOne({ userId });
+      if (!userProfile) throw ORPCNotFoundError(errorCodes.USER_PROFILE_NOT_FOUND);
+      return userProfile;
+    });
   }
 
   public async updateUserProfile(userId: string, bio: string) {
@@ -43,6 +51,10 @@ export class UserService implements iWithLogger {
       if (!updatedProfile) {
         throw ORPCInternalServerError();
       }
+
+      // Invalidate cache
+      await this.valkey.cacheDel(buildCacheKey.userProfile(userId));
+      this.logger.info('User profile updated, cache invalidated', { userId });
 
       return updatedProfile;
     } catch (error) {
@@ -81,6 +93,10 @@ export class UserService implements iWithLogger {
         throw ORPCInternalServerError();
       }
 
+      // Invalidate cache
+      await this.valkey.cacheDel(buildCacheKey.userProfile(userId));
+      this.logger.info('User badge updated, cache invalidated', { userId, badgeId });
+
       return updatedProfile;
     } catch (error) {
       if (error instanceof Error && error.name !== 'ORPCError') {
@@ -109,6 +125,10 @@ export class UserService implements iWithLogger {
         if (!updatedProfile) {
           throw ORPCInternalServerError();
         }
+
+        // Invalidate cache
+        await this.valkey.cacheDel(buildCacheKey.userProfile(userId));
+        this.logger.info('Public code regenerated, cache invalidated', { userId });
 
         return updatedProfile;
       } catch (error) {
