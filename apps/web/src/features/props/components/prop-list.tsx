@@ -14,6 +14,8 @@ import {
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
+import { Skeleton } from '@~/components/ui/skeleton';
+import { ListErrorState, ListPendingState } from '@~/features/knowledge-base/components/list-states';
 import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
 
 import { useDeleteProp } from '../hooks/mutations/use-delete-prop';
@@ -35,12 +37,38 @@ interface iPropListProps {
   seriesId: string;
 }
 
+function PropListPending() {
+  return (
+    <ListPendingState>
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-9 w-28" />
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          // eslint-disable-next-line react/no-array-index-key
+          <Card key={index} className="overflow-hidden">
+            <CardContent className="flex gap-4 p-4">
+              <Skeleton className="size-12 rounded-md" />
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-2/3" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </ListPendingState>
+  );
+}
+
 export function PropList({ seriesId }: iPropListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProp, setEditingProp] = useState<iProp | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [propToDelete, setPropToDelete] = useState<iProp | undefined>(undefined);
-  const { data, isPending, error } = usePropList(seriesId);
+  const { data, isPending, error, refetch } = usePropList(seriesId);
   const { deleteProp, isPending: isDeleting } = useDeleteProp();
 
   const handleEditClick = (prop: iProp) => {
@@ -75,19 +103,13 @@ export function PropList({ seriesId }: iPropListProps) {
   };
 
   if (isPending) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <p className="text-muted-foreground">Loading props...</p>
-      </div>
-    );
+    return <PropListPending />;
   }
 
   if (error) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <p className="text-destructive">Error loading props: {error.message}</p>
-      </div>
-    );
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    // eslint-disable-next-line no-void
+    return <ListErrorState message={`Error loading props: ${message}`} onRetry={() => void refetch()} />;
   }
 
   const props = data?.items ?? [];
@@ -155,6 +177,7 @@ export function PropList({ seriesId }: iPropListProps) {
                             handleEditClick(prop);
                           }}
                           className="size-8 p-0"
+                          aria-label={`Edit ${prop.name}`}
                         >
                           <LuPencil className="size-4" />
                         </Button>
@@ -166,6 +189,7 @@ export function PropList({ seriesId }: iPropListProps) {
                             handleDeleteClick(prop);
                           }}
                           className="size-8 p-0 text-destructive hover:text-destructive"
+                          aria-label={`Delete ${prop.name}`}
                         >
                           <LuTrash2 className="size-4" />
                         </Button>

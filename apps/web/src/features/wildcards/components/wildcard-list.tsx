@@ -15,6 +15,8 @@ import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
+import { Skeleton } from '@~/components/ui/skeleton';
+import { ListErrorState, ListPendingState } from '@~/features/knowledge-base/components/list-states';
 import { useWildcardList } from '@~/features/wildcards/hooks/queries/use-wildcard-list';
 
 import { useDeleteWildcard } from '../hooks/mutations/use-delete-wildcard';
@@ -31,12 +33,41 @@ interface iWildcardListProps {
   seriesId: string;
 }
 
+function WildcardListPending() {
+  return (
+    <ListPendingState>
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-9 w-36" />
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          // eslint-disable-next-line react/no-array-index-key
+          <Card key={index} className="overflow-hidden">
+            <CardContent className="flex gap-4 p-4">
+              <Skeleton className="size-12 rounded-md" />
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-full" />
+                <div className="flex justify-end gap-2 pt-2">
+                  <Skeleton className="h-8 w-8 rounded" />
+                  <Skeleton className="h-8 w-8 rounded" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </ListPendingState>
+  );
+}
+
 export function WildcardList({ seriesId }: iWildcardListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingWildcard, setEditingWildcard] = useState<iWildcard | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [wildcardToDelete, setWildcardToDelete] = useState<iWildcard | undefined>(undefined);
-  const { data, isPending, error } = useWildcardList(seriesId);
+  const { data, isPending, error, refetch } = useWildcardList(seriesId);
   const { deleteWildcard, isPending: isDeleting } = useDeleteWildcard();
 
   const handleEditClick = (wildcard: iWildcard) => {
@@ -71,19 +102,13 @@ export function WildcardList({ seriesId }: iWildcardListProps) {
   };
 
   if (isPending) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <p className="text-muted-foreground">Loading Wild Cards...</p>
-      </div>
-    );
+    return <WildcardListPending />;
   }
 
   if (error) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <p className="text-destructive">Error loading Wild Cards: {error.message}</p>
-      </div>
-    );
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    // eslint-disable-next-line no-void
+    return <ListErrorState message={`Error loading Wild Cards: ${message}`} onRetry={() => void refetch()} />;
   }
 
   const wildcards = data?.items ?? [];
@@ -155,6 +180,7 @@ export function WildcardList({ seriesId }: iWildcardListProps) {
                         handleEditClick(wildcard);
                       }}
                       className="size-8 p-0"
+                      aria-label={`Edit ${wildcard.title}`}
                     >
                       <LuPencil className="size-4" />
                     </Button>
@@ -166,6 +192,7 @@ export function WildcardList({ seriesId }: iWildcardListProps) {
                         handleDeleteClick(wildcard);
                       }}
                       className="size-8 p-0 text-destructive hover:text-destructive"
+                      aria-label={`Delete ${wildcard.title}`}
                     >
                       <LuTrash2 className="size-4" />
                     </Button>

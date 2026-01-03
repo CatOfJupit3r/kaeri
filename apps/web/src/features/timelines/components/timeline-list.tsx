@@ -14,6 +14,8 @@ import {
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
+import { Skeleton } from '@~/components/ui/skeleton';
+import { ListErrorState, ListPendingState } from '@~/features/knowledge-base/components/list-states';
 import { useTimelineList } from '@~/features/timelines/hooks/queries/use-timeline-list';
 
 import { useDeleteTimeline } from '../hooks/mutations/use-delete-timeline';
@@ -30,12 +32,40 @@ interface iTimelineListProps {
   seriesId: string;
 }
 
+function TimelineListPending() {
+  return (
+    <ListPendingState>
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-9 w-40" />
+      </div>
+      <div className="space-y-3">
+        {Array.from({ length: 4 }).map((_, index) => (
+          // eslint-disable-next-line react/no-array-index-key
+          <Card key={index} className="overflow-hidden">
+            <CardContent className="flex items-start justify-between gap-4 p-4">
+              <div className="flex flex-1 flex-col gap-2">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+              <div className="flex gap-2">
+                <Skeleton className="h-8 w-8 rounded" />
+                <Skeleton className="h-8 w-8 rounded" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </ListPendingState>
+  );
+}
+
 export function TimelineList({ seriesId }: iTimelineListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<iTimelineEntry | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<iTimelineEntry | undefined>(undefined);
-  const { data, isPending, error } = useTimelineList(seriesId);
+  const { data, isPending, error, refetch } = useTimelineList(seriesId);
   const { deleteTimeline, isPending: isDeleting } = useDeleteTimeline();
 
   const sortedEntries = useMemo(() => {
@@ -99,19 +129,13 @@ export function TimelineList({ seriesId }: iTimelineListProps) {
   };
 
   if (isPending) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <p className="text-muted-foreground">Loading timeline...</p>
-      </div>
-    );
+    return <TimelineListPending />;
   }
 
   if (error) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <p className="text-destructive">Error loading timeline: {error.message}</p>
-      </div>
-    );
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    // eslint-disable-next-line no-void
+    return <ListErrorState message={`Error loading timeline: ${message}`} onRetry={() => void refetch()} />;
   }
 
   if (sortedEntries.length === 0) {
@@ -172,6 +196,7 @@ export function TimelineList({ seriesId }: iTimelineListProps) {
                         handleEditClick(entry);
                       }}
                       className="size-8 p-0"
+                      aria-label={`Edit ${entry.label}`}
                     >
                       <LuPencil className="size-4" />
                     </Button>
@@ -183,6 +208,7 @@ export function TimelineList({ seriesId }: iTimelineListProps) {
                         handleDeleteClick(entry);
                       }}
                       className="size-8 p-0 text-destructive hover:text-destructive"
+                      aria-label={`Delete ${entry.label}`}
                     >
                       <LuTrash2 className="size-4" />
                     </Button>

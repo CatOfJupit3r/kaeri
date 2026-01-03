@@ -16,7 +16,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@~/components/ui/avatar';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
+import { Skeleton } from '@~/components/ui/skeleton';
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
+import { ListErrorState, ListPendingState } from '@~/features/knowledge-base/components/list-states';
 
 import { useDeleteCharacter } from '../hooks/mutations/use-delete-character';
 import type { CharacterListItem } from '../hooks/queries/use-character-list';
@@ -26,13 +28,39 @@ interface iCharacterListProps {
   seriesId: string;
 }
 
+function CharacterListPending() {
+  return (
+    <ListPendingState>
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-9 w-28" />
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          // eslint-disable-next-line react/no-array-index-key
+          <Card key={index} className="overflow-hidden">
+            <CardContent className="flex gap-4 p-4">
+              <Skeleton className="size-12 rounded-full" />
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-3/4" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </ListPendingState>
+  );
+}
+
 export function CharacterList({ seriesId }: iCharacterListProps) {
   const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCharacter, setEditingCharacter] = useState<CharacterListItem | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [characterToDelete, setCharacterToDelete] = useState<CharacterListItem | undefined>(undefined);
-  const { data, isPending, error } = useCharacterList(seriesId);
+  const { data, isPending, error, refetch } = useCharacterList(seriesId);
   const { deleteCharacter, isPending: isDeleting } = useDeleteCharacter();
 
   const handleCardClick = (characterId: string) => {
@@ -75,20 +103,12 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
   };
 
   if (isPending) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <p className="text-muted-foreground">Loading characters...</p>
-      </div>
-    );
+    return <CharacterListPending />;
   }
 
   if (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <p className="text-destructive">Error loading characters: {message}</p>
-      </div>
-    );
+    return <ListErrorState message={`Error loading characters: ${message}`} onRetry={async () => refetch().then()} />;
   }
 
   const characters = data?.items ?? [];

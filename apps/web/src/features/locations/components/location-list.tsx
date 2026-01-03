@@ -15,6 +15,8 @@ import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
+import { Skeleton } from '@~/components/ui/skeleton';
+import { ListErrorState, ListPendingState } from '@~/features/knowledge-base/components/list-states';
 import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
 
 import { useDeleteLocation } from '../hooks/mutations/use-delete-location';
@@ -31,12 +33,38 @@ interface iLocationListProps {
   seriesId: string;
 }
 
+function LocationListPending() {
+  return (
+    <ListPendingState>
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-9 w-32" />
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          // eslint-disable-next-line react/no-array-index-key
+          <Card key={index} className="overflow-hidden">
+            <CardContent className="flex gap-4 p-4">
+              <Skeleton className="size-12 rounded-full" />
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-2/3" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </ListPendingState>
+  );
+}
+
 export function LocationList({ seriesId }: iLocationListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingLocation, setEditingLocation] = useState<iLocation | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [locationToDelete, setLocationToDelete] = useState<iLocation | undefined>(undefined);
-  const { data, isPending, error } = useLocationList(seriesId);
+  const { data, isPending, error, refetch } = useLocationList(seriesId);
   const { deleteLocation, isPending: isDeleting } = useDeleteLocation();
 
   const handleEditClick = (location: iLocation) => {
@@ -71,19 +99,13 @@ export function LocationList({ seriesId }: iLocationListProps) {
   };
 
   if (isPending) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <p className="text-muted-foreground">Loading locations...</p>
-      </div>
-    );
+    return <LocationListPending />;
   }
 
   if (error) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <p className="text-destructive">Error loading locations: {error.message}</p>
-      </div>
-    );
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    // eslint-disable-next-line no-void
+    return <ListErrorState message={`Error loading locations: ${message}`} onRetry={() => void refetch()} />;
   }
 
   const locations = data?.items ?? [];
@@ -163,6 +185,7 @@ export function LocationList({ seriesId }: iLocationListProps) {
                             handleEditClick(location);
                           }}
                           className="size-8 p-0"
+                          aria-label={`Edit ${location.name}`}
                         >
                           <LuPencil className="size-4" />
                         </Button>
@@ -174,6 +197,7 @@ export function LocationList({ seriesId }: iLocationListProps) {
                             handleDeleteClick(location);
                           }}
                           className="size-8 p-0 text-destructive hover:text-destructive"
+                          aria-label={`Delete ${location.name}`}
                         >
                           <LuTrash2 className="size-4" />
                         </Button>
