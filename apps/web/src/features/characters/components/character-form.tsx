@@ -254,17 +254,12 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-                Cancel
-              </Button>
-              <form.SubmitButton isDisabled={isPending}>
-                {(() => {
-                  if (isPending) {
-                    return isEditMode ? 'Updating...' : 'Creating...';
-                  }
-                  return isEditMode ? 'Update Character' : 'Create Character';
-                })()}
-              </form.SubmitButton>
+              <form.FormActions
+                onCancel={() => onOpenChange(false)}
+                submitLabel={isEditMode ? 'Update Character' : 'Create Character'}
+                loadingLabel={isEditMode ? 'Updating...' : 'Creating...'}
+                isDisabled={isPending}
+              />
             </DialogFooter>
           </form.Form>
         </form.AppForm>

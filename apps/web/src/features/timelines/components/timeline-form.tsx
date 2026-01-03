@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import z from 'zod';
 
-import { Button } from '@~/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -10,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@~/components/ui/dialog';
-import { useAppForm } from '@~/components/ui/field';
+import { useAppForm, withForm } from '@~/components/ui/field';
 
 import { useCreateTimeline } from '../hooks/mutations/use-create-timeline';
 import { useUpdateTimeline } from '../hooks/mutations/use-update-timeline';
@@ -30,6 +29,47 @@ interface iTimelineFormProps {
 }
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+const TimelineFormFields = withForm({
+  defaultValues: {
+    label: '',
+    timestamp: '',
+  },
+  props: {
+    isPending: false,
+    onCancel: () => {},
+    isEditMode: false,
+  },
+  render: function Render({ form, isPending, onCancel, isEditMode }) {
+    return (
+      <>
+        <form.AppField name="label">
+          {(field) => <field.TextField label="Label" placeholder="Enter timeline label" required />}
+        </form.AppField>
+
+        <form.AppField name="timestamp">
+          {(field) => (
+            <field.TextField
+              label="Date"
+              placeholder="YYYY-MM-DD"
+              type="date"
+              description="Optional: Provide a date for chronological ordering (YYYY-MM-DD)"
+            />
+          )}
+        </form.AppField>
+
+        <DialogFooter>
+          <form.FormActions
+            onCancel={onCancel}
+            submitLabel={isEditMode ? 'Update Entry' : 'Create Entry'}
+            loadingLabel={isEditMode ? 'Updating...' : 'Creating...'}
+            isDisabled={isPending}
+          />
+        </DialogFooter>
+      </>
+    );
+  },
+});
 
 export function TimelineForm({ seriesId, open, onOpenChange, initialData }: iTimelineFormProps) {
   const { createTimeline, isPending: isCreating } = useCreateTimeline();
@@ -122,34 +162,12 @@ export function TimelineForm({ seriesId, open, onOpenChange, initialData }: iTim
 
         <form.AppForm>
           <form.Form className="space-y-4 p-0">
-            <form.AppField name="label">
-              {(field) => <field.TextField label="Label" placeholder="Enter timeline label" required />}
-            </form.AppField>
-
-            <form.AppField name="timestamp">
-              {(field) => (
-                <field.TextField
-                  label="Date"
-                  placeholder="YYYY-MM-DD"
-                  type="date"
-                  description="Optional: Provide a date for chronological ordering (YYYY-MM-DD)"
-                />
-              )}
-            </form.AppField>
-
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-                Cancel
-              </Button>
-              <form.SubmitButton isDisabled={isPending}>
-                {(() => {
-                  if (isPending) {
-                    return isEditMode ? 'Updating...' : 'Creating...';
-                  }
-                  return isEditMode ? 'Update Entry' : 'Create Entry';
-                })()}
-              </form.SubmitButton>
-            </DialogFooter>
+            <TimelineFormFields
+              form={form}
+              isPending={isPending}
+              onCancel={() => onOpenChange(false)}
+              isEditMode={isEditMode}
+            />
           </form.Form>
         </form.AppForm>
       </DialogContent>

@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import z from 'zod';
 
-import { Button } from '@~/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -10,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@~/components/ui/dialog';
-import { useAppForm } from '@~/components/ui/field';
+import { useAppForm, withForm } from '@~/components/ui/field';
 
 import { useCreateProp } from '../hooks/mutations/use-create-prop';
 import { useUpdateProp } from '../hooks/mutations/use-update-prop';
@@ -64,6 +63,54 @@ const parseAssociationsJson = (value: string): iProp['associations'] | undefined
   }
   return undefined;
 };
+
+const PropFormFields = withForm({
+  defaultValues: {
+    name: '',
+    description: '',
+    associationsJson: '',
+  },
+  props: {
+    isPending: false,
+    onCancel: () => {},
+    isEditMode: false,
+  },
+  render: function Render({ form, isPending, onCancel, isEditMode }) {
+    return (
+      <>
+        <form.AppField name="name">
+          {(field) => <field.TextField label="Name" placeholder="Enter prop name" required />}
+        </form.AppField>
+
+        <form.AppField name="description">
+          {(field) => (
+            <field.TextareaField label="Description" placeholder="Describe the prop..." rows={3} maxLength={500} />
+          )}
+        </form.AppField>
+
+        <form.AppField name="associationsJson">
+          {(field) => (
+            <field.TextareaField
+              label="Associations (JSON)"
+              placeholder='[{"characterId": "...", "note": "..."}]'
+              rows={4}
+              description="Optional JSON array of associations with characterId, locationId, scriptId, and note fields."
+            />
+          )}
+        </form.AppField>
+
+        <DialogFooter>
+          <form.FormActions
+            onCancel={onCancel}
+            submitLabel={isEditMode ? 'Update Prop' : 'Create Prop'}
+            loadingLabel={isEditMode ? 'Updating...' : 'Creating...'}
+            isDisabled={isPending}
+          />
+        </DialogFooter>
+      </>
+    );
+  },
+});
 
 export function PropForm({ seriesId, open, onOpenChange, initialData }: iPropFormProps) {
   const { createProp, isPending: isCreating } = useCreateProp();
@@ -160,40 +207,12 @@ export function PropForm({ seriesId, open, onOpenChange, initialData }: iPropFor
 
         <form.AppForm>
           <form.Form className="space-y-4 p-0">
-            <form.AppField name="name">
-              {(field) => <field.TextField label="Name" placeholder="Enter prop name" required />}
-            </form.AppField>
-
-            <form.AppField name="description">
-              {(field) => (
-                <field.TextareaField label="Description" placeholder="Describe the prop..." rows={3} maxLength={500} />
-              )}
-            </form.AppField>
-
-            <form.AppField name="associationsJson">
-              {(field) => (
-                <field.TextareaField
-                  label="Associations (JSON)"
-                  placeholder='[{"characterId": "...", "note": "..."}]'
-                  rows={4}
-                  description="Optional JSON array of associations with characterId, locationId, scriptId, and note fields."
-                />
-              )}
-            </form.AppField>
-
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-                Cancel
-              </Button>
-              <form.SubmitButton isDisabled={isPending}>
-                {(() => {
-                  if (isPending) {
-                    return isEditMode ? 'Updating...' : 'Creating...';
-                  }
-                  return isEditMode ? 'Update Prop' : 'Create Prop';
-                })()}
-              </form.SubmitButton>
-            </DialogFooter>
+            <PropFormFields
+              form={form}
+              isPending={isPending}
+              onCancel={() => onOpenChange(false)}
+              isEditMode={isEditMode}
+            />
           </form.Form>
         </form.AppForm>
       </DialogContent>

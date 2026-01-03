@@ -136,3 +136,31 @@ export function SubmitButton({ children, className, isDisabled, ...props }: iSub
     </Button>
   );
 }
+
+interface iFormActionsProps {
+  onCancel: () => void;
+  cancelLabel?: string;
+  submitLabel: string;
+  loadingLabel?: string;
+  isDisabled?: boolean;
+}
+
+export function FormActions({
+  onCancel,
+  cancelLabel = 'Cancel',
+  submitLabel,
+  loadingLabel,
+  isDisabled,
+}: iFormActionsProps) {
+  const form = useFormContext();
+  const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
+
+  return (
+    <>
+      <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting || isDisabled}>
+        {cancelLabel}
+      </Button>
+      <SubmitButton isDisabled={isDisabled}>{isSubmitting && loadingLabel ? loadingLabel : submitLabel}</SubmitButton>
+    </>
+  );
+}
