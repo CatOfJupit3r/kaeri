@@ -13,13 +13,19 @@ import { TimelineEntryModel } from '@~/db/models/timeline-entry.model';
 import { WildCardModel } from '@~/db/models/wildcard.model';
 import { TOKENS } from '@~/di/tokens';
 import type { LoggerFactory, iWithLogger } from '@~/features/logger/logger.types';
+import { buildCacheKey, CACHE_TTL } from '@~/features/valkey/valkey.constants';
 import { ORPCNotFoundError } from '@~/lib/orpc-error-wrapper';
+
+import type { ValkeyService } from '../valkey/valkey.service';
 
 @injectable()
 export class ExportService implements iWithLogger {
   public logger: ReturnType<LoggerFactory['create']>;
 
-  constructor(@inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory) {
+  constructor(
+    @inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory,
+    @inject(TOKENS.ValkeyService) private readonly valkey: ValkeyService,
+  ) {
     this.logger = loggerFactory.create('export-service');
   }
 
@@ -47,48 +53,51 @@ export class ExportService implements iWithLogger {
    * Export complete series data as JSON backup
    */
   public async exportSeriesJson(seriesId: string) {
-    const series = await SeriesModel.findById(seriesId).lean();
-    if (!series) {
-      throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
-    }
+    return this.valkey.cached(buildCacheKey.exportSeriesJson(seriesId), CACHE_TTL.LIST_MEDIUM, async () => {
+      this.logger.debug('Exporting series JSON from database', { seriesId });
+      const series = await SeriesModel.findById(seriesId).lean();
+      if (!series) {
+        throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
+      }
 
-    // Fetch all related data in parallel
-    const [scripts, characters, locations, props, timeline, wildcards, canvasNodes, canvasEdges] = await Promise.all([
-      ScriptModel.find({ seriesId }).select('-content -contentVersion').lean(),
-      CharacterModel.find({ seriesId }).lean(),
-      LocationModel.find({ seriesId }).lean(),
-      PropModel.find({ seriesId }).lean(),
-      TimelineEntryModel.find({ seriesId }).lean(),
-      WildCardModel.find({ seriesId }).lean(),
-      CanvasNodeModel.find({ seriesId }).lean(),
-      CanvasEdgeModel.find({ seriesId }).lean(),
-    ]);
+      // Fetch all related data in parallel
+      const [scripts, characters, locations, props, timeline, wildcards, canvasNodes, canvasEdges] = await Promise.all([
+        ScriptModel.find({ seriesId }).select('-content -contentVersion').lean(),
+        CharacterModel.find({ seriesId }).lean(),
+        LocationModel.find({ seriesId }).lean(),
+        PropModel.find({ seriesId }).lean(),
+        TimelineEntryModel.find({ seriesId }).lean(),
+        WildCardModel.find({ seriesId }).lean(),
+        CanvasNodeModel.find({ seriesId }).lean(),
+        CanvasEdgeModel.find({ seriesId }).lean(),
+      ]);
 
-    // Collect all appearances from characters
-    const appearances = characters.flatMap((char) => char.appearances ?? []);
+      // Collect all appearances from characters
+      const appearances = characters.flatMap((char) => char.appearances ?? []);
 
-    const exportData = {
-      series,
-      scripts,
-      characters,
-      locations,
-      props,
-      timeline,
-      wildcards,
-      appearances,
-      canvas: {
-        nodes: canvasNodes,
-        edges: canvasEdges,
-      },
-    };
+      const exportData = {
+        series,
+        scripts,
+        characters,
+        locations,
+        props,
+        timeline,
+        wildcards,
+        appearances,
+        canvas: {
+          nodes: canvasNodes,
+          edges: canvasEdges,
+        },
+      };
 
-    this.logger.info('Series JSON export completed', {
-      seriesId,
-      title: series.title,
-      scriptCount: scripts.length,
-      characterCount: characters.length,
+      this.logger.info('Series JSON export completed', {
+        seriesId,
+        title: series.title,
+        scriptCount: scripts.length,
+        characterCount: characters.length,
+      });
+
+      return exportData;
     });
-
-    return exportData;
   }
 }

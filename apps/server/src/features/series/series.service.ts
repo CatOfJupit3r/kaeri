@@ -5,15 +5,23 @@ import { errorCodes } from '@kaeri/shared';
 import { ScriptModel } from '@~/db/models/script.model';
 import { SeriesModel } from '@~/db/models/series.model';
 import { TOKENS } from '@~/di/tokens';
+import { buildCacheKey, CACHE_TTL } from '@~/features/valkey/valkey.constants';
 import { ORPCBadRequestError, ORPCNotFoundError, ORPCUnprocessableContentError } from '@~/lib/orpc-error-wrapper';
 
+import type { TypedEventBus } from '../events/event-bus';
 import type { iWithLogger, LoggerFactory } from '../logger/logger.types';
+import type { ValkeyService } from '../valkey/valkey.service';
+import { SERIES_EVENTS } from './series.events';
 
 @injectable()
 export class SeriesService implements iWithLogger {
   public readonly logger: iWithLogger['logger'];
 
-  constructor(@inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory) {
+  constructor(
+    @inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory,
+    @inject(TOKENS.ValkeyService) private readonly valkey: ValkeyService,
+    @inject(TOKENS.EventBus) private readonly eventBus: TypedEventBus,
+  ) {
     this.logger = loggerFactory.create('series-service');
   }
 
@@ -31,6 +39,10 @@ export class SeriesService implements iWithLogger {
     });
 
     this.logger.info('Series created', { seriesId: series._id, title: series.title });
+
+    // Emit event for cache invalidation
+    this.eventBus.emit(SERIES_EVENTS.CREATED, { seriesId: series._id });
+
     return series;
   }
 
@@ -51,7 +63,10 @@ export class SeriesService implements iWithLogger {
     series.lastEditedAt = new Date();
     await series.save();
 
+    // Emit event for cache invalidation
+    this.eventBus.emit(SERIES_EVENTS.UPDATED, { seriesId: series._id });
     this.logger.info('Series updated', { seriesId: series._id });
+
     return series;
   }
 
@@ -70,7 +85,11 @@ export class SeriesService implements iWithLogger {
     // TODO: Check for KB entities, canvas nodes/edges, etc.
 
     await SeriesModel.deleteOne({ _id: seriesId });
+
+    // Emit event for cache invalidation
+    this.eventBus.emit(SERIES_EVENTS.DELETED, { seriesId });
     this.logger.info('Series deleted', { seriesId });
+
     return { success: true };
   }
 
@@ -84,11 +103,13 @@ export class SeriesService implements iWithLogger {
   }
 
   public async get(seriesId: string) {
-    const series = await SeriesModel.findById(seriesId);
-    if (!series) {
-      throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
-    }
-    return series;
+    return this.valkey.cached(buildCacheKey.series(seriesId), CACHE_TTL.ENTITY_MEDIUM, async () => {
+      this.logger.debug('Fetching series from database', { seriesId });
+      const series = await SeriesModel.findById(seriesId);
+      if (!series) throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
+
+      return series;
+    });
   }
 
   public async exportSummary(seriesId: string) {

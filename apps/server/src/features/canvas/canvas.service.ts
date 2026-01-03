@@ -7,7 +7,12 @@ import { CanvasNodeModel } from '@~/db/models/canvas-node.model';
 import { SeriesModel } from '@~/db/models/series.model';
 import { TOKENS } from '@~/di/tokens';
 import type { LoggerFactory, iWithLogger } from '@~/features/logger/logger.types';
+import { buildCacheKey, CACHE_TTL } from '@~/features/valkey/valkey.constants';
 import { ORPCNotFoundError } from '@~/lib/orpc-error-wrapper';
+
+import type { TypedEventBus } from '../events/event-bus';
+import type { ValkeyService } from '../valkey/valkey.service';
+import { CANVAS_EVENTS } from './canvas.events';
 
 interface iCanvasNode {
   _id: string;
@@ -30,7 +35,11 @@ interface iCanvasEdge {
 export class CanvasService implements iWithLogger {
   public logger: ReturnType<LoggerFactory['create']>;
 
-  constructor(@inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory) {
+  constructor(
+    @inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory,
+    @inject(TOKENS.ValkeyService) private readonly valkey: ValkeyService,
+    @inject(TOKENS.EventBus) private readonly eventBus: TypedEventBus,
+  ) {
     this.logger = loggerFactory.create('canvas-service');
   }
 
@@ -38,18 +47,21 @@ export class CanvasService implements iWithLogger {
    * Get all canvas nodes and edges for a series
    */
   public async getCanvas(seriesId: string) {
-    const series = await SeriesModel.findById(seriesId);
-    if (!series) {
-      throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
-    }
+    return this.valkey.cached(buildCacheKey.canvas(seriesId), CACHE_TTL.ENTITY_MEDIUM, async () => {
+      this.logger.debug('Fetching canvas from database', { seriesId });
+      const series = await SeriesModel.findById(seriesId);
+      if (!series) {
+        throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
+      }
 
-    const [nodes, edges] = await Promise.all([
-      CanvasNodeModel.find({ seriesId }).lean(),
-      CanvasEdgeModel.find({ seriesId }).lean(),
-    ]);
+      const [nodes, edges] = await Promise.all([
+        CanvasNodeModel.find({ seriesId }).lean(),
+        CanvasEdgeModel.find({ seriesId }).lean(),
+      ]);
 
-    this.logger.info('Canvas retrieved', { seriesId, nodeCount: nodes.length, edgeCount: edges.length });
-    return { nodes, edges };
+      this.logger.info('Canvas retrieved', { seriesId, nodeCount: nodes.length, edgeCount: edges.length });
+      return { nodes, edges };
+    });
   }
 
   /**
@@ -79,7 +91,10 @@ export class CanvasService implements iWithLogger {
       seriesId,
     }).lean();
 
+    // Emit event for cache invalidation
+    this.eventBus.emit(CANVAS_EVENTS.NODES_UPSERTED, { seriesId });
     this.logger.info('Canvas nodes upserted', { seriesId, nodeCount: nodes.length });
+
     return updatedNodes;
   }
 
@@ -110,7 +125,10 @@ export class CanvasService implements iWithLogger {
       seriesId,
     }).lean();
 
+    // Emit event for cache invalidation
+    this.eventBus.emit(CANVAS_EVENTS.EDGES_UPSERTED, { seriesId });
     this.logger.info('Canvas edges upserted', { seriesId, edgeCount: edges.length });
+
     return updatedEdges;
   }
 
@@ -128,7 +146,10 @@ export class CanvasService implements iWithLogger {
     // Update series lastEditedAt
     await SeriesModel.updateOne({ _id: seriesId }, { lastEditedAt: new Date() });
 
+    // Emit event for cache invalidation
+    this.eventBus.emit(CANVAS_EVENTS.NODES_DELETED, { seriesId });
     this.logger.info('Canvas nodes deleted', { seriesId, deletedCount: result.deletedCount });
+
     return { success: true };
   }
 
@@ -146,7 +167,10 @@ export class CanvasService implements iWithLogger {
     // Update series lastEditedAt
     await SeriesModel.updateOne({ _id: seriesId }, { lastEditedAt: new Date() });
 
+    // Emit event for cache invalidation
+    this.eventBus.emit(CANVAS_EVENTS.EDGES_DELETED, { seriesId });
     this.logger.info('Canvas edges deleted', { seriesId, deletedCount: result.deletedCount });
+
     return { success: true };
   }
 }

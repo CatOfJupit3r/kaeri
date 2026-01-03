@@ -11,14 +11,41 @@ import { WildCardModel } from '@~/db/models/wildcard.model';
 import { TOKENS } from '@~/di/tokens';
 import { ORPCBadRequestError, ORPCNotFoundError } from '@~/lib/orpc-error-wrapper';
 
+import type { TypedEventBus } from '../events/event-bus';
+import type { iKnowledgeBaseActionPayload } from '../events/events.constants';
+import { EVENTS } from '../events/events.constants';
 import type { iWithLogger, LoggerFactory } from '../logger/logger.types';
 
 @injectable()
 export class KnowledgeBaseService implements iWithLogger {
   public readonly logger: iWithLogger['logger'];
 
-  constructor(@inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory) {
+  constructor(
+    @inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory,
+    @inject(TOKENS.EventBus) private readonly eventBus: TypedEventBus,
+  ) {
     this.logger = loggerFactory.create('knowledge-base-service');
+  }
+
+  private readonly kbActionEventMap = {
+    character: EVENTS.KNOWLEDGE_BASE_CHARACTER_ACTION,
+    location: EVENTS.KNOWLEDGE_BASE_LOCATION_ACTION,
+    prop: EVENTS.KNOWLEDGE_BASE_PROP_ACTION,
+    timeline: EVENTS.KNOWLEDGE_BASE_TIMELINE_ACTION,
+    wildcard: EVENTS.KNOWLEDGE_BASE_WILDCARD_ACTION,
+  } as const;
+
+  private emitKnowledgeBaseAction(
+    seriesId: string,
+    entityId: string,
+    entityType: keyof typeof this.kbActionEventMap,
+    action: iKnowledgeBaseActionPayload['action'],
+  ) {
+    this.eventBus.emit(this.kbActionEventMap[entityType], {
+      seriesId,
+      entityId,
+      action,
+    });
   }
 
   // Search across all KB entities
@@ -92,6 +119,7 @@ export class KnowledgeBaseService implements iWithLogger {
     });
 
     this.logger.info('Character created', { characterId: character._id, seriesId, name: character.name });
+    this.emitKnowledgeBaseAction(seriesId, character._id, 'character', 'created');
     return character;
   }
 
@@ -123,6 +151,7 @@ export class KnowledgeBaseService implements iWithLogger {
 
     await character.save();
     this.logger.info('Character updated', { characterId: id });
+    this.emitKnowledgeBaseAction(seriesId, id, 'character', 'updated');
     return character;
   }
 
@@ -134,6 +163,7 @@ export class KnowledgeBaseService implements iWithLogger {
 
     await CharacterModel.deleteOne({ _id: id });
     this.logger.info('Character deleted', { characterId: id });
+    this.emitKnowledgeBaseAction(seriesId, id, 'character', 'deleted');
     return { success: true };
   }
 
@@ -181,6 +211,7 @@ export class KnowledgeBaseService implements iWithLogger {
     await character.save();
 
     this.logger.info('Relationship added', { characterId, targetId: relationship.targetId });
+    this.emitKnowledgeBaseAction(seriesId, characterId, 'character', 'updated');
     return character;
   }
 
@@ -194,6 +225,7 @@ export class KnowledgeBaseService implements iWithLogger {
     await character.save();
 
     this.logger.info('Relationship removed', { characterId, targetId });
+    this.emitKnowledgeBaseAction(seriesId, characterId, 'character', 'updated');
     return character;
   }
 
@@ -213,6 +245,7 @@ export class KnowledgeBaseService implements iWithLogger {
     await character.save();
 
     this.logger.info('Appearance added', { characterId, scriptId: appearance.scriptId });
+    this.emitKnowledgeBaseAction(seriesId, characterId, 'character', 'updated');
     return character;
   }
 
@@ -228,6 +261,7 @@ export class KnowledgeBaseService implements iWithLogger {
     await character.save();
 
     this.logger.info('Appearance removed', { characterId, scriptId, sceneRef });
+    this.emitKnowledgeBaseAction(seriesId, characterId, 'character', 'updated');
     return character;
   }
 
@@ -247,6 +281,7 @@ export class KnowledgeBaseService implements iWithLogger {
     await character.save();
 
     this.logger.info('Variation added', { characterId, scriptId: variation.scriptId });
+    this.emitKnowledgeBaseAction(seriesId, characterId, 'character', 'updated');
     return character;
   }
 
@@ -279,6 +314,7 @@ export class KnowledgeBaseService implements iWithLogger {
     await character.save();
 
     this.logger.info('Variation updated', { characterId, scriptId, label });
+    this.emitKnowledgeBaseAction(seriesId, characterId, 'character', 'updated');
     return character;
   }
 
@@ -294,6 +330,7 @@ export class KnowledgeBaseService implements iWithLogger {
     await character.save();
 
     this.logger.info('Variation removed', { characterId, scriptId, label });
+    this.emitKnowledgeBaseAction(seriesId, characterId, 'character', 'updated');
     return character;
   }
 
@@ -317,6 +354,7 @@ export class KnowledgeBaseService implements iWithLogger {
     });
 
     this.logger.info('Location created', { locationId: location._id, seriesId, name: location.name });
+    this.emitKnowledgeBaseAction(seriesId, location._id, 'location', 'created');
     return location;
   }
 
@@ -340,6 +378,7 @@ export class KnowledgeBaseService implements iWithLogger {
 
     await location.save();
     this.logger.info('Location updated', { locationId: id });
+    this.emitKnowledgeBaseAction(seriesId, id, 'location', 'updated');
     return location;
   }
 
@@ -351,6 +390,7 @@ export class KnowledgeBaseService implements iWithLogger {
 
     await LocationModel.deleteOne({ _id: id });
     this.logger.info('Location deleted', { locationId: id });
+    this.emitKnowledgeBaseAction(seriesId, id, 'location', 'deleted');
     return { success: true };
   }
 
@@ -395,6 +435,7 @@ export class KnowledgeBaseService implements iWithLogger {
     });
 
     this.logger.info('Prop created', { propId: prop._id, seriesId, name: prop.name });
+    this.emitKnowledgeBaseAction(seriesId, prop._id, 'prop', 'created');
     return prop;
   }
 
@@ -409,6 +450,7 @@ export class KnowledgeBaseService implements iWithLogger {
 
     await prop.save();
     this.logger.info('Prop updated', { propId: id });
+    this.emitKnowledgeBaseAction(seriesId, id, 'prop', 'updated');
     return prop;
   }
 
@@ -420,6 +462,7 @@ export class KnowledgeBaseService implements iWithLogger {
 
     await PropModel.deleteOne({ _id: id });
     this.logger.info('Prop deleted', { propId: id });
+    this.emitKnowledgeBaseAction(seriesId, id, 'prop', 'deleted');
     return { success: true };
   }
 
@@ -472,7 +515,8 @@ export class KnowledgeBaseService implements iWithLogger {
       links: data.links ?? [],
     });
 
-    this.logger.info('Timeline entry created', { entryId: entry._id, seriesId, label: entry.label });
+    this.logger.info('Timeline entry created', { timelineId: entry._id, seriesId, label: entry.label });
+    this.emitKnowledgeBaseAction(seriesId, entry._id, 'timeline', 'created');
     return entry;
   }
 
@@ -497,7 +541,8 @@ export class KnowledgeBaseService implements iWithLogger {
     if (patch.links !== undefined) entry.links = patch.links;
 
     await entry.save();
-    this.logger.info('Timeline entry updated', { entryId: id });
+    this.logger.info('Timeline entry updated', { timelineId: id });
+    this.emitKnowledgeBaseAction(seriesId, id, 'timeline', 'updated');
     return entry;
   }
 
@@ -508,7 +553,8 @@ export class KnowledgeBaseService implements iWithLogger {
     }
 
     await TimelineEntryModel.deleteOne({ _id: id });
-    this.logger.info('Timeline entry deleted', { entryId: id });
+    this.logger.info('Timeline entry deleted', { timelineId: id });
+    this.emitKnowledgeBaseAction(seriesId, id, 'timeline', 'deleted');
     return { success: true };
   }
 
@@ -552,7 +598,8 @@ export class KnowledgeBaseService implements iWithLogger {
       tag: data.tag,
     });
 
-    this.logger.info('WildCard created', { wildcardId: wildcard._id, seriesId, title: wildcard.title });
+    this.logger.info('WildCard created', { wildCardId: wildcard._id, seriesId, title: wildcard.title });
+    this.emitKnowledgeBaseAction(seriesId, wildcard._id, 'wildcard', 'created');
     return wildcard;
   }
 
@@ -567,7 +614,8 @@ export class KnowledgeBaseService implements iWithLogger {
     if (patch.tag !== undefined) wildcard.tag = patch.tag;
 
     await wildcard.save();
-    this.logger.info('WildCard updated', { wildcardId: id });
+    this.logger.info('WildCard updated', { wildCardId: id });
+    this.emitKnowledgeBaseAction(seriesId, id, 'wildcard', 'updated');
     return wildcard;
   }
 
@@ -578,7 +626,8 @@ export class KnowledgeBaseService implements iWithLogger {
     }
 
     await WildCardModel.deleteOne({ _id: id });
-    this.logger.info('WildCard deleted', { wildcardId: id });
+    this.logger.info('WildCard deleted', { wildCardId: id });
+    this.emitKnowledgeBaseAction(seriesId, id, 'wildcard', 'deleted');
     return { success: true };
   }
 
