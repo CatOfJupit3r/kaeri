@@ -19,11 +19,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
 import { useCharacter } from '@~/features/characters/hooks/queries/use-character';
+import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 import { useAddVariation } from '@~/features/knowledge-base/hooks/mutations/use-add-variation';
 import { useRemoveVariation } from '@~/features/knowledge-base/hooks/mutations/use-remove-variation';
 import { useUpdateVariation } from '@~/features/knowledge-base/hooks/mutations/use-update-variation';
 import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
 
+import { CharacterHoverPreview } from './character-hover-preview';
 import { VariationForm } from './variation-form';
 
 interface iVariation {
@@ -48,6 +50,7 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
 
   const { data: character, isLoading, error } = useCharacter(characterId, seriesId);
   const { data: scriptsData } = useScriptList(seriesId);
+  const { data: allCharacters } = useCharacterList(seriesId, 100, 0);
   const { addVariation, isPending: isAdding } = useAddVariation();
   const { updateVariation, isPending: isUpdating } = useUpdateVariation();
   const { removeVariation, isPending: isDeleting } = useRemoveVariation();
@@ -127,6 +130,11 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
   const getScriptTitle = (scriptId: string) => {
     const script = scriptsData?.items.find((s) => s._id === scriptId);
     return script?.title ?? 'Unknown Script';
+  };
+
+  const getCharacterName = (charId: string) => {
+    const char = allCharacters?.items.find((c) => c._id === charId);
+    return char?.name ?? 'Unknown Character';
   };
 
   if (isLoading) {
@@ -222,8 +230,22 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
                           className="flex items-start gap-2 rounded-lg border p-3"
                         >
                           <div className="flex-1">
-                            <p className="font-medium">{rel.type}</p>
-                            {rel.note ? <p className="text-sm text-muted-foreground">{rel.note}</p> : null}
+                            <div className="flex items-center gap-2">
+                              <CharacterHoverPreview characterId={rel.targetId} seriesId={seriesId}>
+                                <button
+                                  type="button"
+                                  className="font-medium text-primary hover:underline"
+                                  onClick={() => {
+                                    /* Navigate to character - could be implemented later */
+                                  }}
+                                >
+                                  {getCharacterName(rel.targetId)}
+                                </button>
+                              </CharacterHoverPreview>
+                              <span className="text-xs text-muted-foreground">•</span>
+                              <span className="text-sm text-muted-foreground">{rel.type}</span>
+                            </div>
+                            {rel.note ? <p className="mt-1 text-sm text-muted-foreground">{rel.note}</p> : null}
                           </div>
                         </div>
                       ))}
