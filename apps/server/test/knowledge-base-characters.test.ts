@@ -489,6 +489,65 @@ describe('Knowledge Base API - Characters', () => {
 
       expect(result.variations?.length).toBe(0);
     });
+
+    it('should update a variation', async () => {
+      const { ctx, series } = await createSeriesWithUser();
+
+      const script = await createScript(ctx, series._id, { title: 'Alt Timeline' });
+
+      const character = await createCharacter(ctx, series._id, { name: 'Hero' });
+
+      await call(
+        appRouter.knowledgeBase.addVariation,
+        {
+          seriesId: series._id,
+          characterId: character._id,
+          variation: { scriptId: script._id, label: 'Original Label', notes: 'Original notes' },
+        },
+        ctx(),
+      );
+
+      const result = await call(
+        appRouter.knowledgeBase.updateVariation,
+        {
+          seriesId: series._id,
+          characterId: character._id,
+          scriptId: script._id,
+          label: 'Original Label',
+          patch: { label: 'Updated Label', notes: 'Updated notes' },
+        },
+        ctx(),
+      );
+
+      expect(result.variations?.length).toBe(1);
+      expect(result.variations?.[0].label).toBe('Updated Label');
+      expect(result.variations?.[0].notes).toBe('Updated notes');
+      expect(result.variations?.[0].scriptId).toBe(script._id);
+    });
+
+    it('should return NOT_FOUND when updating non-existent variation', async () => {
+      const { ctx, series } = await createSeriesWithUser();
+
+      const script = await createScript(ctx, series._id, { title: 'Alt Timeline' });
+
+      const character = await createCharacter(ctx, series._id, { name: 'Hero' });
+
+      await expectErrorCode(
+        () =>
+          call(
+            appRouter.knowledgeBase.updateVariation,
+            {
+              seriesId: series._id,
+              characterId: character._id,
+              scriptId: script._id,
+              label: 'Non-existent',
+              patch: { notes: 'Will fail' },
+            },
+            ctx(),
+          ),
+        'NOT_FOUND',
+      );
+    });
   });
 
   describe('Create and Update with Appearances', () => {

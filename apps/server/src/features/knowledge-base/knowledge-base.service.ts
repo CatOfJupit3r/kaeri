@@ -250,6 +250,38 @@ export class KnowledgeBaseService implements iWithLogger {
     return character;
   }
 
+  public async updateVariation(
+    seriesId: string,
+    characterId: string,
+    scriptId: string,
+    label: string,
+    patch: { label?: string; notes?: string },
+  ) {
+    const character = await CharacterModel.findOne({ _id: characterId, seriesId });
+    if (!character) {
+      throw ORPCNotFoundError(errorCodes.CHARACTER_NOT_FOUND);
+    }
+
+    const variationIndex = (character.variations ?? []).findIndex((v) => v.scriptId === scriptId && v.label === label);
+
+    if (variationIndex === -1) {
+      throw ORPCNotFoundError(errorCodes.VARIATION_NOT_FOUND);
+    }
+
+    character.variations = character.variations ?? [];
+    if (patch.label !== undefined) {
+      character.variations[variationIndex].label = patch.label;
+    }
+    if (patch.notes !== undefined) {
+      character.variations[variationIndex].notes = patch.notes;
+    }
+
+    await character.save();
+
+    this.logger.info('Variation updated', { characterId, scriptId, label });
+    return character;
+  }
+
   public async removeVariation(seriesId: string, characterId: string, scriptId: string, label?: string) {
     const character = await CharacterModel.findOne({ _id: characterId, seriesId });
     if (!character) {

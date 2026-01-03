@@ -17,6 +17,7 @@ import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
+import { CharacterDetail } from '@~/features/knowledge-base/components/character-detail';
 
 import { useDeleteCharacter } from '../hooks/mutations/use-delete-character';
 import { CharacterForm } from './character-form';
@@ -49,6 +50,8 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
   const [editingCharacter, setEditingCharacter] = useState<iCharacter | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [characterToDelete, setCharacterToDelete] = useState<iCharacter | undefined>(undefined);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedCharacterId, setSelectedCharacterId] = useState<string | undefined>(undefined);
   const { data, isLoading, error } = useCharacterList(seriesId);
   const { deleteCharacter, isPending: isDeleting } = useDeleteCharacter();
 
@@ -62,6 +65,11 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
   const handleEditClick = (character: iCharacter) => {
     setEditingCharacter(character);
     setIsFormOpen(true);
+  };
+
+  const handleViewClick = (characterId: string) => {
+    setSelectedCharacterId(characterId);
+    setIsDetailOpen(true);
   };
 
   const handleDeleteClick = (character: iCharacter) => {
@@ -226,6 +234,14 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
         onOpenChange={handleFormOpenChange}
         initialData={editingCharacter}
       />
+      {selectedCharacterId ? (
+        <CharacterDetail
+          characterId={selectedCharacterId}
+          seriesId={seriesId}
+          open={isDetailOpen}
+          onOpenChange={setIsDetailOpen}
+        />
+      ) : null}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
