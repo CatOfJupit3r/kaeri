@@ -94,10 +94,79 @@ apps/<workspace>/test/
   └── utils/
 ```
 
-### Product Context
-
-TODO: Replace this with actual product documentation later.
-
 ## Specialized Guides
 - Backend-specific processes: see `server.instructions.md` for contract extensions, router wiring, authentication context, and Typegoose modeling patterns.
 - Frontend-specific workflows: see `web.instructions.md` for oRPC + TanStack usage, optimistic UI updates, and component/hook conventions.
+
+## Commit Message Standards
+
+**ALWAYS** follow conventional commit format with issue references and spec citations:
+
+**Format:**
+```
+<type>(<scope>): <subject>
+
+<body>
+
+Related to: #<issue-number>
+```
+
+**Types:** feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+
+**Scope:** Feature area (e.g., api, models, auth, components, routes, hooks)
+
+**Subject:** Imperative, lowercase, no period, max 100 chars
+
+**Body (required for non-trivial changes):**
+- Explain WHAT changed and WHY (not HOW)
+- Reference requirements from specs (e.g., "Implements FR-004 from spec 003")
+- Cite functional requirements, success criteria, user stories, or edge cases
+- Use `|` for line breaks if needed
+
+**Footer:**
+- `Related to: #<number>` - REQUIRED for all commits linked to issues
+- Use `Closes #<number>` or `Fixes #<number>` only when fully resolving
+- Reference multiple issues: `Related to: #42, #58`
+
+**Examples:**
+
+```
+feat(api): add knowledge-base router with character CRUD
+
+Implements oRPC procedures from knowledge-base.contract.ts, exposing character creation, retrieval, update, and deletion. Satisfies FR-004 from spec 003-knowledge-base.
+
+- Uses protectedProcedure for auth enforcement
+- Implements NOT_FOUND stance per AUTH_ERROR_STANCE.md
+- Validates series ownership before mutations
+- Adds error codes to src/enums/errors.ts
+
+Related to: #42
+```
+
+```
+fix(models): add unique index to character names within series
+
+Prevents duplicate character names within the same series while allowing duplicates across different series, per spec 003 edge case requirements.
+
+Migration handles existing duplicates by appending suffixes.
+
+Related to: #42
+```
+
+```
+test(integration): add character CRUD test coverage
+
+Implements test coverage for FR-004 character operations from spec 003. Validates relationship integrity and appearance tracking per SC-003 criteria.
+
+Related to: #42
+```
+
+```
+refactor(auth): align error handling with NOT_FOUND stance
+
+Updates protected endpoints to return NOT_FOUND instead of FORBIDDEN when users lack access, per AUTH_ERROR_STANCE.md guidelines. Prevents information leakage.
+
+Affects challenge visibility checks and series access control.
+
+Related to: #28, #31
+```
