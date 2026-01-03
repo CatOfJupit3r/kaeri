@@ -10,10 +10,21 @@ import {
   BreadcrumbSeparator,
 } from '@~/components/ui/breadcrumb';
 import { CharacterDetail } from '@~/features/characters/components/character-detail';
-import { useCharacterDetail } from '@~/features/characters/hooks/queries/use-character-detail';
-import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
+import {
+  useCharacterDetail,
+  characterDetailQueryOptions,
+} from '@~/features/characters/hooks/queries/use-character-detail';
+import { useCharacterList, characterListQueryOptions } from '@~/features/characters/hooks/queries/use-character-list';
 
 export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-base/characters/$characterId')({
+  loader: async ({ context, params }) => {
+    const { characterId, seriesId } = params;
+
+    await Promise.all([
+      context.queryClient.ensureQueryData(characterDetailQueryOptions(characterId, seriesId)),
+      context.queryClient.ensureQueryData(characterListQueryOptions(seriesId)),
+    ]);
+  },
   component: RouteComponent,
 });
 

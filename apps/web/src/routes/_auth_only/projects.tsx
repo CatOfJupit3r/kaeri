@@ -25,9 +25,12 @@ import {
 } from '@~/components/ui/dropdown-menu';
 import { SeriesModal } from '@~/features/series/components/series-modal';
 import { useDeleteSeries } from '@~/features/series/hooks/mutations/use-delete-series';
-import { useSeriesList } from '@~/features/series/hooks/queries/use-series-list';
+import { seriesListQueryOptions, useSeriesList } from '@~/features/series/hooks/queries/use-series-list';
 
 export const Route = createFileRoute('/_auth_only/projects')({
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(seriesListQueryOptions());
+  },
   component: RouteComponent,
 });
 

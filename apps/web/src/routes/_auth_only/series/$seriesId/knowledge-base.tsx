@@ -4,13 +4,29 @@ import { LuBookUser, LuGlobe, LuPackage, LuCalendar, LuSparkles } from 'react-ic
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
 import { CharacterList } from '@~/features/characters/components/character-list';
+import { characterListQueryOptions } from '@~/features/characters/hooks/queries/use-character-list';
 import { KBSearch } from '@~/features/knowledge-base/components/kb-search';
 import { LocationList } from '@~/features/locations/components/location-list';
+import { locationListQueryOptions } from '@~/features/locations/hooks/queries/use-location-list';
 import { PropList } from '@~/features/props/components/prop-list';
+import { propListQueryOptions } from '@~/features/props/hooks/queries/use-prop-list';
 import { TimelineList } from '@~/features/timelines/components/timeline-list';
+import { timelineListQueryOptions } from '@~/features/timelines/hooks/queries/use-timeline-list';
 import { WildcardList } from '@~/features/wildcards/components/wildcard-list';
+import { wildcardListQueryOptions } from '@~/features/wildcards/hooks/queries/use-wildcard-list';
 
 export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-base')({
+  loader: async ({ context, params }) => {
+    const { seriesId } = params;
+
+    await Promise.all([
+      context.queryClient.ensureQueryData(characterListQueryOptions(seriesId)),
+      context.queryClient.ensureQueryData(locationListQueryOptions(seriesId)),
+      context.queryClient.ensureQueryData(propListQueryOptions(seriesId)),
+      context.queryClient.ensureQueryData(timelineListQueryOptions(seriesId)),
+      context.queryClient.ensureQueryData(wildcardListQueryOptions(seriesId)),
+    ]);
+  },
   component: RouteComponent,
 });
 

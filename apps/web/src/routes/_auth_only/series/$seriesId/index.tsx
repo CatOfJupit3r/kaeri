@@ -11,10 +11,34 @@ import {
   BreadcrumbSeparator,
 } from '@~/components/ui/breadcrumb';
 import { Card } from '@~/components/ui/card';
-import { useSeries } from '@~/features/series/hooks/queries/use-series';
+import { characterListQueryOptions } from '@~/features/characters/hooks/queries/use-character-list';
+import { locationListQueryOptions } from '@~/features/locations/hooks/queries/use-location-list';
+import { propListQueryOptions } from '@~/features/props/hooks/queries/use-prop-list';
+import { useSeries, seriesQueryOptions } from '@~/features/series/hooks/queries/use-series';
+import { timelineListQueryOptions } from '@~/features/timelines/hooks/queries/use-timeline-list';
+import { wildcardListQueryOptions } from '@~/features/wildcards/hooks/queries/use-wildcard-list';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 export const Route = createFileRoute('/_auth_only/series/$seriesId/')({
+  loader: async ({ context, params }) => {
+    const { seriesId } = params;
+
+    const baseListParams = { limit: 1, offset: 0 } as const;
+
+    await Promise.all([
+      context.queryClient.ensureQueryData(seriesQueryOptions(seriesId)),
+      context.queryClient.ensureQueryData(
+        tanstackRPC.scripts.listScriptsBySeries.queryOptions({
+          input: { seriesId, ...baseListParams },
+        }),
+      ),
+      context.queryClient.ensureQueryData(characterListQueryOptions(seriesId, baseListParams)),
+      context.queryClient.ensureQueryData(locationListQueryOptions(seriesId, baseListParams)),
+      context.queryClient.ensureQueryData(propListQueryOptions(seriesId, baseListParams)),
+      context.queryClient.ensureQueryData(timelineListQueryOptions(seriesId, baseListParams)),
+      context.queryClient.ensureQueryData(wildcardListQueryOptions(seriesId, baseListParams)),
+    ]);
+  },
   component: RouteComponent,
 });
 
