@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { LuX } from 'react-icons/lu';
 import z from 'zod';
 
@@ -34,8 +34,6 @@ interface iLocationFormProps {
 }
 
 export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLocationFormProps) {
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState('');
   const { createLocation, isPending: isCreating } = useCreateLocation();
   const { updateLocation, isPending: isUpdating } = useUpdateLocation();
 
@@ -46,6 +44,7 @@ export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLoc
     defaultValues: {
       name: initialData?.name ?? '',
       description: initialData?.description ?? '',
+      tags: initialData?.tags ?? ([] as string[]),
     },
     onSubmit: async ({ value }) => {
       const normalizedName = value.name.trim();
@@ -59,7 +58,7 @@ export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLoc
             patch: {
               name: normalizedName,
               description: normalizedDescription || undefined,
-              tags: tags.length > 0 ? tags : undefined,
+              tags: value.tags.length > 0 ? value.tags : undefined,
             },
           },
           {
@@ -75,15 +74,13 @@ export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLoc
             value: {
               name: normalizedName,
               description: normalizedDescription || undefined,
-              tags: tags.length > 0 ? tags : undefined,
+              tags: value.tags.length > 0 ? value.tags : undefined,
             },
           },
           {
             onSuccess: () => {
               onOpenChange(false);
               form.reset();
-              setTags([]);
-              setTagInput('');
             },
           },
         );
@@ -93,6 +90,7 @@ export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLoc
       onSubmit: z.object({
         name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
         description: z.string().trim().max(500, 'Description must be 500 characters or less'),
+        tags: z.array(z.string()),
       }),
     },
   });
@@ -102,37 +100,16 @@ export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLoc
       form.reset({
         name: initialData.name,
         description: initialData.description ?? '',
+        tags: initialData.tags ?? [],
       });
-      setTags(initialData.tags ?? []);
-      setTagInput('');
     } else if (!open) {
       form.reset({
         name: '',
         description: '',
+        tags: [],
       });
-      setTags([]);
-      setTagInput('');
     }
   }, [open, initialData, form]);
-
-  const addTag = () => {
-    const trimmedTag = tagInput.trim();
-    if (trimmedTag && !tags.includes(trimmedTag)) {
-      setTags([...tags, trimmedTag]);
-      setTagInput('');
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
-  };
-
-  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addTag();
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -163,39 +140,69 @@ export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLoc
               )}
             </form.AppField>
 
-            <div className="space-y-2">
-              <Label htmlFor="tags">Tags</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="tags"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={handleTagKeyDown}
-                  placeholder="Add a tag (press Enter)"
-                  disabled={isPending}
-                />
-                <Button type="button" onClick={addTag} disabled={!tagInput.trim() || isPending} size="sm">
-                  Add
-                </Button>
-              </div>
-              {tags.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="gap-1">
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => removeTag(tag)}
-                        className="ml-1 rounded-full hover:bg-muted"
+            <form.Field name="tags" mode="array">
+              {(field) => {
+                const tags = field.state.value || [];
+                return (
+                  <div className="space-y-2">
+                    <Label htmlFor="tags">Tags</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="tags"
+                        placeholder="Add a tag (press Enter)"
                         disabled={isPending}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const input = e.currentTarget;
+                            const trimmedTag = input.value.trim();
+                            if (trimmedTag && !tags.includes(trimmedTag)) {
+                              field.pushValue(trimmedTag);
+                              input.value = '';
+                            }
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          const input = document.getElementById('tags') as HTMLInputElement;
+                          if (input) {
+                            const trimmedTag = input.value.trim();
+                            if (trimmedTag && !tags.includes(trimmedTag)) {
+                              field.pushValue(trimmedTag);
+                              input.value = '';
+                            }
+                          }
+                        }}
+                        disabled={isPending}
+                        size="sm"
                       >
-                        <LuX className="size-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+                        Add
+                      </Button>
+                    </div>
+                    {tags.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {tags.map((tag, index) => (
+                          // eslint-disable-next-line react/no-array-index-key
+                          <Badge key={`${tag}-${index}`} variant="secondary" className="gap-1">
+                            {tag}
+                            <button
+                              type="button"
+                              onClick={() => field.removeValue(index)}
+                              className="ml-1 rounded-full hover:bg-muted"
+                              disabled={isPending}
+                            >
+                              <LuX className="size-3" />
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              }}
+            </form.Field>
 
             <DialogFooter>
               <form.FormActions

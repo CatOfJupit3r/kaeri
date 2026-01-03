@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import type { KeyboardEvent } from 'react';
 import { LuX } from 'react-icons/lu';
 import z from 'zod';
 
@@ -36,8 +35,6 @@ interface iCharacterFormProps {
 }
 
 export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCharacterFormProps) {
-  const [traits, setTraits] = useState<string[]>([]);
-  const [traitInput, setTraitInput] = useState('');
   const [relationships, setRelationships] = useState<Relationship[]>([]);
   const [appearances, setAppearances] = useState<Appearance[]>([]);
   const { createCharacter, isPending: isCreating } = useCreateCharacter();
@@ -52,6 +49,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
       name: initialData?.name ?? '',
       description: initialData?.description ?? '',
       avatarUrl: initialData?.avatarUrl ?? '',
+      traits: initialData?.traits ?? ([] as string[]),
     },
     onSubmit: async ({ value }) => {
       const normalizedName = value.name.trim();
@@ -67,7 +65,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
               name: normalizedName,
               description: normalizedDescription || undefined,
               avatarUrl: normalizedAvatarUrl || undefined,
-              traits: traits.length > 0 ? traits : undefined,
+              traits: value.traits.length > 0 ? value.traits : undefined,
               relationships: relationships.length > 0 ? relationships : undefined,
               appearances: appearances.length > 0 ? appearances : undefined,
             },
@@ -86,7 +84,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
               name: normalizedName,
               description: normalizedDescription || undefined,
               avatarUrl: normalizedAvatarUrl || undefined,
-              traits: traits.length > 0 ? traits : undefined,
+              traits: value.traits.length > 0 ? value.traits : undefined,
               relationships: relationships.length > 0 ? relationships : undefined,
               appearances: appearances.length > 0 ? appearances : undefined,
             },
@@ -95,8 +93,6 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
             onSuccess: () => {
               onOpenChange(false);
               form.reset();
-              setTraits([]);
-              setTraitInput('');
               setRelationships([]);
               setAppearances([]);
             },
@@ -114,6 +110,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
           .refine((val) => !val || z.string().url().safeParse(val).success, {
             message: 'Must be a valid URL',
           }),
+        traits: z.array(z.string()),
       }),
     },
   });
@@ -124,9 +121,8 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
         name: initialData.name,
         description: initialData.description ?? '',
         avatarUrl: initialData.avatarUrl ?? '',
+        traits: initialData.traits ?? [],
       });
-      setTraits(initialData.traits ?? []);
-      setTraitInput('');
       setRelationships(initialData.relationships ?? []);
       setAppearances(initialData.appearances ?? []);
     } else if (!open) {
@@ -134,32 +130,12 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
         name: '',
         description: '',
         avatarUrl: '',
+        traits: [],
       });
-      setTraits([]);
-      setTraitInput('');
       setRelationships([]);
       setAppearances([]);
     }
   }, [open, initialData, form]);
-
-  const addTrait = () => {
-    const trimmedTrait = traitInput.trim();
-    if (trimmedTrait && !traits.includes(trimmedTrait)) {
-      setTraits([...traits, trimmedTrait]);
-      setTraitInput('');
-    }
-  };
-
-  const removeTrait = (traitToRemove: string) => {
-    setTraits(traits.filter((trait) => trait !== traitToRemove));
-  };
-
-  const handleTraitKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addTrait();
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -194,39 +170,69 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
               {(field) => <field.TextField label="Avatar URL" placeholder="https://example.com/avatar.jpg" />}
             </form.AppField>
 
-            <div className="space-y-2">
-              <Label htmlFor="traits">Traits</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="traits"
-                  value={traitInput}
-                  onChange={(e) => setTraitInput(e.target.value)}
-                  onKeyDown={handleTraitKeyDown}
-                  placeholder="Add a trait (press Enter)"
-                  disabled={isPending}
-                />
-                <Button type="button" onClick={addTrait} disabled={!traitInput.trim() || isPending} size="sm">
-                  Add
-                </Button>
-              </div>
-              {traits.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {traits.map((trait) => (
-                    <Badge key={trait} variant="secondary" className="gap-1">
-                      {trait}
-                      <button
-                        type="button"
-                        onClick={() => removeTrait(trait)}
-                        className="ml-1 rounded-full hover:bg-muted"
+            <form.Field name="traits" mode="array">
+              {(field) => {
+                const traits = field.state.value || [];
+                return (
+                  <div className="space-y-2">
+                    <Label htmlFor="traits">Traits</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="traits"
+                        placeholder="Add a trait (press Enter)"
                         disabled={isPending}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const input = e.currentTarget;
+                            const trimmedTrait = input.value.trim();
+                            if (trimmedTrait && !traits.includes(trimmedTrait)) {
+                              field.pushValue(trimmedTrait);
+                              input.value = '';
+                            }
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          const input = document.getElementById('traits') as HTMLInputElement;
+                          if (input) {
+                            const trimmedTrait = input.value.trim();
+                            if (trimmedTrait && !traits.includes(trimmedTrait)) {
+                              field.pushValue(trimmedTrait);
+                              input.value = '';
+                            }
+                          }
+                        }}
+                        disabled={isPending}
+                        size="sm"
                       >
-                        <LuX className="size-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+                        Add
+                      </Button>
+                    </div>
+                    {traits.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {traits.map((trait, index) => (
+                          // eslint-disable-next-line react/no-array-index-key
+                          <Badge key={`${trait}-${index}`} variant="secondary" className="gap-1">
+                            {trait}
+                            <button
+                              type="button"
+                              onClick={() => field.removeValue(index)}
+                              className="ml-1 rounded-full hover:bg-muted"
+                              disabled={isPending}
+                            >
+                              <LuX className="size-3" />
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              }}
+            </form.Field>
 
             <div className="space-y-2">
               <Label htmlFor="character-relationships">Relationships</Label>

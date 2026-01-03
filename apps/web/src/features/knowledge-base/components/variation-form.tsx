@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { LuX } from 'react-icons/lu';
 import z from 'zod';
 
@@ -41,8 +41,6 @@ export function VariationForm({
   initialData,
   isPending = false,
 }: iVariationFormProps) {
-  const [traits, setTraits] = useState<string[]>([]);
-  const [traitInput, setTraitInput] = useState('');
   const { data: scriptsData } = useScriptList(seriesId);
 
   const isEditMode = !!initialData;
@@ -52,6 +50,7 @@ export function VariationForm({
       scriptId: initialData?.scriptId ?? '',
       label: initialData?.label ?? '',
       notes: initialData?.notes ?? '',
+      traits: [] as string[],
     },
     onSubmit: async ({ value }) => {
       onSubmit({
@@ -65,6 +64,7 @@ export function VariationForm({
         scriptId: z.string().min(1, 'Script is required'),
         label: z.string().min(1, 'Label is required').max(100, 'Label must be 100 characters or less'),
         notes: z.string().max(500, 'Notes must be 500 characters or less'),
+        traits: z.array(z.string()),
       }),
     },
   });
@@ -75,38 +75,17 @@ export function VariationForm({
         scriptId: initialData.scriptId,
         label: initialData.label,
         notes: initialData.notes ?? '',
+        traits: [],
       });
-      setTraits([]);
-      setTraitInput('');
     } else if (!open) {
       form.reset({
         scriptId: '',
         label: '',
         notes: '',
+        traits: [],
       });
-      setTraits([]);
-      setTraitInput('');
     }
   }, [open, initialData, form]);
-
-  const addTrait = () => {
-    const trimmedTrait = traitInput.trim();
-    if (trimmedTrait && !traits.includes(trimmedTrait)) {
-      setTraits([...traits, trimmedTrait]);
-      setTraitInput('');
-    }
-  };
-
-  const removeTrait = (traitToRemove: string) => {
-    setTraits(traits.filter((trait) => trait !== traitToRemove));
-  };
-
-  const handleTraitKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addTrait();
-    }
-  };
 
   const scriptOptions =
     scriptsData?.items.map((script) => ({
@@ -154,39 +133,69 @@ export function VariationForm({
               )}
             </form.AppField>
 
-            <div className="space-y-2">
-              <Label htmlFor="traits">Traits (Optional)</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="traits"
-                  value={traitInput}
-                  onChange={(e) => setTraitInput(e.target.value)}
-                  onKeyDown={handleTraitKeyDown}
-                  placeholder="Add a trait (press Enter)"
-                  disabled={isPending}
-                />
-                <Button type="button" onClick={addTrait} disabled={!traitInput.trim() || isPending} size="sm">
-                  Add
-                </Button>
-              </div>
-              {traits.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {traits.map((trait) => (
-                    <Badge key={trait} variant="secondary" className="gap-1">
-                      {trait}
-                      <button
-                        type="button"
-                        onClick={() => removeTrait(trait)}
-                        className="ml-1 rounded-full hover:bg-muted"
+            <form.Field name="traits" mode="array">
+              {(field) => {
+                const traits = field.state.value || [];
+                return (
+                  <div className="space-y-2">
+                    <Label htmlFor="traits">Traits (Optional)</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="traits"
+                        placeholder="Add a trait (press Enter)"
                         disabled={isPending}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const input = e.currentTarget;
+                            const trimmedTrait = input.value.trim();
+                            if (trimmedTrait && !traits.includes(trimmedTrait)) {
+                              field.pushValue(trimmedTrait);
+                              input.value = '';
+                            }
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          const input = document.getElementById('traits') as HTMLInputElement;
+                          if (input) {
+                            const trimmedTrait = input.value.trim();
+                            if (trimmedTrait && !traits.includes(trimmedTrait)) {
+                              field.pushValue(trimmedTrait);
+                              input.value = '';
+                            }
+                          }
+                        }}
+                        disabled={isPending}
+                        size="sm"
                       >
-                        <LuX className="size-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+                        Add
+                      </Button>
+                    </div>
+                    {traits.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {traits.map((trait, index) => (
+                          // eslint-disable-next-line react/no-array-index-key
+                          <Badge key={`${trait}-${index}`} variant="secondary" className="gap-1">
+                            {trait}
+                            <button
+                              type="button"
+                              onClick={() => field.removeValue(index)}
+                              className="ml-1 rounded-full hover:bg-muted"
+                              disabled={isPending}
+                            >
+                              <LuX className="size-3" />
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              }}
+            </form.Field>
 
             <DialogFooter>
               <form.FormActions
