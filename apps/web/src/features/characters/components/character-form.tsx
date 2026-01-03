@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { LuX } from 'react-icons/lu';
 import z from 'zod';
 
@@ -35,8 +35,6 @@ interface iCharacterFormProps {
 }
 
 export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCharacterFormProps) {
-  const [relationships, setRelationships] = useState<Relationship[]>([]);
-  const [appearances, setAppearances] = useState<Appearance[]>([]);
   const { createCharacter, isPending: isCreating } = useCreateCharacter();
   const { updateCharacter, isPending: isUpdating } = useUpdateCharacter();
   const { data: characterListData } = useCharacterList(seriesId);
@@ -50,6 +48,8 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
       description: initialData?.description ?? '',
       avatarUrl: initialData?.avatarUrl ?? '',
       traits: initialData?.traits ?? ([] as string[]),
+      relationships: initialData?.relationships ?? ([] as Relationship[]),
+      appearances: initialData?.appearances ?? ([] as Appearance[]),
     },
     onSubmit: async ({ value }) => {
       const normalizedName = value.name.trim();
@@ -66,8 +66,8 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
               description: normalizedDescription || undefined,
               avatarUrl: normalizedAvatarUrl || undefined,
               traits: value.traits.length > 0 ? value.traits : undefined,
-              relationships: relationships.length > 0 ? relationships : undefined,
-              appearances: appearances.length > 0 ? appearances : undefined,
+              relationships: value.relationships.length > 0 ? value.relationships : undefined,
+              appearances: value.appearances.length > 0 ? value.appearances : undefined,
             },
           },
           {
@@ -85,16 +85,14 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
               description: normalizedDescription || undefined,
               avatarUrl: normalizedAvatarUrl || undefined,
               traits: value.traits.length > 0 ? value.traits : undefined,
-              relationships: relationships.length > 0 ? relationships : undefined,
-              appearances: appearances.length > 0 ? appearances : undefined,
+              relationships: value.relationships.length > 0 ? value.relationships : undefined,
+              appearances: value.appearances.length > 0 ? value.appearances : undefined,
             },
           },
           {
             onSuccess: () => {
               onOpenChange(false);
               form.reset();
-              setRelationships([]);
-              setAppearances([]);
             },
           },
         );
@@ -111,6 +109,20 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
             message: 'Must be a valid URL',
           }),
         traits: z.array(z.string()),
+        relationships: z.array(
+          z.object({
+            targetId: z.string(),
+            type: z.string(),
+            note: z.string().optional(),
+          }),
+        ),
+        appearances: z.array(
+          z.object({
+            scriptId: z.string(),
+            sceneRef: z.string(),
+            locationId: z.string().optional(),
+          }),
+        ),
       }),
     },
   });
@@ -122,18 +134,18 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
         description: initialData.description ?? '',
         avatarUrl: initialData.avatarUrl ?? '',
         traits: initialData.traits ?? [],
+        relationships: initialData.relationships ?? [],
+        appearances: initialData.appearances ?? [],
       });
-      setRelationships(initialData.relationships ?? []);
-      setAppearances(initialData.appearances ?? []);
     } else if (!open) {
       form.reset({
         name: '',
         description: '',
         avatarUrl: '',
         traits: [],
+        relationships: [],
+        appearances: [],
       });
-      setRelationships([]);
-      setAppearances([]);
     }
   }, [open, initialData, form]);
 
@@ -234,30 +246,60 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
               }}
             </form.Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="character-relationships">Relationships</Label>
-              <div id="character-relationships">
-                <RelationshipPicker
-                  characters={characterListData?.items ?? []}
-                  currentCharacterId={initialData?._id}
-                  relationships={relationships}
-                  onChange={setRelationships}
-                  disabled={isPending}
-                />
-              </div>
-            </div>
+            <form.Field name="relationships" mode="array">
+              {(field) => {
+                const relationships = field.state.value ?? [];
+                return (
+                  <div className="space-y-2">
+                    <Label htmlFor="character-relationships">Relationships</Label>
+                    <div id="character-relationships">
+                      <RelationshipPicker
+                        characters={characterListData?.items ?? []}
+                        currentCharacterId={initialData?._id}
+                        relationships={relationships}
+                        onAdd={(relationship) => {
+                          const existingIndex = relationships.findIndex(
+                            (rel) => rel.targetId === relationship.targetId,
+                          );
+                          if (existingIndex !== -1) {
+                            field.replaceValue(existingIndex, relationship);
+                          } else {
+                            field.pushValue(relationship);
+                          }
+                        }}
+                        onRemove={(targetId) => {
+                          const index = relationships.findIndex((rel) => rel.targetId === targetId);
+                          if (index !== -1) {
+                            field.removeValue(index);
+                          }
+                        }}
+                        disabled={isPending}
+                      />
+                    </div>
+                  </div>
+                );
+              }}
+            </form.Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="character-appearances">Appearances</Label>
-              <div id="character-appearances">
-                <AppearancePicker
-                  seriesId={seriesId}
-                  appearances={appearances}
-                  onChange={setAppearances}
-                  disabled={isPending}
-                />
-              </div>
-            </div>
+            <form.Field name="appearances" mode="array">
+              {(field) => {
+                const appearances = field.state.value ?? [];
+                return (
+                  <div className="space-y-2">
+                    <Label htmlFor="character-appearances">Appearances</Label>
+                    <div id="character-appearances">
+                      <AppearancePicker
+                        seriesId={seriesId}
+                        appearances={appearances}
+                        onAdd={(appearance) => field.pushValue(appearance)}
+                        onRemove={(index) => field.removeValue(index)}
+                        disabled={isPending}
+                      />
+                    </div>
+                  </div>
+                );
+              }}
+            </form.Field>
 
             <DialogFooter>
               <form.FormActions

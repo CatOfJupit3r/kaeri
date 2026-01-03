@@ -22,7 +22,8 @@ interface iRelationshipPickerProps {
   characters: iCharacterOption[];
   currentCharacterId?: string;
   relationships: Relationship[];
-  onChange: (relationships: Relationship[]) => void;
+  onAdd: (relationship: Relationship) => void;
+  onRemove: (targetId: string) => void;
   disabled?: boolean;
 }
 
@@ -37,7 +38,8 @@ export function RelationshipPicker({
   characters,
   currentCharacterId,
   relationships,
-  onChange,
+  onAdd,
+  onRemove,
   disabled = false,
 }: iRelationshipPickerProps) {
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
@@ -65,15 +67,7 @@ export function RelationshipPicker({
       note: note.trim() || undefined,
     };
 
-    const existingIndex = relationships.findIndex((rel) => rel.targetId === selectedTargetId);
-
-    if (existingIndex !== -1) {
-      const updated = [...relationships];
-      updated[existingIndex] = newRelationship;
-      onChange(updated);
-    } else {
-      onChange([...relationships, newRelationship]);
-    }
+    onAdd(newRelationship);
 
     setSelectedTargetId(null);
     setSelectedType(null);
@@ -81,7 +75,7 @@ export function RelationshipPicker({
   };
 
   const handleRemoveRelationship = (targetId: string) => {
-    onChange(relationships.filter((rel) => rel.targetId !== targetId));
+    onRemove(targetId);
   };
 
   return (
@@ -141,7 +135,7 @@ export function RelationshipPicker({
         <div className="space-y-2">
           <Label htmlFor="current-relationships">Current Relationships</Label>
           <div id="current-relationships" className="space-y-2">
-            {relationships.map((rel) => (
+            {relationships.map((rel: Relationship) => (
               <div key={rel.targetId} className="flex items-start justify-between rounded-md border border-border p-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
