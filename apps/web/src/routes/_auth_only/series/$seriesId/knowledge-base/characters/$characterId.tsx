@@ -19,10 +19,10 @@ export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-bas
 
 function RouteComponent() {
   const { seriesId, characterId } = Route.useParams();
-  const { data: character, isLoading, error } = useCharacterDetail(characterId, seriesId);
+  const { data: character, isPending, error } = useCharacterDetail(characterId, seriesId);
   const { data: characterListData } = useCharacterList(seriesId);
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex items-center gap-2 text-muted-foreground">

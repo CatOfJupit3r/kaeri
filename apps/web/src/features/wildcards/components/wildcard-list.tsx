@@ -36,7 +36,7 @@ export function WildcardList({ seriesId }: iWildcardListProps) {
   const [editingWildcard, setEditingWildcard] = useState<iWildcard | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [wildcardToDelete, setWildcardToDelete] = useState<iWildcard | undefined>(undefined);
-  const { data, isLoading, error } = useWildcardList(seriesId);
+  const { data, isPending, error } = useWildcardList(seriesId);
   const { deleteWildcard, isPending: isDeleting } = useDeleteWildcard();
 
   const handleEditClick = (wildcard: iWildcard) => {
@@ -70,7 +70,7 @@ export function WildcardList({ seriesId }: iWildcardListProps) {
     }
   };
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-muted-foreground">Loading Wild Cards...</p>

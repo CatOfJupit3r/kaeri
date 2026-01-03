@@ -41,7 +41,7 @@ function RouteComponent() {
     coverUrl?: string;
   } | null>(null);
   const [deletingSeriesId, setDeletingSeriesId] = useState<string | null>(null);
-  const { data: seriesListData, isLoading, error, refetch } = useSeriesList();
+  const { data: seriesListData, isPending, error, refetch } = useSeriesList();
   const { deleteSeries, isPending: isDeleting } = useDeleteSeries();
 
   const handleEdit = (series: typeof editingSeries) => {
@@ -73,7 +73,7 @@ function RouteComponent() {
     }
   };
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="min-h-screen bg-background">
         <div className="border-b border-border bg-card px-6 py-4">

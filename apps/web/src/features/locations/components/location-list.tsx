@@ -36,7 +36,7 @@ export function LocationList({ seriesId }: iLocationListProps) {
   const [editingLocation, setEditingLocation] = useState<iLocation | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [locationToDelete, setLocationToDelete] = useState<iLocation | undefined>(undefined);
-  const { data, isLoading, error } = useLocationList(seriesId);
+  const { data, isPending, error } = useLocationList(seriesId);
   const { deleteLocation, isPending: isDeleting } = useDeleteLocation();
 
   const handleEditClick = (location: iLocation) => {
@@ -70,7 +70,7 @@ export function LocationList({ seriesId }: iLocationListProps) {
     }
   };
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-muted-foreground">Loading locations...</p>

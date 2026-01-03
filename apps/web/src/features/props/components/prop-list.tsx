@@ -40,7 +40,7 @@ export function PropList({ seriesId }: iPropListProps) {
   const [editingProp, setEditingProp] = useState<iProp | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [propToDelete, setPropToDelete] = useState<iProp | undefined>(undefined);
-  const { data, isLoading, error } = usePropList(seriesId);
+  const { data, isPending, error } = usePropList(seriesId);
   const { deleteProp, isPending: isDeleting } = useDeleteProp();
 
   const handleEditClick = (prop: iProp) => {
@@ -74,7 +74,7 @@ export function PropList({ seriesId }: iPropListProps) {
     }
   };
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-muted-foreground">Loading props...</p>

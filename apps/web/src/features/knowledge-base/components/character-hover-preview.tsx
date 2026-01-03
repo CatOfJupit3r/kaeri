@@ -13,7 +13,7 @@ interface iCharacterHoverPreviewProps {
 }
 
 export function CharacterHoverPreview({ characterId, seriesId, children, onOpenChange }: iCharacterHoverPreviewProps) {
-  const { data: character, isLoading } = useCharacter(characterId, seriesId);
+  const { data: character, isPending } = useCharacter(characterId, seriesId);
 
   const initials = character?.name
     ? character.name
@@ -38,7 +38,7 @@ export function CharacterHoverPreview({ characterId, seriesId, children, onOpenC
   };
 
   const renderContent = () => {
-    if (isLoading) {
+    if (isPending) {
       return (
         <div className="flex h-24 items-center justify-center">
           <p className="text-sm text-muted-foreground">Loading...</p>

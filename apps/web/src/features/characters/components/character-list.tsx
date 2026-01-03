@@ -49,7 +49,7 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
   const [editingCharacter, setEditingCharacter] = useState<iCharacter | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [characterToDelete, setCharacterToDelete] = useState<iCharacter | undefined>(undefined);
-  const { data, isLoading, error } = useCharacterList(seriesId);
+  const { data, isPending, error } = useCharacterList(seriesId);
   const { deleteCharacter, isPending: isDeleting } = useDeleteCharacter();
 
   const handleCardClick = (characterId: string) => {
@@ -90,7 +90,7 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
     }
   };
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-muted-foreground">Loading characters...</p>

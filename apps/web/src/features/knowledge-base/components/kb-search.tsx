@@ -49,7 +49,7 @@ export function KBSearch({ seriesId, onResultClick }: iKBSearchProps) {
     setDebouncedQuery(value);
   }, 300);
 
-  const { data, isLoading } = useKBSearch(seriesId, debouncedQuery);
+  const { data, isPending } = useKBSearch(seriesId, debouncedQuery);
 
   const handleInputChange = (value: string) => {
     setSearchInput(value);
@@ -99,7 +99,7 @@ export function KBSearch({ seriesId, onResultClick }: iKBSearchProps) {
         <Card className="absolute top-full right-0 left-0 z-50 mt-2 max-h-96 overflow-y-auto shadow-lg">
           <CardContent className="p-2">
             {(() => {
-              if (isLoading) {
+              if (isPending) {
                 return (
                   <div className="flex items-center justify-center py-8">
                     <p className="text-sm text-muted-foreground">Searching...</p>

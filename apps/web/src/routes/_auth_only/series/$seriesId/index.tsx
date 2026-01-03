@@ -20,7 +20,7 @@ export const Route = createFileRoute('/_auth_only/series/$seriesId/')({
 
 function RouteComponent() {
   const { seriesId } = Route.useParams();
-  const { data: series, isLoading, error } = useSeries(seriesId);
+  const { data: series, isPending, error } = useSeries(seriesId);
 
   const { data: scriptsData } = useQuery({
     ...tanstackRPC.scripts.listScriptsBySeries.queryOptions({
@@ -64,7 +64,7 @@ function RouteComponent() {
     enabled: !!seriesId,
   });
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="flex h-full items-center justify-center">
         <p className="text-muted-foreground">Loading series...</p>

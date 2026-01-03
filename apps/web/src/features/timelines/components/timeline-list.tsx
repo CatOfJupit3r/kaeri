@@ -35,7 +35,7 @@ export function TimelineList({ seriesId }: iTimelineListProps) {
   const [editingEntry, setEditingEntry] = useState<iTimelineEntry | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<iTimelineEntry | undefined>(undefined);
-  const { data, isLoading, error } = useTimelineList(seriesId);
+  const { data, isPending, error } = useTimelineList(seriesId);
   const { deleteTimeline, isPending: isDeleting } = useDeleteTimeline();
 
   const sortedEntries = useMemo(() => {
@@ -98,7 +98,7 @@ export function TimelineList({ seriesId }: iTimelineListProps) {
     }
   };
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-muted-foreground">Loading timeline...</p>

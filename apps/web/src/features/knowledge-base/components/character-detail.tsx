@@ -59,7 +59,7 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
   const [variationToDelete, setVariationToDelete] = useState<iVariation | undefined>(undefined);
   const [isAppearanceFormOpen, setIsAppearanceFormOpen] = useState(false);
 
-  const { data: character, isLoading, error } = useCharacter(characterId, seriesId);
+  const { data: character, isPending, error } = useCharacter(characterId, seriesId);
   const { data: scriptsData } = useScriptList(seriesId);
   const { data: locationsData } = useLocationList(seriesId, 100);
   const { data: allCharacters } = useCharacterList(seriesId, 100, 0);
@@ -183,7 +183,7 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
     return char?.name ?? 'Unknown Character';
   };
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-3xl">
