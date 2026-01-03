@@ -66,6 +66,9 @@ export class KnowledgeBaseService implements iWithLogger {
       description?: string;
       traits?: string[];
       avatarUrl?: string;
+      relationships?: Array<{ targetId: string; type: string; note?: string }>;
+      variations?: Array<{ scriptId: string; label: string; notes?: string }>;
+      appearances?: Array<{ scriptId: string; sceneRef: string; locationId?: string }>;
     },
   ) {
     const series = await SeriesModel.findById(seriesId);
@@ -82,9 +85,9 @@ export class KnowledgeBaseService implements iWithLogger {
       name: data.name,
       description: data.description,
       traits: data.traits ?? [],
-      relationships: [],
-      variations: [],
-      appearances: [],
+      relationships: data.relationships ?? [],
+      variations: data.variations ?? [],
+      appearances: data.appearances ?? [],
       avatarUrl: data.avatarUrl,
     });
 
@@ -100,6 +103,9 @@ export class KnowledgeBaseService implements iWithLogger {
       description?: string;
       traits?: string[];
       avatarUrl?: string;
+      relationships?: Array<{ targetId: string; type: string; note?: string }>;
+      variations?: Array<{ scriptId: string; label: string; notes?: string }>;
+      appearances?: Array<{ scriptId: string; sceneRef: string; locationId?: string }>;
     },
   ) {
     const character = await CharacterModel.findOne({ _id: id, seriesId });
@@ -111,6 +117,9 @@ export class KnowledgeBaseService implements iWithLogger {
     if (patch.description !== undefined) character.description = patch.description;
     if (patch.traits !== undefined) character.traits = patch.traits;
     if (patch.avatarUrl !== undefined) character.avatarUrl = patch.avatarUrl;
+    if (patch.relationships !== undefined) character.relationships = patch.relationships;
+    if (patch.variations !== undefined) character.variations = patch.variations;
+    if (patch.appearances !== undefined) character.appearances = patch.appearances;
 
     await character.save();
     this.logger.info('Character updated', { characterId: id });
@@ -238,6 +247,38 @@ export class KnowledgeBaseService implements iWithLogger {
     await character.save();
 
     this.logger.info('Variation added', { characterId, scriptId: variation.scriptId });
+    return character;
+  }
+
+  public async updateVariation(
+    seriesId: string,
+    characterId: string,
+    scriptId: string,
+    label: string,
+    patch: { label?: string; notes?: string },
+  ) {
+    const character = await CharacterModel.findOne({ _id: characterId, seriesId });
+    if (!character) {
+      throw ORPCNotFoundError(errorCodes.CHARACTER_NOT_FOUND);
+    }
+
+    const variationIndex = (character.variations ?? []).findIndex((v) => v.scriptId === scriptId && v.label === label);
+
+    if (variationIndex === -1) {
+      throw ORPCNotFoundError(errorCodes.VARIATION_NOT_FOUND);
+    }
+
+    character.variations = character.variations ?? [];
+    if (patch.label !== undefined) {
+      character.variations[variationIndex].label = patch.label;
+    }
+    if (patch.notes !== undefined) {
+      character.variations[variationIndex].notes = patch.notes;
+    }
+
+    await character.save();
+
+    this.logger.info('Variation updated', { characterId, scriptId, label });
     return character;
   }
 

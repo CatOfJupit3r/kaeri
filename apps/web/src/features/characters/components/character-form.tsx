@@ -15,12 +15,12 @@ import {
 import { useAppForm } from '@~/components/ui/field';
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
+import { RelationshipPicker } from '@~/features/knowledge-base/components/relationship-picker';
 
 import { useCreateCharacter } from '../hooks/mutations/use-create-character';
 import { useUpdateCharacter } from '../hooks/mutations/use-update-character';
 import { useCharacterList } from '../hooks/queries/use-character-list';
 import { AppearancePicker } from './appearance-picker';
-import { RelationshipPicker } from './relationship-picker';
 
 interface iRelationship {
   targetId: string;

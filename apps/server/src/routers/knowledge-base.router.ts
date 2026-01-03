@@ -11,7 +11,15 @@ export const knowledgeBaseRouter = base.knowledgeBase.router({
     create: protectedProcedure.knowledgeBase.characters.create.handler(async ({ input }) =>
       GETTERS.KnowledgeBaseService().createCharacter(
         input.seriesId,
-        input.value as { name: string; description?: string; traits?: string[]; avatarUrl?: string },
+        input.value as {
+          name: string;
+          description?: string;
+          traits?: string[];
+          avatarUrl?: string;
+          relationships?: Array<{ targetId: string; type: string; note?: string }>;
+          variations?: Array<{ scriptId: string; label: string; notes?: string }>;
+          appearances?: Array<{ scriptId: string; sceneRef: string; locationId?: string }>;
+        },
       ),
     ),
 
@@ -159,6 +167,16 @@ export const knowledgeBaseRouter = base.knowledgeBase.router({
   // Character variations
   addVariation: protectedProcedure.knowledgeBase.addVariation.handler(async ({ input }) =>
     GETTERS.KnowledgeBaseService().addVariation(input.seriesId, input.characterId, input.variation),
+  ),
+
+  updateVariation: protectedProcedure.knowledgeBase.updateVariation.handler(async ({ input }) =>
+    GETTERS.KnowledgeBaseService().updateVariation(
+      input.seriesId,
+      input.characterId,
+      input.scriptId,
+      input.label,
+      input.patch,
+    ),
   ),
 
   removeVariation: protectedProcedure.knowledgeBase.removeVariation.handler(async ({ input }) =>

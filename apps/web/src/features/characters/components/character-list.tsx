@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { LuPencil, LuTrash2, LuUsers } from 'react-icons/lu';
 
@@ -43,12 +44,20 @@ interface iCharacterListProps {
 }
 
 export function CharacterList({ seriesId }: iCharacterListProps) {
+  const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCharacter, setEditingCharacter] = useState<iCharacter | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [characterToDelete, setCharacterToDelete] = useState<iCharacter | undefined>(undefined);
   const { data, isLoading, error } = useCharacterList(seriesId);
   const { deleteCharacter, isPending: isDeleting } = useDeleteCharacter();
+
+  const handleCardClick = (characterId: string) => {
+    void navigate({
+      to: '/series/$seriesId/knowledge-base/characters/$characterId',
+      params: { seriesId, characterId },
+    });
+  };
 
   const handleEditClick = (character: iCharacter) => {
     setEditingCharacter(character);
@@ -147,7 +156,11 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
               .slice(0, 2);
 
             return (
-              <Card key={character._id} className="group overflow-hidden transition-all hover:shadow-md">
+              <Card
+                key={character._id}
+                className="group cursor-pointer overflow-hidden transition-all hover:shadow-md"
+                onClick={() => handleCardClick(character._id)}
+              >
                 <CardContent className="flex gap-4 p-4">
                   <Avatar className="size-12">
                     {character.avatarUrl ? <AvatarImage src={character.avatarUrl} alt={character.name} /> : null}
