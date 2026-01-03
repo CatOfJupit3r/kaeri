@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { LuPencil, LuTrash2, LuUsers } from 'react-icons/lu';
 
@@ -16,7 +17,6 @@ import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
-import { CharacterDetail } from '@~/features/knowledge-base/components/character-detail';
 
 import { useDeleteCharacter } from '../hooks/mutations/use-delete-character';
 import { CharacterForm } from './character-form';
@@ -44,23 +44,24 @@ interface iCharacterListProps {
 }
 
 export function CharacterList({ seriesId }: iCharacterListProps) {
+  const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCharacter, setEditingCharacter] = useState<iCharacter | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [characterToDelete, setCharacterToDelete] = useState<iCharacter | undefined>(undefined);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [selectedCharacterId, setSelectedCharacterId] = useState<string | undefined>(undefined);
   const { data, isLoading, error } = useCharacterList(seriesId);
   const { deleteCharacter, isPending: isDeleting } = useDeleteCharacter();
+
+  const handleCardClick = (characterId: string) => {
+    void navigate({
+      to: '/series/$seriesId/knowledge-base/characters/$characterId',
+      params: { seriesId, characterId },
+    });
+  };
 
   const handleEditClick = (character: iCharacter) => {
     setEditingCharacter(character);
     setIsFormOpen(true);
-  };
-
-  const handleViewClick = (characterId: string) => {
-    setSelectedCharacterId(characterId);
-    setIsDetailOpen(true);
   };
 
   const handleDeleteClick = (character: iCharacter) => {
@@ -158,7 +159,7 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
               <Card
                 key={character._id}
                 className="group cursor-pointer overflow-hidden transition-all hover:shadow-md"
-                onClick={() => handleViewClick(character._id)}
+                onClick={() => handleCardClick(character._id)}
               >
                 <CardContent className="flex gap-4 p-4">
                   <Avatar className="size-12">
@@ -225,14 +226,6 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
         onOpenChange={handleFormOpenChange}
         initialData={editingCharacter}
       />
-      {selectedCharacterId ? (
-        <CharacterDetail
-          characterId={selectedCharacterId}
-          seriesId={seriesId}
-          open={isDetailOpen}
-          onOpenChange={setIsDetailOpen}
-        />
-      ) : null}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
