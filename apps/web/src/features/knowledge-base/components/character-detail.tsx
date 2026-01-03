@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LuInfo, LuPencil, LuTrash2, LuTags } from 'react-icons/lu';
+import { LuInfo, LuMapPin, LuPencil, LuTrash2, LuTags } from 'react-icons/lu';
 
 import {
   AlertDialog,
@@ -18,11 +18,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/co
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@~/components/ui/dialog';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
+import { AppearancePicker } from '@~/features/characters/components/appearance-picker';
 import { useCharacter } from '@~/features/characters/hooks/queries/use-character';
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
+import { useAddAppearance } from '@~/features/knowledge-base/hooks/mutations/use-add-appearance';
 import { useAddVariation } from '@~/features/knowledge-base/hooks/mutations/use-add-variation';
+import { useRemoveAppearance } from '@~/features/knowledge-base/hooks/mutations/use-remove-appearance';
 import { useRemoveVariation } from '@~/features/knowledge-base/hooks/mutations/use-remove-variation';
 import { useUpdateVariation } from '@~/features/knowledge-base/hooks/mutations/use-update-variation';
+import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
 import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
 
 import { CharacterHoverPreview } from './character-hover-preview';
@@ -32,6 +36,12 @@ interface iVariation {
   scriptId: string;
   label: string;
   notes?: string;
+}
+
+interface iAppearance {
+  scriptId: string;
+  sceneRef: string;
+  locationId?: string;
 }
 
 interface iCharacterDetailProps {
@@ -47,13 +57,17 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
   const [editingVariation, setEditingVariation] = useState<iVariation | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [variationToDelete, setVariationToDelete] = useState<iVariation | undefined>(undefined);
+  const [isAppearanceFormOpen, setIsAppearanceFormOpen] = useState(false);
 
   const { data: character, isLoading, error } = useCharacter(characterId, seriesId);
   const { data: scriptsData } = useScriptList(seriesId);
+  const { data: locationsData } = useLocationList(seriesId, 100);
   const { data: allCharacters } = useCharacterList(seriesId, 100, 0);
   const { addVariation, isPending: isAdding } = useAddVariation();
   const { updateVariation, isPending: isUpdating } = useUpdateVariation();
   const { removeVariation, isPending: isDeleting } = useRemoveVariation();
+  const { addAppearance, isPending: isAddingAppearance } = useAddAppearance();
+  const { removeAppearance, isPending: isRemovingAppearance } = useRemoveAppearance();
 
   const handleVariationSubmit = (variation: iVariation) => {
     if (editingVariation) {
@@ -132,6 +146,38 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
     return script?.title ?? 'Unknown Script';
   };
 
+  const getLocationName = (locationId: string) => {
+    const location = locationsData?.items.find((l) => l._id === locationId);
+    return location?.name ?? 'Unknown Location';
+  };
+
+  const handleAppearanceChange = (appearances: iAppearance[]) => {
+    const currentAppearances = character?.appearances ?? [];
+    const newAppearances = appearances.filter(
+      (newApp) =>
+        !currentAppearances.some((curr) => curr.scriptId === newApp.scriptId && curr.sceneRef === newApp.sceneRef),
+    );
+
+    if (newAppearances.length > 0) {
+      newAppearances.forEach((appearance) => {
+        addAppearance({
+          seriesId,
+          characterId,
+          appearance,
+        });
+      });
+    }
+  };
+
+  const handleRemoveAppearanceClick = (scriptId: string, sceneRef: string) => {
+    removeAppearance({
+      seriesId,
+      characterId,
+      scriptId,
+      sceneRef,
+    });
+  };
+
   const getCharacterName = (charId: string) => {
     const char = allCharacters?.items.find((c) => c._id === charId);
     return char?.name ?? 'Unknown Character';
@@ -188,7 +234,7 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
           </DialogHeader>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="info" className="gap-2">
                 <LuInfo className="size-4" />
                 <span>Info</span>
@@ -196,6 +242,10 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
               <TabsTrigger value="variations" className="gap-2">
                 <LuTags className="size-4" />
                 <span>Variations</span>
+              </TabsTrigger>
+              <TabsTrigger value="appearances" className="gap-2">
+                <LuMapPin className="size-4" />
+                <span>Appearances</span>
               </TabsTrigger>
             </TabsList>
 
@@ -347,6 +397,103 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
                   </EmptyContent>
                 </Empty>
               )}
+            </TabsContent>
+
+            <TabsContent value="appearances" className="mt-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Appearances</h3>
+                  <p className="text-sm text-muted-foreground">{character.appearances?.length ?? 0} appearance(s)</p>
+                </div>
+                <Button onClick={() => setIsAppearanceFormOpen(true)} size="sm">
+                  Add Appearance
+                </Button>
+              </div>
+
+              {character.appearances && character.appearances.length > 0 ? (
+                <Card>
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="border-b bg-muted/50">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-sm font-medium">Script Name</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">Scene Ref</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">Location</th>
+                            <th className="px-4 py-3 text-right text-sm font-medium">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                          {character.appearances.map((appearance) => (
+                            <tr key={`${appearance.scriptId}-${appearance.sceneRef}`} className="hover:bg-muted/50">
+                              <td className="px-4 py-3 text-sm font-medium">{getScriptTitle(appearance.scriptId)}</td>
+                              <td className="px-4 py-3 text-sm">{appearance.sceneRef}</td>
+                              <td className="px-4 py-3 text-sm">
+                                {appearance.locationId ? getLocationName(appearance.locationId) : '—'}
+                              </td>
+                              <td className="px-4 py-3 text-right">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleRemoveAppearanceClick(appearance.scriptId, appearance.sceneRef)}
+                                  disabled={isRemovingAppearance}
+                                  className="size-8 p-0 text-destructive hover:text-destructive"
+                                >
+                                  <LuTrash2 className="size-4" />
+                                </Button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Empty className="border">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <LuMapPin />
+                    </EmptyMedia>
+                    <EmptyTitle>No appearances yet</EmptyTitle>
+                    <EmptyDescription>
+                      Add appearances to track when and where this character appears in your scripts.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent>
+                    <Button onClick={() => setIsAppearanceFormOpen(true)} size="sm">
+                      Add First Appearance
+                    </Button>
+                  </EmptyContent>
+                </Empty>
+              )}
+
+              {isAppearanceFormOpen ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Add New Appearance</CardTitle>
+                    <CardDescription>Select a script, scene, and optionally a location</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <AppearancePicker
+                      seriesId={seriesId}
+                      appearances={character.appearances ?? []}
+                      onChange={handleAppearanceChange}
+                      disabled={isAddingAppearance}
+                    />
+                    <div className="mt-4 flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsAppearanceFormOpen(false)}
+                        disabled={isAddingAppearance}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : null}
             </TabsContent>
           </Tabs>
         </DialogContent>
