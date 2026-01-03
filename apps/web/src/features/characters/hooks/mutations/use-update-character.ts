@@ -4,11 +4,15 @@ import { toastORPCError, toastSuccess } from '@~/components/toastifications';
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
+import { invalidateKnowledgeBaseLists, KB_LIST_DEFAULT_PARAMS } from '../../../knowledge-base/helpers/cache-utils';
+
 export type CharacterListQueryReturnType = ORPCOutputs['knowledgeBase']['characters']['list'];
 
 export const updateCharacterMutationOptions = tanstackRPC.knowledgeBase.characters.update.mutationOptions({
   onMutate: async ({ id, seriesId, patch }, ctx) => {
-    const queryKey = tanstackRPC.knowledgeBase.characters.list.queryKey({ input: { seriesId, limit: 20, offset: 0 } });
+    const queryKey = tanstackRPC.knowledgeBase.characters.list.queryKey({
+      input: { seriesId, ...KB_LIST_DEFAULT_PARAMS },
+    });
 
     await ctx.client.cancelQueries({ queryKey });
 
@@ -26,18 +30,18 @@ export const updateCharacterMutationOptions = tanstackRPC.knowledgeBase.characte
     return { previousData };
   },
   onError: (error, { seriesId }, context, ctx) => {
-    const queryKey = tanstackRPC.knowledgeBase.characters.list.queryKey({ input: { seriesId, limit: 20, offset: 0 } });
+    const queryKey = tanstackRPC.knowledgeBase.characters.list.queryKey({
+      input: { seriesId, ...KB_LIST_DEFAULT_PARAMS },
+    });
 
-    if (context?.previousData) {
-      ctx.client.setQueryData<CharacterListQueryReturnType>(queryKey, context.previousData);
-    } else {
-      void ctx.client.invalidateQueries({ queryKey });
-    }
+    void ctx.client.invalidateQueries({ queryKey });
 
     toastORPCError('Failed to update character', error);
   },
   onSuccess: (updatedCharacter, { seriesId }, _context, ctx) => {
-    const queryKey = tanstackRPC.knowledgeBase.characters.list.queryKey({ input: { seriesId, limit: 20, offset: 0 } });
+    const queryKey = tanstackRPC.knowledgeBase.characters.list.queryKey({
+      input: { seriesId, ...KB_LIST_DEFAULT_PARAMS },
+    });
 
     ctx.client.setQueryData<CharacterListQueryReturnType>(queryKey, (oldData) => {
       if (!oldData) return oldData;
@@ -49,6 +53,8 @@ export const updateCharacterMutationOptions = tanstackRPC.knowledgeBase.characte
         ),
       };
     });
+
+    void invalidateKnowledgeBaseLists(ctx.client, 'characters', seriesId);
 
     toastSuccess('Character updated successfully');
   },

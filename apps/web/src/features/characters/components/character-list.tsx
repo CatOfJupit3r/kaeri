@@ -19,25 +19,8 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 
 import { useDeleteCharacter } from '../hooks/mutations/use-delete-character';
+import type { CharacterListItem } from '../hooks/queries/use-character-list';
 import { CharacterForm } from './character-form';
-
-interface iCharacter {
-  _id: string;
-  name: string;
-  description?: string;
-  avatarUrl?: string;
-  traits?: string[];
-  relationships?: Array<{
-    targetId: string;
-    type: string;
-    note?: string;
-  }>;
-  appearances?: Array<{
-    scriptId: string;
-    sceneRef: string;
-    locationId?: string;
-  }>;
-}
 
 interface iCharacterListProps {
   seriesId: string;
@@ -46,9 +29,9 @@ interface iCharacterListProps {
 export function CharacterList({ seriesId }: iCharacterListProps) {
   const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingCharacter, setEditingCharacter] = useState<iCharacter | undefined>(undefined);
+  const [editingCharacter, setEditingCharacter] = useState<CharacterListItem | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [characterToDelete, setCharacterToDelete] = useState<iCharacter | undefined>(undefined);
+  const [characterToDelete, setCharacterToDelete] = useState<CharacterListItem | undefined>(undefined);
   const { data, isPending, error } = useCharacterList(seriesId);
   const { deleteCharacter, isPending: isDeleting } = useDeleteCharacter();
 
@@ -56,15 +39,16 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
     void navigate({
       to: '/series/$seriesId/knowledge-base/characters/$characterId',
       params: { seriesId, characterId },
+      search: { tab: 'characters' },
     });
   };
 
-  const handleEditClick = (character: iCharacter) => {
+  const handleEditClick = (character: CharacterListItem) => {
     setEditingCharacter(character);
     setIsFormOpen(true);
   };
 
-  const handleDeleteClick = (character: iCharacter) => {
+  const handleDeleteClick = (character: CharacterListItem) => {
     setCharacterToDelete(character);
     setIsDeleteDialogOpen(true);
   };
@@ -99,9 +83,10 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
   }
 
   if (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-destructive">Error loading characters: {error.message}</p>
+        <p className="text-destructive">Error loading characters: {message}</p>
       </div>
     );
   }
@@ -158,8 +143,17 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
             return (
               <Card
                 key={character._id}
-                className="group cursor-pointer overflow-hidden transition-all hover:shadow-md"
+                className="group overflow-hidden transition-all hover:shadow-md"
+                role="button"
+                tabIndex={0}
+                aria-label={`Open character ${character.name}`}
                 onClick={() => handleCardClick(character._id)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleCardClick(character._id);
+                  }
+                }}
               >
                 <CardContent className="flex gap-4 p-4">
                   <Avatar className="size-12">
@@ -197,6 +191,7 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
                             handleEditClick(character);
                           }}
                           className="size-8 p-0"
+                          aria-label={`Edit ${character.name}`}
                         >
                           <LuPencil className="size-4" />
                         </Button>
@@ -208,6 +203,7 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
                             handleDeleteClick(character);
                           }}
                           className="size-8 p-0 text-destructive hover:text-destructive"
+                          aria-label={`Delete ${character.name}`}
                         >
                           <LuTrash2 className="size-4" />
                         </Button>

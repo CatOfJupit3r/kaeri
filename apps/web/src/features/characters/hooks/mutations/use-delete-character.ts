@@ -4,11 +4,15 @@ import { toastORPCError, toastSuccess } from '@~/components/toastifications';
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
+import { KB_LIST_DEFAULT_PARAMS, invalidateKnowledgeBaseLists } from '../../../knowledge-base/helpers/cache-utils';
+
 export type CharacterListQueryReturnType = ORPCOutputs['knowledgeBase']['characters']['list'];
 
 export const deleteCharacterMutationOptions = tanstackRPC.knowledgeBase.characters.remove.mutationOptions({
   onMutate: async ({ id, seriesId }, ctx) => {
-    const queryKey = tanstackRPC.knowledgeBase.characters.list.queryKey({ input: { seriesId, limit: 20, offset: 0 } });
+    const queryKey = tanstackRPC.knowledgeBase.characters.list.queryKey({
+      input: { seriesId, ...KB_LIST_DEFAULT_PARAMS },
+    });
 
     await ctx.client.cancelQueries({ queryKey });
 
@@ -17,30 +21,29 @@ export const deleteCharacterMutationOptions = tanstackRPC.knowledgeBase.characte
     ctx.client.setQueryData<CharacterListQueryReturnType>(queryKey, (oldData) => {
       if (!oldData) return oldData;
 
+      const filteredItems = oldData.items.filter((character) => character._id !== id);
+      const isRemoved = filteredItems.length !== oldData.items.length;
+
       return {
         ...oldData,
-        items: oldData.items.filter((character) => character._id !== id),
-        total: oldData.total - 1,
+        items: filteredItems,
+        total: isRemoved ? Math.max(0, oldData.total - 1) : oldData.total,
       };
     });
 
     return { previousData };
   },
   onError: (error, { seriesId }, context, ctx) => {
-    const queryKey = tanstackRPC.knowledgeBase.characters.list.queryKey({ input: { seriesId, limit: 20, offset: 0 } });
+    const queryKey = tanstackRPC.knowledgeBase.characters.list.queryKey({
+      input: { seriesId, ...KB_LIST_DEFAULT_PARAMS },
+    });
 
-    if (context?.previousData) {
-      ctx.client.setQueryData<CharacterListQueryReturnType>(queryKey, context.previousData);
-    } else {
-      void ctx.client.invalidateQueries({ queryKey });
-    }
+    void ctx.client.invalidateQueries({ queryKey });
 
     toastORPCError('Failed to delete character', error);
   },
   onSuccess: (_data, { seriesId }, _context, ctx) => {
-    void ctx.client.invalidateQueries({
-      queryKey: tanstackRPC.knowledgeBase.characters.list.queryKey({ input: { seriesId, limit: 20, offset: 0 } }),
-    });
+    void invalidateKnowledgeBaseLists(ctx.client, 'characters', seriesId);
 
     toastSuccess('Character deleted successfully');
   },

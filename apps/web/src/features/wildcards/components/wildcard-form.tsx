@@ -43,15 +43,19 @@ export function WildcardForm({ seriesId, open, onOpenChange, initialData }: iWil
       tag: initialData?.tag ?? '',
     },
     onSubmit: async ({ value }) => {
+      const normalizedTitle = value.title.trim();
+      const normalizedBody = value.body.trim();
+      const normalizedTag = value.tag.trim();
+
       if (isEditMode && initialData) {
         updateWildcard(
           {
             id: initialData._id,
             seriesId,
             patch: {
-              title: value.title,
-              body: value.body || undefined,
-              tag: value.tag || undefined,
+              title: normalizedTitle,
+              body: normalizedBody || undefined,
+              tag: normalizedTag || undefined,
             },
           },
           {
@@ -65,9 +69,9 @@ export function WildcardForm({ seriesId, open, onOpenChange, initialData }: iWil
           {
             seriesId,
             value: {
-              title: value.title,
-              body: value.body || undefined,
-              tag: value.tag || undefined,
+              title: normalizedTitle,
+              body: normalizedBody || undefined,
+              tag: normalizedTag || undefined,
             },
           },
           {
@@ -81,9 +85,9 @@ export function WildcardForm({ seriesId, open, onOpenChange, initialData }: iWil
     },
     validators: {
       onSubmit: z.object({
-        title: z.string().min(1, 'Title is required').max(100, 'Title must be 100 characters or less'),
-        body: z.string().max(1000, 'Content must be 1000 characters or less'),
-        tag: z.string().max(50, 'Tag must be 50 characters or less'),
+        title: z.string().trim().min(1, 'Title is required').max(100, 'Title must be 100 characters or less'),
+        body: z.string().trim().max(1000, 'Content must be 1000 characters or less'),
+        tag: z.string().trim().max(50, 'Tag must be 50 characters or less'),
       }),
     },
   });

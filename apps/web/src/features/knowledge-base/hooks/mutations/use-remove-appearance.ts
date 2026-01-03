@@ -27,11 +27,7 @@ export const removeAppearanceMutationOptions = tanstackRPC.knowledgeBase.removeA
   onError: (error, { seriesId, characterId }, context, ctx) => {
     const queryKey = tanstackRPC.knowledgeBase.characters.get.queryKey({ input: { id: characterId, seriesId } });
 
-    if (context?.previous) {
-      ctx.client.setQueryData<CharacterType>(queryKey, context.previous);
-    } else {
-      void ctx.client.invalidateQueries({ queryKey });
-    }
+    void ctx.client.invalidateQueries({ queryKey });
 
     toastORPCError('Failed to remove appearance', error);
   },

@@ -29,6 +29,8 @@ interface iTimelineFormProps {
   initialData?: iTimelineEntry;
 }
 
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
 export function TimelineForm({ seriesId, open, onOpenChange, initialData }: iTimelineFormProps) {
   const { createTimeline, isPending: isCreating } = useCreateTimeline();
   const { updateTimeline, isPending: isUpdating } = useUpdateTimeline();
@@ -42,14 +44,17 @@ export function TimelineForm({ seriesId, open, onOpenChange, initialData }: iTim
       timestamp: initialData?.timestamp ?? '',
     },
     onSubmit: async ({ value }) => {
+      const normalizedLabel = value.label.trim();
+      const normalizedTimestamp = value.timestamp.trim();
+
       if (isEditMode && initialData) {
         updateTimeline(
           {
             id: initialData._id,
             seriesId,
             patch: {
-              label: value.label,
-              timestamp: value.timestamp || undefined,
+              label: normalizedLabel,
+              timestamp: normalizedTimestamp || undefined,
             },
           },
           {
@@ -63,8 +68,8 @@ export function TimelineForm({ seriesId, open, onOpenChange, initialData }: iTim
           {
             seriesId,
             value: {
-              label: value.label,
-              timestamp: value.timestamp || undefined,
+              label: normalizedLabel,
+              timestamp: normalizedTimestamp || undefined,
             },
           },
           {
@@ -78,8 +83,13 @@ export function TimelineForm({ seriesId, open, onOpenChange, initialData }: iTim
     },
     validators: {
       onSubmit: z.object({
-        label: z.string().min(1, 'Label is required').max(200, 'Label must be 200 characters or less'),
-        timestamp: z.string(),
+        label: z.string().trim().min(1, 'Label is required').max(200, 'Label must be 200 characters or less'),
+        timestamp: z
+          .string()
+          .trim()
+          .refine((val) => !val || DATE_REGEX.test(val), {
+            message: 'Use YYYY-MM-DD format',
+          }),
       }),
     },
   });
@@ -122,7 +132,7 @@ export function TimelineForm({ seriesId, open, onOpenChange, initialData }: iTim
                   label="Date"
                   placeholder="YYYY-MM-DD"
                   type="date"
-                  description="Optional: Provide a date for chronological ordering"
+                  description="Optional: Provide a date for chronological ordering (YYYY-MM-DD)"
                 />
               )}
             </form.AppField>

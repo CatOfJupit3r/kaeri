@@ -8,12 +8,10 @@ import { Label } from '@~/components/ui/label';
 import type { iOptionType } from '@~/components/ui/select';
 import { SingleSelect } from '@~/components/ui/select';
 import { Textarea } from '@~/components/ui/textarea';
+import type { CharacterListItem } from '@~/features/characters/hooks/queries/use-character-list';
 
-interface iRelationship {
-  targetId: string;
-  type: string;
-  note?: string;
-}
+type Relationship = NonNullable<CharacterListItem['relationships']>[number];
+type RelationshipType = Relationship['type'];
 
 interface iCharacterOption {
   _id: string;
@@ -23,15 +21,17 @@ interface iCharacterOption {
 interface iRelationshipPickerProps {
   characters: iCharacterOption[];
   currentCharacterId?: string;
-  relationships: iRelationship[];
-  onChange: (relationships: iRelationship[]) => void;
+  relationships: Relationship[];
+  onChange: (relationships: Relationship[]) => void;
   disabled?: boolean;
 }
 
-const relationshipTypeOptions: iOptionType[] = (Object.values(RELATIONSHIP_TYPES) as string[]).map((type) => ({
-  label: type,
-  value: type,
-}));
+const relationshipTypeOptions: iOptionType[] = (Object.values(RELATIONSHIP_TYPES) as RelationshipType[]).map(
+  (type) => ({
+    label: type,
+    value: type,
+  }),
+);
 
 export function RelationshipPicker({
   characters,
@@ -41,7 +41,7 @@ export function RelationshipPicker({
   disabled = false,
 }: iRelationshipPickerProps) {
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
-  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [selectedType, setSelectedType] = useState<RelationshipType | null>(null);
   const [note, setNote] = useState('');
 
   const availableCharacters = characters.filter((char) => char._id !== currentCharacterId);
@@ -59,7 +59,7 @@ export function RelationshipPicker({
   const handleAddRelationship = () => {
     if (!selectedTargetId || !selectedType) return;
 
-    const newRelationship: iRelationship = {
+    const newRelationship: Relationship = {
       targetId: selectedTargetId,
       type: selectedType,
       note: note.trim() || undefined,

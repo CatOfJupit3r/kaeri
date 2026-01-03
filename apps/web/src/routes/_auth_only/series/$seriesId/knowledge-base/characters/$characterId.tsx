@@ -45,11 +45,12 @@ function RouteComponent() {
   }
 
   if (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-destructive">Error loading character</h2>
-          <p className="mt-2 text-muted-foreground">{error.message}</p>
+          <p className="mt-2 text-muted-foreground">{message}</p>
         </div>
       </div>
     );
@@ -87,7 +88,7 @@ function RouteComponent() {
               </BreadcrumbSeparator>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/series/$seriesId/knowledge-base" params={{ seriesId }}>
+                  <Link to="/series/$seriesId/knowledge-base" params={{ seriesId }} search={{ tab: 'characters' }}>
                     Knowledge Base
                   </Link>
                 </BreadcrumbLink>

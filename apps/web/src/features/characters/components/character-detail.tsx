@@ -114,6 +114,7 @@ export function CharacterDetail({ character, seriesId, allCharacters = [] }: iCh
                               <Link
                                 to="/series/$seriesId/knowledge-base/characters/$characterId"
                                 params={{ seriesId, characterId: rel.targetId }}
+                                search={{ tab: 'characters' }}
                                 className="font-medium text-primary hover:underline"
                               >
                                 {targetName}

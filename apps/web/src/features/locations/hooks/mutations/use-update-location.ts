@@ -4,11 +4,15 @@ import { toastORPCError, toastSuccess } from '@~/components/toastifications';
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
+import { invalidateKnowledgeBaseLists, KB_LIST_DEFAULT_PARAMS } from '../../../knowledge-base/helpers/cache-utils';
+
 export type LocationListQueryReturnType = ORPCOutputs['knowledgeBase']['locations']['list'];
 
 export const updateLocationMutationOptions = tanstackRPC.knowledgeBase.locations.update.mutationOptions({
   onMutate: async ({ id, seriesId, patch }, ctx) => {
-    const queryKey = tanstackRPC.knowledgeBase.locations.list.queryKey({ input: { seriesId, limit: 20, offset: 0 } });
+    const queryKey = tanstackRPC.knowledgeBase.locations.list.queryKey({
+      input: { seriesId, ...KB_LIST_DEFAULT_PARAMS },
+    });
 
     await ctx.client.cancelQueries({ queryKey });
 
@@ -26,18 +30,18 @@ export const updateLocationMutationOptions = tanstackRPC.knowledgeBase.locations
     return { previousData };
   },
   onError: (error, { seriesId }, context, ctx) => {
-    const queryKey = tanstackRPC.knowledgeBase.locations.list.queryKey({ input: { seriesId, limit: 20, offset: 0 } });
+    const queryKey = tanstackRPC.knowledgeBase.locations.list.queryKey({
+      input: { seriesId, ...KB_LIST_DEFAULT_PARAMS },
+    });
 
-    if (context?.previousData) {
-      ctx.client.setQueryData<LocationListQueryReturnType>(queryKey, context.previousData);
-    } else {
-      void ctx.client.invalidateQueries({ queryKey });
-    }
+    void ctx.client.invalidateQueries({ queryKey });
 
     toastORPCError('Failed to update location', error);
   },
   onSuccess: (updatedLocation, { seriesId }, _context, ctx) => {
-    const queryKey = tanstackRPC.knowledgeBase.locations.list.queryKey({ input: { seriesId, limit: 20, offset: 0 } });
+    const queryKey = tanstackRPC.knowledgeBase.locations.list.queryKey({
+      input: { seriesId, ...KB_LIST_DEFAULT_PARAMS },
+    });
 
     ctx.client.setQueryData<LocationListQueryReturnType>(queryKey, (oldData) => {
       if (!oldData) return oldData;
@@ -47,6 +51,8 @@ export const updateLocationMutationOptions = tanstackRPC.knowledgeBase.locations
         items: oldData.items.map((location) => (location._id === updatedLocation._id ? updatedLocation : location)),
       };
     });
+
+    void invalidateKnowledgeBaseLists(ctx.client, 'locations', seriesId);
 
     toastSuccess('Location updated successfully');
   },

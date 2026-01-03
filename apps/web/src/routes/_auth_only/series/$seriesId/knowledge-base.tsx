@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { parseAsStringEnum, useQueryStates } from 'nuqs';
 import { LuBookUser, LuGlobe, LuPackage, LuCalendar, LuSparkles } from 'react-icons/lu';
+import z from 'zod';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
 import { CharacterList } from '@~/features/characters/components/character-list';
@@ -15,7 +16,19 @@ import { timelineListQueryOptions } from '@~/features/timelines/hooks/queries/us
 import { WildcardList } from '@~/features/wildcards/components/wildcard-list';
 import { wildcardListQueryOptions } from '@~/features/wildcards/hooks/queries/use-wildcard-list';
 
+const tabSchema = z.enum(['characters', 'locations', 'props', 'timeline', 'wildcards']);
+const TAB_VALUES = tabSchema.enum;
+const TAB_VALUES_ARRAY = Object.values(TAB_VALUES);
+type TabValue = z.infer<typeof tabSchema>;
+
 export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-base')({
+  validateSearch: (search) => {
+    const parsed = tabSchema.safeParse(search.tab);
+
+    return {
+      tab: parsed.success ? parsed.data : undefined,
+    };
+  },
   loader: async ({ context, params }) => {
     const { seriesId } = params;
 
@@ -32,7 +45,10 @@ export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-bas
 
 function RouteComponent() {
   const { seriesId } = Route.useParams();
-  const [activeTab, setActiveTab] = useState('characters');
+  const [{ tab }, setQueryStates] = useQueryStates({
+    tab: parseAsStringEnum(TAB_VALUES_ARRAY).withDefault(TAB_VALUES.characters),
+  });
+  const activeTab = tab ?? TAB_VALUES.characters;
 
   const handleResultClick = (entityId: string, entityType: string) => {
     const tabMap: Record<string, string> = {
@@ -45,7 +61,7 @@ function RouteComponent() {
 
     const targetTab = tabMap[entityType];
     if (targetTab) {
-      setActiveTab(targetTab);
+      setQueryStates({ tab: targetTab as TabValue }).catch(() => {});
     }
   };
 
@@ -70,7 +86,11 @@ function RouteComponent() {
           <KBSearch seriesId={seriesId} onResultClick={handleResultClick} />
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={async (value) => setQueryStates({ tab: (value as TabValue) ?? TAB_VALUES.characters })}
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="characters" className="gap-2">
               <LuBookUser className="size-4" />

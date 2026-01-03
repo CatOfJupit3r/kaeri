@@ -34,6 +34,37 @@ interface iPropFormProps {
   initialData?: iProp;
 }
 
+const propAssociationsSchema = z.array(
+  z.object({
+    characterId: z.string().optional(),
+    locationId: z.string().optional(),
+    scriptId: z.string().optional(),
+    note: z.string().optional(),
+  }),
+);
+
+const isValidAssociationsJson = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return true;
+  try {
+    return propAssociationsSchema.safeParse(JSON.parse(trimmed)).success;
+  } catch {
+    return false;
+  }
+};
+
+const parseAssociationsJson = (value: string): iProp['associations'] | undefined => {
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  try {
+    const parsed = propAssociationsSchema.safeParse(JSON.parse(trimmed));
+    if (parsed.success) return parsed.data;
+  } catch {
+    // Validation handles messaging; fallback to undefined here.
+  }
+  return undefined;
+};
+
 export function PropForm({ seriesId, open, onOpenChange, initialData }: iPropFormProps) {
   const { createProp, isPending: isCreating } = useCreateProp();
   const { updateProp, isPending: isUpdating } = useUpdateProp();
@@ -48,14 +79,9 @@ export function PropForm({ seriesId, open, onOpenChange, initialData }: iPropFor
       associationsJson: initialData?.associations ? JSON.stringify(initialData.associations, null, 2) : '',
     },
     onSubmit: async ({ value }) => {
-      let associations: iProp['associations'] | undefined;
-      if (value.associationsJson.trim()) {
-        try {
-          associations = JSON.parse(value.associationsJson);
-        } catch {
-          return;
-        }
-      }
+      const normalizedName = value.name.trim();
+      const normalizedDescription = value.description.trim();
+      const associations = parseAssociationsJson(value.associationsJson);
 
       if (isEditMode && initialData) {
         updateProp(
@@ -63,8 +89,8 @@ export function PropForm({ seriesId, open, onOpenChange, initialData }: iPropFor
             id: initialData._id,
             seriesId,
             patch: {
-              name: value.name,
-              description: value.description || undefined,
+              name: normalizedName,
+              description: normalizedDescription || undefined,
               associations,
             },
           },
@@ -79,8 +105,8 @@ export function PropForm({ seriesId, open, onOpenChange, initialData }: iPropFor
           {
             seriesId,
             value: {
-              name: value.name,
-              description: value.description || undefined,
+              name: normalizedName,
+              description: normalizedDescription || undefined,
               associations,
             },
           },
@@ -95,22 +121,11 @@ export function PropForm({ seriesId, open, onOpenChange, initialData }: iPropFor
     },
     validators: {
       onSubmit: z.object({
-        name: z.string().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
-        description: z.string().max(500, 'Description must be 500 characters or less'),
-        associationsJson: z.string().refine(
-          (val) => {
-            if (!val.trim()) return true;
-            try {
-              JSON.parse(val);
-              return true;
-            } catch {
-              return false;
-            }
-          },
-          {
-            message: 'Must be valid JSON',
-          },
-        ),
+        name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
+        description: z.string().trim().max(500, 'Description must be 500 characters or less'),
+        associationsJson: z.string().refine(isValidAssociationsJson, {
+          message: 'Must be valid JSON array of associations',
+        }),
       }),
     },
   });
@@ -161,6 +176,7 @@ export function PropForm({ seriesId, open, onOpenChange, initialData }: iPropFor
                   label="Associations (JSON)"
                   placeholder='[{"characterId": "...", "note": "..."}]'
                   rows={4}
+                  description="Optional JSON array of associations with characterId, locationId, scriptId, and note fields."
                 />
               )}
             </form.AppField>

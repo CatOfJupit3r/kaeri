@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import { LuX } from 'react-icons/lu';
 import z from 'zod';
 
@@ -20,42 +21,25 @@ import { RelationshipPicker } from '@~/features/knowledge-base/components/relati
 import { useCreateCharacter } from '../hooks/mutations/use-create-character';
 import { useUpdateCharacter } from '../hooks/mutations/use-update-character';
 import { useCharacterList } from '../hooks/queries/use-character-list';
+import type { CharacterListItem } from '../hooks/queries/use-character-list';
 import { AppearancePicker } from './appearance-picker';
 
-interface iRelationship {
-  targetId: string;
-  type: string;
-  note?: string;
-}
-
-interface iAppearance {
-  scriptId: string;
-  sceneRef: string;
-  locationId?: string;
-}
-
-interface iCharacter {
-  _id: string;
-  name: string;
-  description?: string;
-  avatarUrl?: string;
-  traits?: string[];
-  relationships?: iRelationship[];
-  appearances?: iAppearance[];
-}
+type Relationship = NonNullable<CharacterListItem['relationships']>[number];
+type Appearance = NonNullable<CharacterListItem['appearances']>[number];
+type Character = CharacterListItem;
 
 interface iCharacterFormProps {
   seriesId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialData?: iCharacter;
+  initialData?: Character;
 }
 
 export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCharacterFormProps) {
   const [traits, setTraits] = useState<string[]>([]);
   const [traitInput, setTraitInput] = useState('');
-  const [relationships, setRelationships] = useState<iRelationship[]>([]);
-  const [appearances, setAppearances] = useState<iAppearance[]>([]);
+  const [relationships, setRelationships] = useState<Relationship[]>([]);
+  const [appearances, setAppearances] = useState<Appearance[]>([]);
   const { createCharacter, isPending: isCreating } = useCreateCharacter();
   const { updateCharacter, isPending: isUpdating } = useUpdateCharacter();
   const { data: characterListData } = useCharacterList(seriesId);
@@ -70,15 +54,19 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
       avatarUrl: initialData?.avatarUrl ?? '',
     },
     onSubmit: async ({ value }) => {
+      const normalizedName = value.name.trim();
+      const normalizedDescription = value.description.trim();
+      const normalizedAvatarUrl = value.avatarUrl.trim();
+
       if (isEditMode && initialData) {
         updateCharacter(
           {
             id: initialData._id,
             seriesId,
             patch: {
-              name: value.name,
-              description: value.description || undefined,
-              avatarUrl: value.avatarUrl || undefined,
+              name: normalizedName,
+              description: normalizedDescription || undefined,
+              avatarUrl: normalizedAvatarUrl || undefined,
               traits: traits.length > 0 ? traits : undefined,
               relationships: relationships.length > 0 ? relationships : undefined,
               appearances: appearances.length > 0 ? appearances : undefined,
@@ -95,9 +83,9 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
           {
             seriesId,
             value: {
-              name: value.name,
-              description: value.description || undefined,
-              avatarUrl: value.avatarUrl || undefined,
+              name: normalizedName,
+              description: normalizedDescription || undefined,
+              avatarUrl: normalizedAvatarUrl || undefined,
               traits: traits.length > 0 ? traits : undefined,
               relationships: relationships.length > 0 ? relationships : undefined,
               appearances: appearances.length > 0 ? appearances : undefined,
@@ -118,11 +106,14 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
     },
     validators: {
       onSubmit: z.object({
-        name: z.string().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
-        description: z.string().max(500, 'Description must be 500 characters or less'),
-        avatarUrl: z.string().refine((val) => !val || z.string().url().safeParse(val).success, {
-          message: 'Must be a valid URL',
-        }),
+        name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
+        description: z.string().trim().max(500, 'Description must be 500 characters or less'),
+        avatarUrl: z
+          .string()
+          .trim()
+          .refine((val) => !val || z.string().url().safeParse(val).success, {
+            message: 'Must be a valid URL',
+          }),
       }),
     },
   });
@@ -163,7 +154,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
     setTraits(traits.filter((trait) => trait !== traitToRemove));
   };
 
-  const handleTraitKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleTraitKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       addTrait();

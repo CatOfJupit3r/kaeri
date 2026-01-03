@@ -4,11 +4,15 @@ import { toastORPCError, toastSuccess } from '@~/components/toastifications';
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
+import { invalidateKnowledgeBaseLists, KB_LIST_DEFAULT_PARAMS } from '../../../knowledge-base/helpers/cache-utils';
+
 export type PropListQueryReturnType = ORPCOutputs['knowledgeBase']['props']['list'];
 
 export const updatePropMutationOptions = tanstackRPC.knowledgeBase.props.update.mutationOptions({
   onMutate: async ({ id, seriesId, patch }, ctx) => {
-    const queryKey = tanstackRPC.knowledgeBase.props.list.queryKey({ input: { seriesId, limit: 20, offset: 0 } });
+    const queryKey = tanstackRPC.knowledgeBase.props.list.queryKey({
+      input: { seriesId, ...KB_LIST_DEFAULT_PARAMS },
+    });
 
     await ctx.client.cancelQueries({ queryKey });
 
@@ -26,18 +30,18 @@ export const updatePropMutationOptions = tanstackRPC.knowledgeBase.props.update.
     return { previousData };
   },
   onError: (error, { seriesId }, context, ctx) => {
-    const queryKey = tanstackRPC.knowledgeBase.props.list.queryKey({ input: { seriesId, limit: 20, offset: 0 } });
+    const queryKey = tanstackRPC.knowledgeBase.props.list.queryKey({
+      input: { seriesId, ...KB_LIST_DEFAULT_PARAMS },
+    });
 
-    if (context?.previousData) {
-      ctx.client.setQueryData<PropListQueryReturnType>(queryKey, context.previousData);
-    } else {
-      void ctx.client.invalidateQueries({ queryKey });
-    }
+    void ctx.client.invalidateQueries({ queryKey });
 
     toastORPCError('Failed to update prop', error);
   },
   onSuccess: (updatedProp, { seriesId }, _context, ctx) => {
-    const queryKey = tanstackRPC.knowledgeBase.props.list.queryKey({ input: { seriesId, limit: 20, offset: 0 } });
+    const queryKey = tanstackRPC.knowledgeBase.props.list.queryKey({
+      input: { seriesId, ...KB_LIST_DEFAULT_PARAMS },
+    });
 
     ctx.client.setQueryData<PropListQueryReturnType>(queryKey, (oldData) => {
       if (!oldData) return oldData;
@@ -47,6 +51,8 @@ export const updatePropMutationOptions = tanstackRPC.knowledgeBase.props.update.
         items: oldData.items.map((prop) => (prop._id === updatedProp._id ? updatedProp : prop)),
       };
     });
+
+    void invalidateKnowledgeBaseLists(ctx.client, 'props', seriesId);
 
     toastSuccess('Prop updated successfully');
   },

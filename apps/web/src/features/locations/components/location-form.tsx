@@ -48,14 +48,17 @@ export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLoc
       description: initialData?.description ?? '',
     },
     onSubmit: async ({ value }) => {
+      const normalizedName = value.name.trim();
+      const normalizedDescription = value.description.trim();
+
       if (isEditMode && initialData) {
         updateLocation(
           {
             id: initialData._id,
             seriesId,
             patch: {
-              name: value.name,
-              description: value.description || undefined,
+              name: normalizedName,
+              description: normalizedDescription || undefined,
               tags: tags.length > 0 ? tags : undefined,
             },
           },
@@ -70,8 +73,8 @@ export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLoc
           {
             seriesId,
             value: {
-              name: value.name,
-              description: value.description || undefined,
+              name: normalizedName,
+              description: normalizedDescription || undefined,
               tags: tags.length > 0 ? tags : undefined,
             },
           },
@@ -88,8 +91,8 @@ export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLoc
     },
     validators: {
       onSubmit: z.object({
-        name: z.string().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
-        description: z.string().max(500, 'Description must be 500 characters or less'),
+        name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
+        description: z.string().trim().max(500, 'Description must be 500 characters or less'),
       }),
     },
   });

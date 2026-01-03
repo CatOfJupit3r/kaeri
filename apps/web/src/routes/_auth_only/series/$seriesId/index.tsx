@@ -12,6 +12,7 @@ import {
 } from '@~/components/ui/breadcrumb';
 import { Card } from '@~/components/ui/card';
 import { characterListQueryOptions } from '@~/features/characters/hooks/queries/use-character-list';
+import { KB_COUNT_PARAMS } from '@~/features/knowledge-base/helpers/cache-utils';
 import { locationListQueryOptions } from '@~/features/locations/hooks/queries/use-location-list';
 import { propListQueryOptions } from '@~/features/props/hooks/queries/use-prop-list';
 import { useSeries, seriesQueryOptions } from '@~/features/series/hooks/queries/use-series';
@@ -23,20 +24,18 @@ export const Route = createFileRoute('/_auth_only/series/$seriesId/')({
   loader: async ({ context, params }) => {
     const { seriesId } = params;
 
-    const baseListParams = { limit: 1, offset: 0 } as const;
-
     await Promise.all([
       context.queryClient.ensureQueryData(seriesQueryOptions(seriesId)),
       context.queryClient.ensureQueryData(
         tanstackRPC.scripts.listScriptsBySeries.queryOptions({
-          input: { seriesId, ...baseListParams },
+          input: { seriesId, ...KB_COUNT_PARAMS },
         }),
       ),
-      context.queryClient.ensureQueryData(characterListQueryOptions(seriesId, baseListParams)),
-      context.queryClient.ensureQueryData(locationListQueryOptions(seriesId, baseListParams)),
-      context.queryClient.ensureQueryData(propListQueryOptions(seriesId, baseListParams)),
-      context.queryClient.ensureQueryData(timelineListQueryOptions(seriesId, baseListParams)),
-      context.queryClient.ensureQueryData(wildcardListQueryOptions(seriesId, baseListParams)),
+      context.queryClient.ensureQueryData(characterListQueryOptions(seriesId, KB_COUNT_PARAMS)),
+      context.queryClient.ensureQueryData(locationListQueryOptions(seriesId, KB_COUNT_PARAMS)),
+      context.queryClient.ensureQueryData(propListQueryOptions(seriesId, KB_COUNT_PARAMS)),
+      context.queryClient.ensureQueryData(timelineListQueryOptions(seriesId, KB_COUNT_PARAMS)),
+      context.queryClient.ensureQueryData(wildcardListQueryOptions(seriesId, KB_COUNT_PARAMS)),
     ]);
   },
   component: RouteComponent,
@@ -97,9 +96,10 @@ function RouteComponent() {
   }
 
   if (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-destructive">Error loading series: {error.message}</p>
+        <p className="text-destructive">Error loading series: {message}</p>
       </div>
     );
   }
@@ -254,7 +254,12 @@ function RouteComponent() {
             </Card>
 
             <Card className="group overflow-hidden transition-all hover:shadow-md">
-              <Link to="/series/$seriesId/knowledge-base" params={{ seriesId }} className="block p-6">
+              <Link
+                to="/series/$seriesId/knowledge-base"
+                params={{ seriesId }}
+                search={{ tab: 'characters' }}
+                className="block p-6"
+              >
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
                     <LuDatabase className="h-6 w-6 text-primary" />
