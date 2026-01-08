@@ -106,72 +106,325 @@ const searchKB = authProcedure
   )
   .output(z.object({ items: z.array(kbEntityUnion), total: z.number() }));
 
-const buildCrud = <TSchema extends z.ZodObject>(basePath: string, schema: TSchema) => {
-  const create = authProcedure
+// Character CRUD
+const characterCrud = {
+  create: authProcedure
     .route({
-      path: `/${basePath}/create`,
+      path: '/characters/create',
       method: 'POST',
-      summary: `Create ${basePath}`,
-      description: `Creates a ${basePath} entity under a series.`,
+      summary: 'Create character',
+      description: 'Creates a character entity under a series.',
     })
-    .input(z.object({ seriesId: z.string(), value: schema.clone().omit({ _id: true, seriesId: true }) }))
-    .output(schema);
+    .input(
+      z.object({
+        seriesId: z.string(),
+        value: characterSchema.omit({ _id: true, seriesId: true }),
+      }),
+    )
+    .output(characterSchema),
 
-  const update = authProcedure
+  update: authProcedure
     .route({
-      path: `/${basePath}/update`,
+      path: '/characters/update',
       method: 'PUT',
-      summary: `Update ${basePath}`,
-      description: `Updates fields on a ${basePath} entity.`,
+      summary: 'Update character',
+      description: 'Updates fields on a character entity.',
     })
     .input(
       z.object({
         id: z.string(),
         seriesId: z.string(),
-        patch: schema.clone().partial().omit({ _id: true, seriesId: true }),
+        patch: characterSchema.omit({ _id: true, seriesId: true }).partial(),
       }),
     )
-    .output(schema);
+    .output(characterSchema),
 
-  const remove = authProcedure
+  remove: authProcedure
     .route({
-      path: `/${basePath}/delete`,
+      path: '/characters/delete',
       method: 'DELETE',
-      summary: `Delete ${basePath}`,
-      description: `Deletes a ${basePath} entity. Implementations must guard against orphaning references.`,
+      summary: 'Delete character',
+      description: 'Deletes a character entity. Implementations must guard against orphaning references.',
     })
     .input(z.object({ id: z.string(), seriesId: z.string() }))
-    .output(z.object({ success: z.boolean() }));
+    .output(z.object({ success: z.boolean() })),
 
-  const get = authProcedure
+  get: authProcedure
     .route({
-      path: `/${basePath}/get`,
+      path: '/characters/get',
       method: 'GET',
-      summary: `Get ${basePath}`,
-      description: `Returns a ${basePath} entity by ID. Uses NOT_FOUND for inaccessible resources.`,
+      summary: 'Get character',
+      description: 'Returns a character entity by ID. Uses NOT_FOUND for inaccessible resources.',
     })
     .input(z.object({ id: z.string(), seriesId: z.string() }))
-    .output(schema);
+    .output(characterSchema),
 
-  const list = authProcedure
+  list: authProcedure
     .route({
-      path: `/${basePath}/list`,
+      path: '/characters/list',
       method: 'GET',
-      summary: `List ${basePath}`,
-      description: `Lists ${basePath} entities by series with pagination.`,
+      summary: 'List characters',
+      description: 'Lists character entities by series with pagination.',
     })
-    // merge is deprecated, but extend() has issues with type inference here
-    .input(paginationSchema.clone().merge(z.object({ seriesId: z.string() })))
-    .output(z.object({ items: z.array(schema), total: z.number() }));
+    .input(paginationSchema.merge(z.object({ seriesId: z.string() })))
+    .output(z.object({ items: z.array(characterSchema), total: z.number() })),
+} as const;
 
-  return { create, update, remove, get, list } as const;
-};
+// Location CRUD
+const locationCrud = {
+  create: authProcedure
+    .route({
+      path: '/locations/create',
+      method: 'POST',
+      summary: 'Create location',
+      description: 'Creates a location entity under a series.',
+    })
+    .input(
+      z.object({
+        seriesId: z.string(),
+        value: locationSchema.omit({ _id: true, seriesId: true }),
+      }),
+    )
+    .output(locationSchema),
 
-const characterCrud = buildCrud('characters', characterSchema);
-const locationCrud = buildCrud('locations', locationSchema);
-const propCrud = buildCrud('props', propSchema);
-const timelineCrud = buildCrud('timeline', timelineEntrySchema);
-const wildCardCrud = buildCrud('wildcards', wildCardSchema);
+  update: authProcedure
+    .route({
+      path: '/locations/update',
+      method: 'PUT',
+      summary: 'Update location',
+      description: 'Updates fields on a location entity.',
+    })
+    .input(
+      z.object({
+        id: z.string(),
+        seriesId: z.string(),
+        patch: locationSchema.omit({ _id: true, seriesId: true }).partial(),
+      }),
+    )
+    .output(locationSchema),
+
+  remove: authProcedure
+    .route({
+      path: '/locations/delete',
+      method: 'DELETE',
+      summary: 'Delete location',
+      description: 'Deletes a location entity. Implementations must guard against orphaning references.',
+    })
+    .input(z.object({ id: z.string(), seriesId: z.string() }))
+    .output(z.object({ success: z.boolean() })),
+
+  get: authProcedure
+    .route({
+      path: '/locations/get',
+      method: 'GET',
+      summary: 'Get location',
+      description: 'Returns a location entity by ID. Uses NOT_FOUND for inaccessible resources.',
+    })
+    .input(z.object({ id: z.string(), seriesId: z.string() }))
+    .output(locationSchema),
+
+  list: authProcedure
+    .route({
+      path: '/locations/list',
+      method: 'GET',
+      summary: 'List locations',
+      description: 'Lists location entities by series with pagination.',
+    })
+    .input(paginationSchema.merge(z.object({ seriesId: z.string() })))
+    .output(z.object({ items: z.array(locationSchema), total: z.number() })),
+} as const;
+
+// Prop CRUD
+const propCrud = {
+  create: authProcedure
+    .route({
+      path: '/props/create',
+      method: 'POST',
+      summary: 'Create prop',
+      description: 'Creates a prop entity under a series.',
+    })
+    .input(
+      z.object({
+        seriesId: z.string(),
+        value: propSchema.omit({ _id: true, seriesId: true }),
+      }),
+    )
+    .output(propSchema),
+
+  update: authProcedure
+    .route({
+      path: '/props/update',
+      method: 'PUT',
+      summary: 'Update prop',
+      description: 'Updates fields on a prop entity.',
+    })
+    .input(
+      z.object({
+        id: z.string(),
+        seriesId: z.string(),
+        patch: propSchema.omit({ _id: true, seriesId: true }).partial(),
+      }),
+    )
+    .output(propSchema),
+
+  remove: authProcedure
+    .route({
+      path: '/props/delete',
+      method: 'DELETE',
+      summary: 'Delete prop',
+      description: 'Deletes a prop entity. Implementations must guard against orphaning references.',
+    })
+    .input(z.object({ id: z.string(), seriesId: z.string() }))
+    .output(z.object({ success: z.boolean() })),
+
+  get: authProcedure
+    .route({
+      path: '/props/get',
+      method: 'GET',
+      summary: 'Get prop',
+      description: 'Returns a prop entity by ID. Uses NOT_FOUND for inaccessible resources.',
+    })
+    .input(z.object({ id: z.string(), seriesId: z.string() }))
+    .output(propSchema),
+
+  list: authProcedure
+    .route({
+      path: '/props/list',
+      method: 'GET',
+      summary: 'List props',
+      description: 'Lists prop entities by series with pagination.',
+    })
+    .input(paginationSchema.merge(z.object({ seriesId: z.string() })))
+    .output(z.object({ items: z.array(propSchema), total: z.number() })),
+} as const;
+
+// Timeline CRUD
+const timelineCrud = {
+  create: authProcedure
+    .route({
+      path: '/timeline/create',
+      method: 'POST',
+      summary: 'Create timeline entry',
+      description: 'Creates a timeline entry entity under a series.',
+    })
+    .input(
+      z.object({
+        seriesId: z.string(),
+        value: timelineEntrySchema.omit({ _id: true, seriesId: true }),
+      }),
+    )
+    .output(timelineEntrySchema),
+
+  update: authProcedure
+    .route({
+      path: '/timeline/update',
+      method: 'PUT',
+      summary: 'Update timeline entry',
+      description: 'Updates fields on a timeline entry entity.',
+    })
+    .input(
+      z.object({
+        id: z.string(),
+        seriesId: z.string(),
+        patch: timelineEntrySchema.omit({ _id: true, seriesId: true }).partial(),
+      }),
+    )
+    .output(timelineEntrySchema),
+
+  remove: authProcedure
+    .route({
+      path: '/timeline/delete',
+      method: 'DELETE',
+      summary: 'Delete timeline entry',
+      description: 'Deletes a timeline entry entity. Implementations must guard against orphaning references.',
+    })
+    .input(z.object({ id: z.string(), seriesId: z.string() }))
+    .output(z.object({ success: z.boolean() })),
+
+  get: authProcedure
+    .route({
+      path: '/timeline/get',
+      method: 'GET',
+      summary: 'Get timeline entry',
+      description: 'Returns a timeline entry entity by ID. Uses NOT_FOUND for inaccessible resources.',
+    })
+    .input(z.object({ id: z.string(), seriesId: z.string() }))
+    .output(timelineEntrySchema),
+
+  list: authProcedure
+    .route({
+      path: '/timeline/list',
+      method: 'GET',
+      summary: 'List timeline entries',
+      description: 'Lists timeline entry entities by series with pagination.',
+    })
+    .input(paginationSchema.merge(z.object({ seriesId: z.string() })))
+    .output(z.object({ items: z.array(timelineEntrySchema), total: z.number() })),
+} as const;
+
+// WildCard CRUD
+const wildCardCrud = {
+  create: authProcedure
+    .route({
+      path: '/wildcards/create',
+      method: 'POST',
+      summary: 'Create wildcard',
+      description: 'Creates a wildcard entity under a series.',
+    })
+    .input(
+      z.object({
+        seriesId: z.string(),
+        value: wildCardSchema.omit({ _id: true, seriesId: true }),
+      }),
+    )
+    .output(wildCardSchema),
+
+  update: authProcedure
+    .route({
+      path: '/wildcards/update',
+      method: 'PUT',
+      summary: 'Update wildcard',
+      description: 'Updates fields on a wildcard entity.',
+    })
+    .input(
+      z.object({
+        id: z.string(),
+        seriesId: z.string(),
+        patch: wildCardSchema.omit({ _id: true, seriesId: true }).partial(),
+      }),
+    )
+    .output(wildCardSchema),
+
+  remove: authProcedure
+    .route({
+      path: '/wildcards/delete',
+      method: 'DELETE',
+      summary: 'Delete wildcard',
+      description: 'Deletes a wildcard entity. Implementations must guard against orphaning references.',
+    })
+    .input(z.object({ id: z.string(), seriesId: z.string() }))
+    .output(z.object({ success: z.boolean() })),
+
+  get: authProcedure
+    .route({
+      path: '/wildcards/get',
+      method: 'GET',
+      summary: 'Get wildcard',
+      description: 'Returns a wildcard entity by ID. Uses NOT_FOUND for inaccessible resources.',
+    })
+    .input(z.object({ id: z.string(), seriesId: z.string() }))
+    .output(wildCardSchema),
+
+  list: authProcedure
+    .route({
+      path: '/wildcards/list',
+      method: 'GET',
+      summary: 'List wildcards',
+      description: 'Lists wildcard entities by series with pagination.',
+    })
+    .input(paginationSchema.merge(z.object({ seriesId: z.string() })))
+    .output(z.object({ items: z.array(wildCardSchema), total: z.number() })),
+} as const;
 
 const addRelationship = authProcedure
   .route({
