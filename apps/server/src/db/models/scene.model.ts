@@ -2,6 +2,7 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
 class SceneBeatClass {
@@ -18,7 +19,7 @@ class SceneBeatClass {
     timestamps: true,
   },
 })
-class SceneClass {
+class SceneClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -75,10 +76,6 @@ class SceneClass {
 
   @prop({ default: () => new Date() })
   public lastEditedAt!: Date;
-
-  public createdAt!: Date;
-
-  public updatedAt!: Date;
 }
 
 export const SceneModel = getModelForClass(SceneClass);
