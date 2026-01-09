@@ -7,6 +7,7 @@ import indexContract from './index.contract';
 import knowledgeBaseContract from './knowledge-base.contract';
 import scriptsContract from './scripts.contract';
 import seriesContract from './series.contract';
+import themeContract from './theme.contract';
 import userContract from './user.contract';
 
 export const CONTRACT = {
@@ -20,6 +21,7 @@ export const CONTRACT = {
   canvas: canvasContract,
   continuity: continuityContract,
   export: exportContract,
+  theme: themeContract,
 };
 
 export type AppContract = typeof CONTRACT;

@@ -24,6 +24,7 @@ export async function registerServices() {
   const { CanvasService } = await import('@~/features/canvas/canvas.service');
   const { ExportService } = await import('@~/features/export/export.service');
   const { ContinuityService } = await import('@~/features/continuity/continuity.service');
+  const { ThemeService } = await import('@~/features/themes/theme.service');
 
   // Register singletons with their tokens
   container.registerSingleton(TOKENS.EventBus, TypedEventBus);
@@ -42,6 +43,7 @@ export async function registerServices() {
   container.register(TOKENS.CanvasService, CanvasService, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.ExportService, ExportService, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.ContinuityService, ContinuityService, { lifecycle: Lifecycle.Transient });
+  container.register(TOKENS.ThemeService, ThemeService, { lifecycle: Lifecycle.Transient });
 
   // Initialize services that need registration
   CacheInvalidationService.handleRegistration({ container, token: TOKENS.CacheInvalidationService });

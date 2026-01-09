@@ -29,6 +29,9 @@ const kaeriErrorCodes = {
   RELATIONSHIP_NOT_FOUND: 'RELATIONSHIP_NOT_FOUND',
   APPEARANCE_NOT_FOUND: 'APPEARANCE_NOT_FOUND',
   VARIATION_NOT_FOUND: 'VARIATION_NOT_FOUND',
+  // Theme errors
+  THEME_NOT_FOUND: 'THEME_NOT_FOUND',
+  THEME_NAME_REQUIRED: 'THEME_NAME_REQUIRED',
   // Canvas errors
   CANVAS_NODE_NOT_FOUND: 'CANVAS_NODE_NOT_FOUND',
   CANVAS_EDGE_NOT_FOUND: 'CANVAS_EDGE_NOT_FOUND',
@@ -72,6 +75,9 @@ const kaeriErrorMessages = {
   [kaeriErrorCodes.RELATIONSHIP_NOT_FOUND]: 'Relationship not found',
   [kaeriErrorCodes.APPEARANCE_NOT_FOUND]: 'Appearance not found',
   [kaeriErrorCodes.VARIATION_NOT_FOUND]: 'Variation not found',
+  // Theme errors
+  [kaeriErrorCodes.THEME_NOT_FOUND]: 'Theme not found',
+  [kaeriErrorCodes.THEME_NAME_REQUIRED]: 'Theme name is required',
   // Canvas errors
   [kaeriErrorCodes.CANVAS_NODE_NOT_FOUND]: 'Canvas node not found',
   [kaeriErrorCodes.CANVAS_EDGE_NOT_FOUND]: 'Canvas edge not found',
