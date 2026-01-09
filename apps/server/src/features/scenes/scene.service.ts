@@ -1,6 +1,8 @@
 import { inject, injectable } from 'tsyringe';
+import type z from 'zod';
 
 import { errorCodes } from '@kaeri/shared';
+import { createSceneInputSchema, updateScenePatchSchema } from '@kaeri/shared/contract/scene.contract';
 
 import { SceneModel } from '@~/db/models/scene.model';
 import { ScriptModel } from '@~/db/models/script.model';
@@ -10,6 +12,9 @@ import { ORPCBadRequestError, ORPCNotFoundError } from '@~/lib/orpc-error-wrappe
 
 import type { iWithLogger, LoggerFactory } from '../logger/logger.types';
 
+type CreateSceneInput = z.infer<typeof createSceneInputSchema>;
+type UpdateScenePatch = z.infer<typeof updateScenePatchSchema>;
+
 @injectable()
 export class SceneService implements iWithLogger {
   public readonly logger: iWithLogger['logger'];
@@ -18,24 +23,7 @@ export class SceneService implements iWithLogger {
     this.logger = loggerFactory.create('scene-service');
   }
 
-  public async create(data: {
-    seriesId: string;
-    scriptId: string;
-    heading: string;
-    locationId?: string;
-    timeOfDay?: string;
-    duration?: string;
-    emotionalTone?: string;
-    conflict?: string;
-    beats?: Array<{ order: number; description: string }>;
-    characterIds?: string[];
-    propIds?: string[];
-    lighting?: string;
-    sound?: string;
-    camera?: string;
-    storyNotes?: string;
-    storyboardUrl?: string;
-  }) {
+  public async create(data: CreateSceneInput) {
     // Verify series exists
     const series = await SeriesModel.findById(data.seriesId);
     if (!series) {
@@ -92,25 +80,7 @@ export class SceneService implements iWithLogger {
     return scene;
   }
 
-  public async update(
-    sceneId: string,
-    patch: {
-      heading?: string;
-      locationId?: string;
-      timeOfDay?: string;
-      duration?: string;
-      emotionalTone?: string;
-      conflict?: string;
-      beats?: Array<{ order: number; description: string }>;
-      characterIds?: string[];
-      propIds?: string[];
-      lighting?: string;
-      sound?: string;
-      camera?: string;
-      storyNotes?: string;
-      storyboardUrl?: string;
-    },
-  ) {
+  public async update(sceneId: string, patch: UpdateScenePatch) {
     const scene = await SceneModel.findById(sceneId);
     if (!scene) {
       throw ORPCNotFoundError(errorCodes.SCENE_NOT_FOUND);

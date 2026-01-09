@@ -8,23 +8,23 @@ const paginationSchema = z.object({
   offset: z.number().int().min(0).default(0),
 });
 
-const characterConnectionSchema = z.object({
+export const characterConnectionSchema = z.object({
   characterId: z.string(),
   connection: z.string(),
 });
 
-const evolutionEntrySchema = z.object({
+export const evolutionEntrySchema = z.object({
   scriptId: z.string(),
   notes: z.string(),
 });
 
-const appearanceSchema = z.object({
+export const appearanceSchema = z.object({
   scriptId: z.string(),
   sceneRef: z.string(),
   quote: z.string().optional(),
 });
 
-const themeSchema = z.object({
+export const themeSchema = z.object({
   _id: z.string(),
   seriesId: z.string(),
   name: z.string(),
@@ -35,6 +35,28 @@ const themeSchema = z.object({
   evolution: z.array(evolutionEntrySchema).optional(),
   appearances: z.array(appearanceSchema).optional(),
 });
+
+export const createThemeValueSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().optional(),
+  color: z.string().optional(),
+  visualMotifs: z.array(z.string()).optional(),
+  relatedCharacters: z.array(characterConnectionSchema).optional(),
+  evolution: z.array(evolutionEntrySchema).optional(),
+  appearances: z.array(appearanceSchema).optional(),
+});
+
+export const updateThemePatchSchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    description: z.string().optional(),
+    color: z.string().optional(),
+    visualMotifs: z.array(z.string()).optional(),
+    relatedCharacters: z.array(characterConnectionSchema).optional(),
+    evolution: z.array(evolutionEntrySchema).optional(),
+    appearances: z.array(appearanceSchema).optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, 'At least one field must be provided');
 
 const createTheme = authProcedure
   .route({
@@ -47,15 +69,7 @@ const createTheme = authProcedure
   .input(
     z.object({
       seriesId: z.string(),
-      value: z.object({
-        name: z.string().min(1),
-        description: z.string().optional(),
-        color: z.string().optional(),
-        visualMotifs: z.array(z.string()).optional(),
-        relatedCharacters: z.array(characterConnectionSchema).optional(),
-        evolution: z.array(evolutionEntrySchema).optional(),
-        appearances: z.array(appearanceSchema).optional(),
-      }),
+      value: createThemeValueSchema,
     }),
   )
   .output(themeSchema);
@@ -71,17 +85,7 @@ const updateTheme = authProcedure
   .input(
     z.object({
       themeId: z.string(),
-      patch: z
-        .object({
-          name: z.string().min(1).optional(),
-          description: z.string().optional(),
-          color: z.string().optional(),
-          visualMotifs: z.array(z.string()).optional(),
-          relatedCharacters: z.array(characterConnectionSchema).optional(),
-          evolution: z.array(evolutionEntrySchema).optional(),
-          appearances: z.array(appearanceSchema).optional(),
-        })
-        .refine((value) => Object.keys(value).length > 0, 'At least one field must be provided'),
+      patch: updateThemePatchSchema,
     }),
   )
   .output(themeSchema);

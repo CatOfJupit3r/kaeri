@@ -1,6 +1,8 @@
 import { inject, injectable } from 'tsyringe';
+import type z from 'zod';
 
 import { errorCodes } from '@kaeri/shared';
+import { createThemeValueSchema, updateThemePatchSchema } from '@kaeri/shared/contract/theme.contract';
 
 import { SeriesModel } from '@~/db/models/series.model';
 import { ThemeModel } from '@~/db/models/theme.model';
@@ -10,25 +12,8 @@ import { ORPCBadRequestError, ORPCNotFoundError } from '@~/lib/orpc-error-wrappe
 import type { TypedEventBus } from '../events/event-bus';
 import type { iWithLogger, LoggerFactory } from '../logger/logger.types';
 
-interface iCreateThemeInput {
-  name: string;
-  description?: string;
-  color?: string;
-  visualMotifs?: string[];
-  relatedCharacters?: Array<{ characterId: string; connection: string }>;
-  evolution?: Array<{ scriptId: string; notes: string }>;
-  appearances?: Array<{ scriptId: string; sceneRef: string; quote?: string }>;
-}
-
-interface iUpdateThemeInput {
-  name?: string;
-  description?: string;
-  color?: string;
-  visualMotifs?: string[];
-  relatedCharacters?: Array<{ characterId: string; connection: string }>;
-  evolution?: Array<{ scriptId: string; notes: string }>;
-  appearances?: Array<{ scriptId: string; sceneRef: string; quote?: string }>;
-}
+type CreateThemeValue = z.infer<typeof createThemeValueSchema>;
+type UpdateThemePatch = z.infer<typeof updateThemePatchSchema>;
 
 @injectable()
 export class ThemeService implements iWithLogger {
@@ -41,7 +26,7 @@ export class ThemeService implements iWithLogger {
     this.logger = loggerFactory.create('theme-service');
   }
 
-  public async create(seriesId: string, data: iCreateThemeInput) {
+  public async create(seriesId: string, data: CreateThemeValue) {
     const series = await SeriesModel.findById(seriesId);
     if (!series) {
       throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
@@ -67,7 +52,7 @@ export class ThemeService implements iWithLogger {
     return theme;
   }
 
-  public async update(themeId: string, patch: iUpdateThemeInput) {
+  public async update(themeId: string, patch: UpdateThemePatch) {
     const theme = await ThemeModel.findById(themeId);
     if (!theme) {
       throw ORPCNotFoundError(errorCodes.THEME_NOT_FOUND);

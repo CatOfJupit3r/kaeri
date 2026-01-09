@@ -1,6 +1,8 @@
 import { inject, injectable } from 'tsyringe';
+import type z from 'zod';
 
 import { errorCodes } from '@kaeri/shared';
+import { createStoryArcInputSchema, updateStoryArcPatchSchema } from '@kaeri/shared/contract/story-arc.contract';
 
 import { StoryArcModel } from '@~/db/models/story-arc.model';
 import { TOKENS } from '@~/di/tokens';
@@ -12,48 +14,8 @@ import type { iWithLogger, LoggerFactory } from '../logger/logger.types';
 import type { ValkeyService } from '../valkey/valkey.service';
 import { STORY_ARC_EVENTS } from './story-arc.events';
 
-interface iCreateStoryArcInput {
-  seriesId: string;
-  name: string;
-  description?: string;
-  status?: 'planned' | 'in_progress' | 'completed' | 'abandoned';
-  startScriptId?: string;
-  endScriptId?: string;
-  keyBeats?: Array<{
-    id: string;
-    order: number;
-    description: string;
-    scriptId?: string;
-    sceneId?: string;
-  }>;
-  resolution?: string;
-  characters?: Array<{
-    characterId: string;
-    role: string;
-  }>;
-  themeIds?: string[];
-}
-
-interface iUpdateStoryArcInput {
-  name?: string;
-  description?: string;
-  status?: 'planned' | 'in_progress' | 'completed' | 'abandoned';
-  startScriptId?: string;
-  endScriptId?: string;
-  keyBeats?: Array<{
-    id: string;
-    order: number;
-    description: string;
-    scriptId?: string;
-    sceneId?: string;
-  }>;
-  resolution?: string;
-  characters?: Array<{
-    characterId: string;
-    role: string;
-  }>;
-  themeIds?: string[];
-}
+type CreateStoryArcInput = z.infer<typeof createStoryArcInputSchema>;
+type UpdateStoryArcPatch = z.infer<typeof updateStoryArcPatchSchema>;
 
 @injectable()
 export class StoryArcService implements iWithLogger {
@@ -67,7 +29,7 @@ export class StoryArcService implements iWithLogger {
     this.logger = loggerFactory.create('story-arc-service');
   }
 
-  public async create(data: iCreateStoryArcInput) {
+  public async create(data: CreateStoryArcInput) {
     if (!data.name?.trim()) {
       throw ORPCBadRequestError(errorCodes.STORY_ARC_NAME_REQUIRED);
     }
@@ -93,7 +55,7 @@ export class StoryArcService implements iWithLogger {
     return storyArc;
   }
 
-  public async update(storyArcId: string, patch: iUpdateStoryArcInput) {
+  public async update(storyArcId: string, patch: UpdateStoryArcPatch) {
     const storyArc = await StoryArcModel.findById(storyArcId);
     if (!storyArc) {
       throw ORPCNotFoundError(errorCodes.STORY_ARC_NOT_FOUND);

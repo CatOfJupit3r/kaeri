@@ -48,6 +48,44 @@ const sceneSummarySchema = sceneSchema.pick({
   lastEditedAt: true,
 });
 
+export const createSceneInputSchema = z.object({
+  seriesId: z.string(),
+  scriptId: z.string(),
+  heading: z.string().min(1),
+  locationId: z.string().optional(),
+  timeOfDay: z.string().optional(),
+  duration: z.string().optional(),
+  emotionalTone: z.string().optional(),
+  conflict: z.string().optional(),
+  beats: z.array(sceneBeatSchema).optional(),
+  characterIds: z.array(z.string()).optional(),
+  propIds: z.array(z.string()).optional(),
+  lighting: z.string().optional(),
+  sound: z.string().optional(),
+  camera: z.string().optional(),
+  storyNotes: z.string().optional(),
+  storyboardUrl: z.string().url().optional(),
+});
+
+export const updateScenePatchSchema = z
+  .object({
+    heading: z.string().min(1).optional(),
+    locationId: z.string().optional(),
+    timeOfDay: z.string().optional(),
+    duration: z.string().optional(),
+    emotionalTone: z.string().optional(),
+    conflict: z.string().optional(),
+    beats: z.array(sceneBeatSchema).optional(),
+    characterIds: z.array(z.string()).optional(),
+    propIds: z.array(z.string()).optional(),
+    lighting: z.string().optional(),
+    sound: z.string().optional(),
+    camera: z.string().optional(),
+    storyNotes: z.string().optional(),
+    storyboardUrl: z.string().url().optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, 'At least one field must be provided');
+
 const createScene = authProcedure
   .route({
     path: '/create',
@@ -55,26 +93,7 @@ const createScene = authProcedure
     summary: 'Create a scene',
     description: 'Creates a new scene under a script with auto-generated scene number. Returns the created scene.',
   })
-  .input(
-    z.object({
-      seriesId: z.string(),
-      scriptId: z.string(),
-      heading: z.string().min(1),
-      locationId: z.string().optional(),
-      timeOfDay: z.string().optional(),
-      duration: z.string().optional(),
-      emotionalTone: z.string().optional(),
-      conflict: z.string().optional(),
-      beats: z.array(sceneBeatSchema).optional(),
-      characterIds: z.array(z.string()).optional(),
-      propIds: z.array(z.string()).optional(),
-      lighting: z.string().optional(),
-      sound: z.string().optional(),
-      camera: z.string().optional(),
-      storyNotes: z.string().optional(),
-      storyboardUrl: z.string().url().optional(),
-    }),
-  )
+  .input(createSceneInputSchema)
   .output(sceneSchema);
 
 const updateScene = authProcedure
@@ -87,24 +106,7 @@ const updateScene = authProcedure
   .input(
     z.object({
       sceneId: z.string(),
-      patch: z
-        .object({
-          heading: z.string().min(1).optional(),
-          locationId: z.string().optional(),
-          timeOfDay: z.string().optional(),
-          duration: z.string().optional(),
-          emotionalTone: z.string().optional(),
-          conflict: z.string().optional(),
-          beats: z.array(sceneBeatSchema).optional(),
-          characterIds: z.array(z.string()).optional(),
-          propIds: z.array(z.string()).optional(),
-          lighting: z.string().optional(),
-          sound: z.string().optional(),
-          camera: z.string().optional(),
-          storyNotes: z.string().optional(),
-          storyboardUrl: z.string().url().optional(),
-        })
-        .refine((value) => Object.keys(value).length > 0, 'At least one field must be provided'),
+      patch: updateScenePatchSchema,
     }),
   )
   .output(sceneSchema);

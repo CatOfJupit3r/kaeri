@@ -3,3 +3,4 @@ export * from './enums/errors.enums';
 export * from './enums/kaeri.enums';
 export * from './constants/achievements';
 export * from './constants/badges';
+export type * from './helpers/contract-types';

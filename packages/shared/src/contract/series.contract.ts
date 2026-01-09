@@ -26,6 +26,22 @@ const seriesSummarySchema = seriesSchema.pick({
   lastEditedAt: true,
 });
 
+export const createSeriesInputSchema = z.object({
+  title: z.string().min(1),
+  genre: z.string().optional(),
+  logline: z.string().optional(),
+  coverUrl: z.string().url().optional(),
+});
+
+export const updateSeriesPatchSchema = z
+  .object({
+    title: z.string().min(1).optional(),
+    genre: z.string().optional(),
+    logline: z.string().optional(),
+    coverUrl: z.string().url().optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, 'At least one field must be provided');
+
 const createSeries = authProcedure
   .route({
     path: '/create',
@@ -33,14 +49,7 @@ const createSeries = authProcedure
     summary: 'Create a new series',
     description: 'Creates a series container with metadata (title, genre, logline, cover). Returns the created series.',
   })
-  .input(
-    z.object({
-      title: z.string().min(1),
-      genre: z.string().optional(),
-      logline: z.string().optional(),
-      coverUrl: z.string().url().optional(),
-    }),
-  )
+  .input(createSeriesInputSchema)
   .output(seriesSchema);
 
 const updateSeries = authProcedure
@@ -53,14 +62,7 @@ const updateSeries = authProcedure
   .input(
     z.object({
       seriesId: z.string(),
-      patch: z
-        .object({
-          title: z.string().min(1).optional(),
-          genre: z.string().optional(),
-          logline: z.string().optional(),
-          coverUrl: z.string().url().optional(),
-        })
-        .refine((value) => Object.keys(value).length > 0, 'At least one field must be provided'),
+      patch: updateSeriesPatchSchema,
     }),
   )
   .output(seriesSchema);

@@ -8,7 +8,7 @@ export const storyArcStatusSchema = z.enum(['planned', 'in_progress', 'completed
 export const STORY_ARC_STATUS = storyArcStatusSchema.enum;
 
 // Embedded schemas for nested objects
-const arcBeatSchema = z.object({
+export const arcBeatSchema = z.object({
   id: z.string(),
   order: z.number().int().min(0),
   description: z.string(),
@@ -16,7 +16,7 @@ const arcBeatSchema = z.object({
   sceneId: z.string().optional(),
 });
 
-const arcCharacterRoleSchema = z.object({
+export const arcCharacterRoleSchema = z.object({
   characterId: z.string(),
   role: z.string(), // "protagonist", "antagonist", "catalyst", etc.
 });
@@ -39,7 +39,7 @@ export const storyArcSchema = z.object({
 });
 
 // Input schemas
-const createStoryArcInputSchema = z.object({
+export const createStoryArcInputSchema = z.object({
   seriesId: z.string(),
   name: z.string().min(1),
   description: z.string().default(''),
@@ -52,22 +52,19 @@ const createStoryArcInputSchema = z.object({
   themeIds: z.array(z.string()).default([]),
 });
 
-const updateStoryArcInputSchema = z.object({
-  storyArcId: z.string(),
-  patch: z
-    .object({
-      name: z.string().min(1).optional(),
-      description: z.string().optional(),
-      status: storyArcStatusSchema.optional(),
-      startScriptId: z.string().optional(),
-      endScriptId: z.string().optional(),
-      keyBeats: z.array(arcBeatSchema).optional(),
-      resolution: z.string().optional(),
-      characters: z.array(arcCharacterRoleSchema).optional(),
-      themeIds: z.array(z.string()).optional(),
-    })
-    .refine((value) => Object.keys(value).length > 0, 'At least one field must be provided'),
-});
+export const updateStoryArcPatchSchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    description: z.string().optional(),
+    status: storyArcStatusSchema.optional(),
+    startScriptId: z.string().optional(),
+    endScriptId: z.string().optional(),
+    keyBeats: z.array(arcBeatSchema).optional(),
+    resolution: z.string().optional(),
+    characters: z.array(arcCharacterRoleSchema).optional(),
+    themeIds: z.array(z.string()).optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, 'At least one field must be provided');
 
 const listStoryArcsInputSchema = z.object({
   seriesId: z.string(),
@@ -96,7 +93,12 @@ const updateStoryArc = authProcedure
     description:
       'Updates story arc fields including status, beats, characters, and themes. Returns the updated story arc.',
   })
-  .input(updateStoryArcInputSchema)
+  .input(
+    z.object({
+      storyArcId: z.string(),
+      patch: updateStoryArcPatchSchema,
+    }),
+  )
   .output(storyArcSchema);
 
 const deleteStoryArc = authProcedure

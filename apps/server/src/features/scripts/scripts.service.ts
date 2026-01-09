@@ -1,6 +1,8 @@
 import { inject, injectable } from 'tsyringe';
+import type z from 'zod';
 
 import { errorCodes } from '@kaeri/shared';
+import { createScriptInputSchema, updateScriptPatchSchema } from '@kaeri/shared/contract/scripts.contract';
 
 import { ScriptModel } from '@~/db/models/script.model';
 import { SeriesModel } from '@~/db/models/series.model';
@@ -8,6 +10,9 @@ import { TOKENS } from '@~/di/tokens';
 import { ORPCBadRequestError, ORPCNotFoundError } from '@~/lib/orpc-error-wrapper';
 
 import type { iWithLogger, LoggerFactory } from '../logger/logger.types';
+
+type CreateScriptInput = z.infer<typeof createScriptInputSchema>;
+type UpdateScriptPatch = z.infer<typeof updateScriptPatchSchema>;
 
 @injectable()
 export class ScriptsService implements iWithLogger {
@@ -17,14 +22,7 @@ export class ScriptsService implements iWithLogger {
     this.logger = loggerFactory.create('scripts-service');
   }
 
-  public async create(data: {
-    seriesId: string;
-    title: string;
-    authors?: string[];
-    genre?: string;
-    logline?: string;
-    coverUrl?: string;
-  }) {
+  public async create(data: CreateScriptInput) {
     // Verify series exists
     const series = await SeriesModel.findById(data.seriesId);
     if (!series) {
@@ -55,10 +53,7 @@ export class ScriptsService implements iWithLogger {
     return script;
   }
 
-  public async update(
-    scriptId: string,
-    patch: { title?: string; authors?: string[]; genre?: string; logline?: string; coverUrl?: string },
-  ) {
+  public async update(scriptId: string, patch: UpdateScriptPatch) {
     const script = await ScriptModel.findById(scriptId);
     if (!script) {
       throw ORPCNotFoundError(errorCodes.SCRIPT_NOT_FOUND);
