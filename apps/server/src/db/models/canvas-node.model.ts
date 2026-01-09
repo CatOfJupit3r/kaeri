@@ -2,6 +2,7 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
 class PositionClass {
@@ -13,7 +14,7 @@ class PositionClass {
 }
 
 @modelOptions({ schemaOptions: { collection: 'canvas_nodes', timestamps: true } })
-class CanvasNodeClass {
+class CanvasNodeClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -31,10 +32,6 @@ class CanvasNodeClass {
 
   @prop({ type: () => Object })
   public style?: Record<string, unknown>;
-
-  public createdAt!: Date;
-
-  public updatedAt!: Date;
 }
 
 export const CanvasNodeModel = getModelForClass(CanvasNodeClass);

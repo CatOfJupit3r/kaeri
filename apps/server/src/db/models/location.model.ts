@@ -2,6 +2,7 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
 class AppearanceClass {
@@ -16,7 +17,7 @@ class AppearanceClass {
 }
 
 @modelOptions({ schemaOptions: { collection: 'locations', timestamps: true } })
-class LocationClass {
+class LocationClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -34,10 +35,6 @@ class LocationClass {
 
   @prop({ type: () => [AppearanceClass], default: [] })
   public appearances?: AppearanceClass[];
-
-  public createdAt!: Date;
-
-  public updatedAt!: Date;
 }
 
 export const LocationModel = getModelForClass(LocationClass);

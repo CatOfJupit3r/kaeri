@@ -1,10 +1,11 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
 @modelOptions({ schemaOptions: { collection: 'series', timestamps: true } })
-class SeriesClass {
+class SeriesClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -29,10 +30,6 @@ class SeriesClass {
 
   @prop({ type: () => [String] })
   public roles?: string[];
-
-  public createdAt!: Date;
-
-  public updatedAt!: Date;
 }
 
 export const SeriesModel = getModelForClass(SeriesClass);

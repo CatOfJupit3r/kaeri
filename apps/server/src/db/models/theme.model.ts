@@ -5,29 +5,25 @@ import type { DocumentType } from '@typegoose/typegoose';
 import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
-// Nested classes for embedded documents
-class RelationshipClass {
+@modelOptions({ schemaOptions: { _id: false } })
+class CharacterConnectionClass {
   @prop({ required: true })
-  public targetId!: string;
+  public characterId!: string;
 
   @prop({ required: true })
-  public type!: string;
-
-  @prop()
-  public note?: string;
+  public connection!: string;
 }
 
-class VariationClass {
+@modelOptions({ schemaOptions: { _id: false } })
+class EvolutionEntryClass {
   @prop({ required: true })
   public scriptId!: string;
 
   @prop({ required: true })
-  public label!: string;
-
-  @prop()
-  public notes?: string;
+  public notes!: string;
 }
 
+@modelOptions({ schemaOptions: { _id: false } })
 class AppearanceClass {
   @prop({ required: true })
   public scriptId!: string;
@@ -36,11 +32,11 @@ class AppearanceClass {
   public sceneRef!: string;
 
   @prop()
-  public locationId?: string;
+  public quote?: string;
 }
 
-@modelOptions({ schemaOptions: { collection: 'characters', timestamps: true } })
-class CharacterClass extends RequiredTimeStamps {
+@modelOptions({ schemaOptions: { collection: 'themes', timestamps: true } })
+class ThemeClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -53,24 +49,24 @@ class CharacterClass extends RequiredTimeStamps {
   @prop()
   public description?: string;
 
+  @prop()
+  public color?: string;
+
   @prop({ type: () => [String], default: [] })
-  public traits?: string[];
+  public visualMotifs?: string[];
 
-  @prop({ type: () => [RelationshipClass], default: [] })
-  public relationships?: RelationshipClass[];
+  @prop({ type: () => [CharacterConnectionClass], default: [] })
+  public relatedCharacters?: CharacterConnectionClass[];
 
-  @prop({ type: () => [VariationClass], default: [] })
-  public variations?: VariationClass[];
+  @prop({ type: () => [EvolutionEntryClass], default: [] })
+  public evolution?: EvolutionEntryClass[];
 
   @prop({ type: () => [AppearanceClass], default: [] })
   public appearances?: AppearanceClass[];
-
-  @prop()
-  public avatarUrl?: string;
 }
 
-export const CharacterModel = getModelForClass(CharacterClass);
-export type CharacterDoc = DocumentType<CharacterClass>;
-export type RelationshipDoc = RelationshipClass;
-export type VariationDoc = VariationClass;
+export const ThemeModel = getModelForClass(ThemeClass);
+export type ThemeDoc = DocumentType<ThemeClass>;
+export type CharacterConnectionDoc = CharacterConnectionClass;
+export type EvolutionEntryDoc = EvolutionEntryClass;
 export type AppearanceDoc = AppearanceClass;

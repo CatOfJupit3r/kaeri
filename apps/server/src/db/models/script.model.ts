@@ -1,10 +1,11 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
 @modelOptions({ schemaOptions: { collection: 'scripts', timestamps: true } })
-class ScriptClass {
+class ScriptClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -34,10 +35,6 @@ class ScriptClass {
 
   @prop({ default: () => new Date() })
   public lastEditedAt!: Date;
-
-  public createdAt!: Date;
-
-  public updatedAt!: Date;
 }
 
 export const ScriptModel = getModelForClass(ScriptClass);
