@@ -18,11 +18,12 @@ interface iAppearance {
 interface iAppearancePickerProps {
   seriesId: string;
   appearances: iAppearance[];
-  onChange: (appearances: iAppearance[]) => void;
+  onAdd: (appearance: iAppearance) => void;
+  onRemove?: (index: number) => void;
   disabled?: boolean;
 }
 
-export function AppearancePicker({ seriesId, appearances, onChange, disabled = false }: iAppearancePickerProps) {
+export function AppearancePicker({ seriesId, appearances, onAdd, onRemove, disabled = false }: iAppearancePickerProps) {
   const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
   const [sceneRef, setSceneRef] = useState('');
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
@@ -73,7 +74,7 @@ export function AppearancePicker({ seriesId, appearances, onChange, disabled = f
       locationId: selectedLocationId ?? undefined,
     };
 
-    onChange([...appearances, newAppearance]);
+    onAdd(newAppearance);
 
     setSelectedScriptId(null);
     setSceneRef('');
@@ -81,7 +82,7 @@ export function AppearancePicker({ seriesId, appearances, onChange, disabled = f
   };
 
   const handleRemoveAppearance = (index: number) => {
-    onChange(appearances.filter((_, i) => i !== index));
+    onRemove?.(index);
   };
 
   return (
@@ -140,7 +141,7 @@ export function AppearancePicker({ seriesId, appearances, onChange, disabled = f
         <div className="space-y-2">
           <Label htmlFor="current-appearances">Current Appearances</Label>
           <div id="current-appearances" className="space-y-2">
-            {appearances.map((appearance) => {
+            {appearances.map((appearance: iAppearance) => {
               const key = `${appearance.scriptId}-${appearance.sceneRef}`;
               return (
                 <div key={key} className="flex items-start justify-between rounded-md border border-border p-3">

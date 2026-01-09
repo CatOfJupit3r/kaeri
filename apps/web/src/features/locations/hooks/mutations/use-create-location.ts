@@ -22,10 +22,10 @@ export const createLocationMutationOptions = tanstackRPC.knowledgeBase.locations
     const optimisticLocation: LocationListItem = {
       _id: tempId,
       seriesId,
-      name: value.name as LocationListItem['name'],
-      description: value.description as LocationListItem['description'],
-      tags: (value.tags ?? []) as LocationListItem['tags'],
-      appearances: (value.appearances ?? []) as LocationListItem['appearances'],
+      name: value.name,
+      description: value.description,
+      tags: value.tags ?? [],
+      appearances: value.appearances ?? [],
     };
 
     ctx.client.setQueryData<LocationListQueryReturnType>(queryKey, (old) => {

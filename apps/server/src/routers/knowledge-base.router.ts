@@ -69,7 +69,7 @@ export const knowledgeBaseRouter = base.knowledgeBase.router({
   // Prop CRUD - nested under 'props'
   props: {
     create: protectedProcedure.knowledgeBase.props.create.handler(async ({ input }) =>
-      GETTERS.KnowledgeBaseService().createProp(input.seriesId, input.value as { name: string; description?: string }),
+      GETTERS.KnowledgeBaseService().createProp(input.seriesId, input.value),
     ),
 
     update: protectedProcedure.knowledgeBase.props.update.handler(async ({ input }) =>

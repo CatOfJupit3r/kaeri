@@ -38,12 +38,6 @@ interface iVariation {
   notes?: string;
 }
 
-interface iAppearance {
-  scriptId: string;
-  sceneRef: string;
-  locationId?: string;
-}
-
 interface iCharacterDetailProps {
   characterId: string;
   seriesId: string;
@@ -151,24 +145,6 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
     return location?.name ?? 'Unknown Location';
   };
 
-  const handleAppearanceChange = (appearances: iAppearance[]) => {
-    const currentAppearances = character?.appearances ?? [];
-    const newAppearances = appearances.filter(
-      (newApp) =>
-        !currentAppearances.some((curr) => curr.scriptId === newApp.scriptId && curr.sceneRef === newApp.sceneRef),
-    );
-
-    if (newAppearances.length > 0) {
-      newAppearances.forEach((appearance) => {
-        addAppearance({
-          seriesId,
-          characterId,
-          appearance,
-        });
-      });
-    }
-  };
-
   const handleRemoveAppearanceClick = (scriptId: string, sceneRef: string) => {
     removeAppearance({
       seriesId,
@@ -217,7 +193,7 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
             <div className="flex items-center gap-4">
               <Avatar className="size-16">
@@ -478,7 +454,20 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
                     <AppearancePicker
                       seriesId={seriesId}
                       appearances={character.appearances ?? []}
-                      onChange={handleAppearanceChange}
+                      onAdd={(appearance) => {
+                        addAppearance(
+                          {
+                            seriesId,
+                            characterId,
+                            appearance,
+                          },
+                          {
+                            onSuccess: () => {
+                              setIsAppearanceFormOpen(false);
+                            },
+                          },
+                        );
+                      }}
                       disabled={isAddingAppearance}
                     />
                     <div className="mt-4 flex justify-end gap-2">

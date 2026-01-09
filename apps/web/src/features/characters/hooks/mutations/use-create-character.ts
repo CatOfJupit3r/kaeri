@@ -20,12 +20,12 @@ export const createCharacterMutationOptions = tanstackRPC.knowledgeBase.characte
     const optimisticCharacter: CharacterListItem = {
       _id: tempId,
       seriesId,
-      name: value.name as CharacterListItem['name'],
-      description: value.description as CharacterListItem['description'],
-      avatarUrl: value.avatarUrl as CharacterListItem['avatarUrl'],
-      traits: (value.traits ?? []) as CharacterListItem['traits'],
-      relationships: (value.relationships ?? []) as CharacterListItem['relationships'],
-      appearances: (value.appearances ?? []) as CharacterListItem['appearances'],
+      name: value.name,
+      description: value.description,
+      avatarUrl: value.avatarUrl,
+      traits: value.traits ?? [],
+      relationships: value.relationships ?? [],
+      appearances: value.appearances ?? [],
     };
 
     ctx.client.setQueryData<CharacterListQueryReturnType>(queryKey, (old) => {

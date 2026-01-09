@@ -11,6 +11,7 @@ import type {
   GroupBase,
   StylesConfig,
   MultiValueRemoveProps,
+  MultiValueProps,
   ClearIndicatorProps,
   OptionProps,
   MenuProps,
@@ -163,6 +164,22 @@ export const MultiValueRemove = (props: MultiValueRemoveProps<iOptionType>) => (
   </components.MultiValueRemove>
 );
 
+export const MultiValue = (props: MultiValueProps<iOptionType, boolean, GroupBase<iOptionType>>) => {
+  const { data } = props;
+  const { icon } = data;
+
+  return (
+    <components.MultiValue {...props}>
+      <div className="flex min-w-0 items-center gap-1.5">
+        {icon ? (
+          <span className="flex h-4 w-4 shrink-0 items-center justify-center text-muted-foreground">{icon}</span>
+        ) : null}
+        <span className="truncate">{data.label}</span>
+      </div>
+    </components.MultiValue>
+  );
+};
+
 export const Option = (props: OptionProps<iOptionType, boolean, GroupBase<iOptionType>>) => {
   const { data, isSelected, label } = props;
   const { icon, description, meta } = data;
@@ -262,6 +279,7 @@ const BaseSelect = <IsMulti extends boolean = false>(
           DropdownIndicator,
           ClearIndicator,
           MultiValueRemove,
+          MultiValue,
           Option,
           SingleValue,
           Menu,

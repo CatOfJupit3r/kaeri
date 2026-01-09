@@ -1,6 +1,17 @@
 import { inject, injectable } from 'tsyringe';
+import type z from 'zod';
 
 import { errorCodes } from '@kaeri/shared';
+import {
+  appearanceSchema,
+  characterSchema,
+  locationSchema,
+  propSchema,
+  relationshipSchema,
+  timelineEntrySchema,
+  variationSchema,
+  wildCardSchema,
+} from '@kaeri/shared/contract/knowledge-base.contract';
 
 import { CharacterModel } from '@~/db/models/character.model';
 import { LocationModel } from '@~/db/models/location.model';
@@ -15,6 +26,24 @@ import type { TypedEventBus } from '../events/event-bus';
 import type { iKnowledgeBaseActionPayload } from '../events/events.constants';
 import { EVENTS } from '../events/events.constants';
 import type { iWithLogger, LoggerFactory } from '../logger/logger.types';
+
+type CreateInput<T extends z.ZodTypeAny> = Omit<z.infer<T>, '_id' | 'seriesId'>;
+type UpdateInput<T extends z.ZodTypeAny> = Partial<CreateInput<T>>;
+
+type CharacterCreateInput = CreateInput<typeof characterSchema>;
+type CharacterUpdateInput = UpdateInput<typeof characterSchema>;
+type LocationCreateInput = CreateInput<typeof locationSchema>;
+type LocationUpdateInput = UpdateInput<typeof locationSchema>;
+type PropCreateInput = CreateInput<typeof propSchema>;
+type PropUpdateInput = UpdateInput<typeof propSchema>;
+type TimelineCreateInput = CreateInput<typeof timelineEntrySchema>;
+type TimelineUpdateInput = UpdateInput<typeof timelineEntrySchema>;
+type WildCardCreateInput = CreateInput<typeof wildCardSchema>;
+type WildCardUpdateInput = UpdateInput<typeof wildCardSchema>;
+
+type Relationship = z.infer<typeof relationshipSchema>;
+type Variation = z.infer<typeof variationSchema>;
+type Appearance = z.infer<typeof appearanceSchema>;
 
 @injectable()
 export class KnowledgeBaseService implements iWithLogger {
@@ -86,18 +115,7 @@ export class KnowledgeBaseService implements iWithLogger {
   }
 
   // Character CRUD
-  public async createCharacter(
-    seriesId: string,
-    data: {
-      name: string;
-      description?: string;
-      traits?: string[];
-      avatarUrl?: string;
-      relationships?: Array<{ targetId: string; type: string; note?: string }>;
-      variations?: Array<{ scriptId: string; label: string; notes?: string }>;
-      appearances?: Array<{ scriptId: string; sceneRef: string; locationId?: string }>;
-    },
-  ) {
+  public async createCharacter(seriesId: string, data: CharacterCreateInput) {
     const series = await SeriesModel.findById(seriesId);
     if (!series) {
       throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
@@ -123,19 +141,7 @@ export class KnowledgeBaseService implements iWithLogger {
     return character;
   }
 
-  public async updateCharacter(
-    id: string,
-    seriesId: string,
-    patch: {
-      name?: string;
-      description?: string;
-      traits?: string[];
-      avatarUrl?: string;
-      relationships?: Array<{ targetId: string; type: string; note?: string }>;
-      variations?: Array<{ scriptId: string; label: string; notes?: string }>;
-      appearances?: Array<{ scriptId: string; sceneRef: string; locationId?: string }>;
-    },
-  ) {
+  public async updateCharacter(id: string, seriesId: string, patch: CharacterUpdateInput) {
     const character = await CharacterModel.findOne({ _id: id, seriesId });
     if (!character) {
       throw ORPCNotFoundError(errorCodes.CHARACTER_NOT_FOUND);
@@ -190,11 +196,7 @@ export class KnowledgeBaseService implements iWithLogger {
   }
 
   // Character relationships
-  public async addRelationship(
-    seriesId: string,
-    characterId: string,
-    relationship: { targetId: string; type: string; note?: string },
-  ) {
+  public async addRelationship(seriesId: string, characterId: string, relationship: Relationship) {
     const character = await CharacterModel.findOne({ _id: characterId, seriesId });
     if (!character) {
       throw ORPCNotFoundError(errorCodes.CHARACTER_NOT_FOUND);
@@ -230,11 +232,7 @@ export class KnowledgeBaseService implements iWithLogger {
   }
 
   // Character appearances
-  public async addAppearance(
-    seriesId: string,
-    characterId: string,
-    appearance: { scriptId: string; sceneRef: string; locationId?: string },
-  ) {
+  public async addAppearance(seriesId: string, characterId: string, appearance: Appearance) {
     const character = await CharacterModel.findOne({ _id: characterId, seriesId });
     if (!character) {
       throw ORPCNotFoundError(errorCodes.CHARACTER_NOT_FOUND);
@@ -266,11 +264,7 @@ export class KnowledgeBaseService implements iWithLogger {
   }
 
   // Character variations
-  public async addVariation(
-    seriesId: string,
-    characterId: string,
-    variation: { scriptId: string; label: string; notes?: string },
-  ) {
+  public async addVariation(seriesId: string, characterId: string, variation: Variation) {
     const character = await CharacterModel.findOne({ _id: characterId, seriesId });
     if (!character) {
       throw ORPCNotFoundError(errorCodes.CHARACTER_NOT_FOUND);
@@ -335,7 +329,7 @@ export class KnowledgeBaseService implements iWithLogger {
   }
 
   // Location CRUD
-  public async createLocation(seriesId: string, data: { name: string; description?: string; tags?: string[] }) {
+  public async createLocation(seriesId: string, data: LocationCreateInput) {
     const series = await SeriesModel.findById(seriesId);
     if (!series) {
       throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
@@ -358,15 +352,7 @@ export class KnowledgeBaseService implements iWithLogger {
     return location;
   }
 
-  public async updateLocation(
-    id: string,
-    seriesId: string,
-    patch: {
-      name?: string;
-      description?: string;
-      tags?: string[];
-    },
-  ) {
+  public async updateLocation(id: string, seriesId: string, patch: LocationUpdateInput) {
     const location = await LocationModel.findOne({ _id: id, seriesId });
     if (!location) {
       throw ORPCNotFoundError(errorCodes.LOCATION_NOT_FOUND);
@@ -417,7 +403,7 @@ export class KnowledgeBaseService implements iWithLogger {
   }
 
   // Prop CRUD
-  public async createProp(seriesId: string, data: { name: string; description?: string }) {
+  public async createProp(seriesId: string, data: PropCreateInput) {
     const series = await SeriesModel.findById(seriesId);
     if (!series) {
       throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
@@ -431,7 +417,7 @@ export class KnowledgeBaseService implements iWithLogger {
       seriesId,
       name: data.name,
       description: data.description,
-      associations: [],
+      associations: data.associations ?? [],
     });
 
     this.logger.info('Prop created', { propId: prop._id, seriesId, name: prop.name });
@@ -439,7 +425,7 @@ export class KnowledgeBaseService implements iWithLogger {
     return prop;
   }
 
-  public async updateProp(id: string, seriesId: string, patch: { name?: string; description?: string }) {
+  public async updateProp(id: string, seriesId: string, patch: PropUpdateInput) {
     const prop = await PropModel.findOne({ _id: id, seriesId });
     if (!prop) {
       throw ORPCNotFoundError(errorCodes.PROP_NOT_FOUND);
@@ -447,6 +433,7 @@ export class KnowledgeBaseService implements iWithLogger {
 
     if (patch.name !== undefined) prop.name = patch.name;
     if (patch.description !== undefined) prop.description = patch.description;
+    if (patch.associations !== undefined) prop.associations = patch.associations;
 
     await prop.save();
     this.logger.info('Prop updated', { propId: id });
@@ -489,15 +476,7 @@ export class KnowledgeBaseService implements iWithLogger {
   }
 
   // Timeline CRUD
-  public async createTimelineEntry(
-    seriesId: string,
-    data: {
-      label: string;
-      order?: number;
-      timestamp?: string;
-      links?: Array<{ entityType: string; entityId: string }>;
-    },
-  ) {
+  public async createTimelineEntry(seriesId: string, data: TimelineCreateInput) {
     const series = await SeriesModel.findById(seriesId);
     if (!series) {
       throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
@@ -520,16 +499,7 @@ export class KnowledgeBaseService implements iWithLogger {
     return entry;
   }
 
-  public async updateTimelineEntry(
-    id: string,
-    seriesId: string,
-    patch: {
-      label?: string;
-      order?: number;
-      timestamp?: string;
-      links?: Array<{ entityType: string; entityId: string }>;
-    },
-  ) {
+  public async updateTimelineEntry(id: string, seriesId: string, patch: TimelineUpdateInput) {
     const entry = await TimelineEntryModel.findOne({ _id: id, seriesId });
     if (!entry) {
       throw ORPCNotFoundError(errorCodes.TIMELINE_ENTRY_NOT_FOUND);
@@ -581,7 +551,7 @@ export class KnowledgeBaseService implements iWithLogger {
   }
 
   // WildCard CRUD
-  public async createWildCard(seriesId: string, data: { title: string; body?: string; tag?: string }) {
+  public async createWildCard(seriesId: string, data: WildCardCreateInput) {
     const series = await SeriesModel.findById(seriesId);
     if (!series) {
       throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
@@ -603,7 +573,7 @@ export class KnowledgeBaseService implements iWithLogger {
     return wildcard;
   }
 
-  public async updateWildCard(id: string, seriesId: string, patch: { title?: string; body?: string; tag?: string }) {
+  public async updateWildCard(id: string, seriesId: string, patch: WildCardUpdateInput) {
     const wildcard = await WildCardModel.findOne({ _id: id, seriesId });
     if (!wildcard) {
       throw ORPCNotFoundError(errorCodes.WILDCARD_NOT_FOUND);

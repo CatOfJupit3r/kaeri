@@ -208,6 +208,163 @@ export function ChallengeFilters() {
 - **Auth Service**: `apps/web/src/services/auth.service.ts`
 
 ## Forms, Feedback, and Styling
-- TanStack Form powers auth flows (`components/sign-in-form.tsx`, `sign-up-form.tsx`); keep validators in sync with shared `zod` schemas and show validation errors inline.
+- TanStack Form powers all forms; keep validators in sync with shared `zod` schemas and show validation errors inline.
 - Toasts are centralized via Sonner (`<Toaster richColors />` in `__root.tsx`); prefer toasts for cross-route notifications and inline UI for form-level feedback.
 - Tailwind provides design tokens; keep new utility classes consistent with existing components and prefer composing primitives located in `components/ui`.
+
+### Form Composition Patterns
+
+We use TanStack Form's composition APIs (`createFormHook`, `withForm`, `withFieldGroup`) to build reusable, type-safe forms:
+
+- **Custom Form Hook**: `apps/web/src/components/ui/field.tsx` exports `useAppForm`, `withForm`, and `withFieldGroup` with pre-bound field components (`TextField`, `TextareaField`, `CheckboxField`, `SelectField`) and form components (`Form`, `SubmitButton`, `FormActions`).
+- **Form Contexts**: `fieldContext` and `formContext` are exported for use in custom components via `useFieldContext` and `useFormContext`.
+
+#### Simple Forms with `withForm`
+
+For forms with only form fields and no additional local state, use the `withForm` HOC to extract form fields into reusable components:
+
+```typescript
+import { withForm } from '@~/components/ui/field';
+
+const SeriesFormFields = withForm({
+  defaultValues: {
+    title: '',
+    genre: '',
+  },
+  props: {
+    isPending: false,
+    onCancel: () => {},
+    isEditMode: false,
+  },
+  render: function Render({ form, isPending, onCancel, isEditMode }) {
+    return (
+      <>
+        <form.AppField name="title">
+          {(field) => <field.TextField label="Title" placeholder="Enter title" required />}
+        </form.AppField>
+
+        <form.AppField name="genre">
+          {(field) => <field.TextField label="Genre" placeholder="Enter genre" />}
+        </form.AppField>
+
+        <DialogFooter>
+          <form.FormActions
+            onCancel={onCancel}
+            submitLabel={isEditMode ? 'Update' : 'Create'}
+            loadingLabel={isEditMode ? 'Updating...' : 'Creating...'}
+            isDisabled={isPending}
+          />
+        </DialogFooter>
+      </>
+    );
+  },
+});
+
+// Usage in parent component
+export function SeriesModal({ open, onOpenChange, initialData }) {
+  const form = useAppForm({
+    defaultValues: { title: '', genre: '' },
+    onSubmit: async ({ value }) => { /* ... */ },
+    validators: { /* ... */ },
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <form.AppForm>
+          <form.Form className="space-y-4 p-0">
+            <SeriesFormFields 
+              form={form} 
+              isPending={isPending} 
+              onCancel={() => onOpenChange(false)} 
+              isEditMode={!!initialData} 
+            />
+          </form.Form>
+        </form.AppForm>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+**Benefits**: Form fields become reusable components with type-safe props, cleaner separation of concerns, and better testability.
+
+**Examples**: `series-modal.tsx`, `wildcard-form.tsx`, `timeline-form.tsx`, `prop-form.tsx`
+
+#### Complex Forms with Local State
+
+For forms managing additional local state (tags, traits, relationships, appearances), keep the state management in the parent component and use `FormActions` for consistent button behavior:
+
+```typescript
+export function CharacterForm({ seriesId, open, onOpenChange, initialData }) {
+  const [traits, setTraits] = useState<string[]>([]);
+  const [relationships, setRelationships] = useState([]);
+
+  const form = useAppForm({
+    defaultValues: { name: '', description: '' },
+    onSubmit: async ({ value }) => {
+      // Include local state in submission
+      createCharacter({ ...value, traits, relationships });
+    },
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <form.AppForm>
+        <form.Form className="space-y-4 p-0">
+          <form.AppField name="name">
+            {(field) => <field.TextField label="Name" required />}
+          </form.AppField>
+
+          {/* Custom local state UI */}
+          <div className="space-y-2">
+            <Label>Traits</Label>
+            <Input value={traitInput} onChange={(e) => setTraitInput(e.target.value)} />
+            {traits.map(trait => <Badge key={trait}>{trait}</Badge>)}
+          </div>
+
+          <DialogFooter>
+            <form.FormActions
+              onCancel={() => onOpenChange(false)}
+              submitLabel={isEditMode ? 'Update Character' : 'Create Character'}
+              loadingLabel={isEditMode ? 'Updating...' : 'Creating...'}
+              isDisabled={isPending}
+            />
+          </DialogFooter>
+        </form.Form>
+      </form.AppForm>
+    </Dialog>
+  );
+}
+```
+
+**When to use this pattern**: Forms with dynamic arrays, complex pickers, or interactive UI elements that require local React state.
+
+**Examples**: `character-form.tsx`, `location-form.tsx`, `variation-form.tsx`
+
+#### FormActions Component
+
+The `FormActions` component provides consistent cancel and submit buttons across all forms:
+
+```typescript
+<form.FormActions
+  onCancel={() => onOpenChange(false)}
+  cancelLabel="Cancel"               // Optional, defaults to "Cancel"
+  submitLabel="Create Project"       // Required
+  loadingLabel="Creating..."         // Optional, shows during submission
+  isDisabled={isPending}             // Optional, additional disable condition
+/>
+```
+
+**Features**:
+- Automatically disables buttons during form submission
+- Shows loading label when `isSubmitting` is true
+- Respects form validation state (disabled when form has errors)
+- Consistent styling and behavior across all forms
+
+#### Critical Rules
+
+1. **All form components must be inside `form.Form`**: This includes `form.AppField`, `form.SubmitButton`, `form.FormActions`, and `DialogFooter` (when it contains form actions).
+2. **Always wrap in `form.AppForm`**: The parent wrapper provides form context to all child components.
+3. **Use `form.AppField` for fields**: Provides proper field context and type inference for field components.
+4. **Named render functions**: When using `withForm`, name the render function (`render: function Render(...)`) to avoid ESLint hook warnings.
