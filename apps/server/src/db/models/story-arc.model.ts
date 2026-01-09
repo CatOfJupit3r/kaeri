@@ -2,6 +2,7 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
 class ArcBeatClass {
@@ -30,7 +31,7 @@ class ArcCharacterRoleClass {
 }
 
 @modelOptions({ schemaOptions: { collection: 'story-arcs', timestamps: true } })
-class StoryArcClass {
+class StoryArcClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -63,10 +64,6 @@ class StoryArcClass {
 
   @prop({ type: () => [String], default: [] })
   public themeIds!: string[];
-
-  public createdAt!: Date;
-
-  public updatedAt!: Date;
 }
 
 export const StoryArcModel = getModelForClass(StoryArcClass);

@@ -2,6 +2,7 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
 @modelOptions({ schemaOptions: { _id: false } })
@@ -35,7 +36,7 @@ class AppearanceClass {
 }
 
 @modelOptions({ schemaOptions: { collection: 'themes', timestamps: true } })
-class ThemeClass {
+class ThemeClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -62,10 +63,6 @@ class ThemeClass {
 
   @prop({ type: () => [AppearanceClass], default: [] })
   public appearances?: AppearanceClass[];
-
-  public createdAt!: Date;
-
-  public updatedAt!: Date;
 }
 
 export const ThemeModel = getModelForClass(ThemeClass);

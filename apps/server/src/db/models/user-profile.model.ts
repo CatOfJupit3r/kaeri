@@ -3,10 +3,11 @@ import type { DocumentType } from '@typegoose/typegoose';
 
 import type { BadgeId } from '@kaeri/shared/constants/badges';
 
+import { RequiredTimeStamps } from '../base-classes';
 import { generatePublicCode, ObjectIdString } from '../helpers';
 
 @modelOptions({ schemaOptions: { collection: 'profile', timestamps: true } })
-class UserProfileClass {
+class UserProfileClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -21,10 +22,6 @@ class UserProfileClass {
 
   @prop({ required: true, unique: true, index: true, default: () => generatePublicCode() })
   public publicCode!: string;
-
-  public createdAt!: Date;
-
-  public updatedAt!: Date;
 }
 
 export const UserProfileModel = getModelForClass(UserProfileClass);

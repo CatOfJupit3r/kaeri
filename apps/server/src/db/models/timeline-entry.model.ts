@@ -2,6 +2,7 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
 class TimelineLinkClass {
@@ -13,7 +14,7 @@ class TimelineLinkClass {
 }
 
 @modelOptions({ schemaOptions: { collection: 'timeline_entries', timestamps: true } })
-class TimelineEntryClass {
+class TimelineEntryClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -31,10 +32,6 @@ class TimelineEntryClass {
 
   @prop({ type: () => [TimelineLinkClass], default: [] })
   public links?: TimelineLinkClass[];
-
-  public createdAt!: Date;
-
-  public updatedAt!: Date;
 }
 
 export const TimelineEntryModel = getModelForClass(TimelineEntryClass);
