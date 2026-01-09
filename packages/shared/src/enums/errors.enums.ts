@@ -17,6 +17,10 @@ const kaeriErrorCodes = {
   SCRIPT_TITLE_REQUIRED: 'SCRIPT_TITLE_REQUIRED',
   SCRIPT_SERIES_MISMATCH: 'SCRIPT_SERIES_MISMATCH',
   SCRIPT_NOT_SAVED: 'SCRIPT_NOT_SAVED',
+  // Scene errors
+  SCENE_NOT_FOUND: 'SCENE_NOT_FOUND',
+  SCENE_HEADING_REQUIRED: 'SCENE_HEADING_REQUIRED',
+  SCENE_NUMBER_DUPLICATE: 'SCENE_NUMBER_DUPLICATE',
   // Knowledge Base errors
   CHARACTER_NOT_FOUND: 'CHARACTER_NOT_FOUND',
   LOCATION_NOT_FOUND: 'LOCATION_NOT_FOUND',
@@ -68,6 +72,10 @@ const kaeriErrorMessages = {
   [kaeriErrorCodes.SCRIPT_TITLE_REQUIRED]: 'Script title is required',
   [kaeriErrorCodes.SCRIPT_SERIES_MISMATCH]: 'Script does not belong to the specified series',
   [kaeriErrorCodes.SCRIPT_NOT_SAVED]: 'Script has unsaved changes',
+  // Scene errors
+  [kaeriErrorCodes.SCENE_NOT_FOUND]: 'Scene not found',
+  [kaeriErrorCodes.SCENE_HEADING_REQUIRED]: 'Scene heading is required',
+  [kaeriErrorCodes.SCENE_NUMBER_DUPLICATE]: 'Scene number already exists for this script',
   // Knowledge Base errors
   [kaeriErrorCodes.CHARACTER_NOT_FOUND]: 'Character not found',
   [kaeriErrorCodes.LOCATION_NOT_FOUND]: 'Location not found',

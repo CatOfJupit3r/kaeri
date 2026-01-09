@@ -8,6 +8,7 @@ import type { TypedEventBus } from '@~/features/events/event-bus';
 import type { ExportService } from '@~/features/export/export.service';
 import type { KnowledgeBaseService } from '@~/features/knowledge-base/knowledge-base.service';
 import type { LoggerFactory } from '@~/features/logger/logger.types';
+import type { SceneService } from '@~/features/scenes/scene.service';
 import type { ScriptsService } from '@~/features/scripts/scripts.service';
 import type { SeriesService } from '@~/features/series/series.service';
 import type { StoryArcService } from '@~/features/story-arcs/story-arc.service';
@@ -27,6 +28,7 @@ const valkeyServiceToken: unique symbol = Symbol.for('ValkeyService');
 const cacheInvalidationServiceToken: unique symbol = Symbol.for('CacheInvalidationService');
 const seriesServiceToken: unique symbol = Symbol.for('SeriesService');
 const scriptsServiceToken: unique symbol = Symbol.for('ScriptsService');
+const sceneServiceToken: unique symbol = Symbol.for('SceneService');
 const knowledgeBaseServiceToken: unique symbol = Symbol.for('KnowledgeBaseService');
 const canvasServiceToken: unique symbol = Symbol.for('CanvasService');
 const exportServiceToken: unique symbol = Symbol.for('ExportService');
@@ -47,6 +49,7 @@ export const TOKENS = {
   CacheInvalidationService: cacheInvalidationServiceToken,
   SeriesService: seriesServiceToken,
   ScriptsService: scriptsServiceToken,
+  SceneService: sceneServiceToken,
   KnowledgeBaseService: knowledgeBaseServiceToken,
   CanvasService: canvasServiceToken,
   ExportService: exportServiceToken,
@@ -67,6 +70,7 @@ export interface iTokenRegistry {
   [TOKENS.CacheInvalidationService]: CacheInvalidationService;
   [TOKENS.SeriesService]: SeriesService;
   [TOKENS.ScriptsService]: ScriptsService;
+  [TOKENS.SceneService]: SceneService;
   [TOKENS.KnowledgeBaseService]: KnowledgeBaseService;
   [TOKENS.CanvasService]: CanvasService;
   [TOKENS.ExportService]: ExportService;
