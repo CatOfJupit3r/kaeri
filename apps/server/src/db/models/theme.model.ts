@@ -4,6 +4,7 @@ import type { DocumentType } from '@typegoose/typegoose';
 
 import { ObjectIdString } from '../helpers';
 
+@modelOptions({ schemaOptions: { _id: false } })
 class CharacterConnectionClass {
   @prop({ required: true })
   public characterId!: string;
@@ -12,6 +13,7 @@ class CharacterConnectionClass {
   public connection!: string;
 }
 
+@modelOptions({ schemaOptions: { _id: false } })
 class EvolutionEntryClass {
   @prop({ required: true })
   public scriptId!: string;
@@ -20,6 +22,7 @@ class EvolutionEntryClass {
   public notes!: string;
 }
 
+@modelOptions({ schemaOptions: { _id: false } })
 class AppearanceClass {
   @prop({ required: true })
   public scriptId!: string;
