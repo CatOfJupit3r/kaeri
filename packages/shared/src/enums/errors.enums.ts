@@ -32,6 +32,11 @@ const kaeriErrorCodes = {
   // Theme errors
   THEME_NOT_FOUND: 'THEME_NOT_FOUND',
   THEME_NAME_REQUIRED: 'THEME_NAME_REQUIRED',
+  // Story Arc errors
+  STORY_ARC_NOT_FOUND: 'STORY_ARC_NOT_FOUND',
+  STORY_ARC_NAME_REQUIRED: 'STORY_ARC_NAME_REQUIRED',
+  STORY_ARC_SERIES_MISMATCH: 'STORY_ARC_SERIES_MISMATCH',
+  INVALID_STORY_ARC_STATUS: 'INVALID_STORY_ARC_STATUS',
   // Canvas errors
   CANVAS_NODE_NOT_FOUND: 'CANVAS_NODE_NOT_FOUND',
   CANVAS_EDGE_NOT_FOUND: 'CANVAS_EDGE_NOT_FOUND',
@@ -78,6 +83,11 @@ const kaeriErrorMessages = {
   // Theme errors
   [kaeriErrorCodes.THEME_NOT_FOUND]: 'Theme not found',
   [kaeriErrorCodes.THEME_NAME_REQUIRED]: 'Theme name is required',
+  // Story Arc errors
+  [kaeriErrorCodes.STORY_ARC_NOT_FOUND]: 'Story arc not found',
+  [kaeriErrorCodes.STORY_ARC_NAME_REQUIRED]: 'Story arc name is required',
+  [kaeriErrorCodes.STORY_ARC_SERIES_MISMATCH]: 'Story arc does not belong to the specified series',
+  [kaeriErrorCodes.INVALID_STORY_ARC_STATUS]: 'Invalid story arc status',
   // Canvas errors
   [kaeriErrorCodes.CANVAS_NODE_NOT_FOUND]: 'Canvas node not found',
   [kaeriErrorCodes.CANVAS_EDGE_NOT_FOUND]: 'Canvas edge not found',

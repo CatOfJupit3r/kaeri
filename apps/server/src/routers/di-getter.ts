@@ -15,4 +15,5 @@ export const GETTERS = {
   ExportService: () => resolve(TOKENS.ExportService),
   ContinuityService: () => resolve(TOKENS.ContinuityService),
   ThemeService: () => resolve(TOKENS.ThemeService),
+  StoryArcService: () => resolve(TOKENS.StoryArcService),
 };

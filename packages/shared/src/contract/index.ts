@@ -7,6 +7,7 @@ import indexContract from './index.contract';
 import knowledgeBaseContract from './knowledge-base.contract';
 import scriptsContract from './scripts.contract';
 import seriesContract from './series.contract';
+import storyArcContract from './story-arc.contract';
 import themeContract from './theme.contract';
 import userContract from './user.contract';
 
@@ -22,6 +23,7 @@ export const CONTRACT = {
   continuity: continuityContract,
   export: exportContract,
   theme: themeContract,
+  storyArc: storyArcContract,
 };
 
 export type AppContract = typeof CONTRACT;

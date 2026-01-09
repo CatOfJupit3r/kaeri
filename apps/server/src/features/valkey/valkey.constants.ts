@@ -38,6 +38,7 @@ export const CACHE_PREFIX = {
   KB: 'kb',
   CANVAS: 'canvas',
   CONTINUITY: 'continuity',
+  STORY_ARC: 'story-arc',
   BADGES: 'badges',
   ACHIEVEMENTS: 'achievements',
   USER: 'user',
@@ -66,6 +67,10 @@ export const buildCacheKey = {
   continuityGraph: (seriesId: string) => `${CACHE_PREFIX.CONTINUITY}:${seriesId}:graph`,
   appearancesByCharacter: (seriesId: string, characterId: string) =>
     `${CACHE_PREFIX.CONTINUITY}:${seriesId}:appearances:${characterId}`,
+
+  storyArc: (storyArcId: string) => `${CACHE_PREFIX.STORY_ARC}:${storyArcId}`,
+  storyArcList: (seriesId: string, status: string | undefined, limit: number, offset: number) =>
+    `${CACHE_PREFIX.STORY_ARC}:${seriesId}:list:${status ?? 'all'}:${limit}:${offset}`,
 
   badges: () => `${CACHE_PREFIX.BADGES}:all`,
   achievements: () => `${CACHE_PREFIX.ACHIEVEMENTS}:all`,
