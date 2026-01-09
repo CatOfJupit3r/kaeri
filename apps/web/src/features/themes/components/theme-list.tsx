@@ -71,8 +71,8 @@ export function ThemeList({ seriesId }: iThemeListProps) {
   const { deleteTheme, isPending: isDeleting } = useDeleteTheme();
 
   const handleCardClick = (themeId: string) => {
-    // Navigation to detail view - route will be generated when running dev server
-    console.log('Navigate to theme:', themeId);
+    // TODO: Enable navigation after dev server generates route tree
+    console.log('Navigate to theme:', themeId, 'in series:', seriesId);
     // void navigate({
     //   to: '/series/$seriesId/knowledge-base/themes/$themeId',
     //   params: { seriesId, themeId },
