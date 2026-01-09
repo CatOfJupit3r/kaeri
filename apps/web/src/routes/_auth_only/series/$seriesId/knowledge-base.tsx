@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { parseAsStringEnum, useQueryStates } from 'nuqs';
-import { LuBookUser, LuGlobe, LuPackage, LuCalendar, LuSparkles } from 'react-icons/lu';
+import { LuBookUser, LuGlobe, LuPackage, LuCalendar, LuSparkles, LuTrendingUp } from 'react-icons/lu';
 import z from 'zod';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
@@ -11,12 +11,14 @@ import { LocationList } from '@~/features/locations/components/location-list';
 import { locationListQueryOptions } from '@~/features/locations/hooks/queries/use-location-list';
 import { PropList } from '@~/features/props/components/prop-list';
 import { propListQueryOptions } from '@~/features/props/hooks/queries/use-prop-list';
+import { StoryArcList } from '@~/features/story-arcs/components/story-arc-list';
+import { storyArcListQueryOptions } from '@~/features/story-arcs/hooks/queries/use-story-arc-list';
 import { TimelineList } from '@~/features/timelines/components/timeline-list';
 import { timelineListQueryOptions } from '@~/features/timelines/hooks/queries/use-timeline-list';
 import { WildcardList } from '@~/features/wildcards/components/wildcard-list';
 import { wildcardListQueryOptions } from '@~/features/wildcards/hooks/queries/use-wildcard-list';
 
-const tabSchema = z.enum(['characters', 'locations', 'props', 'timeline', 'wildcards']);
+const tabSchema = z.enum(['characters', 'locations', 'props', 'timeline', 'wildcards', 'story-arcs']);
 const TAB_VALUES = tabSchema.enum;
 const TAB_VALUES_ARRAY = Object.values(TAB_VALUES);
 type TabValue = z.infer<typeof tabSchema>;
@@ -38,6 +40,7 @@ export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-bas
       context.queryClient.ensureQueryData(propListQueryOptions(seriesId)),
       context.queryClient.ensureQueryData(timelineListQueryOptions(seriesId)),
       context.queryClient.ensureQueryData(wildcardListQueryOptions(seriesId)),
+      context.queryClient.ensureQueryData(storyArcListQueryOptions(seriesId)),
     ]);
   },
   component: RouteComponent,
@@ -57,6 +60,7 @@ function RouteComponent() {
       prop: 'props',
       timeline: 'timeline',
       wildcard: 'wildcards',
+      storyArc: 'story-arcs',
     };
 
     const targetTab = tabMap[entityType];
@@ -91,7 +95,7 @@ function RouteComponent() {
           onValueChange={async (value) => setQueryStates({ tab: (value as TabValue) ?? TAB_VALUES.characters })}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="characters" className="gap-2">
               <LuBookUser className="size-4" />
               <span>Characters</span>
@@ -111,6 +115,10 @@ function RouteComponent() {
             <TabsTrigger value="wildcards" className="gap-2">
               <LuSparkles className="size-4" />
               <span>Wild Cards</span>
+            </TabsTrigger>
+            <TabsTrigger value="story-arcs" className="gap-2">
+              <LuTrendingUp className="size-4" />
+              <span>Story Arcs</span>
             </TabsTrigger>
           </TabsList>
 
@@ -132,6 +140,10 @@ function RouteComponent() {
 
           <TabsContent value="wildcards" className="mt-6 space-y-4">
             <WildcardList seriesId={seriesId} />
+          </TabsContent>
+
+          <TabsContent value="story-arcs" className="mt-6 space-y-4">
+            <StoryArcList seriesId={seriesId} />
           </TabsContent>
         </Tabs>
       </div>
