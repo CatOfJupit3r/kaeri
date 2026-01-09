@@ -14,4 +14,5 @@ export const GETTERS = {
   CanvasService: () => resolve(TOKENS.CanvasService),
   ExportService: () => resolve(TOKENS.ExportService),
   ContinuityService: () => resolve(TOKENS.ContinuityService),
+  StoryArcService: () => resolve(TOKENS.StoryArcService),
 };

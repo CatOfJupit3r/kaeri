@@ -29,6 +29,11 @@ const kaeriErrorCodes = {
   RELATIONSHIP_NOT_FOUND: 'RELATIONSHIP_NOT_FOUND',
   APPEARANCE_NOT_FOUND: 'APPEARANCE_NOT_FOUND',
   VARIATION_NOT_FOUND: 'VARIATION_NOT_FOUND',
+  // Story Arc errors
+  STORY_ARC_NOT_FOUND: 'STORY_ARC_NOT_FOUND',
+  STORY_ARC_NAME_REQUIRED: 'STORY_ARC_NAME_REQUIRED',
+  STORY_ARC_SERIES_MISMATCH: 'STORY_ARC_SERIES_MISMATCH',
+  INVALID_STORY_ARC_STATUS: 'INVALID_STORY_ARC_STATUS',
   // Canvas errors
   CANVAS_NODE_NOT_FOUND: 'CANVAS_NODE_NOT_FOUND',
   CANVAS_EDGE_NOT_FOUND: 'CANVAS_EDGE_NOT_FOUND',
@@ -72,6 +77,11 @@ const kaeriErrorMessages = {
   [kaeriErrorCodes.RELATIONSHIP_NOT_FOUND]: 'Relationship not found',
   [kaeriErrorCodes.APPEARANCE_NOT_FOUND]: 'Appearance not found',
   [kaeriErrorCodes.VARIATION_NOT_FOUND]: 'Variation not found',
+  // Story Arc errors
+  [kaeriErrorCodes.STORY_ARC_NOT_FOUND]: 'Story arc not found',
+  [kaeriErrorCodes.STORY_ARC_NAME_REQUIRED]: 'Story arc name is required',
+  [kaeriErrorCodes.STORY_ARC_SERIES_MISMATCH]: 'Story arc does not belong to the specified series',
+  [kaeriErrorCodes.INVALID_STORY_ARC_STATUS]: 'Invalid story arc status',
   // Canvas errors
   [kaeriErrorCodes.CANVAS_NODE_NOT_FOUND]: 'Canvas node not found',
   [kaeriErrorCodes.CANVAS_EDGE_NOT_FOUND]: 'Canvas edge not found',

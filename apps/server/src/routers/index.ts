@@ -8,6 +8,7 @@ import { indexRouter } from './index.router';
 import { knowledgeBaseRouter } from './knowledge-base.router';
 import { scriptsRouter } from './scripts.router';
 import { seriesRouter } from './series.router';
+import { storyArcRouter } from './story-arc.router';
 import { userRouter } from './user.router';
 
 export const appRouter = base.router({
@@ -21,6 +22,7 @@ export const appRouter = base.router({
   canvas: canvasRouter,
   continuity: continuityRouter,
   export: exportRouter,
+  storyArc: storyArcRouter,
 });
 
 export type AppRouter = typeof appRouter;
