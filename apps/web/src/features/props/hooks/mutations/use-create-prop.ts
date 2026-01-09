@@ -22,9 +22,9 @@ export const createPropMutationOptions = tanstackRPC.knowledgeBase.props.create.
     const optimisticProp: PropListItem = {
       _id: tempId,
       seriesId,
-      name: value.name as PropListItem['name'],
-      description: value.description as PropListItem['description'],
-      associations: (value.associations ?? []) as PropListItem['associations'],
+      name: value.name,
+      description: value.description,
+      associations: value.associations ?? [],
     };
 
     ctx.client.setQueryData<PropListQueryReturnType>(queryKey, (old) => {

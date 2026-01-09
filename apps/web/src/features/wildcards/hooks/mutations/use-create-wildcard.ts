@@ -22,9 +22,9 @@ export const createWildcardMutationOptions = tanstackRPC.knowledgeBase.wildcards
     const optimisticWildcard: WildcardListItem = {
       _id: tempId,
       seriesId,
-      title: value.title as WildcardListItem['title'],
-      body: value.body as WildcardListItem['body'],
-      tag: value.tag as WildcardListItem['tag'],
+      title: value.title,
+      body: value.body,
+      tag: value.tag,
     };
 
     ctx.client.setQueryData<WildcardListQueryReturnType>(queryKey, (old) => {

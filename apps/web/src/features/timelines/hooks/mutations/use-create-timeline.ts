@@ -22,10 +22,10 @@ export const createTimelineMutationOptions = tanstackRPC.knowledgeBase.timeline.
     const optimisticTimeline: TimelineListItem = {
       _id: tempId,
       seriesId,
-      label: value.label as TimelineListItem['label'],
-      order: value.order as TimelineListItem['order'],
-      timestamp: value.timestamp as TimelineListItem['timestamp'],
-      links: (value.links ?? []) as TimelineListItem['links'],
+      label: value.label,
+      order: value.order,
+      timestamp: value.timestamp,
+      links: value.links ?? [],
     };
 
     ctx.client.setQueryData<TimelineListQueryReturnType>(queryKey, (old) => {
