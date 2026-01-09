@@ -29,6 +29,9 @@ const kaeriErrorCodes = {
   RELATIONSHIP_NOT_FOUND: 'RELATIONSHIP_NOT_FOUND',
   APPEARANCE_NOT_FOUND: 'APPEARANCE_NOT_FOUND',
   VARIATION_NOT_FOUND: 'VARIATION_NOT_FOUND',
+  // Theme errors
+  THEME_NOT_FOUND: 'THEME_NOT_FOUND',
+  THEME_NAME_REQUIRED: 'THEME_NAME_REQUIRED',
   // Story Arc errors
   STORY_ARC_NOT_FOUND: 'STORY_ARC_NOT_FOUND',
   STORY_ARC_NAME_REQUIRED: 'STORY_ARC_NAME_REQUIRED',
@@ -77,6 +80,9 @@ const kaeriErrorMessages = {
   [kaeriErrorCodes.RELATIONSHIP_NOT_FOUND]: 'Relationship not found',
   [kaeriErrorCodes.APPEARANCE_NOT_FOUND]: 'Appearance not found',
   [kaeriErrorCodes.VARIATION_NOT_FOUND]: 'Variation not found',
+  // Theme errors
+  [kaeriErrorCodes.THEME_NOT_FOUND]: 'Theme not found',
+  [kaeriErrorCodes.THEME_NAME_REQUIRED]: 'Theme name is required',
   // Story Arc errors
   [kaeriErrorCodes.STORY_ARC_NOT_FOUND]: 'Story arc not found',
   [kaeriErrorCodes.STORY_ARC_NAME_REQUIRED]: 'Story arc name is required',
