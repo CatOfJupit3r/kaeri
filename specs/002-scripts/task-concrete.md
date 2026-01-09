@@ -432,3 +432,199 @@ Breakdown modeled after TASK_BREAKDOWN.md structure with session-by-session task
 
 **Files to Update**:
 - `apps/web/src/features/scripts/components/split-editor-layout.tsx` (wire KB panel)
+
+---
+
+## Session SC1.12: Editor Toolbar Enhancement (T027)
+**Goal**: Enhance toolbar with formatting, version control, and actions matching V0 design  
+**Estimated Time**: 60-75 minutes
+
+**Deliverables**:
+1. Update toolbar component: `apps/web/src/features/scripts/components/script-editor-toolbar.tsx`
+   - Left section: Title and metadata (editable inline or dialog)
+   - Center section: Formatting buttons (Bold, Italic, Underline)
+   - Right section: Version dropdown, Share, Export, More actions (MoreVertical)
+   
+2. Add toolbar button components:
+   - Format buttons with icons (Bold, Italic, Underline)
+   - Version dropdown with revision history (stub initially)
+   - Share button (copy link or share dialog)
+   - Export button (triggers export modal from T030)
+   - More menu (dropdown with additional options: Print, Settings)
+
+3. Implement formatting handlers:
+   - Apply text formatting to selected block content
+   - Toggle format state (active/inactive)
+   - Preserve formatting in block serialization
+
+4. Add version dropdown:
+   - List recent versions (timestamps)
+   - Click version to preview (read-only mode)
+   - "Restore this version" option
+   - Version data from backend (stub for now)
+
+**Acceptance Criteria**:
+- Toolbar displays with left/center/right sections
+- Format buttons toggle formatting on selected text
+- Version dropdown shows revision history
+- Share button copies script link
+- Export button triggers export modal
+- More menu shows additional actions
+- Visual styling matches V0 design with proper spacing
+
+**Files to Update**:
+- `apps/web/src/features/scripts/components/script-editor-toolbar.tsx`
+
+**Files to Create**:
+- `apps/web/src/features/scripts/components/toolbar-format-buttons.tsx`
+- `apps/web/src/features/scripts/components/toolbar-version-dropdown.tsx`
+- `apps/web/src/features/scripts/components/toolbar-more-menu.tsx`
+
+---
+
+## Session SC1.13: Script Breakdown Feature (T028)
+**Goal**: Add breakdown modal for cast, locations, props, and scenes  
+**Estimated Time**: 75-90 minutes
+
+**Deliverables**:
+1. Create breakdown modal: `apps/web/src/features/scripts/components/breakdown-modal.tsx`
+   - Dialog with tabs: Cast, Locations, Props, Scenes
+   - Each tab shows list of entities extracted from script
+   - Show entity counts and scene appearances
+   - Click entity to view/edit details
+   - Export breakdown option (CSV, PDF)
+
+2. Create breakdown parser: `apps/web/src/features/scripts/utils/breakdown-parser.ts`
+   - Parse script blocks to extract entities
+   - Detect characters from Character blocks
+   - Detect locations from Scene Heading blocks
+   - Detect props from Action block keywords (stub initially)
+   - Track scene appearances for each entity
+   - Return breakdown data structure
+
+3. Create breakdown tabs:
+   - `apps/web/src/features/scripts/components/breakdown-cast-tab.tsx`: Character list with appearance counts
+   - `apps/web/src/features/scripts/components/breakdown-locations-tab.tsx`: Location list with scene numbers
+   - `apps/web/src/features/scripts/components/breakdown-props-tab.tsx`: Props list with appearances
+   - `apps/web/src/features/scripts/components/breakdown-scenes-tab.tsx`: Scene list with metadata
+
+4. Add breakdown button to toolbar
+   - Opens breakdown modal
+   - Parses current script state
+   - Shows loading state during parse
+
+**Acceptance Criteria**:
+- Breakdown button in toolbar opens modal
+- Modal displays tabs for Cast, Locations, Props, Scenes
+- Parser correctly extracts entities from script blocks
+- Entity counts and appearances accurate
+- Click entity opens detail view
+- Export breakdown generates file (CSV/PDF)
+- Visual styling matches V0 design
+
+**Files to Create**:
+- `apps/web/src/features/scripts/components/breakdown-modal.tsx`
+- `apps/web/src/features/scripts/components/breakdown-cast-tab.tsx`
+- `apps/web/src/features/scripts/components/breakdown-locations-tab.tsx`
+- `apps/web/src/features/scripts/components/breakdown-props-tab.tsx`
+- `apps/web/src/features/scripts/components/breakdown-scenes-tab.tsx`
+- `apps/web/src/features/scripts/utils/breakdown-parser.ts`
+
+**Files to Update**:
+- `apps/web/src/features/scripts/components/script-editor-toolbar.tsx` (add breakdown button)
+
+---
+
+## Session SC1.14: Right Panel Tabs Enhancement (T029)
+**Goal**: Add AI Assistant tab to script editor right panel  
+**Estimated Time**: 45-60 minutes
+
+**Deliverables**:
+1. Create AI Assistant panel: `apps/web/src/features/scripts/components/ai-assistant-panel.tsx`
+   - Chat interface with message history
+   - Input field for user queries
+   - AI suggestions for script improvements
+   - Context-aware (current script, scene, character)
+   - Preset prompts (Generate dialogue, Improve action, Analyze pacing)
+
+2. Create AI message component: `apps/web/src/features/scripts/components/ai-message.tsx`
+   - Display user and AI messages
+   - Markdown formatting support
+   - Copy button for AI responses
+   - Apply suggestion button (inserts content into script)
+
+3. Update split-editor-layout.tsx:
+   - Add AI Assistant tab to right panel
+   - Tab order: Knowledge Base, Canvas, AI Assistant
+   - AI tab persists state when switching tabs
+
+4. Create AI query hook: `apps/web/src/features/scripts/hooks/use-ai-assistant.ts`
+   - Send queries to AI backend (stub initially)
+   - Handle streaming responses
+   - Context injection (script excerpt, entity info)
+
+**Acceptance Criteria**:
+- AI Assistant tab visible in script editor right panel
+- Chat interface allows user queries
+- AI responses display with formatting
+- Preset prompts provide quick access to common tasks
+- Apply suggestion inserts AI content into script
+- Context-aware responses reference current script state
+- Visual styling matches V0 design
+
+**Files to Create**:
+- `apps/web/src/features/scripts/components/ai-assistant-panel.tsx`
+- `apps/web/src/features/scripts/components/ai-message.tsx`
+- `apps/web/src/features/scripts/hooks/use-ai-assistant.ts`
+
+**Files to Update**:
+- `apps/web/src/features/scripts/components/split-editor-layout.tsx` (add AI Assistant tab)
+
+---
+
+## Session SC1.15: Table Read Feature (T030)
+**Goal**: Add table read modal for collaborative script reading  
+**Estimated Time**: 60-75 minutes
+
+**Deliverables**:
+1. Create table read modal: `apps/web/src/features/scripts/components/table-read-modal.tsx`
+   - Dialog with script view optimized for reading
+   - Character role assignment (assign users to characters)
+   - Current block highlight (synchronized reading position)
+   - Previous/Next block navigation
+   - Reader mode toggle (shows only assigned character's lines)
+
+2. Create table read state hook: `apps/web/src/features/scripts/hooks/use-table-read.ts`
+   - Manage reading position (current block index)
+   - Track assigned roles (user → character mapping)
+   - Handle navigation (next/previous block)
+   - Reader mode filtering
+
+3. Create role assignment component: `apps/web/src/features/scripts/components/table-read-roles.tsx`
+   - List all characters in script
+   - Dropdown to assign user to each character
+   - Unassigned characters shown separately
+   - Color-coded by assignment
+
+4. Add table read button to toolbar
+   - Opens table read modal
+   - Parses script to extract characters
+   - Starts at first block
+
+**Acceptance Criteria**:
+- Table read button in toolbar opens modal
+- Modal displays script blocks in reading format
+- Can assign users to character roles
+- Current block highlights during reading
+- Next/Previous navigation works
+- Reader mode filters to assigned character's lines
+- Visual styling matches V0 design with proper formatting
+
+**Files to Create**:
+- `apps/web/src/features/scripts/components/table-read-modal.tsx`
+- `apps/web/src/features/scripts/components/table-read-roles.tsx`
+- `apps/web/src/features/scripts/hooks/use-table-read.ts`
+
+**Files to Update**:
+- `apps/web/src/features/scripts/components/script-editor-toolbar.tsx` (add table read button)
+
