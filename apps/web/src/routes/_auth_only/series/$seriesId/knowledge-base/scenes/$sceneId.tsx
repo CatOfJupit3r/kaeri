@@ -1,14 +1,6 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { LuChevronRight, LuLoader } from 'react-icons/lu';
+import { createFileRoute } from '@tanstack/react-router';
+import { LuLoader } from 'react-icons/lu';
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@~/components/ui/breadcrumb';
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
 import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
@@ -16,18 +8,24 @@ import { SceneDetail, SceneDetailSkeleton } from '@~/features/scenes/components/
 import { sceneDetailQueryOptions, useSceneDetail } from '@~/features/scenes/hooks/queries/use-scene';
 import { useSceneList } from '@~/features/scenes/hooks/queries/use-scene-list';
 import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
+import { SeriesHeader } from '@~/features/series/components/series-header';
+import { useSeries, seriesQueryOptions } from '@~/features/series/hooks/queries/use-series';
 
 export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-base/scenes/$sceneId')({
   loader: async ({ context, params }) => {
-    const { sceneId } = params;
+    const { sceneId, seriesId } = params;
 
-    await context.queryClient.ensureQueryData(sceneDetailQueryOptions(sceneId));
+    await Promise.all([
+      context.queryClient.ensureQueryData(seriesQueryOptions(seriesId)),
+      context.queryClient.ensureQueryData(sceneDetailQueryOptions(sceneId)),
+    ]);
   },
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const { seriesId, sceneId } = Route.useParams();
+  const { data: series } = useSeries(seriesId);
   const { data: scene, isPending: isScenePending, error } = useSceneDetail(sceneId);
   const { data: scriptsData } = useScriptList(seriesId);
   const { data: charactersData } = useCharacterList(seriesId);
@@ -38,7 +36,7 @@ function RouteComponent() {
     enabled: !!scene?.scriptId,
   });
 
-  if (isScenePending) {
+  if (isScenePending || !series) {
     return (
       <div className="min-h-screen bg-background">
         <div className="border-b border-border bg-card">
@@ -91,47 +89,14 @@ function RouteComponent() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/series/$seriesId" params={{ seriesId }}>
-                    Series
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator>
-                <LuChevronRight className="size-4" />
-              </BreadcrumbSeparator>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/series/$seriesId/knowledge-base" params={{ seriesId }} search={{ tab: 'scenes' }}>
-                    Knowledge Base
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator>
-                <LuChevronRight className="size-4" />
-              </BreadcrumbSeparator>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/series/$seriesId/knowledge-base" params={{ seriesId }} search={{ tab: 'scenes' }}>
-                    Scenes
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator>
-                <LuChevronRight className="size-4" />
-              </BreadcrumbSeparator>
-              <BreadcrumbItem>
-                <BreadcrumbPage>{scene.heading}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </div>
+      <SeriesHeader
+        series={series}
+        breadcrumbs={[
+          { label: 'Knowledge Base', href: `/series/${seriesId}/knowledge-base?tab=scenes` },
+          { label: 'Scenes', href: `/series/${seriesId}/knowledge-base?tab=scenes` },
+        ]}
+        currentPage={scene.heading}
+      />
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <SceneDetail

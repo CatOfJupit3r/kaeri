@@ -2,19 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { LuBookOpen, LuDatabase, LuBookUser, LuGlobe, LuPackage, LuCalendar, LuSparkles } from 'react-icons/lu';
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@~/components/ui/breadcrumb';
 import { Card } from '@~/components/ui/card';
 import { characterListQueryOptions } from '@~/features/characters/hooks/queries/use-character-list';
 import { KB_COUNT_PARAMS } from '@~/features/knowledge-base/helpers/cache-utils';
 import { locationListQueryOptions } from '@~/features/locations/hooks/queries/use-location-list';
 import { propListQueryOptions } from '@~/features/props/hooks/queries/use-prop-list';
+import { SeriesHeader } from '@~/features/series/components/series-header';
 import { useSeries, seriesQueryOptions } from '@~/features/series/hooks/queries/use-series';
 import { timelineListQueryOptions } from '@~/features/timelines/hooks/queries/use-timeline-list';
 import { wildcardListQueryOptions } from '@~/features/wildcards/hooks/queries/use-wildcard-list';
@@ -122,40 +115,8 @@ function RouteComponent() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with Breadcrumb */}
-      <div className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <Breadcrumb className="mb-4">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="/projects" className="transition-colors hover:text-foreground">
-                    Projects
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{series.title}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-
-          <div className="flex items-start gap-6">
-            {series.coverUrl ? (
-              <img src={series.coverUrl} alt={series.title} className="h-32 w-24 rounded-lg object-cover shadow-md" />
-            ) : null}
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">{series.title}</h1>
-              {series.genre ? <p className="mt-1 text-sm text-muted-foreground">{series.genre}</p> : null}
-              {series.logline ? <p className="mt-3 text-base text-muted-foreground">{series.logline}</p> : null}
-              <p className="mt-2 text-xs text-muted-foreground">
-                Last edited: {new Date(series.lastEditedAt).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Series Header */}
+      <SeriesHeader series={series} currentPage="Overview" />
 
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
