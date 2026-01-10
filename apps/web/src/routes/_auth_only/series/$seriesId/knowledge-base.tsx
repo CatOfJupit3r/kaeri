@@ -27,6 +27,8 @@ import { locationListQueryOptions } from '@~/features/locations/hooks/queries/us
 import { PropList } from '@~/features/props/components/prop-list';
 import { propListQueryOptions } from '@~/features/props/hooks/queries/use-prop-list';
 import { SceneList } from '@~/features/scenes/components/scene-list';
+import { SeriesHeader } from '@~/features/series/components/series-header';
+import { useSeries, seriesQueryOptions } from '@~/features/series/hooks/queries/use-series';
 import { StoryArcList } from '@~/features/story-arcs/components/story-arc-list';
 import { storyArcListQueryOptions } from '@~/features/story-arcs/hooks/queries/use-story-arc-list';
 import { ThemeList } from '@~/features/themes/components/theme-list';
@@ -66,6 +68,7 @@ export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-bas
     const { seriesId } = params;
 
     await Promise.all([
+      context.queryClient.ensureQueryData(seriesQueryOptions(seriesId)),
       context.queryClient.ensureQueryData(characterListQueryOptions(seriesId)),
       context.queryClient.ensureQueryData(locationListQueryOptions(seriesId)),
       context.queryClient.ensureQueryData(propListQueryOptions(seriesId)),
@@ -80,6 +83,7 @@ export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-bas
 
 function RouteComponent() {
   const { seriesId } = Route.useParams();
+  const { data: series } = useSeries(seriesId);
   const [{ tab, viewMode }, setQueryStates] = useQueryStates({
     tab: parseAsStringEnum(TAB_VALUES_ARRAY).withDefault(TAB_VALUES.characters),
     viewMode: parseAsStringEnum(VIEW_MODE_ARRAY).withDefault(VIEW_MODE.grid),
@@ -120,45 +124,44 @@ function RouteComponent() {
     setQueryStates({ viewMode: newMode }).catch(() => {});
   };
 
+  if (!series) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-muted-foreground">Series not found</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">Knowledge Base</h1>
-              <p className="mt-1 text-muted-foreground">
-                Manage characters, locations, props, timeline, and other story elements
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleImport}>
-                <LuUpload />
-                Import
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleExport}>
-                <LuDownload />
-                Export
-              </Button>
-              <Toggle
-                pressed={activeViewMode === VIEW_MODE.list}
-                onPressedChange={toggleViewMode}
-                aria-label="Toggle view mode"
-                size="sm"
-              >
-                {activeViewMode === VIEW_MODE.grid ? <LuLayoutGrid /> : <LuLayoutList />}
-              </Toggle>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Series Header */}
+      <SeriesHeader series={series} currentPage="Knowledge Base" />
 
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        {/* Search */}
-        <div className="mb-6">
-          <KBSearch seriesId={seriesId} onResultClick={handleResultClick} />
+        {/* Action Bar */}
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="flex-1">
+            <KBSearch seriesId={seriesId} onResultClick={handleResultClick} />
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleImport}>
+              <LuUpload />
+              Import
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport}>
+              <LuDownload />
+              Export
+            </Button>
+            <Toggle
+              pressed={activeViewMode === VIEW_MODE.list}
+              onPressedChange={toggleViewMode}
+              aria-label="Toggle view mode"
+              size="sm"
+            >
+              {activeViewMode === VIEW_MODE.grid ? <LuLayoutGrid /> : <LuLayoutList />}
+            </Toggle>
+          </div>
         </div>
 
         <Tabs
