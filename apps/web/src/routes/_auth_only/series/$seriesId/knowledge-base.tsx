@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { parseAsStringEnum, useQueryStates } from 'nuqs';
-import { LuBookUser, LuFilm, LuGlobe, LuPackage, LuCalendar, LuSparkles } from 'react-icons/lu';
+import { LuBookUser, LuGlobe, LuPackage, LuCalendar, LuSparkles, LuLightbulb, LuFilm } from 'react-icons/lu';
 import z from 'zod';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
@@ -11,13 +11,15 @@ import { LocationList } from '@~/features/locations/components/location-list';
 import { locationListQueryOptions } from '@~/features/locations/hooks/queries/use-location-list';
 import { PropList } from '@~/features/props/components/prop-list';
 import { propListQueryOptions } from '@~/features/props/hooks/queries/use-prop-list';
+import { ThemeList } from '@~/features/themes/components/theme-list';
+import { themeListQueryOptions } from '@~/features/themes/hooks/queries/use-theme-list';
 import { SceneList } from '@~/features/scenes/components/scene-list';
 import { TimelineList } from '@~/features/timelines/components/timeline-list';
 import { timelineListQueryOptions } from '@~/features/timelines/hooks/queries/use-timeline-list';
 import { WildcardList } from '@~/features/wildcards/components/wildcard-list';
 import { wildcardListQueryOptions } from '@~/features/wildcards/hooks/queries/use-wildcard-list';
 
-const tabSchema = z.enum(['characters', 'locations', 'props', 'scenes', 'timeline', 'wildcards']);
+const tabSchema = z.enum(['characters', 'locations', 'props', 'scenes', 'timeline', 'wildcards', 'themes']);
 const TAB_VALUES = tabSchema.enum;
 const TAB_VALUES_ARRAY = Object.values(TAB_VALUES);
 type TabValue = z.infer<typeof tabSchema>;
@@ -39,6 +41,7 @@ export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-bas
       context.queryClient.ensureQueryData(propListQueryOptions(seriesId)),
       context.queryClient.ensureQueryData(timelineListQueryOptions(seriesId)),
       context.queryClient.ensureQueryData(wildcardListQueryOptions(seriesId)),
+      context.queryClient.ensureQueryData(themeListQueryOptions(seriesId)),
     ]);
   },
   component: RouteComponent,
@@ -59,6 +62,7 @@ function RouteComponent() {
       scene: 'scenes',
       timeline: 'timeline',
       wildcard: 'wildcards',
+      theme: 'themes',
     };
 
     const targetTab = tabMap[entityType];
@@ -118,6 +122,10 @@ function RouteComponent() {
               <LuSparkles className="size-4" />
               <span>Wild Cards</span>
             </TabsTrigger>
+            <TabsTrigger value="themes" className="gap-2">
+              <LuLightbulb className="size-4" />
+              <span>Themes</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="characters" className="mt-6 space-y-4">
@@ -142,6 +150,10 @@ function RouteComponent() {
 
           <TabsContent value="wildcards" className="mt-6 space-y-4">
             <WildcardList seriesId={seriesId} />
+          </TabsContent>
+
+          <TabsContent value="themes" className="mt-6 space-y-4">
+            <ThemeList seriesId={seriesId} />
           </TabsContent>
         </Tabs>
       </div>
