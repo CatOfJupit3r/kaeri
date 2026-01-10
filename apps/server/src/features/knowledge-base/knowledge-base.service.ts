@@ -304,7 +304,7 @@ export class KnowledgeBaseService implements iWithLogger {
     characterId: string,
     scriptId: string,
     label: string,
-    patch: { label?: string; notes?: string },
+    patch: { label?: string; notes?: string; age?: number | string; appearance?: string },
   ) {
     const character = await CharacterModel.findOne({ _id: characterId, seriesId });
     if (!character) {
@@ -323,6 +323,12 @@ export class KnowledgeBaseService implements iWithLogger {
     }
     if (patch.notes !== undefined) {
       character.variations[variationIndex].notes = patch.notes;
+    }
+    if (patch.age !== undefined) {
+      character.variations[variationIndex].age = patch.age;
+    }
+    if (patch.appearance !== undefined) {
+      character.variations[variationIndex].appearance = patch.appearance;
     }
 
     await character.save();
@@ -365,6 +371,12 @@ export class KnowledgeBaseService implements iWithLogger {
       description: data.description,
       tags: data.tags ?? [],
       appearances: [],
+      images: data.images ?? [],
+      associatedCharacterIds: data.associatedCharacterIds ?? [],
+      propIds: data.propIds ?? [],
+      productionNotes: data.productionNotes,
+      mood: data.mood,
+      timeOfDay: data.timeOfDay ?? [],
     });
 
     this.logger.info('Location created', { locationId: location._id, seriesId, name: location.name });
@@ -381,6 +393,12 @@ export class KnowledgeBaseService implements iWithLogger {
     if (patch.name !== undefined) location.name = patch.name;
     if (patch.description !== undefined) location.description = patch.description;
     if (patch.tags !== undefined) location.tags = patch.tags;
+    if (patch.images !== undefined) location.images = patch.images;
+    if (patch.associatedCharacterIds !== undefined) location.associatedCharacterIds = patch.associatedCharacterIds;
+    if (patch.propIds !== undefined) location.propIds = patch.propIds;
+    if (patch.productionNotes !== undefined) location.productionNotes = patch.productionNotes;
+    if (patch.mood !== undefined) location.mood = patch.mood;
+    if (patch.timeOfDay !== undefined) location.timeOfDay = patch.timeOfDay;
 
     await location.save();
     this.logger.info('Location updated', { locationId: id });

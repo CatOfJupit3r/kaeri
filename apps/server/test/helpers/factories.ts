@@ -83,7 +83,17 @@ export async function createCharacter(
 export async function createLocation(
   ctx: TestCtx,
   seriesId: string,
-  value: { name?: string; description?: string; tags?: string[] } = {},
+  value: {
+    name?: string;
+    description?: string;
+    tags?: string[];
+    images?: Array<{ url: string; caption?: string }>;
+    associatedCharacterIds?: string[];
+    propIds?: string[];
+    productionNotes?: string;
+    mood?: string;
+    timeOfDay?: string[];
+  } = {},
 ) {
   return call(
     appRouter.knowledgeBase.locations.create,

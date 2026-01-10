@@ -5,6 +5,14 @@ import type { DocumentType } from '@typegoose/typegoose';
 import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
+class ImageClass {
+  @prop({ required: true })
+  public url!: string;
+
+  @prop()
+  public caption?: string;
+}
+
 class AppearanceClass {
   @prop({ required: true })
   public scriptId!: string;
@@ -35,6 +43,24 @@ class LocationClass extends RequiredTimeStamps {
 
   @prop({ type: () => [AppearanceClass], default: [] })
   public appearances?: AppearanceClass[];
+
+  @prop({ type: () => [ImageClass], default: [] })
+  public images?: ImageClass[];
+
+  @prop({ type: () => [String], default: [] })
+  public associatedCharacterIds?: string[];
+
+  @prop({ type: () => [String], default: [] })
+  public propIds?: string[];
+
+  @prop()
+  public productionNotes?: string;
+
+  @prop()
+  public mood?: string;
+
+  @prop({ type: () => [String], default: [] })
+  public timeOfDay?: string[];
 }
 
 export const LocationModel = getModelForClass(LocationClass);

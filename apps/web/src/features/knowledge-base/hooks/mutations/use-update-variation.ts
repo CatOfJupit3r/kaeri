@@ -24,6 +24,8 @@ export const updateVariationMutationOptions = tanstackRPC.knowledgeBase.updateVa
           ...variations[index],
           ...(patch.label !== undefined && { label: patch.label }),
           ...(patch.notes !== undefined && { notes: patch.notes }),
+          ...(patch.age !== undefined && { age: patch.age }),
+          ...(patch.appearance !== undefined && { appearance: patch.appearance }),
         };
       }
 
