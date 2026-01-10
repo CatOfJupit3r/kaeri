@@ -55,25 +55,17 @@ These entities are separate from the existing Character/Location/Props entities 
 - Story arcs show timeline progression across scripts
 - Story arcs appear in KB "All" view and have dedicated detail pages
 
-#### FR-004: Research Entity Management
-- Users can create, read, update, and delete Research entities within a series
-- Research entries have titles, content (markdown), tags, and source URLs
-- Research can be linked to any KB entity (characters, locations, themes, etc.)
-- Research appears in KB sidebar or dedicated tab
-- Research supports search and filtering by tags
-
-#### FR-005: Entity Relationships
+#### FR-004: Entity Relationships
 - Scenes reference Locations (many-to-one)
 - Scenes reference Characters (many-to-many appearances)
 - Scenes reference Props (many-to-many)
 - Themes reference Characters (many-to-many with connection descriptions)
 - Story Arcs reference Characters (many-to-many with roles)
 - Story Arcs reference Themes (many-to-many)
-- Research links to any KB entity type
 
-#### FR-006: KB Integration
-- All four entity types appear in Knowledge Base "All" view
-- Entity type filter includes Scenes, Themes, Story Arcs, Research
+#### FR-005: KB Integration
+- All three entity types appear in Knowledge Base "All" view
+- Entity type filter includes Scenes, Themes, Story Arcs
 - Search works across all entity types
 - Grid view shows entity cards with type-specific icons and colors
 - Detail views match design patterns (colored borders, avatars/icons)
@@ -85,7 +77,6 @@ These entities are separate from the existing Character/Location/Props entities 
 #### NFR-001: Performance
 - Scene list loads under 500ms for 100+ scenes
 - Theme/Story Arc queries cached for repeat access
-- Research search performs full-text search under 200ms
 
 #### NFR-002: Data Integrity
 - Scene numbers enforce uniqueness per script
@@ -97,7 +88,6 @@ These entities are separate from the existing Character/Location/Props entities 
 - Scene creation wizard suggests location and characters from script context
 - Theme color picker provides preset palette
 - Story arc timeline visualizes progression
-- Research autosave prevents data loss
 
 ---
 
@@ -197,26 +187,6 @@ interface ArcBeat {
 interface ArcCharacterRole {
   characterId: string;
   role: string; // "protagonist", "antagonist", "catalyst"
-}
-```
-
-### Research Entity
-```typescript
-interface Research {
-  id: string;
-  seriesId: string;
-  title: string;
-  content: string; // markdown
-  tags: string[];
-  sourceUrl?: string;
-  linkedEntities: ResearchLink[]; // link to any KB entity
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface ResearchLink {
-  entityType: "character" | "location" | "prop" | "scene" | "theme" | "storyArc";
-  entityId: string;
 }
 ```
 
@@ -350,57 +320,6 @@ export const storyArcContract = {
 };
 ```
 
-### Research Endpoints
-```typescript
-// packages/shared/src/contract/research.contract.ts
-export const researchContract = {
-  listBySeries: {
-    input: z.object({
-      seriesId: z.string(),
-    }),
-    output: z.array(researchSchema),
-  },
-  search: {
-    input: z.object({
-      seriesId: z.string(),
-      query: z.string(),
-      tags: z.array(z.string()).optional(),
-    }),
-    output: z.array(researchSchema),
-  },
-  getById: {
-    input: z.object({
-      id: z.string(),
-    }),
-    output: researchSchema,
-  },
-  create: {
-    input: z.object({
-      seriesId: z.string(),
-      title: z.string(),
-      content: z.string(),
-      tags: z.array(z.string()),
-      sourceUrl: z.string().optional(),
-      linkedEntities: z.array(researchLinkSchema),
-    }),
-    output: researchSchema,
-  },
-  update: {
-    input: z.object({
-      id: z.string(),
-      // ... partial research fields
-    }),
-    output: researchSchema,
-  },
-  delete: {
-    input: z.object({
-      id: z.string(),
-    }),
-    output: z.object({ success: z.boolean() }),
-  },
-};
-```
-
 ---
 
 ## UI/UX Requirements
@@ -436,14 +355,6 @@ export const researchContract = {
 - Related Themes (linked badges)
 - Resolution text
 
-### Research Panel
-- Sidebar or tab in Knowledge Base
-- List of research entries with titles and tags
-- Click to expand/view full content
-- Markdown rendering
-- Link to related entities (badges)
-- Search and filter by tags
-
 ---
 
 ## Success Criteria
@@ -471,15 +382,8 @@ export const researchContract = {
 - Story arcs appear in KB "All" view with arc icon
 - Completed arcs show resolution text
 
-### SC-004: Research Management
-- User can create research with markdown editor
-- Research links to KB entities via picker
-- Research search performs full-text search
-- Research entries render markdown correctly
-- Research tags are filterable
-
-### SC-005: KB Integration
-- All four entity types appear in unified "All" view
+### SC-004: KB Integration
+- All three entity types appear in unified "All" view
 - Entity type filter includes new types
 - Grid cards show type-specific icons and colors
 - Detail views match brutalist design system
@@ -517,18 +421,16 @@ export const researchContract = {
 ## Implementation Notes
 
 ### Backend
-- Create Mongoose models for Scene, Theme, StoryArc, Research
+- Create Mongoose models for Scene, Theme, StoryArc
 - Add indexes for seriesId, scriptId, sceneNumber (unique composite)
-- Implement oRPC routers for all four entity types
+- Implement oRPC routers for all three entity types
 - Add cascade delete logic (e.g., deleting script → delete scenes)
-- Implement search service for Research full-text search
 
 ### Frontend
-- Add entity type constants for Scenes, Themes, StoryArcs, Research
+- Add entity type constants for Scenes, Themes, StoryArcs
 - Create detail components matching V0 designs
 - Extend KB "All" view filter to include new types
 - Add entity icons and colors to design system
-- Create relationship picker components (e.g., link research to entities)
 
 ### Testing
 - Unit tests for scene number uniqueness
