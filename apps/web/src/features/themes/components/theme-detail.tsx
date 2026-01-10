@@ -5,7 +5,7 @@ import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
 
-import type { ThemeDetailQueryReturnType } from '../hooks/queries/use-theme-detail';
+import type { ThemeDetailQueryReturnType } from '../hooks/queries/use-theme';
 import { ThemeForm } from './theme-form';
 
 interface iThemeDetailProps {
