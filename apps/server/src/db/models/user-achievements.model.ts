@@ -3,6 +3,7 @@ import type { DocumentType } from '@typegoose/typegoose';
 
 import type { UserAchievementId } from '@kaeri/shared/constants/achievements';
 
+import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
 @index({ userId: 1, achievementId: 1 }, { unique: true })
@@ -15,7 +16,7 @@ import { ObjectIdString } from '../helpers';
     customName: 'UserAchievement',
   },
 })
-export class UserAchievementClass {
+export class UserAchievementClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -30,10 +31,6 @@ export class UserAchievementClass {
 
   @prop({ type: () => Object, allowMixed: Severity.ALLOW })
   public data?: Record<string, unknown>;
-
-  public createdAt!: Date;
-
-  public updatedAt!: Date;
 }
 
 export const UserAchievementModel = getModelForClass(UserAchievementClass);

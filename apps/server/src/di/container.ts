@@ -20,10 +20,13 @@ export async function registerServices() {
   const { CacheInvalidationService } = await import('@~/features/valkey/cache-invalidation.service');
   const { SeriesService } = await import('@~/features/series/series.service');
   const { ScriptsService } = await import('@~/features/scripts/scripts.service');
+  const { SceneService } = await import('@~/features/scenes/scene.service');
   const { KnowledgeBaseService } = await import('@~/features/knowledge-base/knowledge-base.service');
   const { CanvasService } = await import('@~/features/canvas/canvas.service');
   const { ExportService } = await import('@~/features/export/export.service');
   const { ContinuityService } = await import('@~/features/continuity/continuity.service');
+  const { ThemeService } = await import('@~/features/themes/theme.service');
+  const { StoryArcService } = await import('@~/features/story-arcs/story-arc.service');
 
   // Register singletons with their tokens
   container.registerSingleton(TOKENS.EventBus, TypedEventBus);
@@ -38,10 +41,13 @@ export async function registerServices() {
   container.register(TOKENS.UserService, { useClass: UserService }, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.SeriesService, SeriesService, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.ScriptsService, ScriptsService, { lifecycle: Lifecycle.Transient });
+  container.register(TOKENS.SceneService, SceneService, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.KnowledgeBaseService, KnowledgeBaseService, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.CanvasService, CanvasService, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.ExportService, ExportService, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.ContinuityService, ContinuityService, { lifecycle: Lifecycle.Transient });
+  container.register(TOKENS.ThemeService, ThemeService, { lifecycle: Lifecycle.Transient });
+  container.register(TOKENS.StoryArcService, StoryArcService, { lifecycle: Lifecycle.Transient });
 
   // Initialize services that need registration
   CacheInvalidationService.handleRegistration({ container, token: TOKENS.CacheInvalidationService });

@@ -1,6 +1,8 @@
 import { inject, injectable } from 'tsyringe';
+import type z from 'zod';
 
 import { errorCodes } from '@kaeri/shared';
+import { createSeriesInputSchema, updateSeriesPatchSchema } from '@kaeri/shared/contract/series.contract';
 
 import { ScriptModel } from '@~/db/models/script.model';
 import { SeriesModel } from '@~/db/models/series.model';
@@ -12,6 +14,9 @@ import type { TypedEventBus } from '../events/event-bus';
 import type { iWithLogger, LoggerFactory } from '../logger/logger.types';
 import type { ValkeyService } from '../valkey/valkey.service';
 import { SERIES_EVENTS } from './series.events';
+
+type CreateSeriesInput = z.infer<typeof createSeriesInputSchema>;
+type UpdateSeriesPatch = z.infer<typeof updateSeriesPatchSchema>;
 
 @injectable()
 export class SeriesService implements iWithLogger {
@@ -25,7 +30,7 @@ export class SeriesService implements iWithLogger {
     this.logger = loggerFactory.create('series-service');
   }
 
-  public async create(data: { title: string; genre?: string; logline?: string; coverUrl?: string }) {
+  public async create(data: CreateSeriesInput) {
     if (!data.title?.trim()) {
       throw ORPCBadRequestError(errorCodes.SERIES_TITLE_REQUIRED);
     }
@@ -46,10 +51,7 @@ export class SeriesService implements iWithLogger {
     return series;
   }
 
-  public async update(
-    seriesId: string,
-    patch: { title?: string; genre?: string; logline?: string; coverUrl?: string },
-  ) {
+  public async update(seriesId: string, patch: UpdateSeriesPatch) {
     const series = await SeriesModel.findById(seriesId);
     if (!series) {
       throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);

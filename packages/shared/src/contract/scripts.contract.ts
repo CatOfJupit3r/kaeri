@@ -32,6 +32,25 @@ const scriptSummarySchema = scriptSchema.pick({
   lastEditedAt: true,
 });
 
+export const createScriptInputSchema = z.object({
+  seriesId: z.string(),
+  title: z.string().min(1),
+  authors: z.array(z.string()).optional(),
+  genre: z.string().optional(),
+  logline: z.string().optional(),
+  coverUrl: z.string().url().optional(),
+});
+
+export const updateScriptPatchSchema = z
+  .object({
+    title: z.string().min(1).optional(),
+    authors: z.array(z.string()).optional(),
+    genre: z.string().optional(),
+    logline: z.string().optional(),
+    coverUrl: z.string().url().optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, 'At least one field must be provided');
+
 const createScript = authProcedure
   .route({
     path: '/create',
@@ -39,16 +58,7 @@ const createScript = authProcedure
     summary: 'Create a script',
     description: 'Creates a script under a series with metadata and empty content.',
   })
-  .input(
-    z.object({
-      seriesId: z.string(),
-      title: z.string().min(1),
-      authors: z.array(z.string()).optional(),
-      genre: z.string().optional(),
-      logline: z.string().optional(),
-      coverUrl: z.string().url().optional(),
-    }),
-  )
+  .input(createScriptInputSchema)
   .output(scriptSchema);
 
 const updateScript = authProcedure
@@ -61,15 +71,7 @@ const updateScript = authProcedure
   .input(
     z.object({
       scriptId: z.string(),
-      patch: z
-        .object({
-          title: z.string().min(1).optional(),
-          authors: z.array(z.string()).optional(),
-          genre: z.string().optional(),
-          logline: z.string().optional(),
-          coverUrl: z.string().url().optional(),
-        })
-        .refine((value) => Object.keys(value).length > 0, 'At least one field must be provided'),
+      patch: updateScriptPatchSchema,
     }),
   )
   .output(scriptSchema);

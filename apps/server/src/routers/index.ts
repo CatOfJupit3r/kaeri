@@ -6,8 +6,11 @@ import { continuityRouter } from './continuity.router';
 import { exportRouter } from './export.router';
 import { indexRouter } from './index.router';
 import { knowledgeBaseRouter } from './knowledge-base.router';
+import { sceneRouter } from './scene.router';
 import { scriptsRouter } from './scripts.router';
 import { seriesRouter } from './series.router';
+import { storyArcRouter } from './story-arc.router';
+import { themeRouter } from './theme.router';
 import { userRouter } from './user.router';
 
 export const appRouter = base.router({
@@ -17,10 +20,13 @@ export const appRouter = base.router({
   badges: badgesRouter,
   series: seriesRouter,
   scripts: scriptsRouter,
+  scene: sceneRouter,
   knowledgeBase: knowledgeBaseRouter,
   canvas: canvasRouter,
   continuity: continuityRouter,
   export: exportRouter,
+  theme: themeRouter,
+  storyArc: storyArcRouter,
 });
 
 export type AppRouter = typeof appRouter;

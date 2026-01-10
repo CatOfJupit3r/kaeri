@@ -2,6 +2,7 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
 class AssociationClass {
@@ -19,7 +20,7 @@ class AssociationClass {
 }
 
 @modelOptions({ schemaOptions: { collection: 'props', timestamps: true } })
-class PropClass {
+class PropClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -34,10 +35,6 @@ class PropClass {
 
   @prop({ type: () => [AssociationClass], default: [] })
   public associations?: AssociationClass[];
-
-  public createdAt!: Date;
-
-  public updatedAt!: Date;
 }
 
 export const PropModel = getModelForClass(PropClass);

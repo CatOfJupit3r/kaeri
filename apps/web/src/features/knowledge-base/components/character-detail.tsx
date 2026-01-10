@@ -36,6 +36,8 @@ interface iVariation {
   scriptId: string;
   label: string;
   notes?: string;
+  age?: number | string;
+  appearance?: string;
 }
 
 interface iCharacterDetailProps {
@@ -329,6 +331,18 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
                             </div>
                             {variation.notes ? (
                               <p className="text-sm text-muted-foreground">{variation.notes}</p>
+                            ) : null}
+                            {variation.age ? (
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">Age:</span>
+                                <span className="text-sm text-muted-foreground">{variation.age}</span>
+                              </div>
+                            ) : null}
+                            {variation.appearance ? (
+                              <div className="space-y-1">
+                                <span className="text-sm font-medium">Appearance:</span>
+                                <p className="text-sm text-muted-foreground">{variation.appearance}</p>
+                              </div>
                             ) : null}
                           </div>
                           <div className="flex gap-1">

@@ -1,10 +1,11 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
 @modelOptions({ schemaOptions: { collection: 'audit_entries', timestamps: true } })
-class AuditEntryClass {
+class AuditEntryClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -31,10 +32,6 @@ class AuditEntryClass {
 
   @prop({ type: () => Object })
   public after?: Record<string, unknown>;
-
-  public createdAt!: Date;
-
-  public updatedAt!: Date;
 }
 
 export const AuditEntryModel = getModelForClass(AuditEntryClass);

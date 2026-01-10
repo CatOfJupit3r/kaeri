@@ -17,6 +17,10 @@ const kaeriErrorCodes = {
   SCRIPT_TITLE_REQUIRED: 'SCRIPT_TITLE_REQUIRED',
   SCRIPT_SERIES_MISMATCH: 'SCRIPT_SERIES_MISMATCH',
   SCRIPT_NOT_SAVED: 'SCRIPT_NOT_SAVED',
+  // Scene errors
+  SCENE_NOT_FOUND: 'SCENE_NOT_FOUND',
+  SCENE_HEADING_REQUIRED: 'SCENE_HEADING_REQUIRED',
+  SCENE_NUMBER_DUPLICATE: 'SCENE_NUMBER_DUPLICATE',
   // Knowledge Base errors
   CHARACTER_NOT_FOUND: 'CHARACTER_NOT_FOUND',
   LOCATION_NOT_FOUND: 'LOCATION_NOT_FOUND',
@@ -29,6 +33,14 @@ const kaeriErrorCodes = {
   RELATIONSHIP_NOT_FOUND: 'RELATIONSHIP_NOT_FOUND',
   APPEARANCE_NOT_FOUND: 'APPEARANCE_NOT_FOUND',
   VARIATION_NOT_FOUND: 'VARIATION_NOT_FOUND',
+  // Theme errors
+  THEME_NOT_FOUND: 'THEME_NOT_FOUND',
+  THEME_NAME_REQUIRED: 'THEME_NAME_REQUIRED',
+  // Story Arc errors
+  STORY_ARC_NOT_FOUND: 'STORY_ARC_NOT_FOUND',
+  STORY_ARC_NAME_REQUIRED: 'STORY_ARC_NAME_REQUIRED',
+  STORY_ARC_SERIES_MISMATCH: 'STORY_ARC_SERIES_MISMATCH',
+  INVALID_STORY_ARC_STATUS: 'INVALID_STORY_ARC_STATUS',
   // Canvas errors
   CANVAS_NODE_NOT_FOUND: 'CANVAS_NODE_NOT_FOUND',
   CANVAS_EDGE_NOT_FOUND: 'CANVAS_EDGE_NOT_FOUND',
@@ -60,6 +72,10 @@ const kaeriErrorMessages = {
   [kaeriErrorCodes.SCRIPT_TITLE_REQUIRED]: 'Script title is required',
   [kaeriErrorCodes.SCRIPT_SERIES_MISMATCH]: 'Script does not belong to the specified series',
   [kaeriErrorCodes.SCRIPT_NOT_SAVED]: 'Script has unsaved changes',
+  // Scene errors
+  [kaeriErrorCodes.SCENE_NOT_FOUND]: 'Scene not found',
+  [kaeriErrorCodes.SCENE_HEADING_REQUIRED]: 'Scene heading is required',
+  [kaeriErrorCodes.SCENE_NUMBER_DUPLICATE]: 'Scene number already exists for this script',
   // Knowledge Base errors
   [kaeriErrorCodes.CHARACTER_NOT_FOUND]: 'Character not found',
   [kaeriErrorCodes.LOCATION_NOT_FOUND]: 'Location not found',
@@ -72,6 +88,14 @@ const kaeriErrorMessages = {
   [kaeriErrorCodes.RELATIONSHIP_NOT_FOUND]: 'Relationship not found',
   [kaeriErrorCodes.APPEARANCE_NOT_FOUND]: 'Appearance not found',
   [kaeriErrorCodes.VARIATION_NOT_FOUND]: 'Variation not found',
+  // Theme errors
+  [kaeriErrorCodes.THEME_NOT_FOUND]: 'Theme not found',
+  [kaeriErrorCodes.THEME_NAME_REQUIRED]: 'Theme name is required',
+  // Story Arc errors
+  [kaeriErrorCodes.STORY_ARC_NOT_FOUND]: 'Story arc not found',
+  [kaeriErrorCodes.STORY_ARC_NAME_REQUIRED]: 'Story arc name is required',
+  [kaeriErrorCodes.STORY_ARC_SERIES_MISMATCH]: 'Story arc does not belong to the specified series',
+  [kaeriErrorCodes.INVALID_STORY_ARC_STATUS]: 'Invalid story arc status',
   // Canvas errors
   [kaeriErrorCodes.CANVAS_NODE_NOT_FOUND]: 'Canvas node not found',
   [kaeriErrorCodes.CANVAS_EDGE_NOT_FOUND]: 'Canvas edge not found',

@@ -8,8 +8,11 @@ import type { TypedEventBus } from '@~/features/events/event-bus';
 import type { ExportService } from '@~/features/export/export.service';
 import type { KnowledgeBaseService } from '@~/features/knowledge-base/knowledge-base.service';
 import type { LoggerFactory } from '@~/features/logger/logger.types';
+import type { SceneService } from '@~/features/scenes/scene.service';
 import type { ScriptsService } from '@~/features/scripts/scripts.service';
 import type { SeriesService } from '@~/features/series/series.service';
+import type { StoryArcService } from '@~/features/story-arcs/story-arc.service';
+import type { ThemeService } from '@~/features/themes/theme.service';
 import type { UserService } from '@~/features/user/user.service';
 import type { CacheInvalidationService } from '@~/features/valkey/cache-invalidation.service';
 import type { ValkeyService } from '@~/features/valkey/valkey.service';
@@ -25,10 +28,13 @@ const valkeyServiceToken: unique symbol = Symbol.for('ValkeyService');
 const cacheInvalidationServiceToken: unique symbol = Symbol.for('CacheInvalidationService');
 const seriesServiceToken: unique symbol = Symbol.for('SeriesService');
 const scriptsServiceToken: unique symbol = Symbol.for('ScriptsService');
+const sceneServiceToken: unique symbol = Symbol.for('SceneService');
 const knowledgeBaseServiceToken: unique symbol = Symbol.for('KnowledgeBaseService');
 const canvasServiceToken: unique symbol = Symbol.for('CanvasService');
 const exportServiceToken: unique symbol = Symbol.for('ExportService');
 const continuityServiceToken: unique symbol = Symbol.for('ContinuityService');
+const themeServiceToken: unique symbol = Symbol.for('ThemeService');
+const storyArcServiceToken: unique symbol = Symbol.for('StoryArcService');
 
 // Service tokens for dependency injection (unique symbols for type-safe lookups)
 export const TOKENS = {
@@ -43,10 +49,13 @@ export const TOKENS = {
   CacheInvalidationService: cacheInvalidationServiceToken,
   SeriesService: seriesServiceToken,
   ScriptsService: scriptsServiceToken,
+  SceneService: sceneServiceToken,
   KnowledgeBaseService: knowledgeBaseServiceToken,
   CanvasService: canvasServiceToken,
   ExportService: exportServiceToken,
   ContinuityService: continuityServiceToken,
+  ThemeService: themeServiceToken,
+  StoryArcService: storyArcServiceToken,
 } as const;
 
 export interface iTokenRegistry {
@@ -61,10 +70,13 @@ export interface iTokenRegistry {
   [TOKENS.CacheInvalidationService]: CacheInvalidationService;
   [TOKENS.SeriesService]: SeriesService;
   [TOKENS.ScriptsService]: ScriptsService;
+  [TOKENS.SceneService]: SceneService;
   [TOKENS.KnowledgeBaseService]: KnowledgeBaseService;
   [TOKENS.CanvasService]: CanvasService;
   [TOKENS.ExportService]: ExportService;
   [TOKENS.ContinuityService]: ContinuityService;
+  [TOKENS.ThemeService]: ThemeService;
+  [TOKENS.StoryArcService]: StoryArcService;
 }
 
 export type InjectionTokens = typeof TOKENS;

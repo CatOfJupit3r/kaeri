@@ -2,6 +2,7 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
 // Nested classes for embedded documents
@@ -25,6 +26,12 @@ class VariationClass {
 
   @prop()
   public notes?: string;
+
+  @prop()
+  public age?: number | string;
+
+  @prop()
+  public appearance?: string;
 }
 
 class AppearanceClass {
@@ -39,7 +46,7 @@ class AppearanceClass {
 }
 
 @modelOptions({ schemaOptions: { collection: 'characters', timestamps: true } })
-class CharacterClass {
+class CharacterClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -66,10 +73,6 @@ class CharacterClass {
 
   @prop()
   public avatarUrl?: string;
-
-  public createdAt!: Date;
-
-  public updatedAt!: Date;
 }
 
 export const CharacterModel = getModelForClass(CharacterClass);

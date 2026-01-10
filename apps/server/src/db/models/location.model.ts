@@ -2,7 +2,16 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
+
+class ImageClass {
+  @prop({ required: true })
+  public url!: string;
+
+  @prop()
+  public caption?: string;
+}
 
 class AppearanceClass {
   @prop({ required: true })
@@ -16,7 +25,7 @@ class AppearanceClass {
 }
 
 @modelOptions({ schemaOptions: { collection: 'locations', timestamps: true } })
-class LocationClass {
+class LocationClass extends RequiredTimeStamps {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -35,9 +44,23 @@ class LocationClass {
   @prop({ type: () => [AppearanceClass], default: [] })
   public appearances?: AppearanceClass[];
 
-  public createdAt!: Date;
+  @prop({ type: () => [ImageClass], default: [] })
+  public images?: ImageClass[];
 
-  public updatedAt!: Date;
+  @prop({ type: () => [String], default: [] })
+  public associatedCharacterIds?: string[];
+
+  @prop({ type: () => [String], default: [] })
+  public propIds?: string[];
+
+  @prop()
+  public productionNotes?: string;
+
+  @prop()
+  public mood?: string;
+
+  @prop({ type: () => [String], default: [] })
+  public timeOfDay?: string[];
 }
 
 export const LocationModel = getModelForClass(LocationClass);

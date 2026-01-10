@@ -10,8 +10,11 @@ export const GETTERS = {
   EventBus: () => resolve(TOKENS.EventBus),
   SeriesService: () => resolve(TOKENS.SeriesService),
   ScriptsService: () => resolve(TOKENS.ScriptsService),
+  SceneService: () => resolve(TOKENS.SceneService),
   KnowledgeBaseService: () => resolve(TOKENS.KnowledgeBaseService),
   CanvasService: () => resolve(TOKENS.CanvasService),
   ExportService: () => resolve(TOKENS.ExportService),
   ContinuityService: () => resolve(TOKENS.ContinuityService),
+  ThemeService: () => resolve(TOKENS.ThemeService),
+  StoryArcService: () => resolve(TOKENS.StoryArcService),
 };

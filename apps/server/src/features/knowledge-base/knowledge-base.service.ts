@@ -16,7 +16,10 @@ import {
 import { CharacterModel } from '@~/db/models/character.model';
 import { LocationModel } from '@~/db/models/location.model';
 import { PropModel } from '@~/db/models/prop.model';
+import { SceneModel } from '@~/db/models/scene.model';
 import { SeriesModel } from '@~/db/models/series.model';
+import { StoryArcModel } from '@~/db/models/story-arc.model';
+import { ThemeModel } from '@~/db/models/theme.model';
 import { TimelineEntryModel } from '@~/db/models/timeline-entry.model';
 import { WildCardModel } from '@~/db/models/wildcard.model';
 import { TOKENS } from '@~/di/tokens';
@@ -87,12 +90,15 @@ export class KnowledgeBaseService implements iWithLogger {
 
     const searchRegex = new RegExp(query, 'i');
 
-    const [characters, locations, props, timeline, wildcards] = await Promise.all([
+    const [characters, locations, props, scenes, timeline, wildcards, storyArcs, themes] = await Promise.all([
       CharacterModel.find({ seriesId, name: searchRegex }).limit(limit).skip(offset).lean(),
       LocationModel.find({ seriesId, name: searchRegex }).limit(limit).skip(offset).lean(),
       PropModel.find({ seriesId, name: searchRegex }).limit(limit).skip(offset).lean(),
+      SceneModel.find({ seriesId, heading: searchRegex }).limit(limit).skip(offset).lean(),
       TimelineEntryModel.find({ seriesId, label: searchRegex }).limit(limit).skip(offset).lean(),
       WildCardModel.find({ seriesId, title: searchRegex }).limit(limit).skip(offset).lean(),
+      StoryArcModel.find({ seriesId, name: searchRegex }).limit(limit).skip(offset).lean(),
+      ThemeModel.find({ seriesId, name: searchRegex }).limit(limit).skip(offset).lean(),
     ]);
 
     const items = [
@@ -103,12 +109,26 @@ export class KnowledgeBaseService implements iWithLogger {
       // eslint-disable-next-line @typescript-eslint/no-misused-spread
       ...props.map((p) => ({ ...p, _type: 'prop' as const })),
       // eslint-disable-next-line @typescript-eslint/no-misused-spread
+      ...scenes.map((s) => ({ ...s, _type: 'scene' as const })),
+      // eslint-disable-next-line @typescript-eslint/no-misused-spread
       ...timeline.map((t) => ({ ...t, _type: 'timeline' as const })),
       // eslint-disable-next-line @typescript-eslint/no-misused-spread
       ...wildcards.map((w) => ({ ...w, _type: 'wildcard' as const })),
+      // eslint-disable-next-line @typescript-eslint/no-misused-spread
+      ...storyArcs.map((sa) => ({ ...sa, _type: 'storyArc' as const })),
+      // eslint-disable-next-line @typescript-eslint/no-misused-spread
+      ...themes.map((th) => ({ ...th, _type: 'theme' as const })),
     ].slice(0, limit);
 
-    const total = characters.length + locations.length + props.length + timeline.length + wildcards.length;
+    const total =
+      characters.length +
+      locations.length +
+      props.length +
+      scenes.length +
+      timeline.length +
+      wildcards.length +
+      storyArcs.length +
+      themes.length;
 
     this.logger.info('KB search executed', { seriesId, query, resultsCount: items.length });
     return { items, total };
@@ -284,7 +304,7 @@ export class KnowledgeBaseService implements iWithLogger {
     characterId: string,
     scriptId: string,
     label: string,
-    patch: { label?: string; notes?: string },
+    patch: { label?: string; notes?: string; age?: number | string; appearance?: string },
   ) {
     const character = await CharacterModel.findOne({ _id: characterId, seriesId });
     if (!character) {
@@ -303,6 +323,12 @@ export class KnowledgeBaseService implements iWithLogger {
     }
     if (patch.notes !== undefined) {
       character.variations[variationIndex].notes = patch.notes;
+    }
+    if (patch.age !== undefined) {
+      character.variations[variationIndex].age = patch.age;
+    }
+    if (patch.appearance !== undefined) {
+      character.variations[variationIndex].appearance = patch.appearance;
     }
 
     await character.save();
@@ -345,6 +371,12 @@ export class KnowledgeBaseService implements iWithLogger {
       description: data.description,
       tags: data.tags ?? [],
       appearances: [],
+      images: data.images ?? [],
+      associatedCharacterIds: data.associatedCharacterIds ?? [],
+      propIds: data.propIds ?? [],
+      productionNotes: data.productionNotes,
+      mood: data.mood,
+      timeOfDay: data.timeOfDay ?? [],
     });
 
     this.logger.info('Location created', { locationId: location._id, seriesId, name: location.name });
@@ -361,6 +393,12 @@ export class KnowledgeBaseService implements iWithLogger {
     if (patch.name !== undefined) location.name = patch.name;
     if (patch.description !== undefined) location.description = patch.description;
     if (patch.tags !== undefined) location.tags = patch.tags;
+    if (patch.images !== undefined) location.images = patch.images;
+    if (patch.associatedCharacterIds !== undefined) location.associatedCharacterIds = patch.associatedCharacterIds;
+    if (patch.propIds !== undefined) location.propIds = patch.propIds;
+    if (patch.productionNotes !== undefined) location.productionNotes = patch.productionNotes;
+    if (patch.mood !== undefined) location.mood = patch.mood;
+    if (patch.timeOfDay !== undefined) location.timeOfDay = patch.timeOfDay;
 
     await location.save();
     this.logger.info('Location updated', { locationId: id });
