@@ -1,6 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { parseAsStringEnum, useQueryStates } from 'nuqs';
-import { LuBookUser, LuGlobe, LuPackage, LuCalendar, LuSparkles, LuTrendingUp } from 'react-icons/lu';
+import {
+  LuBookUser,
+  LuGlobe,
+  LuPackage,
+  LuCalendar,
+  LuSparkles,
+  LuTrendingUp,
+  LuLightbulb,
+  LuFilm,
+} from 'react-icons/lu';
 import z from 'zod';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
@@ -11,14 +20,26 @@ import { LocationList } from '@~/features/locations/components/location-list';
 import { locationListQueryOptions } from '@~/features/locations/hooks/queries/use-location-list';
 import { PropList } from '@~/features/props/components/prop-list';
 import { propListQueryOptions } from '@~/features/props/hooks/queries/use-prop-list';
+import { SceneList } from '@~/features/scenes/components/scene-list';
 import { StoryArcList } from '@~/features/story-arcs/components/story-arc-list';
 import { storyArcListQueryOptions } from '@~/features/story-arcs/hooks/queries/use-story-arc-list';
+import { ThemeList } from '@~/features/themes/components/theme-list';
+import { themeListQueryOptions } from '@~/features/themes/hooks/queries/use-theme-list';
 import { TimelineList } from '@~/features/timelines/components/timeline-list';
 import { timelineListQueryOptions } from '@~/features/timelines/hooks/queries/use-timeline-list';
 import { WildcardList } from '@~/features/wildcards/components/wildcard-list';
 import { wildcardListQueryOptions } from '@~/features/wildcards/hooks/queries/use-wildcard-list';
 
-const tabSchema = z.enum(['characters', 'locations', 'props', 'timeline', 'wildcards', 'story-arcs']);
+const tabSchema = z.enum([
+  'characters',
+  'locations',
+  'props',
+  'scenes',
+  'timeline',
+  'wildcards',
+  'story-arcs',
+  'themes',
+]);
 const TAB_VALUES = tabSchema.enum;
 const TAB_VALUES_ARRAY = Object.values(TAB_VALUES);
 type TabValue = z.infer<typeof tabSchema>;
@@ -41,6 +62,7 @@ export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-bas
       context.queryClient.ensureQueryData(timelineListQueryOptions(seriesId)),
       context.queryClient.ensureQueryData(wildcardListQueryOptions(seriesId)),
       context.queryClient.ensureQueryData(storyArcListQueryOptions(seriesId)),
+      context.queryClient.ensureQueryData(themeListQueryOptions(seriesId)),
     ]);
   },
   component: RouteComponent,
@@ -58,9 +80,11 @@ function RouteComponent() {
       character: 'characters',
       location: 'locations',
       prop: 'props',
+      scene: 'scenes',
       timeline: 'timeline',
       wildcard: 'wildcards',
       storyArc: 'story-arcs',
+      theme: 'themes',
     };
 
     const targetTab = tabMap[entityType];
@@ -95,7 +119,7 @@ function RouteComponent() {
           onValueChange={async (value) => setQueryStates({ tab: (value as TabValue) ?? TAB_VALUES.characters })}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="characters" className="gap-2">
               <LuBookUser className="size-4" />
               <span>Characters</span>
@@ -108,6 +132,10 @@ function RouteComponent() {
               <LuPackage className="size-4" />
               <span>Props</span>
             </TabsTrigger>
+            <TabsTrigger value="scenes" className="gap-2">
+              <LuFilm className="size-4" />
+              <span>Scenes</span>
+            </TabsTrigger>
             <TabsTrigger value="timeline" className="gap-2">
               <LuCalendar className="size-4" />
               <span>Timeline</span>
@@ -119,6 +147,10 @@ function RouteComponent() {
             <TabsTrigger value="story-arcs" className="gap-2">
               <LuTrendingUp className="size-4" />
               <span>Story Arcs</span>
+            </TabsTrigger>
+            <TabsTrigger value="themes" className="gap-2">
+              <LuLightbulb className="size-4" />
+              <span>Themes</span>
             </TabsTrigger>
           </TabsList>
 
@@ -134,6 +166,10 @@ function RouteComponent() {
             <PropList seriesId={seriesId} />
           </TabsContent>
 
+          <TabsContent value="scenes" className="mt-6 space-y-4">
+            <SceneList seriesId={seriesId} />
+          </TabsContent>
+
           <TabsContent value="timeline" className="mt-6 space-y-4">
             <TimelineList seriesId={seriesId} />
           </TabsContent>
@@ -144,6 +180,10 @@ function RouteComponent() {
 
           <TabsContent value="story-arcs" className="mt-6 space-y-4">
             <StoryArcList seriesId={seriesId} />
+          </TabsContent>
+
+          <TabsContent value="themes" className="mt-6 space-y-4">
+            <ThemeList seriesId={seriesId} />
           </TabsContent>
         </Tabs>
       </div>
