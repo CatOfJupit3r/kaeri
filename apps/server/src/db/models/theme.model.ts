@@ -26,13 +26,13 @@ class EvolutionEntryClass {
 @modelOptions({ schemaOptions: { _id: false } })
 class AppearanceClass {
   @prop({ required: true })
-  public scriptId!: string;
-
-  @prop({ required: true })
-  public sceneRef!: string;
+  public sceneId!: string;
 
   @prop()
   public quote?: string;
+
+  @prop()
+  public notes?: string;
 }
 
 @modelOptions({ schemaOptions: { collection: 'themes', timestamps: true } })

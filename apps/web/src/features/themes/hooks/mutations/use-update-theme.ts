@@ -25,7 +25,7 @@ export const updateThemeMutationOptions = tanstackRPC.theme.updateTheme.mutation
     }
 
     void ctx.client.invalidateQueries({
-      queryKey: tanstackRPC.theme.listThemes.queryKey({ input: { seriesId: updatedTheme.seriesId } }),
+      queryKey: tanstackRPC.theme.listThemesBySeries.queryKey({ input: { seriesId: updatedTheme.seriesId } }),
     });
 
     void ctx.client.invalidateQueries({

@@ -12,7 +12,7 @@ export const deleteThemeMutationOptions = tanstackRPC.theme.deleteTheme.mutation
       .findAll()
       .filter((query) => {
         const key = query.queryKey;
-        return Array.isArray(key) && JSON.stringify(key).includes('"listThemes"');
+        return Array.isArray(key) && JSON.stringify(key).includes('"listThemesBySeries"');
       });
 
     await Promise.all(listQueries.map(async (query) => ctx.client.cancelQueries({ queryKey: query.queryKey })));
