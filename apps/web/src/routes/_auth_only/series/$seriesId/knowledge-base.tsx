@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs'
 import { Toggle } from '@~/components/ui/toggle';
 import { CharacterList } from '@~/features/characters/components/character-list';
 import { characterListQueryOptions } from '@~/features/characters/hooks/queries/use-character-list';
+import { KBAllView } from '@~/features/knowledge-base/components/kb-all-view';
 import { KBSearch } from '@~/features/knowledge-base/components/kb-search';
 import { LocationList } from '@~/features/locations/components/location-list';
 import { locationListQueryOptions } from '@~/features/locations/hooks/queries/use-location-list';
@@ -37,6 +38,7 @@ import { WildcardList } from '@~/features/wildcards/components/wildcard-list';
 import { wildcardListQueryOptions } from '@~/features/wildcards/hooks/queries/use-wildcard-list';
 
 const tabSchema = z.enum([
+  'all',
   'characters',
   'locations',
   'props',
@@ -81,11 +83,15 @@ export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-bas
 function RouteComponent() {
   const { seriesId } = Route.useParams();
   const [{ tab, viewMode }, setQueryStates] = useQueryStates({
-    tab: parseAsStringEnum(TAB_VALUES_ARRAY).withDefault(TAB_VALUES.characters),
+    tab: parseAsStringEnum(TAB_VALUES_ARRAY).withDefault(TAB_VALUES.all),
     viewMode: parseAsStringEnum(VIEW_MODE_ARRAY).withDefault(VIEW_MODE.grid),
   });
-  const activeTab = tab ?? TAB_VALUES.characters;
+  const activeTab = tab ?? TAB_VALUES.all;
   const activeViewMode = viewMode ?? VIEW_MODE.grid;
+
+  const handleTabChange = (value: string) => {
+    setQueryStates({ tab: (value as TabValue) ?? TAB_VALUES.all }).catch(() => {});
+  };
 
   const handleResultClick = (entityId: string, entityType: string) => {
     const tabMap: Record<string, string> = {
@@ -97,6 +103,7 @@ function RouteComponent() {
       wildcard: 'wildcards',
       storyArc: 'story-arcs',
       theme: 'themes',
+      all: 'all',
     };
 
     const targetTab = tabMap[entityType];
@@ -161,12 +168,12 @@ function RouteComponent() {
           <KBSearch seriesId={seriesId} onResultClick={handleResultClick} />
         </div>
 
-        <Tabs
-          value={activeTab}
-          onValueChange={async (value) => setQueryStates({ tab: (value as TabValue) ?? TAB_VALUES.characters })}
-          className="w-full"
-        >
-          <TabsList className="grid w-full grid-cols-8">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="grid w-full grid-cols-9">
+            <TabsTrigger value="all" className="gap-2">
+              <LuLayoutGrid className="size-4" />
+              <span>All</span>
+            </TabsTrigger>
             <TabsTrigger value="characters" className="gap-2">
               <LuBookUser className="size-4" />
               <span>Characters</span>
@@ -200,6 +207,10 @@ function RouteComponent() {
               <span>Themes</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="all" className="mt-6 space-y-4">
+            <KBAllView seriesId={seriesId} onTabChange={handleTabChange} />
+          </TabsContent>
 
           <TabsContent value="characters" className="mt-6 space-y-4">
             <CharacterList seriesId={seriesId} />
