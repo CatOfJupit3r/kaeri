@@ -14,7 +14,7 @@ export const themeRouter = base.theme.router({
     GETTERS.ThemeService().delete(input.themeId),
   ),
 
-  listThemes: protectedProcedure.theme.listThemes.handler(async ({ input }) =>
+  listThemesBySeries: protectedProcedure.theme.listThemesBySeries.handler(async ({ input }) =>
     GETTERS.ThemeService().list(input.seriesId, input.limit, input.offset),
   ),
 

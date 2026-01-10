@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { LuFileText, LuLightbulb, LuPencil, LuUser } from 'react-icons/lu';
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@~/components/ui/accordion';
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
@@ -147,52 +146,28 @@ export function ThemeDetail({ theme, seriesId }: iThemeDetailProps) {
           </CardHeader>
           <CardContent>
             {theme.appearances && theme.appearances.length > 0 ? (
-              <Accordion type="multiple" className="w-full">
-                {/* Group appearances by script */}
-                {Object.entries(
-                  theme.appearances.reduce<Record<string, typeof theme.appearances>>((acc, appearance) => {
-                    if (!acc[appearance.scriptId]) {
-                      acc[appearance.scriptId] = [];
-                    }
-                    acc[appearance.scriptId].push(appearance);
-                    return acc;
-                  }, {}),
-                ).map(([scriptId, appearances]) => (
-                  <AccordionItem key={scriptId} value={scriptId}>
-                    <AccordionTrigger>
-                      <div className="flex items-center gap-2">
-                        <LuFileText className="size-4 text-blue-500" />
-                        <span className="font-medium">Script {scriptId}</span>
-                        <Badge variant="outline" className="ml-2">
-                          {appearances.length} {appearances.length === 1 ? 'mention' : 'mentions'}
-                        </Badge>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-2 pt-2">
-                        <h4 className="text-xs font-medium text-muted-foreground">Key Scenes</h4>
-                        {appearances.map((appearance, index) => (
-                          <div
-                            // eslint-disable-next-line react/no-array-index-key
-                            key={`${appearance.sceneRef}-${index}`}
-                            className="flex gap-2 rounded-md border border-border bg-card p-3"
-                          >
-                            <div className="flex size-6 shrink-0 items-center justify-center rounded bg-muted text-xs font-medium">
-                              {appearance.sceneRef}
-                            </div>
-                            <div className="flex-1">
-                              <p className="mb-1 text-xs font-medium text-foreground">Scene {appearance.sceneRef}</p>
-                              {appearance.quote ? (
-                                <p className="text-xs text-muted-foreground italic">&quot;{appearance.quote}&quot;</p>
-                              ) : null}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
+              <div className="space-y-2">
+                {theme.appearances.map((appearance, index) => (
+                  <div
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={`${appearance.sceneId}-${index}`}
+                    className="flex gap-2 rounded-md border border-border bg-card p-3"
+                  >
+                    <div className="flex size-6 shrink-0 items-center justify-center rounded bg-muted text-xs font-medium">
+                      <LuFileText className="size-4 text-blue-500" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="mb-1 text-xs font-medium text-foreground">Scene {appearance.sceneId}</p>
+                      {appearance.quote ? (
+                        <p className="text-xs text-muted-foreground italic">&quot;{appearance.quote}&quot;</p>
+                      ) : null}
+                      {appearance.notes ? (
+                        <p className="mt-1 text-xs text-muted-foreground">{appearance.notes}</p>
+                      ) : null}
+                    </div>
+                  </div>
                 ))}
-              </Accordion>
+              </div>
             ) : (
               <p className="text-sm text-muted-foreground">No appearances recorded for this theme</p>
             )}
