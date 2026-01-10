@@ -51,6 +51,39 @@ describe('Knowledge Base API - Locations', () => {
 
       await expectErrorCode(() => createLocation(ctx, series._id, { name: '   ' }), 'BAD_REQUEST');
     });
+
+    it('should create a location with enhanced fields', async () => {
+      const { ctx, series } = await createSeriesWithUser();
+
+      const character = await createCharacter(ctx, series._id, { name: 'John Doe' });
+      const prop = await createProp(ctx, series._id, { name: 'Magic Wand' });
+
+      const location = await createLocation(ctx, series._id, {
+        name: 'Enchanted Forest',
+        description: 'A mystical forest',
+        tags: ['magical', 'exterior'],
+        images: [
+          { url: 'https://example.com/image1.jpg', caption: 'Morning view' },
+          { url: 'https://example.com/image2.jpg' },
+        ],
+        associatedCharacterIds: [character._id],
+        propIds: [prop._id],
+        productionNotes: 'Use green screen for background',
+        mood: 'mysterious',
+        timeOfDay: ['dawn', 'dusk'],
+      });
+
+      expect(location.name).toBe('Enchanted Forest');
+      expect(location.images).toHaveLength(2);
+      expect(location.images?.[0].url).toBe('https://example.com/image1.jpg');
+      expect(location.images?.[0].caption).toBe('Morning view');
+      expect(location.images?.[1].url).toBe('https://example.com/image2.jpg');
+      expect(location.associatedCharacterIds).toEqual([character._id]);
+      expect(location.propIds).toEqual([prop._id]);
+      expect(location.productionNotes).toBe('Use green screen for background');
+      expect(location.mood).toBe('mysterious');
+      expect(location.timeOfDay).toEqual(['dawn', 'dusk']);
+    });
   });
 
   describe('getLocation', () => {
@@ -117,6 +150,41 @@ describe('Knowledge Base API - Locations', () => {
           ),
         'NOT_FOUND',
       );
+    });
+
+    it('should update enhanced location fields', async () => {
+      const { ctx, series } = await createSeriesWithUser();
+
+      const character = await createCharacter(ctx, series._id, { name: 'Jane Smith' });
+      const prop = await createProp(ctx, series._id, { name: 'Crystal Ball' });
+
+      const location = await createLocation(ctx, series._id, { name: 'Old Castle' });
+
+      const updated = await call(
+        appRouter.knowledgeBase.locations.update,
+        {
+          id: location._id,
+          seriesId: series._id,
+          patch: {
+            images: [{ url: 'https://example.com/castle.jpg', caption: 'Main gate' }],
+            associatedCharacterIds: [character._id],
+            propIds: [prop._id],
+            productionNotes: 'Night shooting required',
+            mood: 'eerie',
+            timeOfDay: ['night'],
+          },
+        },
+        ctx(),
+      );
+
+      expect(updated.images).toHaveLength(1);
+      expect(updated.images?.[0].url).toBe('https://example.com/castle.jpg');
+      expect(updated.images?.[0].caption).toBe('Main gate');
+      expect(updated.associatedCharacterIds).toEqual([character._id]);
+      expect(updated.propIds).toEqual([prop._id]);
+      expect(updated.productionNotes).toBe('Night shooting required');
+      expect(updated.mood).toBe('eerie');
+      expect(updated.timeOfDay).toEqual(['night']);
     });
   });
 
