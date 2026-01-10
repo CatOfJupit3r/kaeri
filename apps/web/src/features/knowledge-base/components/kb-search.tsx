@@ -1,5 +1,16 @@
 import { useState } from 'react';
-import { LuSearch, LuBookUser, LuGlobe, LuPackage, LuCalendar, LuSparkles, LuX } from 'react-icons/lu';
+import {
+  LuSearch,
+  LuBookUser,
+  LuGlobe,
+  LuPackage,
+  LuCalendar,
+  LuSparkles,
+  LuX,
+  LuFilm,
+  LuTrendingUp,
+  LuLightbulb,
+} from 'react-icons/lu';
 
 import { Badge } from '@~/components/ui/badge';
 import { Card, CardContent } from '@~/components/ui/card';
@@ -29,14 +40,29 @@ const ENTITY_CONFIG = {
     icon: LuPackage,
     variant: 'outline' as const,
   },
+  scene: {
+    label: 'Scene',
+    icon: LuFilm,
+    variant: 'default' as const,
+  },
   timeline: {
     label: 'Timeline',
     icon: LuCalendar,
-    variant: 'default' as const,
+    variant: 'secondary' as const,
   },
   wildcard: {
     label: 'Wild Card',
     icon: LuSparkles,
+    variant: 'outline' as const,
+  },
+  storyArc: {
+    label: 'Story Arc',
+    icon: LuTrendingUp,
+    variant: 'default' as const,
+  },
+  theme: {
+    label: 'Theme',
+    icon: LuLightbulb,
     variant: 'secondary' as const,
   },
 } as const;
@@ -77,7 +103,7 @@ export function KBSearch({ seriesId, onResultClick }: iKBSearchProps) {
         <LuSearch className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Search characters, locations, props..."
+          placeholder="Search all knowledge base entities..."
           value={searchInput}
           onChange={(e) => handleInputChange(e.target.value)}
           className="pr-9 pl-9"
@@ -122,23 +148,30 @@ export function KBSearch({ seriesId, onResultClick }: iKBSearchProps) {
                     const Icon = config.icon;
 
                     let name = '';
+                    let description: string | undefined;
+
                     if (item._type === 'character') {
                       name = item.name;
+                      description = item.description;
                     } else if (item._type === 'location') {
                       name = item.name;
+                      description = item.description;
                     } else if (item._type === 'prop') {
                       name = item.name;
+                      description = item.description;
+                    } else if (item._type === 'scene') {
+                      name = item.heading;
                     } else if (item._type === 'timeline') {
                       name = item.label;
-                    } else {
-                      name = item.title;
-                    }
-
-                    let description: string | undefined;
-                    if (item._type === 'wildcard') {
-                      description = item.body;
-                    } else if ('description' in item) {
+                    } else if (item._type === 'storyArc') {
+                      name = item.name;
                       description = item.description;
+                    } else if (item._type === 'theme') {
+                      name = item.name;
+                      description = item.description;
+                    } else if (item._type === 'wildcard') {
+                      name = item.title;
+                      description = item.body;
                     }
 
                     return (
