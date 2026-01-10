@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { parseAsStringEnum, useQueryStates } from 'nuqs';
-import { LuBookUser, LuGlobe, LuPackage, LuCalendar, LuSparkles } from 'react-icons/lu';
+import { LuBookUser, LuFilm, LuGlobe, LuPackage, LuCalendar, LuSparkles } from 'react-icons/lu';
 import z from 'zod';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
@@ -11,12 +11,13 @@ import { LocationList } from '@~/features/locations/components/location-list';
 import { locationListQueryOptions } from '@~/features/locations/hooks/queries/use-location-list';
 import { PropList } from '@~/features/props/components/prop-list';
 import { propListQueryOptions } from '@~/features/props/hooks/queries/use-prop-list';
+import { SceneList } from '@~/features/scenes/components/scene-list';
 import { TimelineList } from '@~/features/timelines/components/timeline-list';
 import { timelineListQueryOptions } from '@~/features/timelines/hooks/queries/use-timeline-list';
 import { WildcardList } from '@~/features/wildcards/components/wildcard-list';
 import { wildcardListQueryOptions } from '@~/features/wildcards/hooks/queries/use-wildcard-list';
 
-const tabSchema = z.enum(['characters', 'locations', 'props', 'timeline', 'wildcards']);
+const tabSchema = z.enum(['characters', 'locations', 'props', 'scenes', 'timeline', 'wildcards']);
 const TAB_VALUES = tabSchema.enum;
 const TAB_VALUES_ARRAY = Object.values(TAB_VALUES);
 type TabValue = z.infer<typeof tabSchema>;
@@ -55,6 +56,7 @@ function RouteComponent() {
       character: 'characters',
       location: 'locations',
       prop: 'props',
+      scene: 'scenes',
       timeline: 'timeline',
       wildcard: 'wildcards',
     };
@@ -91,7 +93,7 @@ function RouteComponent() {
           onValueChange={async (value) => setQueryStates({ tab: (value as TabValue) ?? TAB_VALUES.characters })}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="characters" className="gap-2">
               <LuBookUser className="size-4" />
               <span>Characters</span>
@@ -103,6 +105,10 @@ function RouteComponent() {
             <TabsTrigger value="props" className="gap-2">
               <LuPackage className="size-4" />
               <span>Props</span>
+            </TabsTrigger>
+            <TabsTrigger value="scenes" className="gap-2">
+              <LuFilm className="size-4" />
+              <span>Scenes</span>
             </TabsTrigger>
             <TabsTrigger value="timeline" className="gap-2">
               <LuCalendar className="size-4" />
@@ -124,6 +130,10 @@ function RouteComponent() {
 
           <TabsContent value="props" className="mt-6 space-y-4">
             <PropList seriesId={seriesId} />
+          </TabsContent>
+
+          <TabsContent value="scenes" className="mt-6 space-y-4">
+            <SceneList seriesId={seriesId} />
           </TabsContent>
 
           <TabsContent value="timeline" className="mt-6 space-y-4">
