@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { LuX } from 'react-icons/lu';
-import z from 'zod';
 
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
@@ -22,6 +21,8 @@ interface iVariation {
   scriptId: string;
   label: string;
   notes?: string;
+  age?: number | string;
+  appearance?: string;
 }
 
 interface iVariationFormProps {
@@ -50,6 +51,8 @@ export function VariationForm({
       scriptId: initialData?.scriptId ?? '',
       label: initialData?.label ?? '',
       notes: initialData?.notes ?? '',
+      age: initialData?.age ?? '',
+      appearance: initialData?.appearance ?? '',
       traits: [] as string[],
     },
     onSubmit: async ({ value }) => {
@@ -57,15 +60,9 @@ export function VariationForm({
         scriptId: value.scriptId,
         label: value.label,
         notes: value.notes || undefined,
+        age: value.age || undefined,
+        appearance: value.appearance || undefined,
       });
-    },
-    validators: {
-      onSubmit: z.object({
-        scriptId: z.string().min(1, 'Script is required'),
-        label: z.string().min(1, 'Label is required').max(100, 'Label must be 100 characters or less'),
-        notes: z.string().max(500, 'Notes must be 500 characters or less'),
-        traits: z.array(z.string()),
-      }),
     },
   });
 
@@ -75,6 +72,8 @@ export function VariationForm({
         scriptId: initialData.scriptId,
         label: initialData.label,
         notes: initialData.notes ?? '',
+        age: initialData.age ?? '',
+        appearance: initialData.appearance ?? '',
         traits: [],
       });
     } else if (!open) {
@@ -82,6 +81,8 @@ export function VariationForm({
         scriptId: '',
         label: '',
         notes: '',
+        age: '',
+        appearance: '',
         traits: [],
       });
     }
@@ -134,6 +135,25 @@ export function VariationForm({
                 <field.TextareaField label="Notes" placeholder="Describe this variation..." rows={3} maxLength={500} />
               )}
             </form.AppField>
+
+            <div className="grid grid-cols-2 gap-4">
+              <form.AppField name="age">
+                {(field) => <field.TextField label="Age" placeholder="e.g., 30 or 30s" />}
+              </form.AppField>
+
+              <div className="col-span-2">
+                <form.AppField name="appearance">
+                  {(field) => (
+                    <field.TextareaField
+                      label="Appearance"
+                      placeholder="Physical description..."
+                      rows={3}
+                      maxLength={1000}
+                    />
+                  )}
+                </form.AppField>
+              </div>
+            </div>
 
             <form.Field name="traits" mode="array">
               {(field) => {

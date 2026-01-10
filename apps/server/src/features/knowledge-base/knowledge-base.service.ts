@@ -284,7 +284,7 @@ export class KnowledgeBaseService implements iWithLogger {
     characterId: string,
     scriptId: string,
     label: string,
-    patch: { label?: string; notes?: string },
+    patch: { label?: string; notes?: string; age?: number | string; appearance?: string },
   ) {
     const character = await CharacterModel.findOne({ _id: characterId, seriesId });
     if (!character) {
@@ -303,6 +303,12 @@ export class KnowledgeBaseService implements iWithLogger {
     }
     if (patch.notes !== undefined) {
       character.variations[variationIndex].notes = patch.notes;
+    }
+    if (patch.age !== undefined) {
+      character.variations[variationIndex].age = patch.age;
+    }
+    if (patch.appearance !== undefined) {
+      character.variations[variationIndex].appearance = patch.appearance;
     }
 
     await character.save();
