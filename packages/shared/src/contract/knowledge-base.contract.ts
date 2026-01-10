@@ -2,6 +2,9 @@ import { oc } from '@orpc/contract';
 import z from 'zod';
 
 import { authProcedure } from './procedures';
+import { sceneSchema } from './scene.contract';
+import { storyArcSchema } from './story-arc.contract';
+import { themeSchema } from './theme.contract';
 
 const paginationSchema = z.object({
   limit: z.number().int().min(1).max(100).default(20),
@@ -85,8 +88,11 @@ const kbEntityUnion = z.discriminatedUnion('_type', [
   characterSchema.extend({ _type: z.literal('character') }),
   locationSchema.extend({ _type: z.literal('location') }),
   propSchema.extend({ _type: z.literal('prop') }),
+  sceneSchema.extend({ _type: z.literal('scene') }),
   timelineEntrySchema.extend({ _type: z.literal('timeline') }),
   wildCardSchema.extend({ _type: z.literal('wildcard') }),
+  storyArcSchema.extend({ _type: z.literal('storyArc') }),
+  themeSchema.extend({ _type: z.literal('theme') }),
 ]);
 
 const searchKB = authProcedure
@@ -94,7 +100,8 @@ const searchKB = authProcedure
     path: '/search',
     method: 'GET',
     summary: 'Search knowledge base entities',
-    description: 'Search across characters, locations, props, timeline entries, and wild cards for a series.',
+    description:
+      'Search across characters, locations, props, scenes, timeline entries, wild cards, story arcs, and themes for a series.',
   })
   .input(
     paginationSchema.merge(

@@ -16,7 +16,10 @@ import {
 import { CharacterModel } from '@~/db/models/character.model';
 import { LocationModel } from '@~/db/models/location.model';
 import { PropModel } from '@~/db/models/prop.model';
+import { SceneModel } from '@~/db/models/scene.model';
 import { SeriesModel } from '@~/db/models/series.model';
+import { StoryArcModel } from '@~/db/models/story-arc.model';
+import { ThemeModel } from '@~/db/models/theme.model';
 import { TimelineEntryModel } from '@~/db/models/timeline-entry.model';
 import { WildCardModel } from '@~/db/models/wildcard.model';
 import { TOKENS } from '@~/di/tokens';
@@ -87,12 +90,15 @@ export class KnowledgeBaseService implements iWithLogger {
 
     const searchRegex = new RegExp(query, 'i');
 
-    const [characters, locations, props, timeline, wildcards] = await Promise.all([
+    const [characters, locations, props, scenes, timeline, wildcards, storyArcs, themes] = await Promise.all([
       CharacterModel.find({ seriesId, name: searchRegex }).limit(limit).skip(offset).lean(),
       LocationModel.find({ seriesId, name: searchRegex }).limit(limit).skip(offset).lean(),
       PropModel.find({ seriesId, name: searchRegex }).limit(limit).skip(offset).lean(),
+      SceneModel.find({ seriesId, heading: searchRegex }).limit(limit).skip(offset).lean(),
       TimelineEntryModel.find({ seriesId, label: searchRegex }).limit(limit).skip(offset).lean(),
       WildCardModel.find({ seriesId, title: searchRegex }).limit(limit).skip(offset).lean(),
+      StoryArcModel.find({ seriesId, name: searchRegex }).limit(limit).skip(offset).lean(),
+      ThemeModel.find({ seriesId, name: searchRegex }).limit(limit).skip(offset).lean(),
     ]);
 
     const items = [
@@ -103,12 +109,26 @@ export class KnowledgeBaseService implements iWithLogger {
       // eslint-disable-next-line @typescript-eslint/no-misused-spread
       ...props.map((p) => ({ ...p, _type: 'prop' as const })),
       // eslint-disable-next-line @typescript-eslint/no-misused-spread
+      ...scenes.map((s) => ({ ...s, _type: 'scene' as const })),
+      // eslint-disable-next-line @typescript-eslint/no-misused-spread
       ...timeline.map((t) => ({ ...t, _type: 'timeline' as const })),
       // eslint-disable-next-line @typescript-eslint/no-misused-spread
       ...wildcards.map((w) => ({ ...w, _type: 'wildcard' as const })),
+      // eslint-disable-next-line @typescript-eslint/no-misused-spread
+      ...storyArcs.map((sa) => ({ ...sa, _type: 'storyArc' as const })),
+      // eslint-disable-next-line @typescript-eslint/no-misused-spread
+      ...themes.map((th) => ({ ...th, _type: 'theme' as const })),
     ].slice(0, limit);
 
-    const total = characters.length + locations.length + props.length + timeline.length + wildcards.length;
+    const total =
+      characters.length +
+      locations.length +
+      props.length +
+      scenes.length +
+      timeline.length +
+      wildcards.length +
+      storyArcs.length +
+      themes.length;
 
     this.logger.info('KB search executed', { seriesId, query, resultsCount: items.length });
     return { items, total };

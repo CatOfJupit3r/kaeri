@@ -9,10 +9,16 @@ import {
   LuTrendingUp,
   LuLightbulb,
   LuFilm,
+  LuDownload,
+  LuUpload,
+  LuLayoutGrid,
+  LuLayoutList,
 } from 'react-icons/lu';
 import z from 'zod';
 
+import { Button } from '@~/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
+import { Toggle } from '@~/components/ui/toggle';
 import { CharacterList } from '@~/features/characters/components/character-list';
 import { characterListQueryOptions } from '@~/features/characters/hooks/queries/use-character-list';
 import { KBSearch } from '@~/features/knowledge-base/components/kb-search';
@@ -44,6 +50,10 @@ const TAB_VALUES = tabSchema.enum;
 const TAB_VALUES_ARRAY = Object.values(TAB_VALUES);
 type TabValue = z.infer<typeof tabSchema>;
 
+const viewModeSchema = z.enum(['grid', 'list']);
+const VIEW_MODE = viewModeSchema.enum;
+const VIEW_MODE_ARRAY = Object.values(VIEW_MODE);
+
 export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-base')({
   validateSearch: (search) => {
     const parsed = tabSchema.safeParse(search.tab);
@@ -70,10 +80,12 @@ export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-bas
 
 function RouteComponent() {
   const { seriesId } = Route.useParams();
-  const [{ tab }, setQueryStates] = useQueryStates({
+  const [{ tab, viewMode }, setQueryStates] = useQueryStates({
     tab: parseAsStringEnum(TAB_VALUES_ARRAY).withDefault(TAB_VALUES.characters),
+    viewMode: parseAsStringEnum(VIEW_MODE_ARRAY).withDefault(VIEW_MODE.grid),
   });
   const activeTab = tab ?? TAB_VALUES.characters;
+  const activeViewMode = viewMode ?? VIEW_MODE.grid;
 
   const handleResultClick = (entityId: string, entityType: string) => {
     const tabMap: Record<string, string> = {
@@ -93,16 +105,51 @@ function RouteComponent() {
     }
   };
 
+  const handleImport = () => {
+    // TODO: Implement import functionality
+    console.log('Import clicked');
+  };
+
+  const handleExport = () => {
+    // TODO: Implement export functionality
+    console.log('Export clicked');
+  };
+
+  const toggleViewMode = () => {
+    const newMode = activeViewMode === VIEW_MODE.grid ? VIEW_MODE.list : VIEW_MODE.grid;
+    setQueryStates({ viewMode: newMode }).catch(() => {});
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Knowledge Base</h1>
-            <p className="mt-1 text-muted-foreground">
-              Manage characters, locations, props, timeline, and other story elements
-            </p>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">Knowledge Base</h1>
+              <p className="mt-1 text-muted-foreground">
+                Manage characters, locations, props, timeline, and other story elements
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleImport}>
+                <LuUpload />
+                Import
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExport}>
+                <LuDownload />
+                Export
+              </Button>
+              <Toggle
+                pressed={activeViewMode === VIEW_MODE.list}
+                onPressedChange={toggleViewMode}
+                aria-label="Toggle view mode"
+                size="sm"
+              >
+                {activeViewMode === VIEW_MODE.grid ? <LuLayoutGrid /> : <LuLayoutList />}
+              </Toggle>
+            </div>
           </div>
         </div>
       </div>
