@@ -7,6 +7,9 @@ import { useAppForm } from '@~/components/ui/field';
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
 import { SingleSelect } from '@~/components/ui/select';
+import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
+import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
+import { useThemeList } from '@~/features/themes/hooks/queries/use-theme-list';
 
 import { useCreateStoryArc } from '../hooks/mutations/use-create-story-arc';
 import { useUpdateStoryArc } from '../hooks/mutations/use-update-story-arc';
@@ -43,15 +46,23 @@ export function StoryArcForm({ seriesId, open, onOpenChange, initialData }: iSto
   const { updateStoryArc, isPending: isUpdating } = useUpdateStoryArc();
   const isPending = isCreating || isUpdating;
 
+  // Fetch data for dropdowns
+  const { data: scriptsData } = useScriptList(seriesId);
+  const { data: charactersData } = useCharacterList(seriesId, 100, 0);
+  const { data: themesData } = useThemeList(seriesId, 100, 0);
+
+  const scripts = scriptsData?.items ?? [];
+  const characters = charactersData?.items ?? [];
+  const themes = themesData?.items ?? [];
+
   const [beats, setBeats] = useState<iBeat[]>(
     initialData?.keyBeats ?? [{ id: crypto.randomUUID(), order: 0, description: '' }],
   );
   const [beatInput, setBeatInput] = useState('');
-  const [characters, setCharacters] = useState<iCharacterRole[]>(initialData?.characters ?? []);
-  const [characterIdInput, setCharacterIdInput] = useState('');
+  const [characterRoles, setCharacterRoles] = useState<iCharacterRole[]>(initialData?.characters ?? []);
+  const [selectedCharacterId, setSelectedCharacterId] = useState('');
   const [characterRoleInput, setCharacterRoleInput] = useState('');
-  const [themeInput, setThemeInput] = useState('');
-  const [themes, setThemes] = useState<string[]>(initialData?.themeIds ?? []);
+  const [selectedThemeIds, setSelectedThemeIds] = useState<string[]>(initialData?.themeIds ?? []);
 
   const form = useAppForm({
     defaultValues: {
@@ -72,20 +83,19 @@ export function StoryArcForm({ seriesId, open, onOpenChange, initialData }: iSto
         endScriptId: value.endScriptId || undefined,
         keyBeats: beats,
         resolution: value.resolution || undefined,
-        characters,
-        themeIds: themes,
+        characters: characterRoles,
+        themeIds: selectedThemeIds,
       };
 
       const handleSuccess = () => {
         onOpenChange(false);
         form.reset();
         setBeats([{ id: crypto.randomUUID(), order: 0, description: '' }]);
-        setCharacters([]);
-        setThemes([]);
+        setCharacterRoles([]);
+        setSelectedThemeIds([]);
         setBeatInput('');
-        setCharacterIdInput('');
+        setSelectedCharacterId('');
         setCharacterRoleInput('');
-        setThemeInput('');
       };
 
       if (isEditMode && initialData) {
@@ -100,8 +110,8 @@ export function StoryArcForm({ seriesId, open, onOpenChange, initialData }: iSto
               endScriptId: value.endScriptId || undefined,
               keyBeats: beats,
               resolution: value.resolution || undefined,
-              characters,
-              themeIds: themes,
+              characters: characterRoles,
+              themeIds: selectedThemeIds,
             },
           },
           { onSuccess: handleSuccess },
@@ -115,12 +125,11 @@ export function StoryArcForm({ seriesId, open, onOpenChange, initialData }: iSto
   const resetForm = useCallback(() => {
     form.reset();
     setBeats([{ id: crypto.randomUUID(), order: 0, description: '' }]);
-    setCharacters([]);
-    setThemes([]);
+    setCharacterRoles([]);
+    setSelectedThemeIds([]);
     setBeatInput('');
-    setCharacterIdInput('');
+    setSelectedCharacterId('');
     setCharacterRoleInput('');
-    setThemeInput('');
   }, [form]);
 
   const handleAddBeat = () => {
@@ -150,26 +159,28 @@ export function StoryArcForm({ seriesId, open, onOpenChange, initialData }: iSto
   };
 
   const handleAddCharacter = () => {
-    if (characterIdInput.trim() && characterRoleInput.trim()) {
-      setCharacters([...characters, { characterId: characterIdInput.trim(), role: characterRoleInput.trim() }]);
-      setCharacterIdInput('');
-      setCharacterRoleInput('');
+    if (selectedCharacterId && characterRoleInput.trim()) {
+      // Avoid duplicates
+      if (!characterRoles.find((c) => c.characterId === selectedCharacterId)) {
+        setCharacterRoles([...characterRoles, { characterId: selectedCharacterId, role: characterRoleInput.trim() }]);
+        setSelectedCharacterId('');
+        setCharacterRoleInput('');
+      }
     }
   };
 
   const handleRemoveCharacter = (characterId: string) => {
-    setCharacters(characters.filter((c) => c.characterId !== characterId));
+    setCharacterRoles(characterRoles.filter((c) => c.characterId !== characterId));
   };
 
-  const handleAddTheme = () => {
-    if (themeInput.trim() && !themes.includes(themeInput.trim())) {
-      setThemes([...themes, themeInput.trim()]);
-      setThemeInput('');
+  const handleAddTheme = (themeId: string) => {
+    if (themeId && !selectedThemeIds.includes(themeId)) {
+      setSelectedThemeIds([...selectedThemeIds, themeId]);
     }
   };
 
   const handleRemoveTheme = (themeId: string) => {
-    setThemes(themes.filter((t) => t !== themeId));
+    setSelectedThemeIds(selectedThemeIds.filter((t) => t !== themeId));
   };
 
   return (
@@ -217,11 +228,39 @@ export function StoryArcForm({ seriesId, open, onOpenChange, initialData }: iSto
 
             <div className="grid grid-cols-2 gap-4">
               <form.AppField name="startScriptId">
-                {(field) => <field.TextField label="Start Script ID" placeholder="Optional" />}
+                {(field) => (
+                  <div className="space-y-2">
+                    <Label htmlFor="start-script-select">Start Script</Label>
+                    <SingleSelect
+                      id="start-script-select"
+                      value={field.state.value ?? ''}
+                      onValueChange={(value: string | null) => field.handleChange(value ?? '')}
+                      options={[
+                        { value: '', label: 'None' },
+                        ...scripts.map((s) => ({ value: s._id, label: s.title })),
+                      ]}
+                      placeholder="Select start script"
+                    />
+                  </div>
+                )}
               </form.AppField>
 
               <form.AppField name="endScriptId">
-                {(field) => <field.TextField label="End Script ID" placeholder="Optional" />}
+                {(field) => (
+                  <div className="space-y-2">
+                    <Label htmlFor="end-script-select">End Script</Label>
+                    <SingleSelect
+                      id="end-script-select"
+                      value={field.state.value ?? ''}
+                      onValueChange={(value: string | null) => field.handleChange(value ?? '')}
+                      options={[
+                        { value: '', label: 'None' },
+                        ...scripts.map((s) => ({ value: s._id, label: s.title })),
+                      ]}
+                      placeholder="Select end script"
+                    />
+                  </div>
+                )}
               </form.AppField>
             </div>
 
@@ -282,36 +321,42 @@ export function StoryArcForm({ seriesId, open, onOpenChange, initialData }: iSto
 
             {/* Characters */}
             <div className="space-y-2">
-              <Label htmlFor="character-id-input">Characters</Label>
+              <Label htmlFor="character-select">Characters</Label>
               <div className="space-y-2">
-                {characters.map((char) => (
-                  <div key={char.characterId} className="flex items-center gap-2 rounded-lg border p-2">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{char.characterId}</p>
-                      <p className="text-xs text-muted-foreground">{char.role}</p>
+                {characterRoles.map((char) => {
+                  const characterName = characters.find((c) => c._id === char.characterId)?.name ?? char.characterId;
+                  return (
+                    <div key={char.characterId} className="flex items-center gap-2 rounded-lg border p-2">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{characterName}</p>
+                        <p className="text-xs text-muted-foreground">{char.role}</p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveCharacter(char.characterId)}
+                      >
+                        <LuTrash2 className="size-4" />
+                      </Button>
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveCharacter(char.characterId)}
-                    >
-                      <LuTrash2 className="size-4" />
-                    </Button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <Input
-                  id="character-id-input"
-                  value={characterIdInput}
-                  onChange={(e) => setCharacterIdInput(e.target.value)}
-                  placeholder="Character ID"
+                <SingleSelect
+                  id="character-select"
+                  value={selectedCharacterId}
+                  onValueChange={(value: string | null) => setSelectedCharacterId(value ?? '')}
+                  options={characters
+                    .filter((c) => !characterRoles.find((cr) => cr.characterId === c._id))
+                    .map((c) => ({ value: c._id, label: c.name }))}
+                  placeholder="Select character"
                 />
                 <Input
                   value={characterRoleInput}
                   onChange={(e) => setCharacterRoleInput(e.target.value)}
-                  placeholder="Role"
+                  placeholder="Role (e.g., protagonist)"
                 />
               </div>
               <Button type="button" variant="outline" size="sm" onClick={handleAddCharacter} className="w-full">
@@ -321,43 +366,48 @@ export function StoryArcForm({ seriesId, open, onOpenChange, initialData }: iSto
 
             {/* Themes */}
             <div className="space-y-2">
-              <Label htmlFor="theme-input">Themes</Label>
+              <Label htmlFor="theme-select">Themes</Label>
               <div className="flex flex-wrap gap-2">
-                {themes.map((theme) => (
-                  <div key={theme} className="flex items-center gap-1 rounded-md border px-2 py-1">
-                    <span className="text-sm">{theme}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="size-5 p-0"
-                      onClick={() => handleRemoveTheme(theme)}
-                    >
-                      <LuTrash2 className="size-3" />
-                    </Button>
-                  </div>
-                ))}
+                {selectedThemeIds.map((themeId) => {
+                  const themeName = themes.find((t) => t._id === themeId)?.name ?? themeId;
+                  return (
+                    <div key={themeId} className="flex items-center gap-1 rounded-md border px-2 py-1">
+                      <span className="text-sm">{themeName}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="size-5 p-0"
+                        onClick={() => handleRemoveTheme(themeId)}
+                      >
+                        <LuTrash2 className="size-3" />
+                      </Button>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="flex gap-2">
-                <Input
-                  value={themeInput}
-                  onChange={(e) => setThemeInput(e.target.value)}
-                  placeholder="Add theme ID..."
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddTheme();
-                    }
-                  }}
-                />
-                <Button type="button" variant="outline" size="sm" onClick={handleAddTheme}>
-                  <LuPlus className="size-4" />
-                </Button>
-              </div>
+              <SingleSelect
+                id="theme-select"
+                value=""
+                onValueChange={(value: string | null) => {
+                  if (value) handleAddTheme(value);
+                }}
+                options={themes
+                  .filter((t) => !selectedThemeIds.includes(t._id))
+                  .map((t) => ({ value: t._id, label: t.name }))}
+                placeholder="Add theme"
+              />
             </div>
 
             <form.AppField name="resolution">
-              {(field) => <field.TextareaField label="Resolution" placeholder="How does the arc conclude?" rows={3} />}
+              {(field) => (
+                <field.TextareaField
+                  label="Resolution"
+                  placeholder="How does the arc conclude?"
+                  rows={3}
+                  disabled={form.getFieldValue('status') !== 'completed'}
+                />
+              )}
             </form.AppField>
 
             <DialogFooter>

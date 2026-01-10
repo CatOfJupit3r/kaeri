@@ -3,11 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
-export type ThemeListQueryReturnType = ORPCOutputs['theme']['listThemes'];
+export type ThemeListQueryReturnType = ORPCOutputs['theme']['listThemesBySeries'];
 export type ThemeListItem = ThemeListQueryReturnType['items'][number];
 
 export const themeListQueryOptions = (seriesId: string, params: { limit?: number; offset?: number } = {}) =>
-  tanstackRPC.theme.listThemes.queryOptions({
+  tanstackRPC.theme.listThemesBySeries.queryOptions({
     input: {
       seriesId,
       limit: params.limit ?? 20,

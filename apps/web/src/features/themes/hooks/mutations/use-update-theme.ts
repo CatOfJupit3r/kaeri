@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { toastORPCError, toastSuccess } from '@~/components/toastifications';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
-import type { ThemeDetailQueryReturnType } from '../queries/use-theme-detail';
+import type { ThemeDetailQueryReturnType } from '../queries/use-theme';
 
 export const updateThemeMutationOptions = tanstackRPC.theme.updateTheme.mutationOptions({
   onMutate: async ({ themeId, patch }, ctx) => {
@@ -25,7 +25,7 @@ export const updateThemeMutationOptions = tanstackRPC.theme.updateTheme.mutation
     }
 
     void ctx.client.invalidateQueries({
-      queryKey: tanstackRPC.theme.listThemes.queryKey({ input: { seriesId: updatedTheme.seriesId } }),
+      queryKey: tanstackRPC.theme.listThemesBySeries.queryKey({ input: { seriesId: updatedTheme.seriesId } }),
     });
 
     void ctx.client.invalidateQueries({
