@@ -26,6 +26,11 @@ const appearanceSchema = z.object({
   locationId: z.string().optional(),
 });
 
+const imageSchema = z.object({
+  url: z.string().url(),
+  caption: z.string().optional(),
+});
+
 const characterSchema = z.object({
   _id: z.string(),
   seriesId: z.string(),
@@ -45,6 +50,12 @@ const locationSchema = z.object({
   description: z.string().optional(),
   tags: z.array(z.string()).optional(),
   appearances: z.array(appearanceSchema).optional(),
+  images: z.array(imageSchema).optional(),
+  associatedCharacterIds: z.array(z.string()).optional(),
+  propIds: z.array(z.string()).optional(),
+  productionNotes: z.string().optional(),
+  mood: z.string().optional(),
+  timeOfDay: z.array(z.string()).optional(),
 });
 
 const propSchema = z.object({
@@ -568,4 +579,5 @@ export {
   relationshipSchema,
   variationSchema,
   appearanceSchema,
+  imageSchema,
 };
