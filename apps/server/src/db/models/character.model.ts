@@ -26,6 +26,12 @@ class VariationClass {
 
   @prop()
   public notes?: string;
+
+  @prop()
+  public age?: number | string;
+
+  @prop()
+  public appearance?: string;
 }
 
 class AppearanceClass {

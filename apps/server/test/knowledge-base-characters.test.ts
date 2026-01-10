@@ -550,6 +550,134 @@ describe('Knowledge Base API - Characters', () => {
     });
   });
 
+  describe('Character Variation Age and Appearance', () => {
+    it('should add a variation with age and appearance', async () => {
+      const { ctx, series } = await createSeriesWithUser();
+
+      const script = await createScript(ctx, series._id, { title: 'Alt Timeline' });
+
+      const character = await createCharacter(ctx, series._id, { name: 'Hero' });
+
+      const result = await call(
+        appRouter.knowledgeBase.addVariation,
+        {
+          seriesId: series._id,
+          characterId: character._id,
+          variation: {
+            scriptId: script._id,
+            label: 'Young Version',
+            notes: 'Character in their youth',
+            age: 25,
+            appearance: 'Tall with dark hair and piercing blue eyes',
+          },
+        },
+        ctx(),
+      );
+
+      expect(result.variations?.length).toBe(1);
+      expect(result.variations?.[0].label).toBe('Young Version');
+      expect(result.variations?.[0].notes).toBe('Character in their youth');
+      expect(result.variations?.[0].age).toBe(25);
+      expect(result.variations?.[0].appearance).toBe('Tall with dark hair and piercing blue eyes');
+    });
+
+    it('should add a variation with age as string', async () => {
+      const { ctx, series } = await createSeriesWithUser();
+
+      const script = await createScript(ctx, series._id, { title: 'Alt Timeline' });
+
+      const character = await createCharacter(ctx, series._id, { name: 'Hero' });
+
+      const result = await call(
+        appRouter.knowledgeBase.addVariation,
+        {
+          seriesId: series._id,
+          characterId: character._id,
+          variation: {
+            scriptId: script._id,
+            label: 'Old Version',
+            age: '60s',
+            appearance: 'Gray hair and weathered face',
+          },
+        },
+        ctx(),
+      );
+
+      expect(result.variations?.length).toBe(1);
+      expect(result.variations?.[0].age).toBe('60s');
+      expect(result.variations?.[0].appearance).toBe('Gray hair and weathered face');
+    });
+
+    it('should update variation age and appearance', async () => {
+      const { ctx, series } = await createSeriesWithUser();
+
+      const script = await createScript(ctx, series._id, { title: 'Alt Timeline' });
+
+      const character = await createCharacter(ctx, series._id, { name: 'Hero' });
+
+      await call(
+        appRouter.knowledgeBase.addVariation,
+        {
+          seriesId: series._id,
+          characterId: character._id,
+          variation: {
+            scriptId: script._id,
+            label: 'Mid-life',
+            age: 40,
+            appearance: 'Starting to show age',
+          },
+        },
+        ctx(),
+      );
+
+      const result = await call(
+        appRouter.knowledgeBase.updateVariation,
+        {
+          seriesId: series._id,
+          characterId: character._id,
+          scriptId: script._id,
+          label: 'Mid-life',
+          patch: {
+            age: 45,
+            appearance: 'Distinguished gray at temples',
+          },
+        },
+        ctx(),
+      );
+
+      expect(result.variations?.length).toBe(1);
+      expect(result.variations?.[0].age).toBe(45);
+      expect(result.variations?.[0].appearance).toBe('Distinguished gray at temples');
+    });
+
+    it('should allow optional age and appearance', async () => {
+      const { ctx, series } = await createSeriesWithUser();
+
+      const script = await createScript(ctx, series._id, { title: 'Alt Timeline' });
+
+      const character = await createCharacter(ctx, series._id, { name: 'Hero' });
+
+      const result = await call(
+        appRouter.knowledgeBase.addVariation,
+        {
+          seriesId: series._id,
+          characterId: character._id,
+          variation: {
+            scriptId: script._id,
+            label: 'Basic Version',
+            notes: 'No age or appearance specified',
+          },
+        },
+        ctx(),
+      );
+
+      expect(result.variations?.length).toBe(1);
+      expect(result.variations?.[0].label).toBe('Basic Version');
+      expect(result.variations?.[0].age).toBeUndefined();
+      expect(result.variations?.[0].appearance).toBeUndefined();
+    });
+  });
+
   describe('Create and Update with Appearances', () => {
     it('should create a character with appearances', async () => {
       const { ctx, series } = await createSeriesWithUser();
