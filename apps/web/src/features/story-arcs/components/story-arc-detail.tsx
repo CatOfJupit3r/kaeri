@@ -5,6 +5,8 @@ import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card } from '@~/components/ui/card';
 import { Progress } from '@~/components/ui/progress';
+import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
+import { useThemeList } from '@~/features/themes/hooks/queries/use-theme-list';
 
 import type { StoryArcDetailQueryReturnType } from '../hooks/queries/use-story-arc';
 import { StoryArcForm } from './story-arc-form';
@@ -30,6 +32,13 @@ const STATUS_LABELS = {
 
 export function StoryArcDetail({ storyArc, seriesId }: iStoryArcDetailProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
+
+  // Fetch character and theme names for display
+  const { data: charactersData } = useCharacterList(seriesId, 100, 0);
+  const { data: themesData } = useThemeList(seriesId, 100, 0);
+
+  const characterMap = new Map(charactersData?.items.map((c) => [c._id, c.name]) ?? []);
+  const themeMap = new Map(themesData?.items.map((t) => [t._id, t.name]) ?? []);
 
   const calculateProgress = (): number => {
     if (storyArc.keyBeats.length === 0) return 0;
@@ -115,7 +124,9 @@ export function StoryArcDetail({ storyArc, seriesId }: iStoryArcDetailProps) {
                   <div className="space-y-2">
                     {storyArc.characters.map((char) => (
                       <div key={char.characterId} className="rounded-lg border border-border bg-background/50 p-3">
-                        <h3 className="mb-1 text-sm font-medium text-foreground">Character ID: {char.characterId}</h3>
+                        <h3 className="mb-1 text-sm font-medium text-foreground">
+                          {characterMap.get(char.characterId) ?? `Character ${char.characterId}`}
+                        </h3>
                         <p className="text-xs text-muted-foreground">{char.role}</p>
                       </div>
                     ))}
@@ -132,7 +143,7 @@ export function StoryArcDetail({ storyArc, seriesId }: iStoryArcDetailProps) {
                   <div className="flex flex-wrap gap-2">
                     {storyArc.themeIds.map((themeId) => (
                       <Badge key={themeId} variant="secondary" className="cursor-pointer hover:bg-secondary/80">
-                        Theme: {themeId}
+                        {themeMap.get(themeId) ?? `Theme ${themeId}`}
                       </Badge>
                     ))}
                   </div>
