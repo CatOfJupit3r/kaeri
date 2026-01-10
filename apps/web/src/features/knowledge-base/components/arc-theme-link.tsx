@@ -3,7 +3,7 @@ import { LuLightbulb } from 'react-icons/lu';
 
 import { Badge } from '@~/components/ui/badge';
 import { Skeleton } from '@~/components/ui/skeleton';
-import { useThemeDetail } from '@~/features/themes/hooks/queries/use-theme-detail';
+import { useThemeDetail } from '@~/features/themes/hooks/queries/use-theme';
 
 interface iArcThemeLinkProps {
   arcId: string;
