@@ -18,6 +18,8 @@ const variationSchema = z.object({
   scriptId: z.string(),
   label: z.string(),
   notes: z.string().optional(),
+  age: z.union([z.number(), z.string()]).optional(),
+  appearance: z.string().optional(),
 });
 
 const appearanceSchema = z.object({
