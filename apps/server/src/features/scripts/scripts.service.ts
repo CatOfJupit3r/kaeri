@@ -4,6 +4,7 @@ import type z from 'zod';
 import { errorCodes } from '@kaeri/shared';
 import { createScriptInputSchema, updateScriptPatchSchema } from '@kaeri/shared/contract/scripts.contract';
 
+import { SceneModel } from '@~/db/models/scene.model';
 import { ScriptModel } from '@~/db/models/script.model';
 import { SeriesModel } from '@~/db/models/series.model';
 import { TOKENS } from '@~/di/tokens';
@@ -81,6 +82,7 @@ export class ScriptsService implements iWithLogger {
       throw ORPCNotFoundError(errorCodes.SCRIPT_NOT_FOUND);
     }
 
+    await SceneModel.deleteMany({ scriptId });
     await ScriptModel.deleteOne({ _id: scriptId });
 
     // Update series lastEditedAt

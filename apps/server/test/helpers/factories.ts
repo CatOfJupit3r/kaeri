@@ -1,4 +1,8 @@
 import { call } from '@orpc/server';
+import type { z } from 'zod';
+
+import { createSceneInputSchema } from '@kaeri/shared/contract/scene.contract';
+import { createThemeValueSchema } from '@kaeri/shared/contract/theme.contract';
 
 import { appRouter } from './instance';
 import { createUser } from './utilities';
@@ -9,6 +13,9 @@ const DEFAULT_SCRIPT_TITLE = 'Test Script';
 const DEFAULT_CHARACTER_NAME = 'Test Character';
 const DEFAULT_LOCATION_NAME = 'Test Location';
 const DEFAULT_PROP_NAME = 'Test Prop';
+
+type CreateSceneValue = Partial<Omit<z.infer<typeof createSceneInputSchema>, 'seriesId' | 'scriptId'>>;
+type CreateThemeValue = Partial<z.infer<typeof createThemeValueSchema>>;
 
 export async function createSeries(
   ctx: TestCtx,
@@ -163,19 +170,16 @@ export async function createWildcard(
   );
 }
 
-export async function createScene(
-  ctx: TestCtx,
-  scriptId: string,
-  seriesId: string,
-  value: { heading?: string; locationId?: string; timeOfDay?: string; emotionalTone?: string } = {},
-) {
+export async function createScene(ctx: TestCtx, seriesId: string, scriptId: string, value: CreateSceneValue = {}) {
+  const { heading = 'INT. LOCATION - DAY', ...rest } = value;
+
   return call(
     appRouter.scene.createScene,
     {
       seriesId,
       scriptId,
-      heading: 'INT. LOCATION - DAY',
-      ...value,
+      heading,
+      ...rest,
     },
     ctx(),
   );
@@ -188,13 +192,28 @@ export async function createStoryArc(
     name?: string;
     description?: string;
     status?: 'planned' | 'in_progress' | 'completed' | 'abandoned';
+    startScriptId?: string;
+    endScriptId?: string;
+    keyBeats?: Array<{
+      id: string;
+      order: number;
+      description: string;
+      scriptId?: string;
+      sceneId?: string;
+    }>;
+    resolution?: string;
+    characters?: Array<{
+      characterId: string;
+      role: string;
+    }>;
+    themeIds?: string[];
   } = {},
 ) {
   return call(
     appRouter.storyArc.createStoryArc,
     {
       seriesId,
-      name: 'Story Arc',
+      name: 'Test Story Arc',
       description: '',
       status: 'planned',
       ...value,
@@ -203,18 +222,16 @@ export async function createStoryArc(
   );
 }
 
-export async function createTheme(
-  ctx: TestCtx,
-  seriesId: string,
-  value: { name?: string; description?: string; color?: string } = {},
-) {
+export async function createTheme(ctx: TestCtx, seriesId: string, value: CreateThemeValue = {}) {
+  const { name = 'Test Theme', ...rest } = value;
+
   return call(
     appRouter.theme.createTheme,
     {
       seriesId,
       value: {
-        name: 'Theme',
-        ...value,
+        name,
+        ...rest,
       },
     },
     ctx(),

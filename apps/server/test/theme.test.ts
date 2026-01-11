@@ -51,10 +51,7 @@ describe('Theme API', () => {
               { scriptId: 'script-1', notes: 'Introduction of theme through flashbacks' },
               { scriptId: 'script-2', notes: 'Theme reaches climax' },
             ],
-            appearances: [
-              { scriptId: 'script-1', sceneRef: 'scene-3', quote: 'I can still make this right' },
-              { scriptId: 'script-2', sceneRef: 'scene-7' },
-            ],
+            appearances: [{ sceneId: 'scene-3', quote: 'I can still make this right' }, { sceneId: 'scene-7' }],
           },
         },
         ctx(),
@@ -290,7 +287,7 @@ describe('Theme API', () => {
     });
   });
 
-  describe('listThemes', () => {
+  describe('listThemesBySeries', () => {
     it('should list themes for a series', async () => {
       const { ctx, series } = await createSeriesWithUser();
 
@@ -322,7 +319,7 @@ describe('Theme API', () => {
       );
 
       const result = await call(
-        appRouter.theme.listThemes,
+        appRouter.theme.listThemesBySeries,
         {
           seriesId: series._id,
           limit: 20,
@@ -340,7 +337,7 @@ describe('Theme API', () => {
       const { ctx, series } = await createSeriesWithUser();
 
       const result = await call(
-        appRouter.theme.listThemes,
+        appRouter.theme.listThemesBySeries,
         {
           seriesId: series._id,
           limit: 20,
@@ -368,7 +365,7 @@ describe('Theme API', () => {
       }
 
       const page1 = await call(
-        appRouter.theme.listThemes,
+        appRouter.theme.listThemesBySeries,
         {
           seriesId: series._id,
           limit: 2,
@@ -381,7 +378,7 @@ describe('Theme API', () => {
       expect(page1.total).toBe(5);
 
       const page2 = await call(
-        appRouter.theme.listThemes,
+        appRouter.theme.listThemesBySeries,
         {
           seriesId: series._id,
           limit: 2,
@@ -403,7 +400,7 @@ describe('Theme API', () => {
       await expectErrorCode(
         () =>
           call(
-            appRouter.theme.listThemes,
+            appRouter.theme.listThemesBySeries,
             {
               seriesId: '507f1f77bcf86cd799439011',
               limit: 20,
@@ -449,7 +446,7 @@ describe('Theme API', () => {
       );
 
       const result1 = await call(
-        appRouter.theme.listThemes,
+        appRouter.theme.listThemesBySeries,
         {
           seriesId: series1._id,
           limit: 20,
@@ -459,7 +456,7 @@ describe('Theme API', () => {
       );
 
       const result2 = await call(
-        appRouter.theme.listThemes,
+        appRouter.theme.listThemesBySeries,
         {
           seriesId: series2._id,
           limit: 20,
@@ -494,9 +491,9 @@ describe('Theme API', () => {
           { scriptId: 'script-3', notes: 'Resolution' },
         ],
         appearances: [
-          { scriptId: 'script-1', sceneRef: 'S1-E1', quote: 'Opening quote' },
-          { scriptId: 'script-2', sceneRef: 'S1-E5' },
-          { scriptId: 'script-3', sceneRef: 'S2-E10', quote: 'Closing quote' },
+          { sceneId: 'S1-E1', quote: 'Opening quote' },
+          { sceneId: 'S1-E5' },
+          { sceneId: 'S2-E10', quote: 'Closing quote' },
         ],
       };
 
