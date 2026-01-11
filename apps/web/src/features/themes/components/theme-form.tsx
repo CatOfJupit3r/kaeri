@@ -62,8 +62,9 @@ export function ThemeForm({ seriesId, open, onOpenChange, initialData }: iThemeF
   const [newConnection, setNewConnection] = useState('');
   const [newScriptId, setNewScriptId] = useState('');
   const [newEvolutionNotes, setNewEvolutionNotes] = useState('');
-  const [newSceneRef, setNewSceneRef] = useState('');
+  const [newSceneId, setNewSceneId] = useState('');
   const [newQuote, setNewQuote] = useState('');
+  const [newNotes, setNewNotes] = useState('');
 
   const form = useAppForm({
     defaultValues: {
@@ -157,8 +158,9 @@ export function ThemeForm({ seriesId, open, onOpenChange, initialData }: iThemeF
       setNewConnection('');
       setNewScriptId('');
       setNewEvolutionNotes('');
-      setNewSceneRef('');
+      setNewSceneId('');
       setNewQuote('');
+      setNewNotes('');
     }
   }, [open, initialData, form]);
 
@@ -199,18 +201,18 @@ export function ThemeForm({ seriesId, open, onOpenChange, initialData }: iThemeF
   };
 
   const handleAddAppearance = () => {
-    if (newScriptId.trim() && newSceneRef.trim()) {
+    if (newSceneId.trim()) {
       setAppearances([
         ...appearances,
         {
-          scriptId: newScriptId.trim(),
-          sceneRef: newSceneRef.trim(),
+          sceneId: newSceneId.trim(),
           quote: newQuote.trim() || undefined,
+          notes: newNotes.trim() || undefined,
         },
       ]);
-      setNewScriptId('');
-      setNewSceneRef('');
+      setNewSceneId('');
       setNewQuote('');
+      setNewNotes('');
     }
   };
 
@@ -436,15 +438,9 @@ export function ThemeForm({ seriesId, open, onOpenChange, initialData }: iThemeF
               <div id="appearances-in-scripts" className="space-y-2 rounded-lg border p-3">
                 <div className="grid grid-cols-3 gap-2">
                   <Input
-                    placeholder="Script ID"
-                    value={newScriptId}
-                    onChange={(e) => setNewScriptId(e.target.value)}
-                    disabled={isPending}
-                  />
-                  <Input
-                    placeholder="Scene Ref"
-                    value={newSceneRef}
-                    onChange={(e) => setNewSceneRef(e.target.value)}
+                    placeholder="Scene ID"
+                    value={newSceneId}
+                    onChange={(e) => setNewSceneId(e.target.value)}
                     disabled={isPending}
                   />
                   <Input
@@ -453,11 +449,17 @@ export function ThemeForm({ seriesId, open, onOpenChange, initialData }: iThemeF
                     onChange={(e) => setNewQuote(e.target.value)}
                     disabled={isPending}
                   />
+                  <Input
+                    placeholder="Notes (optional)"
+                    value={newNotes}
+                    onChange={(e) => setNewNotes(e.target.value)}
+                    disabled={isPending}
+                  />
                 </div>
                 <Button
                   type="button"
                   onClick={handleAddAppearance}
-                  disabled={isPending || !newScriptId.trim() || !newSceneRef.trim()}
+                  disabled={isPending || !newSceneId.trim()}
                   size="sm"
                   className="w-full"
                 >
@@ -470,12 +472,11 @@ export function ThemeForm({ seriesId, open, onOpenChange, initialData }: iThemeF
                     // eslint-disable-next-line react/no-array-index-key
                     <div key={index} className="flex items-start gap-2 rounded-md border p-2">
                       <div className="flex-1 text-sm">
-                        <span className="font-medium">
-                          Script {app.scriptId}, Scene {app.sceneRef}
-                        </span>
+                        <span className="font-medium">Scene {app.sceneId}</span>
                         {app.quote ? (
                           <span className="ml-2 text-muted-foreground italic">&quot;{app.quote}&quot;</span>
                         ) : null}
+                        {app.notes ? <div className="mt-1 text-muted-foreground">{app.notes}</div> : null}
                       </div>
                       <button
                         type="button"

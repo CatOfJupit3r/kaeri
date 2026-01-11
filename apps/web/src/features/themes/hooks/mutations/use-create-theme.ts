@@ -7,7 +7,7 @@ import type { ThemeListItem, ThemeListQueryReturnType } from '../queries/use-the
 
 export const createThemeMutationOptions = tanstackRPC.theme.createTheme.mutationOptions({
   onMutate: async ({ seriesId, value }, ctx) => {
-    const queryKey = tanstackRPC.theme.listThemes.queryKey({
+    const queryKey = tanstackRPC.theme.listThemesBySeries.queryKey({
       input: { seriesId, limit: 20, offset: 0 },
     });
 
@@ -59,7 +59,7 @@ export const createThemeMutationOptions = tanstackRPC.theme.createTheme.mutation
     }
 
     void ctx.client.invalidateQueries({
-      queryKey: tanstackRPC.theme.listThemes.queryKey({ input: { seriesId } }),
+      queryKey: tanstackRPC.theme.listThemesBySeries.queryKey({ input: { seriesId } }),
     });
     toastSuccess('Theme created successfully');
   },

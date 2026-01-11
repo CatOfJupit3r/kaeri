@@ -8,20 +8,20 @@ const paginationSchema = z.object({
   offset: z.number().int().min(0).default(0),
 });
 
-export const characterConnectionSchema = z.object({
+export const themeCharacterConnectionSchema = z.object({
   characterId: z.string(),
   connection: z.string(),
 });
 
-export const evolutionEntrySchema = z.object({
+export const themeEvolutionSchema = z.object({
   scriptId: z.string(),
   notes: z.string(),
 });
 
-export const appearanceSchema = z.object({
-  scriptId: z.string(),
-  sceneRef: z.string(),
+export const themeAppearanceSchema = z.object({
+  sceneId: z.string(),
   quote: z.string().optional(),
+  notes: z.string().optional(),
 });
 
 export const themeSchema = z.object({
@@ -29,32 +29,41 @@ export const themeSchema = z.object({
   seriesId: z.string(),
   name: z.string(),
   description: z.string().optional(),
-  color: z.string().optional(),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, 'Color must be a valid hex color (e.g., #FF5733)')
+    .optional(),
   visualMotifs: z.array(z.string()).optional(),
-  relatedCharacters: z.array(characterConnectionSchema).optional(),
-  evolution: z.array(evolutionEntrySchema).optional(),
-  appearances: z.array(appearanceSchema).optional(),
+  relatedCharacters: z.array(themeCharacterConnectionSchema).optional(),
+  evolution: z.array(themeEvolutionSchema).optional(),
+  appearances: z.array(themeAppearanceSchema).optional(),
 });
 
 export const createThemeValueSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
-  color: z.string().optional(),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, 'Color must be a valid hex color (e.g., #FF5733)')
+    .optional(),
   visualMotifs: z.array(z.string()).optional(),
-  relatedCharacters: z.array(characterConnectionSchema).optional(),
-  evolution: z.array(evolutionEntrySchema).optional(),
-  appearances: z.array(appearanceSchema).optional(),
+  relatedCharacters: z.array(themeCharacterConnectionSchema).optional(),
+  evolution: z.array(themeEvolutionSchema).optional(),
+  appearances: z.array(themeAppearanceSchema).optional(),
 });
 
 export const updateThemePatchSchema = z
   .object({
     name: z.string().min(1).optional(),
     description: z.string().optional(),
-    color: z.string().optional(),
+    color: z
+      .string()
+      .regex(/^#[0-9A-Fa-f]{6}$/, 'Color must be a valid hex color (e.g., #FF5733)')
+      .optional(),
     visualMotifs: z.array(z.string()).optional(),
-    relatedCharacters: z.array(characterConnectionSchema).optional(),
-    evolution: z.array(evolutionEntrySchema).optional(),
-    appearances: z.array(appearanceSchema).optional(),
+    relatedCharacters: z.array(themeCharacterConnectionSchema).optional(),
+    evolution: z.array(themeEvolutionSchema).optional(),
+    appearances: z.array(themeAppearanceSchema).optional(),
   })
   .refine((value) => Object.keys(value).length > 0, 'At least one field must be provided');
 
@@ -101,7 +110,7 @@ const deleteTheme = authProcedure
   .input(z.object({ themeId: z.string() }))
   .output(z.object({ success: z.boolean() }));
 
-const listThemes = authProcedure
+const listThemesBySeries = authProcedure
   .route({
     path: '/list',
     method: 'GET',
@@ -125,7 +134,7 @@ const themeContract = oc.prefix('/theme').router({
   createTheme,
   updateTheme,
   deleteTheme,
-  listThemes,
+  listThemesBySeries,
   getTheme,
 });
 
