@@ -43,7 +43,9 @@ export function ThemeCharacterLink({ themeId: _themeId, characterId, connection,
 
   const initials = character.name
     .split(' ')
-    .map((n) => n[0])
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0)
+    .map((part) => part[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
