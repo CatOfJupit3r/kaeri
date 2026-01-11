@@ -2,23 +2,17 @@ import { Link } from '@tanstack/react-router';
 import { LuLightbulb } from 'react-icons/lu';
 
 import { Badge } from '@~/components/ui/badge';
-import { Skeleton } from '@~/components/ui/skeleton';
-import { useThemeDetail } from '@~/features/themes/hooks/queries/use-theme';
+import type { ThemeListItem } from '@~/features/themes/hooks/queries/use-theme-list';
 
 interface iArcThemeLinkProps {
   arcId: string;
   themeIds: string[];
   seriesId: string;
+  themes: ThemeListItem[] | Map<string, ThemeListItem>;
 }
 
-function ThemeBadge({ themeId, seriesId }: { themeId: string; seriesId: string }) {
-  const { data: theme, isPending } = useThemeDetail(themeId);
-
-  if (isPending) {
-    return <Skeleton className="h-6 w-20" />;
-  }
-
-  if (!theme) {
+function ThemeBadge({ seriesId, themeData }: { seriesId: string; themeData: ThemeListItem | undefined }) {
+  if (!themeData) {
     return (
       <Badge variant="outline" className="gap-1">
         <LuLightbulb className="size-3" />
@@ -38,23 +32,23 @@ function ThemeBadge({ themeId, seriesId }: { themeId: string; seriesId: string }
         variant="outline"
         className="gap-1 transition-colors hover:border-pink-500 hover:bg-pink-50"
         style={{
-          borderColor: theme.color ?? undefined,
-          backgroundColor: theme.color ? `${theme.color}15` : undefined,
+          borderColor: themeData.color ?? undefined,
+          backgroundColor: themeData.color ? `${themeData.color}15` : undefined,
         }}
       >
         <div
           className="size-2 rounded-full"
           style={{
-            backgroundColor: theme.color ?? '#e11d48',
+            backgroundColor: themeData.color ?? '#e11d48',
           }}
         />
-        <span>{theme.name}</span>
+        <span>{themeData.name}</span>
       </Badge>
     </Link>
   );
 }
 
-export function ArcThemeLink({ arcId: _arcId, themeIds, seriesId }: iArcThemeLinkProps) {
+export function ArcThemeLink({ arcId: _arcId, themeIds, seriesId, themes }: iArcThemeLinkProps) {
   if (themeIds.length === 0) {
     return (
       <div className="flex items-center gap-2 text-muted-foreground">
@@ -64,10 +58,13 @@ export function ArcThemeLink({ arcId: _arcId, themeIds, seriesId }: iArcThemeLin
     );
   }
 
+  // Convert themes to a Map for efficient lookups if it's an array
+  const themeMap = themes instanceof Map ? themes : new Map(themes.map((t) => [t._id, t]));
+
   return (
     <div className="flex flex-wrap gap-2">
       {themeIds.map((themeId) => (
-        <ThemeBadge key={themeId} themeId={themeId} seriesId={seriesId} />
+        <ThemeBadge key={themeId} seriesId={seriesId} themeData={themeMap.get(themeId)} />
       ))}
     </div>
   );
