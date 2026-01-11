@@ -357,7 +357,7 @@ describe('Theme Service', () => {
       await call(appRouter.theme.deleteTheme, { themeId: theme2._id }, ctx());
 
       const result = await call(
-        appRouter.theme.listThemes,
+        appRouter.theme.listThemesBySeries,
         {
           seriesId: series._id,
           limit: 20,
@@ -480,7 +480,7 @@ describe('Theme Service', () => {
 
       // Currently works - no ownership check exists yet
       const result = await call(
-        appRouter.theme.listThemes,
+        appRouter.theme.listThemesBySeries,
         {
           seriesId: series1._id,
           limit: 20,
@@ -511,8 +511,8 @@ describe('Theme Service', () => {
           { scriptId: 'script-2', notes: 'Development' },
         ],
         appearances: [
-          { scriptId: 'script-1', sceneRef: 'S1-E1', quote: 'Opening' },
-          { scriptId: 'script-2', sceneRef: 'S1-E5' },
+          { sceneId: 'scene-1', quote: 'Opening', notes: 'First appearance' },
+          { sceneId: 'scene-2', notes: 'Key moment' },
         ],
       };
 
@@ -606,7 +606,7 @@ describe('Theme Service', () => {
       const theme2 = await createTheme(ctx, series2._id, { name: 'S2 Theme' });
 
       const list1 = await call(
-        appRouter.theme.listThemes,
+        appRouter.theme.listThemesBySeries,
         {
           seriesId: series1._id,
           limit: 20,
@@ -616,7 +616,7 @@ describe('Theme Service', () => {
       );
 
       const list2 = await call(
-        appRouter.theme.listThemes,
+        appRouter.theme.listThemesBySeries,
         {
           seriesId: series2._id,
           limit: 20,
