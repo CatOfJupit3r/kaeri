@@ -25,7 +25,7 @@ describe('Knowledge Base API - Search', () => {
       await createCharacter(ctx, series._id, { name: 'Test Character' });
       await createLocation(ctx, series._id, { name: 'Test Location' });
       await createProp(ctx, series._id, { name: 'Test Prop' });
-      await createScene(ctx, script._id, series._id, { heading: 'Test Scene' });
+      await createScene(ctx, series._id, script._id, { heading: 'Test Scene' });
       await createTimelineEntry(ctx, series._id, { label: 'Test Timeline' });
       await createWildcard(ctx, series._id, { title: 'Test Wildcard' });
       await createStoryArc(ctx, series._id, { name: 'Test Story Arc' });
@@ -214,8 +214,8 @@ describe('Knowledge Base API - Search', () => {
       const { ctx, series } = await createSeriesWithUser();
       const script = await createScript(ctx, series._id, { title: 'Script' });
 
-      await createScene(ctx, script._id, series._id, { heading: 'INT. SPACESHIP - NIGHT' });
-      await createScene(ctx, script._id, series._id, { heading: 'EXT. PLANET - DAY' });
+      await createScene(ctx, series._id, script._id, { heading: 'INT. SPACESHIP - NIGHT' });
+      await createScene(ctx, series._id, script._id, { heading: 'EXT. PLANET - DAY' });
 
       const result = await call(
         appRouter.knowledgeBase.searchKB,
