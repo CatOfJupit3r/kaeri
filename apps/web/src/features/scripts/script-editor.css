@@ -1,0 +1,115 @@
+/**
+ * Script editor styles for tiptap
+ * Add to index.css or import separately
+ */
+
+/* Base script block styles */
+.script-block {
+  position: relative;
+  padding: 0.75rem 1rem;
+  margin: 0.25rem 0;
+  border-left: 4px solid transparent;
+  transition: all 0.15s ease;
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.script-block:focus-within {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+/* Scene Heading */
+.script-block--scene-heading {
+  border-left-color: var(--block-scene-heading);
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 0.025em;
+}
+
+.script-block--scene-heading:focus-within {
+  background-color: var(--block-scene-heading-bg);
+}
+
+/* Action */
+.script-block--action {
+  border-left-color: var(--block-action);
+}
+
+.script-block--action:focus-within {
+  background-color: var(--block-action-bg);
+}
+
+/* Character */
+.script-block--character {
+  border-left-color: var(--block-character);
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: bold;
+  padding-left: 25%;
+  padding-right: 25%;
+}
+
+.script-block--character:focus-within {
+  background-color: var(--block-character-bg);
+}
+
+/* Dialogue */
+.script-block--dialogue {
+  border-left-color: var(--block-dialogue);
+  padding-left: 15%;
+  padding-right: 15%;
+}
+
+.script-block--dialogue:focus-within {
+  background-color: var(--block-dialogue-bg);
+}
+
+/* Parenthetical */
+.script-block--parenthetical {
+  border-left-color: var(--block-parenthetical);
+  text-align: center;
+  font-style: italic;
+  padding-left: 20%;
+  padding-right: 20%;
+}
+
+.script-block--parenthetical:focus-within {
+  background-color: var(--block-parenthetical-bg);
+}
+
+/* Transition */
+.script-block--transition {
+  border-left-color: var(--block-transition);
+  text-align: right;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.script-block--transition:focus-within {
+  background-color: var(--block-transition-bg);
+}
+
+/* Placeholder styles */
+.script-editor-content .is-empty::before {
+  content: attr(data-placeholder);
+  color: var(--muted-foreground);
+  pointer-events: none;
+  position: absolute;
+  height: 0;
+  float: left;
+}
+
+/* Editor content styles */
+.script-editor-content {
+  font-family: 'Courier Prime', 'Courier New', monospace;
+}
+
+.script-editor-content:focus {
+  outline: none;
+}
+
+/* Selection styles */
+.script-editor-content ::selection {
+  background-color: var(--accent);
+}

@@ -29,6 +29,10 @@
     "./helpers/*": {
       "types": "./dist/helpers/*.d.mts",
       "default": "./dist/helpers/*.mjs"
+    },
+    "./schemas/*": {
+      "types": "./dist/schemas/*.d.mts",
+      "default": "./dist/schemas/*.mjs"
     }
   },
   "files": [

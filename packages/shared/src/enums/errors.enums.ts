@@ -47,6 +47,8 @@ const kaeriErrorCodes = {
   // Export errors
   EXPORT_FAILED: 'EXPORT_FAILED',
   EXPORT_SCRIPT_EMPTY: 'EXPORT_SCRIPT_EMPTY',
+  EXPORT_PRESET_NOT_FOUND: 'EXPORT_PRESET_NOT_FOUND',
+  CANNOT_MODIFY_SYSTEM_PRESET: 'CANNOT_MODIFY_SYSTEM_PRESET',
   // General errors
   INSUFFICIENT_PERMISSIONS: 'INSUFFICIENT_PERMISSIONS',
   INVALID_INPUT: 'INVALID_INPUT',
@@ -102,6 +104,8 @@ const kaeriErrorMessages = {
   // Export errors
   [kaeriErrorCodes.EXPORT_FAILED]: 'Export failed',
   [kaeriErrorCodes.EXPORT_SCRIPT_EMPTY]: 'Cannot export empty script',
+  [kaeriErrorCodes.EXPORT_PRESET_NOT_FOUND]: 'Export preset not found',
+  [kaeriErrorCodes.CANNOT_MODIFY_SYSTEM_PRESET]: 'Cannot modify system presets',
   // General errors
   [kaeriErrorCodes.INSUFFICIENT_PERMISSIONS]: 'Insufficient permissions',
   [kaeriErrorCodes.INVALID_INPUT]: 'Invalid input provided',

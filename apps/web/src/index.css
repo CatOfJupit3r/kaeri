@@ -51,6 +51,20 @@ body {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Script editor block colors */
+  --block-scene-heading: oklch(0.7 0.18 240);
+  --block-scene-heading-bg: oklch(0.95 0.05 240);
+  --block-action: oklch(0.5 0 0);
+  --block-action-bg: transparent;
+  --block-character: oklch(0.7 0.18 55);
+  --block-character-bg: oklch(0.95 0.1 55);
+  --block-dialogue: oklch(0.65 0.18 145);
+  --block-dialogue-bg: oklch(0.95 0.05 145);
+  --block-parenthetical: oklch(0.7 0.15 350);
+  --block-parenthetical-bg: oklch(0.95 0.05 350);
+  --block-transition: oklch(0.75 0.18 85);
+  --block-transition-bg: oklch(0.95 0.1 85);
 }
 
 .dark {
