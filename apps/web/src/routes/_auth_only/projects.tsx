@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useState } from 'react';
+import { GiHoneyJar } from 'react-icons/gi';
 import { LuEllipsisVertical, LuPencil, LuTrash2 } from 'react-icons/lu';
 
 import { SeriesError } from '@~/components/errors/series-error';
@@ -26,6 +27,7 @@ import {
 import { SeriesModal } from '@~/features/series/components/series-modal';
 import { useDeleteSeries } from '@~/features/series/hooks/mutations/use-delete-series';
 import { seriesListQueryOptions, useSeriesList } from '@~/features/series/hooks/queries/use-series-list';
+import { useCreateBeeMovie } from '@~/hooks/use-create-bee-movie';
 
 export const Route = createFileRoute('/_auth_only/projects')({
   loader: async ({ context }) => {
@@ -46,6 +48,7 @@ function RouteComponent() {
   const [deletingSeriesId, setDeletingSeriesId] = useState<string | null>(null);
   const { data: seriesListData, isPending, error, refetch } = useSeriesList();
   const { deleteSeries, isPending: isDeleting } = useDeleteSeries();
+  const { createBeeMovieData, isPending: isCreatingBeeMovie } = useCreateBeeMovie();
 
   const handleEdit = (series: typeof editingSeries) => {
     setEditingSeries(series);
@@ -212,6 +215,17 @@ function RouteComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {/* Secret Bee Movie Button - Subtle but discoverable */}
+      <Button
+        onClick={() => createBeeMovieData()}
+        disabled={isCreatingBeeMovie}
+        size="icon"
+        variant="ghost"
+        className="fixed bottom-4 left-4 size-10 opacity-20 transition-all hover:scale-110 hover:opacity-100"
+        title={isCreatingBeeMovie ? 'Creating Bee Movie data...' : 'Create Bee Movie example data (dev only)'}
+      >
+        <GiHoneyJar className="size-5 text-amber-600 dark:text-amber-400" />
+      </Button>
     </div>
   );
 }

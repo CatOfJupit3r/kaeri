@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { describeRoute, validator } from 'hono-openapi';
 import z from 'zod';
 
+import { createBeeMovieMockData } from '@~/features/bee-movie/bee-movie.service';
 import type { iRequestContext } from '@~/features/logger/logger.types';
 
 import { GETTERS } from './di-getter';
@@ -42,6 +43,31 @@ nonContractRouter.get(
       message: `Impersonation session created for userId: ${userId}`,
       session: response.session,
       user: response.user,
+    });
+  },
+);
+
+nonContractRouter.post(
+  'dev-tools/create-bee-movie',
+  describeRoute({
+    summary: 'Create Bee Movie mock data',
+    description:
+      'Creates a complete Bee Movie series with script, characters, locations, props, and scenes for testing purposes.',
+    tags: ['Dev Tools'],
+  }),
+  async (c) => {
+    if (process.env.NODE_ENV === 'production') return c.notFound();
+
+    const session = c.get('session');
+    if (!session?.user) {
+      return c.json({ error: 'Authentication required' }, 401);
+    }
+
+    const result = await createBeeMovieMockData();
+
+    return c.json({
+      message: 'Bee Movie mock data created successfully',
+      data: result,
     });
   },
 );
