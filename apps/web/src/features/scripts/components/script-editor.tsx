@@ -8,8 +8,8 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Text from '@tiptap/extension-text';
 import Underline from '@tiptap/extension-underline';
 import { EditorContent, useEditor } from '@tiptap/react';
-import { useCallback, useEffect, useRef } from 'react';
-import { LuPlus } from 'react-icons/lu';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { LuBookOpen, LuPenTool, LuPlus, LuSparkles } from 'react-icons/lu';
 
 import { Button } from '@~/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
@@ -27,6 +27,7 @@ import { BLOCK_CONFIG } from '../helpers/block-config';
 import type { ScriptBlockType } from '../types';
 import { BLOCK_TYPE_CYCLE_ORDER } from '../types';
 import { EditorToolbar } from './editor-toolbar';
+import { KnowledgeBasePanel } from './knowledge-base-panel';
 
 interface iScriptEditorProps {
   /** Script content as JSON string */
@@ -35,6 +36,8 @@ interface iScriptEditorProps {
   onContentChange?: (content: string) => void;
   /** Script title */
   title?: string;
+  /** Series ID for fetching knowledge base data */
+  seriesId: string;
   /** Callback to open script settings */
   onOpenSettings?: () => void;
   /** Callback to open export dialog */
@@ -107,13 +110,14 @@ export function ScriptEditor({
   content,
   onContentChange,
   title,
+  seriesId,
   onOpenSettings,
   onExport,
   isSaving,
   lastEditedAt,
 }: iScriptEditorProps) {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const rightPanelTab = 'knowledge'; // TODO: Make this stateful
+  const [rightPanelTab, setRightPanelTab] = useState('knowledge');
 
   const editor = useEditor({
     extensions: [
@@ -250,36 +254,52 @@ export function ScriptEditor({
 
         {/* Right Panel - Knowledge Base / Canvas */}
         <div className="flex h-1/2 w-full flex-col overflow-hidden lg:h-full lg:w-1/2">
-          <Tabs defaultValue={rightPanelTab} className="flex h-full flex-col">
-            <div className="border-b border-border px-4">
-              <TabsList className="h-12">
-                <TabsTrigger value="knowledge" className="gap-2">
-                  Knowledge Base
-                </TabsTrigger>
-                <TabsTrigger value="canvas" className="gap-2">
-                  Canvas
-                </TabsTrigger>
-                <TabsTrigger value="ai" className="gap-2">
-                  AI Assistant
-                </TabsTrigger>
-              </TabsList>
-            </div>
-            <TabsContent value="knowledge" className="mt-0 flex-1 overflow-y-auto p-4">
-              <div className="text-center text-muted-foreground">
-                <p>Knowledge Base panel</p>
-                <p className="text-sm">Characters, locations, and props from this series</p>
+          <Tabs value={rightPanelTab} onValueChange={setRightPanelTab} className="flex h-full flex-col">
+            <TabsList className="h-auto shrink-0 justify-start gap-0 border-b-2 border-foreground bg-card p-0">
+              <TabsTrigger
+                value="knowledge"
+                className="flex-1 gap-2 border-r-2 border-foreground py-3 font-black tracking-wide uppercase data-[state=active]:bg-(--brutalist-blue) data-[state=active]:text-white"
+              >
+                <LuBookOpen className="h-4 w-4" />
+                <span className="hidden sm:inline">Knowledge</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="canvas"
+                className="flex-1 gap-2 border-r-2 border-foreground py-3 font-black tracking-wide uppercase data-[state=active]:bg-(--brutalist-pink)"
+              >
+                <LuPenTool className="h-4 w-4" />
+                <span className="hidden sm:inline">Canvas</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="ai"
+                className="flex-1 gap-2 py-3 font-black tracking-wide uppercase data-[state=active]:bg-(--brutalist-green)"
+              >
+                <LuSparkles className="h-4 w-4" />
+                <span className="hidden sm:inline">AI</span>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="knowledge" className="mt-0 flex-1 overflow-hidden">
+              <KnowledgeBasePanel seriesId={seriesId} />
+            </TabsContent>
+
+            <TabsContent value="canvas" className="mt-0 flex-1 overflow-hidden">
+              <div className="flex h-full flex-col items-center justify-center bg-muted/30 p-8 text-center">
+                <div className="brutalist-shadow mb-4 flex h-12 w-12 items-center justify-center border-2 border-foreground bg-(--brutalist-pink)">
+                  <LuPenTool className="h-6 w-6" />
+                </div>
+                <p className="text-sm font-black uppercase">Canvas</p>
+                <p className="mt-1 text-xs text-muted-foreground">Visual planning coming soon</p>
               </div>
             </TabsContent>
-            <TabsContent value="canvas" className="mt-0 flex-1 overflow-y-auto p-4">
-              <div className="text-center text-muted-foreground">
-                <p>Canvas panel</p>
-                <p className="text-sm">Visual planning and storyboarding</p>
-              </div>
-            </TabsContent>
-            <TabsContent value="ai" className="mt-0 flex-1 overflow-y-auto p-4">
-              <div className="text-center text-muted-foreground">
-                <p>AI Assistant</p>
-                <p className="text-sm">Coming soon</p>
+
+            <TabsContent value="ai" className="mt-0 flex-1 overflow-hidden">
+              <div className="flex h-full flex-col items-center justify-center bg-muted/30 p-8 text-center">
+                <div className="brutalist-shadow mb-4 flex h-12 w-12 items-center justify-center border-2 border-foreground bg-(--brutalist-green)">
+                  <LuSparkles className="h-6 w-6" />
+                </div>
+                <p className="text-sm font-black uppercase">AI Assistant</p>
+                <p className="mt-1 text-xs text-muted-foreground">Coming soon</p>
               </div>
             </TabsContent>
           </Tabs>

@@ -38,7 +38,7 @@ function RouteComponent() {
 
   if (isScenePending || !series) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="h-full overflow-auto bg-background">
         <div className="border-b border-border bg-card">
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -57,7 +57,7 @@ function RouteComponent() {
   if (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-destructive">Error loading scene</h2>
           <p className="mt-2 text-muted-foreground">{message}</p>
@@ -68,7 +68,7 @@ function RouteComponent() {
 
   if (!scene) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold">Scene not found</h2>
           <p className="mt-2 text-muted-foreground">The scene you&apos;re looking for doesn&apos;t exist.</p>
@@ -88,15 +88,8 @@ function RouteComponent() {
   const nextScene = currentIndex < scenes.length - 1 ? scenes[currentIndex + 1] : undefined;
 
   return (
-    <div className="min-h-screen bg-background">
-      <SeriesHeader
-        series={series}
-        breadcrumbs={[
-          { label: 'Knowledge Base', href: `/series/${seriesId}/knowledge-base?tab=scenes` },
-          { label: 'Scenes', href: `/series/${seriesId}/knowledge-base?tab=scenes` },
-        ]}
-        currentPage={scene.heading}
-      />
+    <div className="h-full overflow-auto bg-background">
+      <SeriesHeader series={series} />
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <SceneDetail

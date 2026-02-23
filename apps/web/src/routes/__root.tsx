@@ -81,9 +81,11 @@ function RootComponent() {
       <body>
         <ThemeProvider initialTheme={initialTheme}>
           <NuqsAdapter>
-            <div className="grid h-svh grid-rows-[auto_1fr]">
+            <div className="flex h-svh flex-col overflow-hidden">
               <Header />
-              <Outlet />
+              <main className="min-h-0 flex-1">
+                <Outlet />
+              </main>
             </div>
             <ToasterContainer />
           </NuqsAdapter>

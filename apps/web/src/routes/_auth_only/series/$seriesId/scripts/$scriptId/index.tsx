@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 
 import { ExportPdfModal } from '@~/features/export';
-import { ScriptEditor } from '@~/features/scripts/components';
+import { ScriptEditor, ScriptSettingsModal } from '@~/features/scripts/components';
 import { useSaveScriptContent } from '@~/features/scripts/hooks/mutations/use-save-script-content';
 import { scriptQueryOptions, useScript } from '@~/features/scripts/hooks/queries/use-script';
 import '@~/features/scripts/script-editor.css';
@@ -21,6 +21,7 @@ function ScriptEditorPage() {
   const { data: script, isPending, error } = useScript(scriptId);
   const { saveContent, isPending: isSaving } = useSaveScriptContent();
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   const handleContentChange = useCallback(
     (content: string) => {
@@ -30,8 +31,7 @@ function ScriptEditorPage() {
   );
 
   const handleOpenSettings = useCallback(() => {
-    // TODO: Open script settings modal
-    console.log('Open settings');
+    setIsSettingsModalOpen(true);
   }, []);
 
   const handleExport = useCallback(() => {
@@ -69,6 +69,7 @@ function ScriptEditorPage() {
         content={script.content}
         onContentChange={handleContentChange}
         title={script.title}
+        seriesId={seriesId}
         onOpenSettings={handleOpenSettings}
         onExport={handleExport}
         isSaving={isSaving}
@@ -80,6 +81,7 @@ function ScriptEditorPage() {
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
       />
+      <ScriptSettingsModal open={isSettingsModalOpen} onOpenChange={setIsSettingsModalOpen} script={script} />
     </div>
   );
 }

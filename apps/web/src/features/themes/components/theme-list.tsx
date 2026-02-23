@@ -70,14 +70,10 @@ export function ThemeList({ seriesId }: iThemeListProps) {
   const { data, isPending, error, refetch } = useThemeList(seriesId);
   const { deleteTheme, isPending: isDeleting } = useDeleteTheme();
 
-  const handleCardClick = (themeId: string) => {
-    // TODO: Enable navigation after dev server generates route tree
-    console.log('Navigate to theme:', themeId, 'in series:', seriesId);
-    // void navigate({
-    //   to: '/series/$seriesId/knowledge-base/themes/$themeId',
-    //   params: { seriesId, themeId },
-    //   search: { tab: 'themes' },
-    // });
+  const handleCardClick = (theme: ThemeListItem) => {
+    // Open edit modal when clicking on a theme card
+    setEditingTheme(theme);
+    setIsFormOpen(true);
   };
 
   const handleEditClick = (theme: ThemeListItem) => {
@@ -186,11 +182,11 @@ export function ThemeList({ seriesId }: iThemeListProps) {
                 role="button"
                 tabIndex={0}
                 aria-label={`Open theme ${theme.name}`}
-                onClick={() => handleCardClick(theme._id)}
+                onClick={() => handleCardClick(theme)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
-                    handleCardClick(theme._id);
+                    handleCardClick(theme);
                   }
                 }}
               >

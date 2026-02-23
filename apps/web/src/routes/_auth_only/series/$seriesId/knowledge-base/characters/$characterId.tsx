@@ -31,7 +31,7 @@ function RouteComponent() {
 
   if (isPending) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <div className="flex items-center gap-2 text-muted-foreground">
           <LuLoader className="size-5 animate-spin" />
           <span>Loading character...</span>
@@ -43,7 +43,7 @@ function RouteComponent() {
   if (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-destructive">Error loading character</h2>
           <p className="mt-2 text-muted-foreground">{message}</p>
@@ -54,7 +54,7 @@ function RouteComponent() {
 
   if (!character) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold">Character not found</h2>
           <p className="mt-2 text-muted-foreground">The character you&apos;re looking for doesn&apos;t exist.</p>
@@ -65,7 +65,7 @@ function RouteComponent() {
 
   if (!series) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold">Series not found</h2>
           <p className="mt-2 text-muted-foreground">The series you&apos;re looking for doesn&apos;t exist.</p>
@@ -77,16 +77,9 @@ function RouteComponent() {
   const allCharacters = characterListData?.items ?? [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-full overflow-auto bg-background">
       {/* Series Header */}
-      <SeriesHeader
-        series={series}
-        breadcrumbs={[
-          { label: 'Knowledge Base', href: `/series/${seriesId}/knowledge-base?tab=characters` },
-          { label: 'Characters', href: `/series/${seriesId}/knowledge-base?tab=characters` },
-        ]}
-        currentPage={character.name}
-      />
+      <SeriesHeader series={series} />
 
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">

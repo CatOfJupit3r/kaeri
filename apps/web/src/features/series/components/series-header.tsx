@@ -1,15 +1,8 @@
 import { Link } from '@tanstack/react-router';
-import { LuEllipsisVertical, LuUsers, LuSettings, LuDownload } from 'react-icons/lu';
+import { useState } from 'react';
+import { LuLayoutGrid, LuSettings, LuUsers, LuUser, LuZap } from 'react-icons/lu';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@~/components/ui/avatar';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@~/components/ui/breadcrumb';
+import { toastInfo } from '@~/components/toastifications';
 import { Button } from '@~/components/ui/button';
 import {
   DropdownMenu,
@@ -18,6 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@~/components/ui/dropdown-menu';
+
+import { SeriesModal } from './series-modal';
 
 interface iSeriesHeaderProps {
   series: {
@@ -28,152 +23,101 @@ interface iSeriesHeaderProps {
     coverUrl?: string;
     lastEditedAt: Date;
   };
-  breadcrumbs?: Array<{ label: string; href?: string }>;
-  currentPage: string;
 }
 
-export function SeriesHeader({ series, breadcrumbs = [], currentPage }: iSeriesHeaderProps) {
+export function SeriesHeader({ series }: iSeriesHeaderProps) {
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+
   const handleManageUsers = () => {
-    // TODO: Implement manage users functionality (future multi-user support)
-    console.log('[SeriesHeader] Manage users clicked');
+    toastInfo('Multi-user support coming soon');
   };
 
   const handleSeriesSettings = () => {
-    // TODO: Implement series settings functionality
-    console.log('[SeriesHeader] Series settings clicked');
+    setIsSettingsModalOpen(true);
   };
 
-  const handleExportSeries = () => {
-    // TODO: Implement export series functionality
-    console.log('[SeriesHeader] Export series clicked');
+  const handleUserSettings = () => {
+    toastInfo('User settings coming soon');
   };
-
-  // Mock collaborators for future multi-user support
-  const mockCollaborators = [
-    { id: '1', name: 'User 1', avatarUrl: undefined },
-    { id: '2', name: 'User 2', avatarUrl: undefined },
-    { id: '3', name: 'User 3', avatarUrl: undefined },
-  ];
 
   return (
-    <div className="border-b border-border bg-card">
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        {/* Breadcrumb Navigation */}
-        <Breadcrumb className="mb-4">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/projects" className="transition-colors hover:text-foreground">
-                  Projects
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link
-                  to="/series/$seriesId"
-                  params={{ seriesId: series._id }}
-                  className="transition-colors hover:text-foreground"
-                >
-                  {series.title}
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            {breadcrumbs.map((crumb) => (
-              <span key={crumb.label}>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  {crumb.href ? (
-                    <BreadcrumbLink asChild>
-                      <Link to={crumb.href} className="transition-colors hover:text-foreground">
-                        {crumb.label}
-                      </Link>
-                    </BreadcrumbLink>
-                  ) : (
-                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                  )}
-                </BreadcrumbItem>
-              </span>
-            ))}
-            {!breadcrumbs.length && (
-              <>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{currentPage}</BreadcrumbPage>
-                </BreadcrumbItem>
-              </>
-            )}
-          </BreadcrumbList>
-        </Breadcrumb>
+    <>
+      <div className="flex h-16 shrink-0 items-center justify-between gap-3 border-b-4 border-foreground bg-card px-4">
+        <div className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
+          {/* Logo */}
+          <div className="flex shrink-0 items-center gap-2">
+            <div className="brutalist-shadow-sm flex h-9 w-9 items-center justify-center border-2 border-foreground bg-(--brutalist-yellow)">
+              <LuZap className="h-5 w-5" />
+            </div>
+            <span className="hidden text-lg font-black tracking-tight uppercase sm:inline">Kaeri</span>
+          </div>
 
-        {/* Header Content */}
-        <div className="flex items-start gap-6">
-          {/* Cover Image */}
-          {series.coverUrl ? (
-            <img src={series.coverUrl} alt={series.title} className="h-32 w-24 rounded-lg object-cover shadow-md" />
+          <div className="hidden h-8 w-0.5 bg-foreground md:block" />
+
+          <Link to="/dashboard">
+            <Button
+              variant="outline"
+              size="sm"
+              className="brutalist-shadow-sm shrink-0 gap-2 border-2 border-foreground bg-transparent font-bold tracking-wide uppercase transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-(--brutalist-yellow) hover:shadow-none"
+            >
+              <LuLayoutGrid className="h-4 w-4" />
+              <span className="hidden sm:inline">Projects</span>
+            </Button>
+          </Link>
+
+          {/* Series Name */}
+          <h1 className="truncate text-lg font-black tracking-tight text-foreground uppercase md:text-xl">
+            {series.title}
+          </h1>
+          {series.genre ? (
+            <span className="hidden border-2 border-foreground bg-(--brutalist-green) px-2 py-0.5 text-xs font-bold uppercase xl:inline">
+              {series.genre}
+            </span>
           ) : null}
+        </div>
 
-          {/* Series Info */}
-          <div className="flex-1">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">{series.title}</h1>
-                {series.genre ? <p className="mt-1 text-sm text-muted-foreground">{series.genre}</p> : null}
-                {series.logline ? <p className="mt-3 text-base text-muted-foreground">{series.logline}</p> : null}
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Last edited: {new Date(series.lastEditedAt).toLocaleDateString()}
-                </p>
-              </div>
-
-              {/* Actions Section */}
-              <div className="flex items-center gap-2">
-                {/* Collaborator Avatars - Placeholder for future multi-user */}
-                <div className="mr-2 flex -space-x-2">
-                  {mockCollaborators.map((collab) => {
-                    const initials = collab.name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')
-                      .toUpperCase()
-                      .slice(0, 2);
-                    return (
-                      <Avatar key={collab.id} className="size-8 border-2 border-background">
-                        {collab.avatarUrl ? <AvatarImage src={collab.avatarUrl} alt={collab.name} /> : null}
-                        <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-                      </Avatar>
-                    );
-                  })}
-                </div>
-
-                {/* Settings Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <LuEllipsisVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem onClick={handleManageUsers}>
-                      <LuUsers className="mr-2 h-4 w-4" />
-                      Manage Users
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleSeriesSettings}>
-                      <LuSettings className="mr-2 h-4 w-4" />
-                      Series Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleExportSeries}>
-                      <LuDownload className="mr-2 h-4 w-4" />
-                      Export Series
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+        <div className="flex shrink-0 items-center gap-3">
+          {/* User avatars - brutalist style */}
+          <div className="flex -space-x-1">
+            <div className="flex h-8 w-8 items-center justify-center border-2 border-foreground bg-(--brutalist-pink) text-xs font-black">
+              U1
+            </div>
+            <div className="flex h-8 w-8 items-center justify-center border-2 border-foreground bg-(--brutalist-blue) text-xs font-black text-white">
+              U2
             </div>
           </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="brutalist-shadow-sm h-9 w-9 shrink-0 border-2 border-foreground bg-transparent transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-(--brutalist-yellow) hover:shadow-none"
+              >
+                <LuSettings className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="brutalist-shadow border-2 border-foreground">
+              <DropdownMenuItem onClick={handleSeriesSettings}>
+                <LuSettings className="mr-2 h-4 w-4" />
+                Project Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleManageUsers}>
+                <LuUsers className="mr-2 h-4 w-4" />
+                Manage Team
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-foreground" />
+              <DropdownMenuItem onClick={handleUserSettings}>
+                <LuUser className="mr-2 h-4 w-4" />
+                User Settings
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
-    </div>
+
+      {/* Series Settings Modal */}
+      <SeriesModal open={isSettingsModalOpen} onOpenChange={setIsSettingsModalOpen} initialData={series} />
+    </>
   );
 }

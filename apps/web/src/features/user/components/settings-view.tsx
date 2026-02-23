@@ -4,6 +4,7 @@ import { LuArrowLeft, LuTriangleAlert } from 'react-icons/lu';
 import z from 'zod';
 
 import Loader from '@~/components/loader';
+import { toastInfo } from '@~/components/toastifications';
 import { Alert, AlertDescription } from '@~/components/ui/alert';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
@@ -53,8 +54,9 @@ export function SettingsView() {
   }
 
   const handleDeleteAccount = async () => {
-    // TODO: Implement delete account functionality
-    console.log('[Settings] Delete account requested');
+    // TODO: Implement delete account functionality when backend API is available
+    toastInfo('Account deletion is not available yet. Please contact support to delete your account.');
+    setIsDeleteConfirmShown(false);
   };
 
   return (
@@ -192,11 +194,7 @@ export function SettingsView() {
                   </AlertDescription>
                 </Alert>
 
-                {!isDeleteConfirmShown ? (
-                  <Button variant="destructive" onClick={() => setIsDeleteConfirmShown(true)} className="w-full">
-                    Delete My Account
-                  </Button>
-                ) : (
+                {isDeleteConfirmShown ? (
                   <div className="space-y-3 pt-2">
                     <p className="text-sm font-medium text-foreground">
                       Are you absolutely sure? This action cannot be undone.
@@ -210,6 +208,10 @@ export function SettingsView() {
                       </Button>
                     </div>
                   </div>
+                ) : (
+                  <Button variant="destructive" onClick={() => setIsDeleteConfirmShown(true)} className="w-full">
+                    Delete My Account
+                  </Button>
                 )}
               </CardContent>
             </Card>
