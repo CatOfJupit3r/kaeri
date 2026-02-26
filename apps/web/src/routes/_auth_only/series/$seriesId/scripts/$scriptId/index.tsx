@@ -1,3 +1,4 @@
+import { useHotkey } from '@tanstack/react-hotkeys';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 
@@ -37,6 +38,10 @@ function ScriptEditorPage() {
   const handleExport = useCallback(() => {
     setIsExportModalOpen(true);
   }, []);
+
+  // Keyboard shortcuts
+  useHotkey('Mod+E', handleExport, { preventDefault: true });
+  useHotkey('Mod+,', handleOpenSettings, { preventDefault: true });
 
   // Handle loading state
   if (isPending) {

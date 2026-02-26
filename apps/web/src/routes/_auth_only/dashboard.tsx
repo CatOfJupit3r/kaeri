@@ -1,5 +1,6 @@
+import { useHotkey } from '@tanstack/react-hotkeys';
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { GiHoneyJar } from 'react-icons/gi';
 import { LuEllipsisVertical, LuPencil, LuTrash2 } from 'react-icons/lu';
 
@@ -50,6 +51,14 @@ function RouteComponent() {
   const { deleteSeries, isPending: isDeleting } = useDeleteSeries();
   const { createBeeMovieData, isPending: isCreatingBeeMovie } = useCreateBeeMovie();
 
+  const handleNewProject = useCallback(() => {
+    setEditingSeries(null);
+    setIsModalOpen(true);
+  }, []);
+
+  // Keyboard shortcut: Mod+N to create new project
+  useHotkey('Mod+N', handleNewProject, { preventDefault: true });
+
   const handleEdit = (series: typeof editingSeries) => {
     setEditingSeries(series);
     setIsModalOpen(true);
@@ -88,7 +97,7 @@ function RouteComponent() {
               <h1 className="text-2xl font-bold text-foreground">My Projects</h1>
               <p className="text-sm text-muted-foreground">Manage all your series and screenplays</p>
             </div>
-            <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
+            <Button className="gap-2" onClick={handleNewProject}>
               <span>New Project</span>
             </Button>
           </div>
@@ -109,7 +118,7 @@ function RouteComponent() {
               <h1 className="text-2xl font-bold text-foreground">My Projects</h1>
               <p className="text-sm text-muted-foreground">Manage all your series and screenplays</p>
             </div>
-            <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
+            <Button className="gap-2" onClick={handleNewProject}>
               <span>New Project</span>
             </Button>
           </div>
@@ -137,7 +146,7 @@ function RouteComponent() {
             <p className="text-sm text-muted-foreground">Manage all your series and screenplays</p>
           </div>
 
-          <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
+          <Button className="gap-2" onClick={handleNewProject}>
             <span>New Project</span>
           </Button>
         </div>
@@ -145,7 +154,7 @@ function RouteComponent() {
 
       <div className="p-6">
         {series.length === 0 ? (
-          <SeriesEmptyState onCreateClick={() => setIsModalOpen(true)} />
+          <SeriesEmptyState onCreateClick={handleNewProject} />
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {series.map((s) => (
