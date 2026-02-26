@@ -137,6 +137,7 @@ export function CharacterList({ seriesId, onCharacterSelect }: iCharacterListPro
         </Empty>
         <CharacterForm
           seriesId={seriesId}
+          characters={characters}
           open={isFormOpen}
           onOpenChange={handleFormOpenChange}
           initialData={editingCharacter}
@@ -245,6 +246,7 @@ export function CharacterList({ seriesId, onCharacterSelect }: iCharacterListPro
       </div>
       <CharacterForm
         seriesId={seriesId}
+        characters={characters}
         open={isFormOpen}
         onOpenChange={handleFormOpenChange}
         initialData={editingCharacter}

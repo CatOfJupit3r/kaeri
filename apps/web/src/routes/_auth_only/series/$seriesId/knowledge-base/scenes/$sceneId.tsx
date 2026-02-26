@@ -101,6 +101,8 @@ function RouteComponent() {
           characters={characters}
           location={location}
           props={props}
+          scripts={scriptsData?.items ?? []}
+          locations={locationsData?.items ?? []}
         />
       </div>
     </div>

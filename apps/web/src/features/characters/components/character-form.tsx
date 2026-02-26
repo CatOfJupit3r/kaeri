@@ -19,7 +19,6 @@ import { RelationshipPicker } from '@~/features/knowledge-base/components/relati
 
 import { useCreateCharacter } from '../hooks/mutations/use-create-character';
 import { useUpdateCharacter } from '../hooks/mutations/use-update-character';
-import { useCharacterList } from '../hooks/queries/use-character-list';
 import type { CharacterListItem } from '../hooks/queries/use-character-list';
 import { AppearancePicker } from './appearance-picker';
 
@@ -27,17 +26,22 @@ type Relationship = NonNullable<CharacterListItem['relationships']>[number];
 type Appearance = NonNullable<CharacterListItem['appearances']>[number];
 type Character = CharacterListItem;
 
+interface iCharacter {
+  _id: string;
+  name: string;
+}
+
 interface iCharacterFormProps {
   seriesId: string;
+  characters: iCharacter[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialData?: Character;
 }
 
-export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCharacterFormProps) {
+export function CharacterForm({ seriesId, characters, open, onOpenChange, initialData }: iCharacterFormProps) {
   const { createCharacter, isPending: isCreating } = useCreateCharacter();
   const { updateCharacter, isPending: isUpdating } = useUpdateCharacter();
-  const { data: characterListData } = useCharacterList(seriesId);
 
   const isPending = isCreating || isUpdating;
   const isEditMode = !!initialData;
@@ -256,7 +260,7 @@ export function CharacterForm({ seriesId, open, onOpenChange, initialData }: iCh
                     <Label htmlFor="character-relationships">Relationships</Label>
                     <div id="character-relationships">
                       <RelationshipPicker
-                        characters={characterListData?.items ?? []}
+                        characters={characters}
                         currentCharacterId={initialData?._id}
                         relationships={relationships}
                         onAdd={(relationship) => {

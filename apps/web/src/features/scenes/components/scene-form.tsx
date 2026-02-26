@@ -16,10 +16,6 @@ import { useAppForm } from '@~/components/ui/field';
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
 import { SingleSelect } from '@~/components/ui/select';
-import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
-import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
-import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
-import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
 
 import { useCreateScene } from '../hooks/mutations/use-create-scene';
 import { useUpdateScene } from '../hooks/mutations/use-update-scene';
@@ -32,20 +28,49 @@ interface iSceneBeat {
 }
 type Scene = SceneDetailQueryReturnType | SceneListItem;
 
+interface iScript {
+  _id: string;
+  title: string;
+}
+
+interface iLocation {
+  _id: string;
+  name: string;
+}
+
+interface iCharacter {
+  _id: string;
+  name: string;
+}
+
+interface iProp {
+  _id: string;
+  name: string;
+}
+
 interface iSceneFormProps {
   seriesId: string;
+  scripts: iScript[];
+  locations: iLocation[];
+  characters: iCharacter[];
+  props: iProp[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialData?: Scene;
 }
 
-export function SceneForm({ seriesId, open, onOpenChange, initialData }: iSceneFormProps) {
+export function SceneForm({
+  seriesId,
+  scripts,
+  locations,
+  characters,
+  props,
+  open,
+  onOpenChange,
+  initialData,
+}: iSceneFormProps) {
   const { createScene, isPending: isCreating } = useCreateScene();
   const { updateScene, isPending: isUpdating } = useUpdateScene();
-  const { data: scriptsData } = useScriptList(seriesId);
-  const { data: locationsData } = useLocationList(seriesId);
-  const { data: charactersData } = useCharacterList(seriesId);
-  const { data: propsData } = usePropList(seriesId);
 
   const isPending = isCreating || isUpdating;
   const isEditMode = !!initialData;
@@ -203,11 +228,6 @@ export function SceneForm({ seriesId, open, onOpenChange, initialData }: iSceneF
       setBeatInput('');
     }
   }, [open, initialData, form]);
-
-  const scripts = scriptsData?.items ?? [];
-  const locations = locationsData?.items ?? [];
-  const characters = charactersData?.items ?? [];
-  const props = propsData?.items ?? [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

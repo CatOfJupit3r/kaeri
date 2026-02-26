@@ -17,7 +17,10 @@ import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { Progress } from '@~/components/ui/progress';
 import { Skeleton } from '@~/components/ui/skeleton';
+import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 import { ListErrorState, ListPendingState } from '@~/features/knowledge-base/components/list-states';
+import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
+import { useThemeList } from '@~/features/themes/hooks/queries/use-theme-list';
 
 import { useDeleteStoryArc } from '../hooks/mutations/use-delete-story-arc';
 import type { StoryArcListItem } from '../hooks/queries/use-story-arc-list';
@@ -80,6 +83,15 @@ export function StoryArcList({ seriesId, onStoryArcSelect }: iStoryArcListProps)
   const [storyArcToDelete, setStoryArcToDelete] = useState<StoryArcListItem | undefined>(undefined);
   const { data, isPending, error } = useStoryArcList(seriesId);
   const { deleteStoryArc, isPending: isDeleting } = useDeleteStoryArc();
+
+  // Fetch data for StoryArcForm dropdowns
+  const { data: scriptsData } = useScriptList(seriesId);
+  const { data: charactersData } = useCharacterList(seriesId, 100, 0);
+  const { data: themesData } = useThemeList(seriesId, 100, 0);
+
+  const scripts = scriptsData?.items ?? [];
+  const characters = charactersData?.items ?? [];
+  const themes = themesData?.items ?? [];
 
   const handleCardClick = (storyArc: StoryArcListItem) => {
     if (onStoryArcSelect) {
@@ -231,6 +243,9 @@ export function StoryArcList({ seriesId, onStoryArcSelect }: iStoryArcListProps)
 
       <StoryArcForm
         seriesId={seriesId}
+        scripts={scripts}
+        characters={characters}
+        themes={themes}
         open={isFormOpen}
         onOpenChange={handleFormOpenChange}
         initialData={editingStoryArc}

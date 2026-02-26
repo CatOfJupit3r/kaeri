@@ -15,7 +15,11 @@ import { useAppForm } from '@~/components/ui/field';
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
 import { SingleSelect } from '@~/components/ui/select';
-import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
+
+interface iScript {
+  _id: string;
+  title: string;
+}
 
 interface iVariation {
   scriptId: string;
@@ -26,7 +30,7 @@ interface iVariation {
 }
 
 interface iVariationFormProps {
-  seriesId: string;
+  scripts: iScript[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (variation: iVariation) => void;
@@ -35,15 +39,13 @@ interface iVariationFormProps {
 }
 
 export function VariationForm({
-  seriesId,
+  scripts,
   open,
   onOpenChange,
   onSubmit,
   initialData,
   isPending = false,
 }: iVariationFormProps) {
-  const { data: scriptsData } = useScriptList(seriesId);
-
   const isEditMode = !!initialData;
 
   const form = useAppForm({
@@ -88,11 +90,10 @@ export function VariationForm({
     }
   }, [open, initialData, form]);
 
-  const scriptOptions =
-    scriptsData?.items.map((script) => ({
-      label: script.title,
-      value: script._id,
-    })) ?? [];
+  const scriptOptions = scripts.map((script) => ({
+    label: script.title,
+    value: script._id,
+  }));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

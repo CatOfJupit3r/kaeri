@@ -16,8 +16,6 @@ import { useAppForm } from '@~/components/ui/field';
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
 import { MultiSelect } from '@~/components/ui/select';
-import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
-import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
 
 import { useCreateLocation } from '../hooks/mutations/use-create-location';
 import { useUpdateLocation } from '../hooks/mutations/use-update-location';
@@ -40,18 +38,28 @@ interface iLocation {
   timeOfDay?: string[];
 }
 
+interface iCharacter {
+  _id: string;
+  name: string;
+}
+
+interface iProp {
+  _id: string;
+  name: string;
+}
+
 interface iLocationFormProps {
   seriesId: string;
+  characters: iCharacter[];
+  props: iProp[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialData?: iLocation;
 }
 
-export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLocationFormProps) {
+export function LocationForm({ seriesId, characters, props, open, onOpenChange, initialData }: iLocationFormProps) {
   const { createLocation, isPending: isCreating } = useCreateLocation();
   const { updateLocation, isPending: isUpdating } = useUpdateLocation();
-  const { data: charactersData } = useCharacterList(seriesId, 100, 0, { enabled: open });
-  const { data: propsData } = usePropList(seriesId, 100, 0, { enabled: open });
 
   const [images, setImages] = useState<iImage[]>(initialData?.images ?? []);
   const [newImageUrl, setNewImageUrl] = useState('');
@@ -60,12 +68,12 @@ export function LocationForm({ seriesId, open, onOpenChange, initialData }: iLoc
   const isPending = isCreating || isUpdating;
   const isEditMode = !!initialData;
 
-  const characterOptions = (charactersData?.items ?? []).map((char) => ({
+  const characterOptions = characters.map((char) => ({
     label: char.name,
     value: char._id,
   }));
 
-  const propOptions = (propsData?.items ?? []).map((prop) => ({
+  const propOptions = props.map((prop) => ({
     label: prop.name,
     value: prop._id,
   }));

@@ -15,8 +15,11 @@ import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { Skeleton } from '@~/components/ui/skeleton';
+import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 import { ListErrorState, ListPendingState } from '@~/features/knowledge-base/components/list-states';
+import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
 import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
+import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
 
 import { useDeleteProp } from '../hooks/mutations/use-delete-prop';
 import { PropForm } from './prop-form';
@@ -71,7 +74,14 @@ export function PropList({ seriesId, onPropSelect }: iPropListProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [propToDelete, setPropToDelete] = useState<iProp | undefined>(undefined);
   const { data, isPending, error, refetch } = usePropList(seriesId);
+  const { data: charactersData } = useCharacterList(seriesId);
+  const { data: locationsData } = useLocationList(seriesId);
+  const { data: scriptsData } = useScriptList(seriesId);
   const { deleteProp, isPending: isDeleting } = useDeleteProp();
+
+  const characters = charactersData?.items ?? [];
+  const locations = locationsData?.items ?? [];
+  const scripts = scriptsData?.items ?? [];
 
   const handleCardClick = (propId: string) => {
     if (onPropSelect) {
@@ -136,7 +146,15 @@ export function PropList({ seriesId, onPropSelect }: iPropListProps) {
             <Button onClick={() => setIsFormOpen(true)}>New Prop</Button>
           </EmptyContent>
         </Empty>
-        <PropForm seriesId={seriesId} open={isFormOpen} onOpenChange={handleFormOpenChange} initialData={editingProp} />
+        <PropForm
+          seriesId={seriesId}
+          characters={characters}
+          locations={locations}
+          scripts={scripts}
+          open={isFormOpen}
+          onOpenChange={handleFormOpenChange}
+          initialData={editingProp}
+        />
       </>
     );
   }
@@ -226,7 +244,15 @@ export function PropList({ seriesId, onPropSelect }: iPropListProps) {
           })}
         </div>
       </div>
-      <PropForm seriesId={seriesId} open={isFormOpen} onOpenChange={handleFormOpenChange} initialData={editingProp} />
+      <PropForm
+        seriesId={seriesId}
+        characters={characters}
+        locations={locations}
+        scripts={scripts}
+        open={isFormOpen}
+        onOpenChange={handleFormOpenChange}
+        initialData={editingProp}
+      />
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

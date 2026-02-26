@@ -18,9 +18,6 @@ import { Label } from '@~/components/ui/label';
 import { MultiSelect } from '@~/components/ui/select';
 import type { iOptionType } from '@~/components/ui/select';
 
-import { useCharacterList } from '../../characters/hooks/queries/use-character-list';
-import { useLocationList } from '../../locations/hooks/queries/use-location-list';
-import { useScriptList } from '../../scripts/hooks/queries/use-script-list';
 import { useCreateProp } from '../hooks/mutations/use-create-prop';
 import { useUpdateProp } from '../hooks/mutations/use-update-prop';
 
@@ -38,6 +35,9 @@ interface iProp {
 
 interface iPropFormProps {
   seriesId: string;
+  characters: iCharacter[];
+  locations: iLocation[];
+  scripts: iScript[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialData?: iProp;
@@ -93,26 +93,46 @@ function entityValuesToAssociations(values: EntityValue[]): Association[] {
   return associations;
 }
 
+interface iCharacter {
+  _id: string;
+  name: string;
+}
+
+interface iLocation {
+  _id: string;
+  name: string;
+}
+
+interface iScript {
+  _id: string;
+  title: string;
+}
+
 interface iAssociationsFieldProps {
-  seriesId: string;
+  characters: iCharacter[];
+  locations: iLocation[];
+  scripts: iScript[];
   value: string[];
   onChange: (values: string[]) => void;
   disabled?: boolean;
 }
 
-function AssociationsField({ seriesId, value, onChange, disabled = false }: iAssociationsFieldProps) {
-  const { data: charactersData, isLoading: isLoadingCharacters } = useCharacterList(seriesId, 100, 0);
-  const { data: locationsData, isLoading: isLoadingLocations } = useLocationList(seriesId, 100, 0);
-  const { data: scriptsData, isLoading: isLoadingScripts } = useScriptList(seriesId, 100, 0);
-
+function AssociationsField({
+  characters,
+  locations,
+  scripts,
+  value,
+  onChange,
+  disabled = false,
+}: iAssociationsFieldProps) {
   const options = useMemo(() => {
     const groups: GroupBase<iOptionType>[] = [];
 
     // Characters group
-    if (charactersData?.items && charactersData.items.length > 0) {
+    if (characters.length > 0) {
       groups.push({
         label: 'Characters',
-        options: charactersData.items.map((char) => ({
+        options: characters.map((char) => ({
           value: `${ENTITY_TYPE_PREFIXES.CHARACTER}${char._id}` as EntityValue,
           label: char.name,
           icon: <LuBookUser className="h-4 w-4" />,
@@ -126,10 +146,10 @@ function AssociationsField({ seriesId, value, onChange, disabled = false }: iAss
     }
 
     // Locations group
-    if (locationsData?.items && locationsData.items.length > 0) {
+    if (locations.length > 0) {
       groups.push({
         label: 'Locations',
-        options: locationsData.items.map((loc) => ({
+        options: locations.map((loc) => ({
           value: `${ENTITY_TYPE_PREFIXES.LOCATION}${loc._id}` as EntityValue,
           label: loc.name,
           icon: <LuGlobe className="h-4 w-4" />,
@@ -143,10 +163,10 @@ function AssociationsField({ seriesId, value, onChange, disabled = false }: iAss
     }
 
     // Scripts group
-    if (scriptsData?.items && scriptsData.items.length > 0) {
+    if (scripts.length > 0) {
       groups.push({
         label: 'Scripts',
-        options: scriptsData.items.map((script) => ({
+        options: scripts.map((script) => ({
           value: `${ENTITY_TYPE_PREFIXES.SCRIPT}${script._id}` as EntityValue,
           label: script.title,
           icon: <LuScroll className="h-4 w-4" />,
@@ -160,9 +180,7 @@ function AssociationsField({ seriesId, value, onChange, disabled = false }: iAss
     }
 
     return groups;
-  }, [charactersData, locationsData, scriptsData]);
-
-  const isLoading = isLoadingCharacters || isLoadingLocations || isLoadingScripts;
+  }, [characters, locations, scripts]);
 
   return (
     <div className="space-y-2">
@@ -178,7 +196,6 @@ function AssociationsField({ seriesId, value, onChange, disabled = false }: iAss
         value={value}
         onValueChange={onChange}
         isDisabled={disabled}
-        isLoading={isLoading}
         placeholder="Select entities to associate..."
         closeMenuOnSelect={false}
         isClearable
@@ -200,9 +217,11 @@ const PropFormFields = withForm({
     isPending: false,
     onCancel: () => {},
     isEditMode: false,
-    seriesId: '',
+    characters: [] as iCharacter[],
+    locations: [] as iLocation[],
+    scripts: [] as iScript[],
   },
-  render: function Render({ form, isPending, onCancel, isEditMode, seriesId }) {
+  render: function Render({ form, isPending, onCancel, isEditMode, characters, locations, scripts }) {
     return (
       <>
         <div className="grid gap-4">
@@ -220,7 +239,9 @@ const PropFormFields = withForm({
         <form.Field name="entityValues">
           {(field) => (
             <AssociationsField
-              seriesId={seriesId}
+              characters={characters}
+              locations={locations}
+              scripts={scripts}
               value={field.state.value ?? []}
               onChange={(values) => field.handleChange(values)}
               disabled={isPending}
@@ -241,7 +262,15 @@ const PropFormFields = withForm({
   },
 });
 
-export function PropForm({ seriesId, open, onOpenChange, initialData }: iPropFormProps) {
+export function PropForm({
+  seriesId,
+  characters,
+  locations,
+  scripts,
+  open,
+  onOpenChange,
+  initialData,
+}: iPropFormProps) {
   const { createProp, isPending: isCreating } = useCreateProp();
   const { updateProp, isPending: isUpdating } = useUpdateProp();
 
@@ -338,7 +367,9 @@ export function PropForm({ seriesId, open, onOpenChange, initialData }: iPropFor
               isPending={isPending}
               onCancel={() => onOpenChange(false)}
               isEditMode={isEditMode}
-              seriesId={seriesId}
+              characters={characters}
+              locations={locations}
+              scripts={scripts}
             />
           </form.Form>
         </form.AppForm>

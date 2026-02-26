@@ -6,6 +6,7 @@ import { Button } from '@~/components/ui/button';
 import { Card } from '@~/components/ui/card';
 import { Progress } from '@~/components/ui/progress';
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
+import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
 import { useThemeList } from '@~/features/themes/hooks/queries/use-theme-list';
 
 import type { StoryArcDetailQueryReturnType } from '../hooks/queries/use-story-arc';
@@ -33,12 +34,17 @@ const STATUS_LABELS = {
 export function StoryArcDetail({ storyArc, seriesId }: iStoryArcDetailProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  // Fetch character and theme names for display
+  // Fetch data for display and StoryArcForm
+  const { data: scriptsData } = useScriptList(seriesId);
   const { data: charactersData } = useCharacterList(seriesId, 100, 0);
   const { data: themesData } = useThemeList(seriesId, 100, 0);
 
-  const characterMap = new Map(charactersData?.items.map((c) => [c._id, c.name]) ?? []);
-  const themeMap = new Map(themesData?.items.map((t) => [t._id, t.name]) ?? []);
+  const scripts = scriptsData?.items ?? [];
+  const characters = charactersData?.items ?? [];
+  const themes = themesData?.items ?? [];
+
+  const characterMap = new Map(characters.map((c) => [c._id, c.name]));
+  const themeMap = new Map(themes.map((t) => [t._id, t.name]));
 
   const calculateProgress = (): number => {
     if (storyArc.keyBeats.length === 0) return 0;
@@ -162,7 +168,15 @@ export function StoryArcDetail({ storyArc, seriesId }: iStoryArcDetailProps) {
         </div>
       </div>
 
-      <StoryArcForm seriesId={seriesId} open={isFormOpen} onOpenChange={setIsFormOpen} initialData={storyArc} />
+      <StoryArcForm
+        seriesId={seriesId}
+        scripts={scripts}
+        characters={characters}
+        themes={themes}
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        initialData={storyArc}
+      />
     </>
   );
 }

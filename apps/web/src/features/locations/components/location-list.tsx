@@ -16,8 +16,10 @@ import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { Skeleton } from '@~/components/ui/skeleton';
+import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 import { ListErrorState, ListPendingState } from '@~/features/knowledge-base/components/list-states';
 import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
+import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
 
 import { useDeleteLocation } from '../hooks/mutations/use-delete-location';
 import { LocationForm } from './location-form';
@@ -67,7 +69,12 @@ export function LocationList({ seriesId, onLocationSelect }: iLocationListProps)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [locationToDelete, setLocationToDelete] = useState<iLocation | undefined>(undefined);
   const { data, isPending, error, refetch } = useLocationList(seriesId);
+  const { data: charactersData } = useCharacterList(seriesId);
+  const { data: propsData } = usePropList(seriesId);
   const { deleteLocation, isPending: isDeleting } = useDeleteLocation();
+
+  const characters = charactersData?.items ?? [];
+  const props = propsData?.items ?? [];
 
   const handleCardClick = (locationId: string) => {
     // If onLocationSelect is provided, use it instead of editing
@@ -136,6 +143,8 @@ export function LocationList({ seriesId, onLocationSelect }: iLocationListProps)
         </Empty>
         <LocationForm
           seriesId={seriesId}
+          characters={characters}
+          props={props}
           open={isFormOpen}
           onOpenChange={handleFormOpenChange}
           initialData={editingLocation}
@@ -234,6 +243,8 @@ export function LocationList({ seriesId, onLocationSelect }: iLocationListProps)
       </div>
       <LocationForm
         seriesId={seriesId}
+        characters={characters}
+        props={props}
         open={isFormOpen}
         onOpenChange={handleFormOpenChange}
         initialData={editingLocation}

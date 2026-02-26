@@ -7,16 +7,31 @@ import { useAppForm } from '@~/components/ui/field';
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
 import { SingleSelect } from '@~/components/ui/select';
-import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
-import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
-import { useThemeList } from '@~/features/themes/hooks/queries/use-theme-list';
 
 import { useCreateStoryArc } from '../hooks/mutations/use-create-story-arc';
 import { useUpdateStoryArc } from '../hooks/mutations/use-update-story-arc';
 import type { StoryArcListItem } from '../hooks/queries/use-story-arc-list';
 
+interface iScript {
+  _id: string;
+  title: string;
+}
+
+interface iCharacter {
+  _id: string;
+  name: string;
+}
+
+interface iTheme {
+  _id: string;
+  name: string;
+}
+
 interface iStoryArcFormProps {
   seriesId: string;
+  scripts: iScript[];
+  characters: iCharacter[];
+  themes: iTheme[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialData?: StoryArcListItem;
@@ -40,20 +55,19 @@ const STATUS_OPTIONS = [
   { value: 'abandoned', label: 'Abandoned' },
 ] as const;
 
-export function StoryArcForm({ seriesId, open, onOpenChange, initialData }: iStoryArcFormProps) {
+export function StoryArcForm({
+  seriesId,
+  scripts,
+  characters,
+  themes,
+  open,
+  onOpenChange,
+  initialData,
+}: iStoryArcFormProps) {
   const isEditMode = !!initialData;
   const { createStoryArc, isPending: isCreating } = useCreateStoryArc();
   const { updateStoryArc, isPending: isUpdating } = useUpdateStoryArc();
   const isPending = isCreating || isUpdating;
-
-  // Fetch data for dropdowns
-  const { data: scriptsData } = useScriptList(seriesId);
-  const { data: charactersData } = useCharacterList(seriesId, 100, 0);
-  const { data: themesData } = useThemeList(seriesId, 100, 0);
-
-  const scripts = scriptsData?.items ?? [];
-  const characters = charactersData?.items ?? [];
-  const themes = themesData?.items ?? [];
 
   const [beats, setBeats] = useState<iBeat[]>(
     initialData?.keyBeats ?? [{ id: crypto.randomUUID(), order: 0, description: '' }],

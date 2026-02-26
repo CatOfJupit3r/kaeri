@@ -17,7 +17,10 @@ import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { Skeleton } from '@~/components/ui/skeleton';
+import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 import { ListErrorState, ListPendingState } from '@~/features/knowledge-base/components/list-states';
+import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
+import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
 import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
 
 import { useDeleteScene } from '../hooks/mutations/use-delete-scene';
@@ -75,9 +78,16 @@ export function SceneList({ seriesId, onSceneSelect }: iSceneListProps) {
   const [sceneToDelete, setSceneToDelete] = useState<SceneListItem | undefined>(undefined);
 
   const { data: scriptsData, isPending: isScriptsPending, error: scriptsError } = useScriptList(seriesId);
+  const { data: locationsData } = useLocationList(seriesId);
+  const { data: charactersData } = useCharacterList(seriesId);
+  const { data: propsData } = usePropList(seriesId);
   const { deleteScene, isPending: isDeleting } = useDeleteScene();
 
   const scriptIds = scriptsData?.items.map((script) => script._id) ?? [];
+  const scripts = scriptsData?.items ?? [];
+  const locations = locationsData?.items ?? [];
+  const characters = charactersData?.items ?? [];
+  const props = propsData?.items ?? [];
 
   const sceneQueries = scriptIds.map((scriptId) =>
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -147,7 +157,6 @@ export function SceneList({ seriesId, onSceneSelect }: iSceneListProps) {
     return <ListErrorState message={message} />;
   }
 
-  const scripts = scriptsData?.items ?? [];
   const allScenes = sceneQueries.flatMap((query, index) => {
     const scriptId = scriptIds[index];
     const script = scripts.find((s) => s._id === scriptId);
@@ -175,7 +184,15 @@ export function SceneList({ seriesId, onSceneSelect }: iSceneListProps) {
             Add Scene
           </Button>
         </Empty>
-        <SceneForm seriesId={seriesId} open={isFormOpen} onOpenChange={handleFormOpenChange} />
+        <SceneForm
+          seriesId={seriesId}
+          scripts={scripts}
+          locations={locations}
+          characters={characters}
+          props={props}
+          open={isFormOpen}
+          onOpenChange={handleFormOpenChange}
+        />
       </>
     );
   }
@@ -255,7 +272,16 @@ export function SceneList({ seriesId, onSceneSelect }: iSceneListProps) {
         })}
       </div>
 
-      <SceneForm seriesId={seriesId} open={isFormOpen} onOpenChange={handleFormOpenChange} initialData={editingScene} />
+      <SceneForm
+        seriesId={seriesId}
+        scripts={scripts}
+        locations={locations}
+        characters={characters}
+        props={props}
+        open={isFormOpen}
+        onOpenChange={handleFormOpenChange}
+        initialData={editingScene}
+      />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>

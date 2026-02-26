@@ -503,7 +503,7 @@ export function CharacterDetail({ characterId, seriesId, open, onOpenChange }: i
       </Dialog>
 
       <VariationForm
-        seriesId={seriesId}
+        scripts={scriptsData?.items ?? []}
         open={isVariationFormOpen}
         onOpenChange={handleVariationFormOpenChange}
         onSubmit={handleVariationSubmit}

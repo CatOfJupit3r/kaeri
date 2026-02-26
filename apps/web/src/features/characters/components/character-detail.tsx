@@ -202,7 +202,13 @@ export function CharacterDetail({ character, seriesId, allCharacters = [] }: iCh
       </div>
 
       {/* Character Edit Form */}
-      <CharacterForm seriesId={seriesId} open={isFormOpen} onOpenChange={setIsFormOpen} initialData={character} />
+      <CharacterForm
+        seriesId={seriesId}
+        characters={allCharacters}
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        initialData={character}
+      />
     </>
   );
 }

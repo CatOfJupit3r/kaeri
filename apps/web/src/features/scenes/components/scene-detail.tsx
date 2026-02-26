@@ -19,6 +19,9 @@ interface iSceneDetailProps {
   characters?: Array<{ _id: string; name: string }>;
   location?: { _id: string; name: string };
   props?: Array<{ _id: string; name: string }>;
+  // Data for SceneForm dropdowns
+  scripts?: Array<{ _id: string; title: string }>;
+  locations?: Array<{ _id: string; name: string }>;
 }
 
 export function SceneDetail({
@@ -30,6 +33,8 @@ export function SceneDetail({
   characters = [],
   location,
   props = [],
+  scripts = [],
+  locations = [],
 }: iSceneDetailProps) {
   const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -247,7 +252,16 @@ export function SceneDetail({
         </div>
       </div>
 
-      <SceneForm seriesId={seriesId} open={isFormOpen} onOpenChange={setIsFormOpen} initialData={scene} />
+      <SceneForm
+        seriesId={seriesId}
+        scripts={scripts}
+        locations={locations}
+        characters={characters}
+        props={props}
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        initialData={scene}
+      />
     </>
   );
 }
