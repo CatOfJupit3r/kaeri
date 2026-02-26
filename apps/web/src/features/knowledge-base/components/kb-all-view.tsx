@@ -2,15 +2,21 @@ import { useNavigate } from '@tanstack/react-router';
 import {
   LuBookUser,
   LuCalendar,
+  LuClock,
   LuFilm,
   LuGlobe,
+  LuHash,
+  LuHeart,
   LuLightbulb,
+  LuLink,
   LuPackage,
   LuSparkles,
   LuTrendingUp,
+  LuUsers,
 } from 'react-icons/lu';
 
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
+import type { iEntitySummaryItem } from '@~/features/knowledge-base/components/entity-summary-card';
 import { EntitySummaryCard } from '@~/features/knowledge-base/components/entity-summary-card';
 import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
 import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
@@ -109,133 +115,240 @@ export function KBAllView({
     }
   };
 
+  // Map characters to rich entity items
+  const characterEntities: iEntitySummaryItem[] =
+    charactersData?.items.map((c) => ({
+      id: c._id,
+      name: c.name,
+      subtitle: c.description,
+      avatarUrl: c.avatarUrl,
+      tags: c.traits?.slice(0, 3),
+      metadata: [
+        ...(c.relationships?.length
+          ? [{ label: `${c.relationships.length} relations`, icon: <LuHeart className="size-3" /> }]
+          : []),
+        ...(c.variations?.length
+          ? [{ label: `${c.variations.length} variations`, icon: <LuUsers className="size-3" /> }]
+          : []),
+      ],
+    })) ?? [];
+
+  // Map locations to rich entity items
+  const locationEntities: iEntitySummaryItem[] =
+    locationsData?.items.map((l) => {
+      const moodSuffix = l.description ? ` — ${l.description}` : '';
+      return {
+        id: l._id,
+        name: l.name,
+        subtitle: l.mood ? `${l.mood}${moodSuffix}` : l.description,
+        tags: l.tags?.slice(0, 3),
+        metadata: [
+          ...(l.timeOfDay?.length ? [{ label: l.timeOfDay.join(', '), icon: <LuClock className="size-3" /> }] : []),
+          ...(l.associatedCharacterIds?.length
+            ? [{ label: `${l.associatedCharacterIds.length} characters`, icon: <LuUsers className="size-3" /> }]
+            : []),
+          ...(l.propIds?.length
+            ? [{ label: `${l.propIds.length} props`, icon: <LuPackage className="size-3" /> }]
+            : []),
+        ],
+      };
+    }) ?? [];
+
+  // Map props to rich entity items
+  const propEntities: iEntitySummaryItem[] =
+    propsData?.items.map((p) => ({
+      id: p._id,
+      name: p.name,
+      subtitle: p.description,
+      icon: <LuPackage className="size-4" />,
+      metadata: p.associations?.length
+        ? [{ label: `${p.associations.length} associations`, icon: <LuLink className="size-3" /> }]
+        : [],
+    })) ?? [];
+
+  // Map scenes to rich entity items
+  const sceneEntities: iEntitySummaryItem[] =
+    scenesData?.items.map((s) => ({
+      id: s._id,
+      name: s.heading,
+      subtitle: s.emotionalTone,
+      icon: <LuFilm className="size-4" />,
+      metadata: [
+        { label: `Scene ${s.sceneNumber}`, icon: <LuHash className="size-3" /> },
+        ...(s.timeOfDay ? [{ label: s.timeOfDay, icon: <LuClock className="size-3" /> }] : []),
+        ...(s.characterIds?.length
+          ? [{ label: `${s.characterIds.length} characters`, icon: <LuUsers className="size-3" /> }]
+          : []),
+      ],
+    })) ?? [];
+
+  // Map timeline entries to rich entity items
+  const timelineEntities: iEntitySummaryItem[] =
+    timelinesData?.items.map((t) => ({
+      id: t._id,
+      name: t.label,
+      subtitle: t.timestamp,
+      icon: <LuCalendar className="size-4" />,
+      metadata: t.links?.length ? [{ label: `${t.links.length} links`, icon: <LuLink className="size-3" /> }] : [],
+    })) ?? [];
+
+  // Map wildcards to rich entity items
+  const wildcardEntities: iEntitySummaryItem[] =
+    wildcardsData?.items.map((w) => ({
+      id: w._id,
+      name: w.title,
+      subtitle: w.body,
+      icon: <LuSparkles className="size-4" />,
+      tags: w.tag ? [w.tag] : [],
+    })) ?? [];
+
+  // Map story arcs to rich entity items
+  const getStoryArcStatusVariant = (status: string): 'default' | 'secondary' | 'outline' | 'destructive' => {
+    if (status === 'completed') return 'default';
+    if (status === 'in_progress') return 'secondary';
+    if (status === 'abandoned') return 'destructive';
+    return 'outline';
+  };
+
+  const storyArcEntities: iEntitySummaryItem[] =
+    storyArcsData?.items.map((s) => ({
+      id: s._id,
+      name: s.name,
+      subtitle: s.description,
+      icon: <LuTrendingUp className="size-4" />,
+      status: {
+        label: s.status.replace('_', ' '),
+        variant: getStoryArcStatusVariant(s.status),
+      },
+      metadata: [
+        ...(s.keyBeats?.length ? [{ label: `${s.keyBeats.length} beats`, icon: <LuHash className="size-3" /> }] : []),
+        ...(s.characters?.length
+          ? [{ label: `${s.characters.length} characters`, icon: <LuUsers className="size-3" /> }]
+          : []),
+        ...(s.themeIds?.length
+          ? [{ label: `${s.themeIds.length} themes`, icon: <LuLightbulb className="size-3" /> }]
+          : []),
+      ],
+    })) ?? [];
+
+  // Map themes to rich entity items
+  const themeEntities: iEntitySummaryItem[] =
+    themesData?.items.map((t) => ({
+      id: t._id,
+      name: t.name,
+      subtitle: t.description,
+      color: t.color,
+      icon: <LuLightbulb className="size-4" />,
+      tags: t.visualMotifs?.slice(0, 3),
+      metadata: [
+        ...(t.relatedCharacters?.length
+          ? [{ label: `${t.relatedCharacters.length} characters`, icon: <LuUsers className="size-3" /> }]
+          : []),
+        ...(t.evolution?.length
+          ? [{ label: `${t.evolution.length} evolutions`, icon: <LuTrendingUp className="size-3" /> }]
+          : []),
+      ],
+    })) ?? [];
+
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <EntitySummaryCard
-        title="Characters"
-        icon={<LuBookUser className="size-5" />}
-        count={charactersData?.total ?? 0}
-        recentEntities={
-          charactersData?.items.map((c) => ({
-            id: c._id,
-            name: c.name,
-            subtitle: c.description,
-          })) ?? []
-        }
-        onViewAll={() => onTabChange('characters')}
-        onEntityClick={handleCharacterClick}
-        isPending={isCharactersLoading}
-      />
+    <div className="space-y-6">
+      {/* Hero Section - Characters & Story Arcs */}
+      <section>
+        <h2 className="mb-3 text-sm font-medium tracking-wide text-muted-foreground uppercase">Narrative Core</h2>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+          <EntitySummaryCard
+            title="Characters"
+            icon={<LuBookUser className="size-5" />}
+            count={charactersData?.total ?? 0}
+            recentEntities={characterEntities}
+            onViewAll={() => onTabChange('characters')}
+            onEntityClick={handleCharacterClick}
+            isPending={isCharactersLoading}
+            variant="featured"
+            className="lg:col-span-3"
+          />
+          <EntitySummaryCard
+            title="Story Arcs"
+            icon={<LuTrendingUp className="size-5" />}
+            count={storyArcsData?.total ?? 0}
+            recentEntities={storyArcEntities}
+            onViewAll={() => onTabChange('story-arcs')}
+            onEntityClick={onStoryArcSelect ? handleStoryArcClick : undefined}
+            isPending={isStoryArcsLoading}
+            variant="featured"
+            className="lg:col-span-2"
+          />
+        </div>
+      </section>
 
-      <EntitySummaryCard
-        title="Locations"
-        icon={<LuGlobe className="size-5" />}
-        count={locationsData?.total ?? 0}
-        recentEntities={
-          locationsData?.items.map((l) => ({
-            id: l._id,
-            name: l.name,
-            subtitle: l.description,
-          })) ?? []
-        }
-        onViewAll={() => onTabChange('locations')}
-        onEntityClick={handleLocationClick}
-        isPending={isLocationsLoading}
-      />
+      {/* World Building Section */}
+      <section>
+        <h2 className="mb-3 text-sm font-medium tracking-wide text-muted-foreground uppercase">World Building</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <EntitySummaryCard
+            title="Locations"
+            icon={<LuGlobe className="size-5" />}
+            count={locationsData?.total ?? 0}
+            recentEntities={locationEntities}
+            onViewAll={() => onTabChange('locations')}
+            onEntityClick={handleLocationClick}
+            isPending={isLocationsLoading}
+          />
+          <EntitySummaryCard
+            title="Scenes"
+            icon={<LuFilm className="size-5" />}
+            count={scenesData?.total ?? 0}
+            recentEntities={sceneEntities}
+            onViewAll={() => onTabChange('scenes')}
+            onEntityClick={onSceneSelect ? handleSceneClick : undefined}
+            isPending={isScenesLoading}
+          />
+          <EntitySummaryCard
+            title="Themes"
+            icon={<LuLightbulb className="size-5" />}
+            count={themesData?.total ?? 0}
+            recentEntities={themeEntities}
+            onViewAll={() => onTabChange('themes')}
+            onEntityClick={onThemeSelect ? handleThemeClick : undefined}
+            isPending={isThemesLoading}
+          />
+        </div>
+      </section>
 
-      <EntitySummaryCard
-        title="Props"
-        icon={<LuPackage className="size-5" />}
-        count={propsData?.total ?? 0}
-        recentEntities={
-          propsData?.items.map((p) => ({
-            id: p._id,
-            name: p.name,
-            subtitle: p.description,
-          })) ?? []
-        }
-        onViewAll={() => onTabChange('props')}
-        onEntityClick={onPropSelect ? handlePropClick : undefined}
-        isPending={isPropsLoading}
-      />
-
-      <EntitySummaryCard
-        title="Scenes"
-        icon={<LuFilm className="size-5" />}
-        count={scenesData?.total ?? 0}
-        recentEntities={
-          scenesData?.items.map((s) => ({
-            id: s._id,
-            name: `#${s.sceneNumber} ${s.heading}`,
-            subtitle: s.emotionalTone,
-          })) ?? []
-        }
-        onViewAll={() => onTabChange('scenes')}
-        onEntityClick={onSceneSelect ? handleSceneClick : undefined}
-        isPending={isScenesLoading}
-      />
-
-      <EntitySummaryCard
-        title="Timeline"
-        icon={<LuCalendar className="size-5" />}
-        count={timelinesData?.total ?? 0}
-        recentEntities={
-          timelinesData?.items.map((t) => ({
-            id: t._id,
-            name: t.label,
-            subtitle: t.timestamp,
-          })) ?? []
-        }
-        onViewAll={() => onTabChange('timeline')}
-        isPending={isTimelinesLoading}
-      />
-
-      <EntitySummaryCard
-        title="Wildcards"
-        icon={<LuSparkles className="size-5" />}
-        count={wildcardsData?.total ?? 0}
-        recentEntities={
-          wildcardsData?.items.map((w) => ({
-            id: w._id,
-            name: w.title,
-            subtitle: w.body,
-          })) ?? []
-        }
-        onViewAll={() => onTabChange('wildcards')}
-        isPending={isWildcardsLoading}
-      />
-
-      <EntitySummaryCard
-        title="Story Arcs"
-        icon={<LuTrendingUp className="size-5" />}
-        count={storyArcsData?.total ?? 0}
-        recentEntities={
-          storyArcsData?.items.map((s) => ({
-            id: s._id,
-            name: s.name,
-            subtitle: s.description,
-          })) ?? []
-        }
-        onViewAll={() => onTabChange('story-arcs')}
-        onEntityClick={onStoryArcSelect ? handleStoryArcClick : undefined}
-        isPending={isStoryArcsLoading}
-      />
-
-      <EntitySummaryCard
-        title="Themes"
-        icon={<LuLightbulb className="size-5" />}
-        count={themesData?.total ?? 0}
-        recentEntities={
-          themesData?.items.map((t) => ({
-            id: t._id,
-            name: t.name,
-            subtitle: t.description,
-          })) ?? []
-        }
-        onViewAll={() => onTabChange('themes')}
-        onEntityClick={onThemeSelect ? handleThemeClick : undefined}
-        isPending={isThemesLoading}
-      />
+      {/* Quick Access Section - Compact Cards */}
+      <section>
+        <h2 className="mb-3 text-sm font-medium tracking-wide text-muted-foreground uppercase">Quick Access</h2>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <EntitySummaryCard
+            title="Props"
+            icon={<LuPackage className="size-4" />}
+            count={propsData?.total ?? 0}
+            recentEntities={propEntities}
+            onViewAll={() => onTabChange('props')}
+            onEntityClick={onPropSelect ? handlePropClick : undefined}
+            isPending={isPropsLoading}
+            variant="compact"
+          />
+          <EntitySummaryCard
+            title="Timeline"
+            icon={<LuCalendar className="size-4" />}
+            count={timelinesData?.total ?? 0}
+            recentEntities={timelineEntities}
+            onViewAll={() => onTabChange('timeline')}
+            isPending={isTimelinesLoading}
+            variant="compact"
+          />
+          <EntitySummaryCard
+            title="Wildcards"
+            icon={<LuSparkles className="size-4" />}
+            count={wildcardsData?.total ?? 0}
+            recentEntities={wildcardEntities}
+            onViewAll={() => onTabChange('wildcards')}
+            isPending={isWildcardsLoading}
+            variant="compact"
+          />
+        </div>
+      </section>
     </div>
   );
 }
