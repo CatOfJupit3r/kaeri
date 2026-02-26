@@ -26,6 +26,8 @@ import { CharacterForm } from './character-form';
 
 interface iCharacterListProps {
   seriesId: string;
+  /** Optional callback for when a character is selected. If not provided, navigates to character page. */
+  onCharacterSelect?: (characterId: string) => void;
 }
 
 function CharacterListPending() {
@@ -54,7 +56,7 @@ function CharacterListPending() {
   );
 }
 
-export function CharacterList({ seriesId }: iCharacterListProps) {
+export function CharacterList({ seriesId, onCharacterSelect }: iCharacterListProps) {
   const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCharacter, setEditingCharacter] = useState<CharacterListItem | undefined>(undefined);
@@ -64,11 +66,16 @@ export function CharacterList({ seriesId }: iCharacterListProps) {
   const { deleteCharacter, isPending: isDeleting } = useDeleteCharacter();
 
   const handleCardClick = (characterId: string) => {
-    void navigate({
-      to: '/series/$seriesId/knowledge-base/characters/$characterId',
-      params: { seriesId, characterId },
-      search: { tab: 'characters' },
-    });
+    // If onCharacterSelect is provided, use it instead of navigating
+    if (onCharacterSelect) {
+      onCharacterSelect(characterId);
+    } else {
+      void navigate({
+        to: '/series/$seriesId/knowledge-base/characters/$characterId',
+        params: { seriesId, characterId },
+        search: { tab: 'characters' },
+      });
+    }
   };
 
   const handleEditClick = (character: CharacterListItem) => {

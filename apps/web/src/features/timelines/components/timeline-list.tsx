@@ -30,6 +30,8 @@ interface iTimelineEntry {
 
 interface iTimelineListProps {
   seriesId: string;
+  /** Optional callback for when a timeline entry is selected. If not provided, opens inline edit. */
+  onTimelineSelect?: (timelineId: string) => void;
 }
 
 function TimelineListPending() {
@@ -60,7 +62,7 @@ function TimelineListPending() {
   );
 }
 
-export function TimelineList({ seriesId }: iTimelineListProps) {
+export function TimelineList({ seriesId, onTimelineSelect }: iTimelineListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<iTimelineEntry | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -172,8 +174,29 @@ export function TimelineList({ seriesId }: iTimelineListProps) {
           {sortedEntries.map((entry) => {
             const formattedDate = formatDate(entry.timestamp);
 
+            const handleCardClick = () => {
+              if (onTimelineSelect) {
+                onTimelineSelect(entry._id);
+              } else {
+                handleEditClick(entry);
+              }
+            };
+
             return (
-              <Card key={entry._id} className="group overflow-hidden transition-all hover:shadow-md">
+              <Card
+                key={entry._id}
+                className="group cursor-pointer overflow-hidden transition-all hover:shadow-md"
+                role="button"
+                tabIndex={0}
+                aria-label={`Open timeline entry ${entry.label}`}
+                onClick={handleCardClick}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleCardClick();
+                  }
+                }}
+              >
                 <CardContent className="flex items-start justify-between gap-4 p-4">
                   <div className="flex min-w-0 flex-1 flex-col gap-2">
                     <div className="flex items-center gap-3">

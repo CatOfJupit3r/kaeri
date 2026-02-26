@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastORPCError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
@@ -53,8 +53,6 @@ export const updatePropMutationOptions = tanstackRPC.knowledgeBase.props.update.
     });
 
     void invalidateKnowledgeBaseLists(ctx.client, 'props', seriesId);
-
-    toastSuccess('Prop updated successfully');
   },
 });
 

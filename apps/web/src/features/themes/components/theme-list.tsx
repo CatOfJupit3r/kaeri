@@ -25,6 +25,8 @@ import { ThemeForm } from './theme-form';
 
 interface iThemeListProps {
   seriesId: string;
+  /** Optional callback for when a theme is selected. If not provided, opens modal form. */
+  onThemeSelect?: (themeId: string) => void;
 }
 
 function ThemeListPending() {
@@ -62,7 +64,7 @@ function ThemeListPending() {
   );
 }
 
-export function ThemeList({ seriesId }: iThemeListProps) {
+export function ThemeList({ seriesId, onThemeSelect }: iThemeListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTheme, setEditingTheme] = useState<ThemeListItem | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -71,14 +73,23 @@ export function ThemeList({ seriesId }: iThemeListProps) {
   const { deleteTheme, isPending: isDeleting } = useDeleteTheme();
 
   const handleCardClick = (theme: ThemeListItem) => {
-    // Open edit modal when clicking on a theme card
-    setEditingTheme(theme);
-    setIsFormOpen(true);
+    // If onThemeSelect is provided, use edit panel, otherwise use modal form
+    if (onThemeSelect) {
+      onThemeSelect(theme._id);
+    } else {
+      setEditingTheme(theme);
+      setIsFormOpen(true);
+    }
   };
 
   const handleEditClick = (theme: ThemeListItem) => {
-    setEditingTheme(theme);
-    setIsFormOpen(true);
+    // If onThemeSelect is provided, use edit panel, otherwise use modal form
+    if (onThemeSelect) {
+      onThemeSelect(theme._id);
+    } else {
+      setEditingTheme(theme);
+      setIsFormOpen(true);
+    }
   };
 
   const handleDeleteClick = (theme: ThemeListItem) => {

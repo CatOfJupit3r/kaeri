@@ -31,6 +31,8 @@ interface iWildcard {
 
 interface iWildcardListProps {
   seriesId: string;
+  /** Optional callback for when a wildcard is selected. */
+  onWildcardSelect?: (wildcardId: string) => void;
 }
 
 function WildcardListPending() {
@@ -62,13 +64,19 @@ function WildcardListPending() {
   );
 }
 
-export function WildcardList({ seriesId }: iWildcardListProps) {
+export function WildcardList({ seriesId, onWildcardSelect }: iWildcardListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingWildcard, setEditingWildcard] = useState<iWildcard | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [wildcardToDelete, setWildcardToDelete] = useState<iWildcard | undefined>(undefined);
   const { data, isPending, error, refetch } = useWildcardList(seriesId);
   const { deleteWildcard, isPending: isDeleting } = useDeleteWildcard();
+
+  const handleCardClick = (wildcardId: string) => {
+    if (onWildcardSelect) {
+      onWildcardSelect(wildcardId);
+    }
+  };
 
   const handleEditClick = (wildcard: iWildcard) => {
     setEditingWildcard(wildcard);
@@ -150,7 +158,24 @@ export function WildcardList({ seriesId }: iWildcardListProps) {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {wildcards.map((wildcard) => (
-            <Card key={wildcard._id} className="group overflow-hidden transition-all hover:shadow-md">
+            <Card
+              key={wildcard._id}
+              className="group overflow-hidden transition-all hover:shadow-md"
+              role={onWildcardSelect ? 'button' : undefined}
+              tabIndex={onWildcardSelect ? 0 : undefined}
+              aria-label={onWildcardSelect ? `Open Wild Card ${wildcard.title}` : undefined}
+              onClick={onWildcardSelect ? () => handleCardClick(wildcard._id) : undefined}
+              onKeyDown={
+                onWildcardSelect
+                  ? (event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        handleCardClick(wildcard._id);
+                      }
+                    }
+                  : undefined
+              }
+            >
               <CardContent className="flex gap-4 p-4">
                 <div className="flex size-12 shrink-0 items-center justify-center rounded-md bg-muted">
                   <LuSparkles className="size-6 text-muted-foreground" />

@@ -26,6 +26,8 @@ import { StoryArcForm } from './story-arc-form';
 
 interface iStoryArcListProps {
   seriesId: string;
+  /** Optional callback for when a story arc is selected. If not provided, opens the dialog form. */
+  onStoryArcSelect?: (storyArcId: string) => void;
 }
 
 function StoryArcListPending() {
@@ -71,7 +73,7 @@ const STATUS_LABELS = {
   abandoned: 'Abandoned',
 } as const;
 
-export function StoryArcList({ seriesId }: iStoryArcListProps) {
+export function StoryArcList({ seriesId, onStoryArcSelect }: iStoryArcListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingStoryArc, setEditingStoryArc] = useState<StoryArcListItem | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -79,10 +81,20 @@ export function StoryArcList({ seriesId }: iStoryArcListProps) {
   const { data, isPending, error } = useStoryArcList(seriesId);
   const { deleteStoryArc, isPending: isDeleting } = useDeleteStoryArc();
 
+  const handleCardClick = (storyArc: StoryArcListItem) => {
+    if (onStoryArcSelect) {
+      onStoryArcSelect(storyArc._id);
+    }
+  };
+
   const handleEditClick = (e: React.MouseEvent, storyArc: StoryArcListItem) => {
     e.stopPropagation();
-    setEditingStoryArc(storyArc);
-    setIsFormOpen(true);
+    if (onStoryArcSelect) {
+      onStoryArcSelect(storyArc._id);
+    } else {
+      setEditingStoryArc(storyArc);
+      setIsFormOpen(true);
+    }
   };
 
   const handleDeleteClick = (e: React.MouseEvent, storyArc: StoryArcListItem) => {
@@ -158,6 +170,7 @@ export function StoryArcList({ seriesId }: iStoryArcListProps) {
                 <Card
                   key={arc._id}
                   className="group cursor-pointer overflow-hidden transition-colors hover:bg-accent/50"
+                  onClick={() => handleCardClick(arc)}
                 >
                   <CardContent className="space-y-3 p-4">
                     <div className="flex items-start justify-between">

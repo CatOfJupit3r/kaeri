@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastORPCError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import type { StoryArcListQueryReturnType, StoryArcListItem } from '../queries/use-story-arc-list';
@@ -65,7 +65,6 @@ export const createStoryArcMutationOptions = tanstackRPC.storyArc.createStoryArc
     void ctx.client.invalidateQueries({
       predicate: (query) => query.queryKey[0] === 'storyArc' && query.queryKey[1] === 'listStoryArcs',
     });
-    toastSuccess('Story arc created successfully');
   },
   onError: (error, _variables, context, ctx) => {
     if (context?.queryKey) {

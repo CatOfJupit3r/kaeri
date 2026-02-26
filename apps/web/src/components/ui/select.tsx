@@ -232,22 +232,32 @@ export const Menu = ({ children, ...props }: MenuProps<iOptionType>) => (
   <components.Menu {...props}>{children}</components.Menu>
 );
 
+const OPTION_HEIGHT = 35;
+const MAX_VISIBLE_OPTIONS = 6;
+const MAX_MENU_HEIGHT = OPTION_HEIGHT * MAX_VISIBLE_OPTIONS;
+
 export const MenuList = (props: MenuListProps<iOptionType>) => {
-  const { children, className } = props;
+  const { children, className, maxHeight } = props;
 
   const childrenArray = Children.toArray(children);
 
-  if (!childrenArray || childrenArray.length - 1 === 0) return <components.MenuList {...props} />;
+  if (!childrenArray || childrenArray.length === 0) return <components.MenuList {...props} />;
+
+  // Calculate the appropriate height - use the minimum of total items height or maxHeight
+  const totalHeight = childrenArray.length * OPTION_HEIGHT;
+  const listHeight = Math.min(totalHeight, typeof maxHeight === 'number' ? maxHeight : MAX_MENU_HEIGHT);
 
   return (
-    <List
-      rowCount={childrenArray.length}
-      rowHeight={35}
-      rowProps={{ children: childrenArray }}
-      // eslint-disable-next-line react/no-unstable-nested-components
-      rowComponent={({ index, style }) => <div style={style}>{childrenArray[index]}</div>}
-      className={className}
-    />
+    <div style={{ height: listHeight, overflow: 'hidden' }}>
+      <List
+        rowCount={childrenArray.length}
+        rowHeight={OPTION_HEIGHT}
+        rowProps={{ children: childrenArray }}
+        // eslint-disable-next-line react/no-unstable-nested-components
+        rowComponent={({ index, style }) => <div style={style}>{childrenArray[index]}</div>}
+        className={className}
+      />
+    </div>
   );
 };
 
@@ -260,6 +270,7 @@ const BaseSelect = <IsMulti extends boolean = false>(
     classNames = {},
     components: componentsFromProps = {},
     isDOMTarget = true,
+    maxMenuHeight = MAX_MENU_HEIGHT,
     ...rest
   } = props;
   const instanceId = useId();
@@ -275,6 +286,7 @@ const BaseSelect = <IsMulti extends boolean = false>(
           stringify: (option) => option.label,
         })}
         menuPortalTarget={isDOMTarget && isOnClient ? document.body : undefined}
+        maxMenuHeight={maxMenuHeight}
         components={{
           DropdownIndicator,
           ClearIndicator,

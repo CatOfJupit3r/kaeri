@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastORPCError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
@@ -45,7 +45,6 @@ export const updateTimelineMutationOptions = tanstackRPC.knowledgeBase.timeline.
   },
   onSuccess: (_data, { seriesId }, _context, ctx) => {
     void invalidateKnowledgeBaseLists(ctx.client, 'timeline', seriesId);
-    toastSuccess('Timeline entry updated successfully');
   },
 });
 

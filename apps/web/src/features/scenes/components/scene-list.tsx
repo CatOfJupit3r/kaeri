@@ -27,6 +27,8 @@ import { SceneForm } from './scene-form';
 
 interface iSceneListProps {
   seriesId: string;
+  /** Optional callback for when a scene is selected. If not provided, navigates to scene page. */
+  onSceneSelect?: (sceneId: string) => void;
 }
 
 function SceneListPending() {
@@ -65,7 +67,7 @@ function SceneListPending() {
   );
 }
 
-export function SceneList({ seriesId }: iSceneListProps) {
+export function SceneList({ seriesId, onSceneSelect }: iSceneListProps) {
   const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingScene, setEditingScene] = useState<SceneListItem | undefined>(undefined);
@@ -86,17 +88,27 @@ export function SceneList({ seriesId }: iSceneListProps) {
   const error = scriptsError ?? sceneQueries.find((q) => q.error)?.error;
 
   const handleCardClick = (sceneId: string) => {
-    void navigate({
-      to: '/series/$seriesId/knowledge-base/scenes/$sceneId',
-      params: { seriesId, sceneId },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    // If onSceneSelect is provided, use edit panel, otherwise navigate
+    if (onSceneSelect) {
+      onSceneSelect(sceneId);
+    } else {
+      void navigate({
+        to: '/series/$seriesId/knowledge-base/scenes/$sceneId',
+        params: { seriesId, sceneId },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+    }
   };
 
   const handleEditClick = (scene: SceneListItem, event: React.MouseEvent) => {
     event.stopPropagation();
-    setEditingScene(scene);
-    setIsFormOpen(true);
+    // If onSceneSelect is provided, use edit panel, otherwise use modal form
+    if (onSceneSelect) {
+      onSceneSelect(scene._id);
+    } else {
+      setEditingScene(scene);
+      setIsFormOpen(true);
+    }
   };
 
   const handleDeleteClick = (scene: SceneListItem, event: React.MouseEvent) => {

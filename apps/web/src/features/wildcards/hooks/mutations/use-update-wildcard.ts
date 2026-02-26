@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastORPCError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
@@ -53,8 +53,6 @@ export const updateWildcardMutationOptions = tanstackRPC.knowledgeBase.wildcards
     });
 
     void invalidateKnowledgeBaseLists(ctx.client, 'wildcards', seriesId);
-
-    toastSuccess('Wild Card updated successfully');
   },
 });
 

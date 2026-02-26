@@ -14,6 +14,8 @@ import { useCharacterList } from '@~/features/characters/hooks/queries/use-chara
 import { EntitySummaryCard } from '@~/features/knowledge-base/components/entity-summary-card';
 import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
 import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
+import { useSceneList } from '@~/features/scenes/hooks/queries/use-scene-list';
+import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
 import { useStoryArcList } from '@~/features/story-arcs/hooks/queries/use-story-arc-list';
 import { useThemeList } from '@~/features/themes/hooks/queries/use-theme-list';
 import { useTimelineList } from '@~/features/timelines/hooks/queries/use-timeline-list';
@@ -22,25 +24,89 @@ import { useWildcardList } from '@~/features/wildcards/hooks/queries/use-wildcar
 interface iKBAllViewProps {
   seriesId: string;
   onTabChange: (tab: string) => void;
+  /** Optional callback for when a character is selected. If not provided, navigates to character page. */
+  onCharacterSelect?: (characterId: string) => void;
+  /** Optional callback for when a location is selected. If not provided, navigates to location page. */
+  onLocationSelect?: (locationId: string) => void;
+  /** Optional callback for when a prop is selected. */
+  onPropSelect?: (propId: string) => void;
+  /** Optional callback for when a scene is selected. */
+  onSceneSelect?: (sceneId: string) => void;
+  /** Optional callback for when a story arc is selected. */
+  onStoryArcSelect?: (storyArcId: string) => void;
+  /** Optional callback for when a theme is selected. */
+  onThemeSelect?: (themeId: string) => void;
 }
 
-export function KBAllView({ seriesId, onTabChange }: iKBAllViewProps) {
+export function KBAllView({
+  seriesId,
+  onTabChange,
+  onCharacterSelect,
+  onLocationSelect,
+  onPropSelect,
+  onSceneSelect,
+  onStoryArcSelect,
+  onThemeSelect,
+}: iKBAllViewProps) {
   const navigate = useNavigate();
 
   const { data: charactersData, isPending: isCharactersLoading } = useCharacterList(seriesId, 3, 0);
   const { data: locationsData, isPending: isLocationsLoading } = useLocationList(seriesId, 3, 0);
   const { data: propsData, isPending: isPropsLoading } = usePropList(seriesId, 3, 0);
+  const { data: scriptsData } = useScriptList(seriesId, 10, 0);
   const { data: timelinesData, isPending: isTimelinesLoading } = useTimelineList(seriesId, 3, 0);
   const { data: wildcardsData, isPending: isWildcardsLoading } = useWildcardList(seriesId, 3, 0);
   const { data: storyArcsData, isPending: isStoryArcsLoading } = useStoryArcList(seriesId, { limit: 3, offset: 0 });
   const { data: themesData, isPending: isThemesLoading } = useThemeList(seriesId, 3, 0);
 
+  // Fetch scenes for first script (if any) to show in summary
+  const firstScriptId = scriptsData?.items[0]?._id ?? '';
+  const { data: scenesData, isPending: isScenesLoading } = useSceneList(firstScriptId, 3, 0, {
+    enabled: !!firstScriptId,
+  });
+
   const handleCharacterClick = (characterId: string) => {
-    void navigate({
-      to: '/series/$seriesId/knowledge-base/characters/$characterId',
-      params: { seriesId, characterId },
-      search: { tab: 'characters' },
-    });
+    // If onCharacterSelect is provided, use it instead of navigating
+    if (onCharacterSelect) {
+      onCharacterSelect(characterId);
+    } else {
+      void navigate({
+        to: '/series/$seriesId/knowledge-base/characters/$characterId',
+        params: { seriesId, characterId },
+        search: { tab: 'characters' },
+      });
+    }
+  };
+
+  const handleLocationClick = (locationId: string) => {
+    // If onLocationSelect is provided, use it instead of navigating
+    if (onLocationSelect) {
+      onLocationSelect(locationId);
+    }
+  };
+
+  const handlePropClick = (propId: string) => {
+    if (onPropSelect) {
+      onPropSelect(propId);
+    }
+  };
+
+  const handleSceneClick = (sceneId: string) => {
+    if (onSceneSelect) {
+      onSceneSelect(sceneId);
+    }
+  };
+
+  const handleStoryArcClick = (storyArcId: string) => {
+    if (onStoryArcSelect) {
+      onStoryArcSelect(storyArcId);
+    }
+  };
+
+  const handleThemeClick = (themeId: string) => {
+    if (onThemeSelect) {
+      onThemeSelect(themeId);
+    }
   };
 
   return (
@@ -73,6 +139,7 @@ export function KBAllView({ seriesId, onTabChange }: iKBAllViewProps) {
           })) ?? []
         }
         onViewAll={() => onTabChange('locations')}
+        onEntityClick={handleLocationClick}
         isPending={isLocationsLoading}
       />
 
@@ -88,16 +155,24 @@ export function KBAllView({ seriesId, onTabChange }: iKBAllViewProps) {
           })) ?? []
         }
         onViewAll={() => onTabChange('props')}
+        onEntityClick={onPropSelect ? handlePropClick : undefined}
         isPending={isPropsLoading}
       />
 
       <EntitySummaryCard
         title="Scenes"
         icon={<LuFilm className="size-5" />}
-        count={0}
-        recentEntities={[]}
+        count={scenesData?.total ?? 0}
+        recentEntities={
+          scenesData?.items.map((s) => ({
+            id: s._id,
+            name: `#${s.sceneNumber} ${s.heading}`,
+            subtitle: s.emotionalTone,
+          })) ?? []
+        }
         onViewAll={() => onTabChange('scenes')}
-        isPending={false}
+        onEntityClick={onSceneSelect ? handleSceneClick : undefined}
+        isPending={isScenesLoading}
       />
 
       <EntitySummaryCard
@@ -142,6 +217,7 @@ export function KBAllView({ seriesId, onTabChange }: iKBAllViewProps) {
           })) ?? []
         }
         onViewAll={() => onTabChange('story-arcs')}
+        onEntityClick={onStoryArcSelect ? handleStoryArcClick : undefined}
         isPending={isStoryArcsLoading}
       />
 
@@ -157,6 +233,7 @@ export function KBAllView({ seriesId, onTabChange }: iKBAllViewProps) {
           })) ?? []
         }
         onViewAll={() => onTabChange('themes')}
+        onEntityClick={onThemeSelect ? handleThemeClick : undefined}
         isPending={isThemesLoading}
       />
     </div>

@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastORPCError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
@@ -26,7 +26,6 @@ export const updateSeriesMutationOptions = tanstackRPC.series.updateSeries.mutat
       data,
     );
     void ctx.client.invalidateQueries({ queryKey: tanstackRPC.series.listSeries.queryKey({ input: {} }) });
-    toastSuccess('Series updated successfully');
   },
 });
 

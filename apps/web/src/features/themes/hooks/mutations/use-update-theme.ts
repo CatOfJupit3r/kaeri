@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastORPCError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import type { ThemeDetailQueryReturnType } from '../queries/use-theme';
@@ -34,8 +34,6 @@ export const updateThemeMutationOptions = tanstackRPC.theme.updateTheme.mutation
         return Array.isArray(key) && JSON.stringify(key).includes('"theme"') && JSON.stringify(key).includes(themeId);
       },
     });
-
-    toastSuccess('Theme updated successfully');
   },
   onError: (error, _variables, context, ctx) => {
     if (context?.detailQueryKey && context?.previousDetail) {

@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastORPCError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import type { SceneDetailQueryReturnType } from '../queries/use-scene';
@@ -35,7 +35,6 @@ export const updateSceneMutationOptions = tanstackRPC.scene.updateScene.mutation
         input: { scriptId: updatedScene.scriptId, limit: 20, offset: 0 },
       }),
     });
-    toastSuccess('Scene updated successfully');
   },
   onError: (error, _variables, context, ctx) => {
     if (context?.detailKey && context.previous) {

@@ -5,8 +5,8 @@
 
 @theme {
   --font-sans:
-    'Space Grotesk', 'Inter', 'Geist', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-    'Noto Color Emoji';
+    'Space Grotesk', 'Inter', 'Geist', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', 'Noto Color Emoji';
   --font-mono: 'JetBrains Mono', 'Geist Mono', monospace;
 }
 
@@ -22,7 +22,7 @@ body {
 :root {
   /* Neo-brutalist design: zero border radius */
   --radius: 0px;
-  
+
   /* Neo-brutalist color palette with high contrast */
   --background: oklch(0.98 0.01 90);
   --foreground: oklch(0.1 0 0);
@@ -182,7 +182,7 @@ body {
     box-shadow: var(--brutalist-shadow-lg);
   }
   .brutalist-btn {
-    @apply border-2 border-foreground font-bold uppercase tracking-wide transition-all;
+    @apply border-foreground border-2 font-bold tracking-wide uppercase transition-all;
     box-shadow: var(--brutalist-shadow);
   }
   .brutalist-btn:hover {
@@ -194,7 +194,7 @@ body {
     box-shadow: none;
   }
   .brutalist-card {
-    @apply border-2 border-foreground bg-card;
+    @apply border-foreground bg-card border-2;
     box-shadow: var(--brutalist-shadow);
   }
   .brutalist-card:hover {
@@ -202,7 +202,7 @@ body {
     box-shadow: var(--brutalist-shadow-lg);
   }
   .brutalist-input {
-    @apply border-2 border-foreground bg-background;
+    @apply border-foreground bg-background border-2;
   }
   .brutalist-input:focus {
     box-shadow: var(--brutalist-shadow-sm);

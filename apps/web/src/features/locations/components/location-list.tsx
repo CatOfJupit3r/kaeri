@@ -31,6 +31,8 @@ interface iLocation {
 
 interface iLocationListProps {
   seriesId: string;
+  /** Optional callback for when a location is selected. If not provided, opens edit form. */
+  onLocationSelect?: (locationId: string) => void;
 }
 
 function LocationListPending() {
@@ -59,13 +61,20 @@ function LocationListPending() {
   );
 }
 
-export function LocationList({ seriesId }: iLocationListProps) {
+export function LocationList({ seriesId, onLocationSelect }: iLocationListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingLocation, setEditingLocation] = useState<iLocation | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [locationToDelete, setLocationToDelete] = useState<iLocation | undefined>(undefined);
   const { data, isPending, error, refetch } = useLocationList(seriesId);
   const { deleteLocation, isPending: isDeleting } = useDeleteLocation();
+
+  const handleCardClick = (locationId: string) => {
+    // If onLocationSelect is provided, use it instead of editing
+    if (onLocationSelect) {
+      onLocationSelect(locationId);
+    }
+  };
 
   const handleEditClick = (location: iLocation) => {
     setEditingLocation(location);
@@ -150,7 +159,20 @@ export function LocationList({ seriesId }: iLocationListProps) {
             const tagCount = location.tags?.length ?? 0;
 
             return (
-              <Card key={location._id} className="group overflow-hidden transition-all hover:shadow-md">
+              <Card
+                key={location._id}
+                className="group overflow-hidden transition-all hover:shadow-md"
+                role={onLocationSelect ? 'button' : undefined}
+                tabIndex={onLocationSelect ? 0 : undefined}
+                aria-label={onLocationSelect ? `Open location ${location.name}` : undefined}
+                onClick={() => handleCardClick(location._id)}
+                onKeyDown={(event) => {
+                  if ((event.key === 'Enter' || event.key === ' ') && onLocationSelect) {
+                    event.preventDefault();
+                    handleCardClick(location._id);
+                  }
+                }}
+              >
                 <CardContent className="flex gap-4 p-4">
                   <div className="flex size-12 items-center justify-center rounded-full bg-muted">
                     <LuGlobe className="size-6 text-muted-foreground" />

@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastORPCError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import type { StoryArcListQueryReturnType } from '../queries/use-story-arc-list';
@@ -31,8 +31,6 @@ export const updateStoryArcMutationOptions = tanstackRPC.storyArc.updateStoryArc
         items: oldData.items.map((arc) => (arc._id === updatedStoryArc._id ? updatedStoryArc : arc)),
       });
     });
-
-    toastSuccess('Story arc updated successfully');
   },
   onError: (error, { storyArcId }, _context, ctx) => {
     void ctx.client.invalidateQueries({

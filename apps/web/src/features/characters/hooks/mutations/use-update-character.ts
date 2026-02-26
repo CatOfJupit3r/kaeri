@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastORPCError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
@@ -55,8 +55,6 @@ export const updateCharacterMutationOptions = tanstackRPC.knowledgeBase.characte
     });
 
     void invalidateKnowledgeBaseLists(ctx.client, 'characters', seriesId);
-
-    toastSuccess('Character updated successfully');
   },
 });
 

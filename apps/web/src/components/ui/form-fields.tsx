@@ -1,5 +1,5 @@
 import { useStore } from '@tanstack/react-form';
-import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react';
+import type { FocusEvent, InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react';
 
 import { Button } from './button';
 import type { iButtonProps } from './button';
@@ -15,8 +15,13 @@ type TextFieldProps = {
   description?: ReactNode;
 } & InputHTMLAttributes<HTMLInputElement>;
 
-export const TextField = ({ label, description, ...inputProps }: TextFieldProps) => {
+export const TextField = ({ label, description, onBlur, ...inputProps }: TextFieldProps) => {
   const field = useFieldContext<string>();
+
+  const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
+    field.handleBlur();
+    onBlur?.(e);
+  };
 
   return (
     <div className="space-y-2">
@@ -26,7 +31,7 @@ export const TextField = ({ label, description, ...inputProps }: TextFieldProps)
           id={field.name}
           value={field.state.value}
           onChange={(e) => field.handleChange(e.target.value)}
-          onBlur={field.handleBlur}
+          onBlur={handleBlur}
           {...inputProps}
         />
       </div>
@@ -41,8 +46,13 @@ type TextareaFieldProps = {
   description?: ReactNode;
 } & TextareaHTMLAttributes<HTMLTextAreaElement>;
 
-export const TextareaField = ({ label, description, ...textareaProps }: TextareaFieldProps) => {
+export const TextareaField = ({ label, description, onBlur, ...textareaProps }: TextareaFieldProps) => {
   const field = useFieldContext<string>();
+
+  const handleBlur = (e: FocusEvent<HTMLTextAreaElement>) => {
+    field.handleBlur();
+    onBlur?.(e);
+  };
 
   return (
     <div className="space-y-2">
@@ -52,7 +62,7 @@ export const TextareaField = ({ label, description, ...textareaProps }: Textarea
           id={field.name}
           value={field.state.value}
           onChange={(e) => field.handleChange(e.target.value)}
-          onBlur={field.handleBlur}
+          onBlur={handleBlur}
           {...textareaProps}
         />
       </div>

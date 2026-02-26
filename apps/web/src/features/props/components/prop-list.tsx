@@ -35,6 +35,8 @@ interface iProp {
 
 interface iPropListProps {
   seriesId: string;
+  /** Optional callback for when a prop is selected. */
+  onPropSelect?: (propId: string) => void;
 }
 
 function PropListPending() {
@@ -63,13 +65,19 @@ function PropListPending() {
   );
 }
 
-export function PropList({ seriesId }: iPropListProps) {
+export function PropList({ seriesId, onPropSelect }: iPropListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProp, setEditingProp] = useState<iProp | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [propToDelete, setPropToDelete] = useState<iProp | undefined>(undefined);
   const { data, isPending, error, refetch } = usePropList(seriesId);
   const { deleteProp, isPending: isDeleting } = useDeleteProp();
+
+  const handleCardClick = (propId: string) => {
+    if (onPropSelect) {
+      onPropSelect(propId);
+    }
+  };
 
   const handleEditClick = (prop: iProp) => {
     setEditingProp(prop);
@@ -108,8 +116,7 @@ export function PropList({ seriesId }: iPropListProps) {
 
   if (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    // eslint-disable-next-line no-void
-    return <ListErrorState message={`Error loading props: ${message}`} onRetry={() => void refetch()} />;
+    return <ListErrorState message={`Error loading props: ${message}`} onRetry={async () => refetch().then()} />;
   }
 
   const props = data?.items ?? [];
@@ -149,7 +156,24 @@ export function PropList({ seriesId }: iPropListProps) {
             const associationCount = prop.associations?.length ?? 0;
 
             return (
-              <Card key={prop._id} className="group overflow-hidden transition-all hover:shadow-md">
+              <Card
+                key={prop._id}
+                className="group overflow-hidden transition-all hover:shadow-md"
+                role={onPropSelect ? 'button' : undefined}
+                tabIndex={onPropSelect ? 0 : undefined}
+                aria-label={onPropSelect ? `Open prop ${prop.name}` : undefined}
+                onClick={onPropSelect ? () => handleCardClick(prop._id) : undefined}
+                onKeyDown={
+                  onPropSelect
+                    ? (event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          handleCardClick(prop._id);
+                        }
+                      }
+                    : undefined
+                }
+              >
                 <CardContent className="flex gap-4 p-4">
                   <div className="flex size-12 shrink-0 items-center justify-center rounded-md bg-muted">
                     <LuPackage className="size-6 text-muted-foreground" />
