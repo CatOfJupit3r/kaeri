@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { LuX } from 'react-icons/lu';
-import z from 'zod';
 
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
@@ -21,6 +20,7 @@ import { useCreateScene } from '../hooks/mutations/use-create-scene';
 import { useUpdateScene } from '../hooks/mutations/use-update-scene';
 import type { SceneDetailQueryReturnType } from '../hooks/queries/use-scene';
 import type { SceneListItem } from '../hooks/queries/use-scene-list';
+import { sceneFormSchema } from '../schemas/scene.schema';
 
 interface iSceneBeat {
   order: number;
@@ -98,14 +98,12 @@ export function SceneForm({
       storyboardUrl: fullSceneData?.storyboardUrl ?? '',
     },
     onSubmit: async ({ value }) => {
-      const normalizedHeading = value.heading.trim();
-
       if (isEditMode && initialData) {
         updateScene(
           {
             sceneId: initialData._id,
             patch: {
-              heading: normalizedHeading,
+              heading: value.heading,
               locationId: value.locationId || undefined,
               timeOfDay: value.timeOfDay || undefined,
               duration: value.duration || undefined,
@@ -132,7 +130,7 @@ export function SceneForm({
           {
             seriesId,
             scriptId: value.scriptId,
-            heading: normalizedHeading,
+            heading: value.heading,
             locationId: value.locationId || undefined,
             timeOfDay: value.timeOfDay || undefined,
             duration: value.duration || undefined,
@@ -157,33 +155,7 @@ export function SceneForm({
       }
     },
     validators: {
-      onSubmit: z.object({
-        scriptId: z.string().min(1, 'Script is required'),
-        heading: z.string().trim().min(1, 'Heading is required').max(200, 'Heading must be 200 characters or less'),
-        locationId: z.string(),
-        timeOfDay: z.string(),
-        duration: z.string(),
-        emotionalTone: z.string(),
-        conflict: z.string(),
-        beats: z.array(
-          z.object({
-            order: z.number(),
-            description: z.string(),
-          }),
-        ),
-        characterIds: z.array(z.string()),
-        propIds: z.array(z.string()),
-        lighting: z.string(),
-        sound: z.string(),
-        camera: z.string(),
-        storyNotes: z.string(),
-        storyboardUrl: z
-          .string()
-          .trim()
-          .refine((val) => !val || z.string().url().safeParse(val).success, {
-            message: 'Must be a valid URL',
-          }),
-      }),
+      onSubmit: sceneFormSchema,
     },
   });
 

@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { LuArrowLeft, LuCheck, LuLoader, LuX } from 'react-icons/lu';
-import z from 'zod';
+import { useEffect } from 'react';
+import { LuArrowLeft, LuX } from 'react-icons/lu';
 
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
@@ -11,11 +10,13 @@ import { Label } from '@~/components/ui/label';
 import { ScrollArea } from '@~/components/ui/scroll-area';
 import { Separator } from '@~/components/ui/separator';
 import { RelationshipPicker } from '@~/features/knowledge-base/components/relationship-picker';
+import { useAutoSave } from '@~/hooks/use-auto-save';
 
 import { useUpdateCharacter } from '../hooks/mutations/use-update-character';
 import { useCharacter } from '../hooks/queries/use-character';
 import { useCharacterList } from '../hooks/queries/use-character-list';
 import type { CharacterListItem } from '../hooks/queries/use-character-list';
+import { characterFormSchema } from '../schemas/character.schema';
 import { AppearancePicker } from './appearance-picker';
 
 type Relationship = NonNullable<CharacterListItem['relationships']>[number];
@@ -32,10 +33,6 @@ export function CharacterEditPanel({ characterId, seriesId, onClose }: iCharacte
   const { updateCharacter, isPending: isUpdating } = useUpdateCharacter();
   const { data: characterListData } = useCharacterList(seriesId);
 
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isInitializedRef = useRef(false);
-
   const form = useAppForm({
     defaultValues: {
       name: '',
@@ -48,78 +45,30 @@ export function CharacterEditPanel({ characterId, seriesId, onClose }: iCharacte
     onSubmit: async ({ value }) => {
       if (!character) return;
 
-      const normalizedName = value.name.trim();
-      const normalizedDescription = value.description.trim();
-      const normalizedAvatarUrl = value.avatarUrl.trim();
-
-      updateCharacter(
-        {
-          id: character._id,
-          seriesId,
-          patch: {
-            name: normalizedName,
-            description: normalizedDescription || undefined,
-            avatarUrl: normalizedAvatarUrl || undefined,
-            traits: value.traits.length > 0 ? value.traits : undefined,
-            relationships: value.relationships.length > 0 ? value.relationships : undefined,
-            appearances: value.appearances.length > 0 ? value.appearances : undefined,
-          },
+      updateCharacter({
+        id: character._id,
+        seriesId,
+        patch: {
+          name: value.name || undefined,
+          description: value.description || undefined,
+          avatarUrl: value.avatarUrl || undefined,
+          traits: value.traits.length > 0 ? value.traits : undefined,
+          relationships: value.relationships.length > 0 ? value.relationships : undefined,
+          appearances: value.appearances.length > 0 ? value.appearances : undefined,
         },
-        {
-          onSuccess: () => {
-            // Stay open on save, form is now synced
-          },
-        },
-      );
+      });
     },
     validators: {
-      onSubmit: z.object({
-        name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
-        description: z.string().trim().max(500, 'Description must be 500 characters or less'),
-        avatarUrl: z
-          .string()
-          .trim()
-          .refine((val) => !val || z.string().url().safeParse(val).success, {
-            message: 'Must be a valid URL',
-          }),
-        traits: z.array(z.string()),
-        relationships: z.array(
-          z.object({
-            targetId: z.string(),
-            type: z.string(),
-            note: z.string().optional(),
-          }),
-        ),
-        appearances: z.array(
-          z.object({
-            scriptId: z.string(),
-            sceneRef: z.string(),
-            locationId: z.string().optional(),
-          }),
-        ),
-      }),
+      onSubmit: characterFormSchema,
     },
   });
 
-  // Auto-save function
-  const handleAutoSave = useCallback(() => {
-    if (!isInitializedRef.current) return;
-
-    // Clear any existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    setSaveStatus('saving');
-    form.handleSubmit().catch(() => {
-      // Handle submit errors silently - the form validators will show errors
-    });
-  }, [form]);
+  const { handleAutoSave, resetInitialization } = useAutoSave(form, { isUpdating });
 
   // Sync form with character data when loaded
   useEffect(() => {
     if (character) {
-      isInitializedRef.current = false;
+      resetInitialization();
       form.reset({
         name: character.name,
         description: character.description ?? '',
@@ -128,29 +77,8 @@ export function CharacterEditPanel({ characterId, seriesId, onClose }: iCharacte
         relationships: character.relationships ?? [],
         appearances: character.appearances ?? [],
       });
-      // Mark as initialized after a short delay to avoid autosave on initial load
-      setTimeout(() => {
-        isInitializedRef.current = true;
-      }, 100);
     }
-  }, [character, form]);
-
-  // Update save status when mutation completes
-  useEffect(() => {
-    if (!isUpdating && saveStatus === 'saving') {
-      setSaveStatus('saved');
-      // Clear saved status after 2 seconds
-      saveTimeoutRef.current = setTimeout(() => {
-        setSaveStatus('idle');
-      }, 2000);
-    }
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [isUpdating, saveStatus]);
+  }, [character, form, resetInitialization]);
 
   if (isLoading) {
     return (
@@ -182,21 +110,6 @@ export function CharacterEditPanel({ characterId, seriesId, onClose }: iCharacte
           </Button>
           <Separator orientation="vertical" className="h-6" />
           <h2 className="text-lg font-bold">Edit Character</h2>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          {saveStatus === 'saving' && (
-            <span className="flex items-center gap-1.5">
-              <LuLoader className="size-4 animate-spin" />
-              Saving...
-            </span>
-          )}
-          {saveStatus === 'saved' && (
-            <span className="flex items-center gap-1.5 text-green-600">
-              <LuCheck className="size-4" />
-              Saved
-            </span>
-          )}
-          {saveStatus === 'idle' && <span>Auto-save enabled</span>}
         </div>
       </div>
 

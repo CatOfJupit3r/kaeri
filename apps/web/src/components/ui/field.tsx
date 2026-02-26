@@ -9,7 +9,15 @@ import { Separator } from '@~/components/ui/separator';
 import { cn } from '@~/lib/utils';
 
 // eslint-disable-next-line import-x/no-cycle
-import { CheckboxField, FormActions, SelectField, SubmitButton, TextField, TextareaField } from './form-fields';
+import {
+  CheckboxField,
+  FormActions,
+  MultiSelectField,
+  SelectField,
+  SubmitButton,
+  TextField,
+  TextareaField,
+} from './form-fields';
 
 export const { fieldContext, formContext, useFieldContext, useFormContext } = createFormHookContexts();
 
@@ -31,6 +39,7 @@ export const { useAppForm, withForm, withFieldGroup } = createFormHook({
     TextareaField,
     CheckboxField,
     SelectField,
+    MultiSelectField,
   },
   formComponents: {
     FieldLegend,

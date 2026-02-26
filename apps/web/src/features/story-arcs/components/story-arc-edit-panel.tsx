@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { LuArrowLeft, LuCheck, LuGripVertical, LuLoader, LuPlus, LuTrash2 } from 'react-icons/lu';
-import z from 'zod';
+import { useState } from 'react';
+import { LuArrowLeft, LuGripVertical, LuPlus, LuTrash2 } from 'react-icons/lu';
 
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
@@ -14,10 +13,12 @@ import { Separator } from '@~/components/ui/separator';
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
 import { useThemeList } from '@~/features/themes/hooks/queries/use-theme-list';
+import { useAutoSave } from '@~/hooks/use-auto-save';
 
 import { useUpdateStoryArc } from '../hooks/mutations/use-update-story-arc';
 import type { StoryArcDetailQueryReturnType } from '../hooks/queries/use-story-arc';
 import { useStoryArc } from '../hooks/queries/use-story-arc';
+import { storyArcFormSchema } from '../schemas/story-arc.schema';
 
 interface iStoryArcEditPanelProps {
   storyArcId: string;
@@ -98,10 +99,6 @@ function StoryArcEditForm({ storyArc, seriesId, onClose }: iStoryArcEditFormProp
   const characters = charactersData?.items ?? [];
   const themes = themesData?.items ?? [];
 
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isInitializedRef = useRef(false);
-
   // State for array fields - initialize with storyArc data
   const [beats, setBeats] = useState<iBeat[]>(storyArc.keyBeats ?? []);
   const [beatInput, setBeatInput] = useState('');
@@ -120,83 +117,27 @@ function StoryArcEditForm({ storyArc, seriesId, onClose }: iStoryArcEditFormProp
       resolution: storyArc.resolution ?? '',
     },
     onSubmit: async ({ value }) => {
-      const normalizedName = value.name.trim();
-      const normalizedDescription = value.description.trim();
-      const normalizedResolution = value.resolution.trim();
-
-      updateStoryArc(
-        {
-          storyArcId: storyArc._id,
-          patch: {
-            name: normalizedName,
-            description: normalizedDescription || undefined,
-            status: value.status,
-            startScriptId: value.startScriptId || undefined,
-            endScriptId: value.endScriptId || undefined,
-            keyBeats: beats.length > 0 ? beats : undefined,
-            resolution: normalizedResolution || undefined,
-            characters: characterRoles.length > 0 ? characterRoles : undefined,
-            themeIds: selectedThemeIds.length > 0 ? selectedThemeIds : undefined,
-          },
+      updateStoryArc({
+        storyArcId: storyArc._id,
+        patch: {
+          name: value.name || undefined,
+          description: value.description || undefined,
+          status: value.status,
+          startScriptId: value.startScriptId || undefined,
+          endScriptId: value.endScriptId || undefined,
+          keyBeats: beats.length > 0 ? beats : undefined,
+          resolution: value.resolution || undefined,
+          characters: characterRoles.length > 0 ? characterRoles : undefined,
+          themeIds: selectedThemeIds.length > 0 ? selectedThemeIds : undefined,
         },
-        {
-          onSuccess: () => {
-            // Stay open on save, form is now synced
-          },
-        },
-      );
+      });
     },
     validators: {
-      onSubmit: z.object({
-        name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
-        description: z.string().trim().max(1000, 'Description must be 1000 characters or less'),
-        status: z.enum(['planned', 'in_progress', 'completed', 'abandoned']),
-        startScriptId: z.string(),
-        endScriptId: z.string(),
-        resolution: z.string().trim().max(1000, 'Resolution must be 1000 characters or less'),
-      }),
+      onSubmit: storyArcFormSchema,
     },
   });
 
-  // Auto-save function
-  const handleAutoSave = useCallback(() => {
-    if (!isInitializedRef.current) return;
-
-    // Clear any existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    setSaveStatus('saving');
-    form.handleSubmit().catch(() => {
-      // Handle submit errors silently - the form validators will show errors
-    });
-  }, [form]);
-
-  // Mark as initialized after a short delay to avoid autosave on initial load
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      isInitializedRef.current = true;
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Update save status when mutation completes
-  useEffect(() => {
-    if (!isUpdating && saveStatus === 'saving') {
-      setSaveStatus('saved');
-      // Clear saved status after 2 seconds
-      saveTimeoutRef.current = setTimeout(() => {
-        setSaveStatus('idle');
-      }, 2000);
-    }
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [isUpdating, saveStatus]);
+  const { handleAutoSave } = useAutoSave(form, { isUpdating });
 
   // Beat management
   const handleAddBeat = () => {
@@ -276,21 +217,6 @@ function StoryArcEditForm({ storyArc, seriesId, onClose }: iStoryArcEditFormProp
           <Separator orientation="vertical" className="h-6" />
           <h2 className="text-lg font-bold">Edit Story Arc</h2>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          {saveStatus === 'saving' && (
-            <span className="flex items-center gap-1.5">
-              <LuLoader className="size-4 animate-spin" />
-              Saving...
-            </span>
-          )}
-          {saveStatus === 'saved' && (
-            <span className="flex items-center gap-1.5 text-green-600">
-              <LuCheck className="size-4" />
-              Saved
-            </span>
-          )}
-          {saveStatus === 'idle' && <span>Auto-save enabled</span>}
-        </div>
       </div>
 
       {/* Form Content */}
@@ -359,43 +285,29 @@ function StoryArcEditForm({ storyArc, seriesId, onClose }: iStoryArcEditFormProp
                 <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                   <form.AppField name="startScriptId">
                     {(field) => (
-                      <div className="space-y-2">
-                        <Label htmlFor="start-script-select">Start Script</Label>
-                        <SingleSelect
-                          id="start-script-select"
-                          value={field.state.value ?? ''}
-                          onValueChange={(value: string | null) => {
-                            field.handleChange(value ?? '');
-                            handleAutoSave();
-                          }}
-                          options={[
-                            { value: '', label: 'None' },
-                            ...scripts.map((s) => ({ value: s._id, label: s.title })),
-                          ]}
-                          placeholder="Select start script"
-                        />
-                      </div>
+                      <field.SelectField
+                        label="Start Script"
+                        options={[
+                          { value: '', label: 'None' },
+                          ...scripts.map((s) => ({ value: s._id, label: s.title })),
+                        ]}
+                        placeholder="Select start script"
+                        onBlur={handleAutoSave}
+                      />
                     )}
                   </form.AppField>
 
                   <form.AppField name="endScriptId">
                     {(field) => (
-                      <div className="space-y-2">
-                        <Label htmlFor="end-script-select">End Script</Label>
-                        <SingleSelect
-                          id="end-script-select"
-                          value={field.state.value ?? ''}
-                          onValueChange={(value: string | null) => {
-                            field.handleChange(value ?? '');
-                            handleAutoSave();
-                          }}
-                          options={[
-                            { value: '', label: 'None' },
-                            ...scripts.map((s) => ({ value: s._id, label: s.title })),
-                          ]}
-                          placeholder="Select end script"
-                        />
-                      </div>
+                      <field.SelectField
+                        label="End Script"
+                        options={[
+                          { value: '', label: 'None' },
+                          ...scripts.map((s) => ({ value: s._id, label: s.title })),
+                        ]}
+                        placeholder="Select end script"
+                        onBlur={handleAutoSave}
+                      />
                     )}
                   </form.AppField>
                 </div>

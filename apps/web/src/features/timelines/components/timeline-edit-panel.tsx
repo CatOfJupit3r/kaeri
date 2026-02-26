@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { LuArrowLeft, LuCheck, LuLoader } from 'react-icons/lu';
-import z from 'zod';
+import { useEffect } from 'react';
+import { LuArrowLeft } from 'react-icons/lu';
 
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
 import { useAppForm } from '@~/components/ui/field';
 import { ScrollArea } from '@~/components/ui/scroll-area';
 import { Separator } from '@~/components/ui/separator';
+import { useAutoSave } from '@~/hooks/use-auto-save';
 
 import { useUpdateTimeline } from '../hooks/mutations/use-update-timeline';
 import { useTimeline } from '../hooks/queries/use-timeline';
+import { timelineFormSchema } from '../schemas/timeline.schema';
 
 interface iTimelineEditPanelProps {
   timelineId: string;
@@ -17,15 +18,9 @@ interface iTimelineEditPanelProps {
   onClose: () => void;
 }
 
-const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-
 export function TimelineEditPanel({ timelineId, seriesId, onClose }: iTimelineEditPanelProps) {
   const { data: timeline, isPending: isLoading, error } = useTimeline(timelineId, seriesId);
   const { updateTimeline, isPending: isUpdating } = useUpdateTimeline();
-
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isInitializedRef = useRef(false);
 
   const form = useAppForm({
     defaultValues: {
@@ -35,84 +30,32 @@ export function TimelineEditPanel({ timelineId, seriesId, onClose }: iTimelineEd
     onSubmit: async ({ value }) => {
       if (!timeline) return;
 
-      const normalizedLabel = value.label.trim();
-      const normalizedTimestamp = value.timestamp.trim();
-
-      updateTimeline(
-        {
-          id: timeline._id,
-          seriesId,
-          patch: {
-            label: normalizedLabel,
-            timestamp: normalizedTimestamp || undefined,
-          },
+      updateTimeline({
+        id: timeline._id,
+        seriesId,
+        patch: {
+          label: value.label || undefined,
+          timestamp: value.timestamp || undefined,
         },
-        {
-          onSuccess: () => {
-            // Stay open on save, form is now synced
-          },
-        },
-      );
+      });
     },
     validators: {
-      onSubmit: z.object({
-        label: z.string().trim().min(1, 'Label is required').max(200, 'Label must be 200 characters or less'),
-        timestamp: z
-          .string()
-          .trim()
-          .refine((val) => !val || DATE_REGEX.test(val), {
-            message: 'Use YYYY-MM-DD format',
-          }),
-      }),
+      onSubmit: timelineFormSchema,
     },
   });
 
-  // Auto-save function
-  const handleAutoSave = useCallback(() => {
-    if (!isInitializedRef.current) return;
-
-    // Clear any existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    setSaveStatus('saving');
-    form.handleSubmit().catch(() => {
-      // Handle submit errors silently - the form validators will show errors
-    });
-  }, [form]);
+  const { handleAutoSave, resetInitialization } = useAutoSave(form, { isUpdating });
 
   // Sync form with timeline data when loaded
   useEffect(() => {
     if (timeline) {
-      isInitializedRef.current = false;
+      resetInitialization();
       form.reset({
         label: timeline.label,
         timestamp: timeline.timestamp ?? '',
       });
-      // Mark as initialized after a short delay to avoid autosave on initial load
-      setTimeout(() => {
-        isInitializedRef.current = true;
-      }, 100);
     }
-  }, [timeline, form]);
-
-  // Update save status when mutation completes
-  useEffect(() => {
-    if (!isUpdating && saveStatus === 'saving') {
-      setSaveStatus('saved');
-      // Clear saved status after 2 seconds
-      saveTimeoutRef.current = setTimeout(() => {
-        setSaveStatus('idle');
-      }, 2000);
-    }
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [isUpdating, saveStatus]);
+  }, [timeline, form, resetInitialization]);
 
   if (isLoading) {
     return (
@@ -144,21 +87,6 @@ export function TimelineEditPanel({ timelineId, seriesId, onClose }: iTimelineEd
           </Button>
           <Separator orientation="vertical" className="h-6" />
           <h2 className="text-lg font-bold">Edit Timeline Entry</h2>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          {saveStatus === 'saving' && (
-            <span className="flex items-center gap-1.5">
-              <LuLoader className="size-4 animate-spin" />
-              Saving...
-            </span>
-          )}
-          {saveStatus === 'saved' && (
-            <span className="flex items-center gap-1.5 text-green-600">
-              <LuCheck className="size-4" />
-              Saved
-            </span>
-          )}
-          {saveStatus === 'idle' && <span>Auto-save enabled</span>}
         </div>
       </div>
 

@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { LuArrowLeft, LuCheck, LuLoader, LuX } from 'react-icons/lu';
-import z from 'zod';
+import { useEffect, useState } from 'react';
+import { LuArrowLeft, LuX } from 'react-icons/lu';
 
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
@@ -9,13 +8,14 @@ import { useAppForm } from '@~/components/ui/field';
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
 import { ScrollArea } from '@~/components/ui/scroll-area';
-import { MultiSelect } from '@~/components/ui/select';
 import { Separator } from '@~/components/ui/separator';
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
+import { useAutoSave } from '@~/hooks/use-auto-save';
 
 import { useUpdateLocation } from '../hooks/mutations/use-update-location';
 import { useLocation } from '../hooks/queries/use-location';
+import { locationFormSchema } from '../schemas/location.schema';
 
 interface iImage {
   url: string;
@@ -42,10 +42,6 @@ export function LocationEditPanel({ locationId, seriesId, onClose }: iLocationEd
   const { updateLocation, isPending: isUpdating } = useUpdateLocation();
   const { data: charactersData } = useCharacterList(seriesId, 100, 0);
   const { data: propsData } = usePropList(seriesId, 100, 0);
-
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isInitializedRef = useRef(false);
 
   const [images, setImages] = useState<iImage[]>([]);
   const [newImageUrl, setNewImageUrl] = useState('');
@@ -75,67 +71,33 @@ export function LocationEditPanel({ locationId, seriesId, onClose }: iLocationEd
     onSubmit: async ({ value }) => {
       if (!location) return;
 
-      const normalizedName = value.name.trim();
-      const normalizedDescription = value.description.trim();
-      const normalizedProductionNotes = value.productionNotes.trim();
-      const normalizedMood = value.mood.trim();
-
-      updateLocation(
-        {
-          id: location._id,
-          seriesId,
-          patch: {
-            name: normalizedName,
-            description: normalizedDescription || undefined,
-            tags: value.tags.length > 0 ? value.tags : undefined,
-            images: images.length > 0 ? images : undefined,
-            associatedCharacterIds: value.associatedCharacterIds.length > 0 ? value.associatedCharacterIds : undefined,
-            propIds: value.propIds.length > 0 ? value.propIds : undefined,
-            productionNotes: normalizedProductionNotes || undefined,
-            mood: normalizedMood || undefined,
-            timeOfDay: value.timeOfDay.length > 0 ? value.timeOfDay : undefined,
-          },
+      updateLocation({
+        id: location._id,
+        seriesId,
+        patch: {
+          name: value.name || undefined,
+          description: value.description || undefined,
+          tags: value.tags.length > 0 ? value.tags : undefined,
+          images: images.length > 0 ? images : undefined,
+          associatedCharacterIds: value.associatedCharacterIds.length > 0 ? value.associatedCharacterIds : undefined,
+          propIds: value.propIds.length > 0 ? value.propIds : undefined,
+          productionNotes: value.productionNotes || undefined,
+          mood: value.mood || undefined,
+          timeOfDay: value.timeOfDay.length > 0 ? value.timeOfDay : undefined,
         },
-        {
-          onSuccess: () => {
-            // Stay open on save, form is now synced
-          },
-        },
-      );
+      });
     },
     validators: {
-      onSubmit: z.object({
-        name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
-        description: z.string().trim().max(500, 'Description must be 500 characters or less'),
-        tags: z.array(z.string()),
-        associatedCharacterIds: z.array(z.string()),
-        propIds: z.array(z.string()),
-        productionNotes: z.string().trim().max(1000, 'Production notes must be 1000 characters or less'),
-        mood: z.string().trim().max(100, 'Mood must be 100 characters or less'),
-        timeOfDay: z.array(z.string()),
-      }),
+      onSubmit: locationFormSchema,
     },
   });
 
-  // Auto-save function
-  const handleAutoSave = useCallback(() => {
-    if (!isInitializedRef.current) return;
-
-    // Clear any existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    setSaveStatus('saving');
-    form.handleSubmit().catch(() => {
-      // Handle submit errors silently - the form validators will show errors
-    });
-  }, [form]);
+  const { handleAutoSave, resetInitialization } = useAutoSave(form, { isUpdating });
 
   // Sync form with location data when loaded
   useEffect(() => {
     if (location) {
-      isInitializedRef.current = false;
+      resetInitialization();
       form.reset({
         name: location.name,
         description: location.description ?? '',
@@ -147,29 +109,8 @@ export function LocationEditPanel({ locationId, seriesId, onClose }: iLocationEd
         timeOfDay: location.timeOfDay ?? [],
       });
       setImages(location.images ?? []);
-      // Mark as initialized after a short delay to avoid autosave on initial load
-      setTimeout(() => {
-        isInitializedRef.current = true;
-      }, 100);
     }
-  }, [location, form]);
-
-  // Update save status when mutation completes
-  useEffect(() => {
-    if (!isUpdating && saveStatus === 'saving') {
-      setSaveStatus('saved');
-      // Clear saved status after 2 seconds
-      saveTimeoutRef.current = setTimeout(() => {
-        setSaveStatus('idle');
-      }, 2000);
-    }
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [isUpdating, saveStatus]);
+  }, [location, form, resetInitialization]);
 
   const handleAddImage = () => {
     const trimmedUrl = newImageUrl.trim();
@@ -222,21 +163,6 @@ export function LocationEditPanel({ locationId, seriesId, onClose }: iLocationEd
           </Button>
           <Separator orientation="vertical" className="h-6" />
           <h2 className="text-lg font-bold">Edit Location</h2>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          {saveStatus === 'saving' && (
-            <span className="flex items-center gap-1.5">
-              <LuLoader className="size-4 animate-spin" />
-              Saving...
-            </span>
-          )}
-          {saveStatus === 'saved' && (
-            <span className="flex items-center gap-1.5 text-green-600">
-              <LuCheck className="size-4" />
-              Saved
-            </span>
-          )}
-          {saveStatus === 'idle' && <span>Auto-save enabled</span>}
         </div>
       </div>
 
@@ -435,43 +361,29 @@ export function LocationEditPanel({ locationId, seriesId, onClose }: iLocationEd
                   <CardDescription>Related characters and props</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <form.AppField name="associatedCharacterIds" mode="array">
+                  <form.AppField name="associatedCharacterIds">
                     {(field) => (
-                      <div className="space-y-2">
-                        <Label htmlFor="characters-select">Characters</Label>
-                        <MultiSelect
-                          inputId="characters-select"
-                          options={characterOptions}
-                          value={field.state.value}
-                          onValueChange={(value) => {
-                            field.setValue(value ?? []);
-                            handleAutoSave();
-                          }}
-                          placeholder="Select characters..."
-                          isDisabled={isUpdating}
-                          isClearable
-                        />
-                      </div>
+                      <field.MultiSelectField
+                        label="Characters"
+                        options={characterOptions}
+                        placeholder="Select characters..."
+                        isDisabled={isUpdating}
+                        isClearable
+                        onBlur={handleAutoSave}
+                      />
                     )}
                   </form.AppField>
 
-                  <form.AppField name="propIds" mode="array">
+                  <form.AppField name="propIds">
                     {(field) => (
-                      <div className="space-y-2">
-                        <Label htmlFor="props-select">Props</Label>
-                        <MultiSelect
-                          inputId="props-select"
-                          options={propOptions}
-                          value={field.state.value}
-                          onValueChange={(value) => {
-                            field.setValue(value ?? []);
-                            handleAutoSave();
-                          }}
-                          placeholder="Select props..."
-                          isDisabled={isUpdating}
-                          isClearable
-                        />
-                      </div>
+                      <field.MultiSelectField
+                        label="Props"
+                        options={propOptions}
+                        placeholder="Select props..."
+                        isDisabled={isUpdating}
+                        isClearable
+                        onBlur={handleAutoSave}
+                      />
                     )}
                   </form.AppField>
                 </CardContent>
@@ -484,23 +396,16 @@ export function LocationEditPanel({ locationId, seriesId, onClose }: iLocationEd
                   <CardDescription>Time and production details</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <form.AppField name="timeOfDay" mode="array">
+                  <form.AppField name="timeOfDay">
                     {(field) => (
-                      <div className="space-y-2">
-                        <Label htmlFor="time-of-day-select">Time of Day</Label>
-                        <MultiSelect
-                          inputId="time-of-day-select"
-                          options={TIME_OF_DAY_OPTIONS}
-                          value={field.state.value}
-                          onValueChange={(value) => {
-                            field.setValue(value ?? []);
-                            handleAutoSave();
-                          }}
-                          placeholder="Select time of day..."
-                          isDisabled={isUpdating}
-                          isClearable
-                        />
-                      </div>
+                      <field.MultiSelectField
+                        label="Time of Day"
+                        options={TIME_OF_DAY_OPTIONS}
+                        placeholder="Select time of day..."
+                        isDisabled={isUpdating}
+                        isClearable
+                        onBlur={handleAutoSave}
+                      />
                     )}
                   </form.AppField>
 

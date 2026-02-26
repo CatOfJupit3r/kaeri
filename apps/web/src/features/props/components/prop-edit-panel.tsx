@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { LuArrowLeft, LuBookUser, LuCheck, LuGlobe, LuLoader, LuScroll } from 'react-icons/lu';
+import { useEffect, useMemo } from 'react';
+import { LuArrowLeft, LuBookUser, LuGlobe, LuScroll } from 'react-icons/lu';
 import type { GroupBase } from 'react-select';
-import z from 'zod';
 
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
@@ -15,9 +14,11 @@ import { Separator } from '@~/components/ui/separator';
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
 import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
+import { useAutoSave } from '@~/hooks/use-auto-save';
 
 import { useUpdateProp } from '../hooks/mutations/use-update-prop';
 import { useProp } from '../hooks/queries/use-prop';
+import { propFormSchema } from '../schemas/prop.schema';
 
 interface iPropEditPanelProps {
   propId: string;
@@ -176,10 +177,6 @@ export function PropEditPanel({ propId, seriesId, onClose }: iPropEditPanelProps
   const { data: prop, isPending: isLoading, error } = useProp(propId, seriesId);
   const { updateProp, isPending: isUpdating } = useUpdateProp();
 
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isInitializedRef = useRef(false);
-
   const form = useAppForm({
     defaultValues: {
       name: '',
@@ -189,83 +186,36 @@ export function PropEditPanel({ propId, seriesId, onClose }: iPropEditPanelProps
     onSubmit: async ({ value }) => {
       if (!prop) return;
 
-      const normalizedName = value.name.trim();
-      const normalizedDescription = value.description.trim();
       const associations = entityValuesToAssociations((value.entityValues ?? []) as EntityValue[]);
 
-      updateProp(
-        {
-          id: prop._id,
-          seriesId,
-          patch: {
-            name: normalizedName,
-            description: normalizedDescription || undefined,
-            associations: associations.length > 0 ? associations : undefined,
-          },
+      updateProp({
+        id: prop._id,
+        seriesId,
+        patch: {
+          name: value.name || undefined,
+          description: value.description || undefined,
+          associations: associations.length > 0 ? associations : undefined,
         },
-        {
-          onSuccess: () => {
-            // Stay open on save, form is now synced
-          },
-        },
-      );
+      });
     },
     validators: {
-      onSubmit: z.object({
-        name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
-        description: z.string().trim().max(500, 'Description must be 500 characters or less'),
-        entityValues: z.array(z.string()),
-      }),
+      onSubmit: propFormSchema,
     },
   });
 
-  // Auto-save function
-  const handleAutoSave = useCallback(() => {
-    if (!isInitializedRef.current) return;
-
-    // Clear any existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    setSaveStatus('saving');
-    form.handleSubmit().catch(() => {
-      // Handle submit errors silently - the form validators will show errors
-    });
-  }, [form]);
+  const { handleAutoSave, resetInitialization } = useAutoSave(form, { isUpdating });
 
   // Sync form with prop data when loaded
   useEffect(() => {
     if (prop) {
-      isInitializedRef.current = false;
+      resetInitialization();
       form.reset({
         name: prop.name,
         description: prop.description ?? '',
         entityValues: prop.associations ? associationsToEntityValues(prop.associations) : [],
       });
-      // Mark as initialized after a short delay to avoid autosave on initial load
-      setTimeout(() => {
-        isInitializedRef.current = true;
-      }, 100);
     }
-  }, [prop, form]);
-
-  // Update save status when mutation completes
-  useEffect(() => {
-    if (!isUpdating && saveStatus === 'saving') {
-      setSaveStatus('saved');
-      // Clear saved status after 2 seconds
-      saveTimeoutRef.current = setTimeout(() => {
-        setSaveStatus('idle');
-      }, 2000);
-    }
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [isUpdating, saveStatus]);
+  }, [prop, form, resetInitialization]);
 
   if (isLoading) {
     return (
@@ -297,21 +247,6 @@ export function PropEditPanel({ propId, seriesId, onClose }: iPropEditPanelProps
           </Button>
           <Separator orientation="vertical" className="h-6" />
           <h2 className="text-lg font-bold">Edit Prop</h2>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          {saveStatus === 'saving' && (
-            <span className="flex items-center gap-1.5">
-              <LuLoader className="size-4 animate-spin" />
-              Saving...
-            </span>
-          )}
-          {saveStatus === 'saved' && (
-            <span className="flex items-center gap-1.5 text-green-600">
-              <LuCheck className="size-4" />
-              Saved
-            </span>
-          )}
-          {saveStatus === 'idle' && <span>Auto-save enabled</span>}
         </div>
       </div>
 

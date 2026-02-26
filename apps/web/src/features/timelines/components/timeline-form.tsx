@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import z from 'zod';
 
 import {
   Dialog,
@@ -13,6 +12,7 @@ import { useAppForm, withForm } from '@~/components/ui/field';
 
 import { useCreateTimeline } from '../hooks/mutations/use-create-timeline';
 import { useUpdateTimeline } from '../hooks/mutations/use-update-timeline';
+import { timelineFormSchema } from '../schemas/timeline.schema';
 
 interface iTimelineEntry {
   _id: string;
@@ -27,8 +27,6 @@ interface iTimelineFormProps {
   onOpenChange: (open: boolean) => void;
   initialData?: iTimelineEntry;
 }
-
-const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 const TimelineFormFields = withForm({
   defaultValues: {
@@ -86,17 +84,14 @@ export function TimelineForm({ seriesId, open, onOpenChange, initialData }: iTim
       timestamp: initialData?.timestamp ?? '',
     },
     onSubmit: async ({ value }) => {
-      const normalizedLabel = value.label.trim();
-      const normalizedTimestamp = value.timestamp.trim();
-
       if (isEditMode && initialData) {
         updateTimeline(
           {
             id: initialData._id,
             seriesId,
             patch: {
-              label: normalizedLabel,
-              timestamp: normalizedTimestamp || undefined,
+              label: value.label,
+              timestamp: value.timestamp || undefined,
             },
           },
           {
@@ -110,8 +105,8 @@ export function TimelineForm({ seriesId, open, onOpenChange, initialData }: iTim
           {
             seriesId,
             value: {
-              label: normalizedLabel,
-              timestamp: normalizedTimestamp || undefined,
+              label: value.label,
+              timestamp: value.timestamp || undefined,
             },
           },
           {
@@ -124,15 +119,7 @@ export function TimelineForm({ seriesId, open, onOpenChange, initialData }: iTim
       }
     },
     validators: {
-      onSubmit: z.object({
-        label: z.string().trim().min(1, 'Label is required').max(200, 'Label must be 200 characters or less'),
-        timestamp: z
-          .string()
-          .trim()
-          .refine((val) => !val || DATE_REGEX.test(val), {
-            message: 'Use YYYY-MM-DD format',
-          }),
-      }),
+      onSubmit: timelineFormSchema,
     },
   });
 

@@ -2,7 +2,6 @@ import { useEffect, useMemo } from 'react';
 import { LuBookUser, LuGlobe, LuScroll } from 'react-icons/lu';
 import type { GroupBase } from 'react-select';
 import { components } from 'react-select';
-import z from 'zod';
 
 import { Badge } from '@~/components/ui/badge';
 import {
@@ -20,6 +19,7 @@ import type { iOptionType } from '@~/components/ui/select';
 
 import { useCreateProp } from '../hooks/mutations/use-create-prop';
 import { useUpdateProp } from '../hooks/mutations/use-update-prop';
+import { propFormSchema } from '../schemas/prop.schema';
 
 interface iProp {
   _id: string;
@@ -284,8 +284,6 @@ export function PropForm({
       entityValues: initialData?.associations ? associationsToEntityValues(initialData.associations) : ([] as string[]),
     },
     onSubmit: async ({ value }) => {
-      const normalizedName = value.name.trim();
-      const normalizedDescription = value.description.trim();
       const associations = entityValuesToAssociations((value.entityValues ?? []) as EntityValue[]);
       if (isEditMode && initialData) {
         updateProp(
@@ -293,8 +291,8 @@ export function PropForm({
             id: initialData._id,
             seriesId,
             patch: {
-              name: normalizedName,
-              description: normalizedDescription || undefined,
+              name: value.name,
+              description: value.description || undefined,
               associations: associations.length > 0 ? associations : undefined,
             },
           },
@@ -309,8 +307,8 @@ export function PropForm({
           {
             seriesId,
             value: {
-              name: normalizedName,
-              description: normalizedDescription || undefined,
+              name: value.name,
+              description: value.description || undefined,
               associations: associations.length > 0 ? associations : undefined,
             },
           },
@@ -324,11 +322,7 @@ export function PropForm({
       }
     },
     validators: {
-      onSubmit: z.object({
-        name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
-        description: z.string().trim().max(500, 'Description must be 500 characters or less'),
-        entityValues: z.array(z.string()),
-      }),
+      onSubmit: propFormSchema,
     },
   });
 

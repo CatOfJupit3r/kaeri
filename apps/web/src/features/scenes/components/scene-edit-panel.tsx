@@ -1,24 +1,23 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { LuArrowLeft, LuCheck, LuGripVertical, LuLoader, LuPlus, LuTrash2 } from 'react-icons/lu';
-import z from 'zod';
+import { useState } from 'react';
+import { LuArrowLeft, LuGripVertical, LuPlus, LuTrash2 } from 'react-icons/lu';
 
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
 import { useAppForm } from '@~/components/ui/field';
 import { Input } from '@~/components/ui/input';
-import { Label } from '@~/components/ui/label';
 import { ScrollArea } from '@~/components/ui/scroll-area';
-import { MultiSelect, SingleSelect } from '@~/components/ui/select';
 import { Separator } from '@~/components/ui/separator';
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
 import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
 import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
+import { useAutoSave } from '@~/hooks/use-auto-save';
 
 import { useUpdateScene } from '../hooks/mutations/use-update-scene';
 import type { SceneDetailQueryReturnType } from '../hooks/queries/use-scene';
 import { useSceneDetail } from '../hooks/queries/use-scene';
+import { sceneEditSchema } from '../schemas/scene.schema';
 
 interface iSceneEditPanelProps {
   sceneId: string;
@@ -91,15 +90,9 @@ function SceneEditForm({ scene, seriesId, onClose }: iSceneEditFormProps) {
   const characters = charactersData?.items ?? [];
   const props = propsData?.items ?? [];
 
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isInitializedRef = useRef(false);
-
   // State for array fields - initialize with scene data
   const [beats, setBeats] = useState<iBeat[]>(scene.beats ?? []);
   const [beatInput, setBeatInput] = useState('');
-  const [selectedCharacterIds, setSelectedCharacterIds] = useState<string[]>(scene.characterIds ?? []);
-  const [selectedPropIds, setSelectedPropIds] = useState<string[]>(scene.propIds ?? []);
 
   const form = useAppForm({
     defaultValues: {
@@ -114,93 +107,36 @@ function SceneEditForm({ scene, seriesId, onClose }: iSceneEditFormProps) {
       camera: scene.camera ?? '',
       storyNotes: scene.storyNotes ?? '',
       storyboardUrl: scene.storyboardUrl ?? '',
+      characterIds: scene.characterIds ?? ([] as string[]),
+      propIds: scene.propIds ?? ([] as string[]),
     },
     onSubmit: async ({ value }) => {
-      const normalizedHeading = value.heading.trim();
-
-      updateScene(
-        {
-          sceneId: scene._id,
-          patch: {
-            heading: normalizedHeading,
-            locationId: value.locationId || undefined,
-            timeOfDay: value.timeOfDay || undefined,
-            duration: value.duration.trim() || undefined,
-            emotionalTone: value.emotionalTone.trim() || undefined,
-            conflict: value.conflict.trim() || undefined,
-            lighting: value.lighting.trim() || undefined,
-            sound: value.sound.trim() || undefined,
-            camera: value.camera.trim() || undefined,
-            storyNotes: value.storyNotes.trim() || undefined,
-            storyboardUrl: value.storyboardUrl.trim() || undefined,
-            beats: beats.length > 0 ? beats : undefined,
-            characterIds: selectedCharacterIds.length > 0 ? selectedCharacterIds : undefined,
-            propIds: selectedPropIds.length > 0 ? selectedPropIds : undefined,
-          },
+      updateScene({
+        sceneId: scene._id,
+        patch: {
+          heading: value.heading || undefined,
+          locationId: value.locationId || undefined,
+          timeOfDay: value.timeOfDay || undefined,
+          duration: value.duration || undefined,
+          emotionalTone: value.emotionalTone || undefined,
+          conflict: value.conflict || undefined,
+          lighting: value.lighting || undefined,
+          sound: value.sound || undefined,
+          camera: value.camera || undefined,
+          storyNotes: value.storyNotes || undefined,
+          storyboardUrl: value.storyboardUrl || undefined,
+          beats: beats.length > 0 ? beats : undefined,
+          characterIds: value.characterIds.length > 0 ? value.characterIds : undefined,
+          propIds: value.propIds.length > 0 ? value.propIds : undefined,
         },
-        {
-          onSuccess: () => {
-            // Stay open on save, form is now synced
-          },
-        },
-      );
+      });
     },
     validators: {
-      onSubmit: z.object({
-        heading: z.string().trim().min(1, 'Heading is required').max(200, 'Heading must be 200 characters or less'),
-        locationId: z.string(),
-        timeOfDay: z.string(),
-        duration: z.string().max(50, 'Duration must be 50 characters or less'),
-        emotionalTone: z.string().max(100, 'Emotional tone must be 100 characters or less'),
-        conflict: z.string().max(500, 'Conflict must be 500 characters or less'),
-        lighting: z.string().max(200, 'Lighting must be 200 characters or less'),
-        sound: z.string().max(200, 'Sound must be 200 characters or less'),
-        camera: z.string().max(200, 'Camera must be 200 characters or less'),
-        storyNotes: z.string().max(2000, 'Story notes must be 2000 characters or less'),
-        storyboardUrl: z.string().refine((val) => val === '' || /^https?:\/\/.+/.test(val), 'Must be a valid URL'),
-      }),
+      onSubmit: sceneEditSchema,
     },
   });
 
-  // Auto-save function
-  const handleAutoSave = useCallback(() => {
-    if (!isInitializedRef.current) return;
-
-    // Clear any existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    setSaveStatus('saving');
-    form.handleSubmit().catch(() => {
-      // Handle submit errors silently - the form validators will show errors
-    });
-  }, [form]);
-
-  // Mark as initialized after a short delay to avoid autosave on initial load
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      isInitializedRef.current = true;
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Update save status when mutation completes
-  useEffect(() => {
-    if (!isUpdating && saveStatus === 'saving') {
-      setSaveStatus('saved');
-      // Clear saved status after 2 seconds
-      saveTimeoutRef.current = setTimeout(() => {
-        setSaveStatus('idle');
-      }, 2000);
-    }
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [isUpdating, saveStatus]);
+  const { handleAutoSave } = useAutoSave(form, { isUpdating });
 
   // Beat management
   const handleAddBeat = () => {
@@ -254,21 +190,6 @@ function SceneEditForm({ scene, seriesId, onClose }: iSceneEditFormProps) {
             </Badge>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          {saveStatus === 'saving' && (
-            <span className="flex items-center gap-1.5">
-              <LuLoader className="size-4 animate-spin" />
-              Saving...
-            </span>
-          )}
-          {saveStatus === 'saved' && (
-            <span className="flex items-center gap-1.5 text-green-600">
-              <LuCheck className="size-4" />
-              Saved
-            </span>
-          )}
-          {saveStatus === 'idle' && <span>Auto-save enabled</span>}
-        </div>
       </div>
 
       {/* Form Content */}
@@ -300,41 +221,27 @@ function SceneEditForm({ scene, seriesId, onClose }: iSceneEditFormProps) {
                   {/* Location */}
                   <form.AppField name="locationId">
                     {(field) => (
-                      <div className="space-y-2">
-                        <Label htmlFor="location-select">Location</Label>
-                        <SingleSelect
-                          id="location-select"
-                          value={field.state.value ?? ''}
-                          onValueChange={(value: string | null) => {
-                            field.handleChange(value ?? '');
-                            handleAutoSave();
-                          }}
-                          options={[
-                            { value: '', label: 'None' },
-                            ...locations.map((l) => ({ value: l._id, label: l.name })),
-                          ]}
-                          placeholder="Select location"
-                        />
-                      </div>
+                      <field.SelectField
+                        label="Location"
+                        options={[
+                          { value: '', label: 'None' },
+                          ...locations.map((l) => ({ value: l._id, label: l.name })),
+                        ]}
+                        placeholder="Select location"
+                        onBlur={handleAutoSave}
+                      />
                     )}
                   </form.AppField>
 
                   {/* Time of Day */}
                   <form.AppField name="timeOfDay">
                     {(field) => (
-                      <div className="space-y-2">
-                        <Label htmlFor="time-of-day-select">Time of Day</Label>
-                        <SingleSelect
-                          id="time-of-day-select"
-                          value={field.state.value ?? ''}
-                          onValueChange={(value: string | null) => {
-                            field.handleChange(value ?? '');
-                            handleAutoSave();
-                          }}
-                          options={TIME_OF_DAY_OPTIONS.map((t) => ({ value: t.value, label: t.label }))}
-                          placeholder="Select time"
-                        />
-                      </div>
+                      <field.SelectField
+                        label="Time of Day"
+                        options={TIME_OF_DAY_OPTIONS.map((t) => ({ value: t.value, label: t.label }))}
+                        placeholder="Select time"
+                        onBlur={handleAutoSave}
+                      />
                     )}
                   </form.AppField>
 
@@ -483,34 +390,30 @@ function SceneEditForm({ scene, seriesId, onClose }: iSceneEditFormProps) {
               <CardContent>
                 <div className="space-y-4">
                   {/* Characters */}
-                  <div className="space-y-2">
-                    <Label>Characters in Scene ({selectedCharacterIds.length})</Label>
-                    <MultiSelect
-                      options={characters.map((c) => ({ value: c._id, label: c.name }))}
-                      value={selectedCharacterIds}
-                      onValueChange={(values) => {
-                        setSelectedCharacterIds(values);
-                        handleAutoSave();
-                      }}
-                      placeholder="Select characters..."
-                      closeMenuOnSelect={false}
-                    />
-                  </div>
+                  <form.AppField name="characterIds">
+                    {(field) => (
+                      <field.MultiSelectField
+                        label="Characters in Scene"
+                        options={characters.map((c) => ({ value: c._id, label: c.name }))}
+                        placeholder="Select characters..."
+                        closeMenuOnSelect={false}
+                        onBlur={handleAutoSave}
+                      />
+                    )}
+                  </form.AppField>
 
                   {/* Props */}
-                  <div className="space-y-2">
-                    <Label>Props in Scene ({selectedPropIds.length})</Label>
-                    <MultiSelect
-                      options={props.map((p) => ({ value: p._id, label: p.name }))}
-                      value={selectedPropIds}
-                      onValueChange={(values) => {
-                        setSelectedPropIds(values);
-                        handleAutoSave();
-                      }}
-                      placeholder="Select props..."
-                      closeMenuOnSelect={false}
-                    />
-                  </div>
+                  <form.AppField name="propIds">
+                    {(field) => (
+                      <field.MultiSelectField
+                        label="Props in Scene"
+                        options={props.map((p) => ({ value: p._id, label: p.name }))}
+                        placeholder="Select props..."
+                        closeMenuOnSelect={false}
+                        onBlur={handleAutoSave}
+                      />
+                    )}
+                  </form.AppField>
                 </div>
               </CardContent>
             </Card>

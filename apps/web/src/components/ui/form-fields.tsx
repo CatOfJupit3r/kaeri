@@ -6,8 +6,8 @@ import type { iButtonProps } from './button';
 // eslint-disable-next-line import-x/no-cycle
 import { useFieldContext, FieldError, useFormContext, FieldDescription, FieldLabel } from './field';
 import { Input } from './input';
-import { SingleSelect } from './select';
-import type { iSingleSelectProps } from './select';
+import { MultiSelect, SingleSelect } from './select';
+import type { iMultiSelectProps, iSingleSelectProps } from './select';
 import { Textarea } from './textarea';
 
 type TextFieldProps = {
@@ -95,10 +95,16 @@ export const CheckboxField = ({ label, ...inputProps }: TextFieldProps) => {
 
 interface iSelectFieldProps extends iSingleSelectProps {
   label: string;
+  description?: ReactNode;
 }
 
-export const SelectField = ({ label, options, ...selectProps }: iSelectFieldProps) => {
+export const SelectField = ({ label, description, options, onBlur, ...selectProps }: iSelectFieldProps) => {
   const field = useFieldContext<string>();
+
+  const handleBlur: iSingleSelectProps['onBlur'] = (e) => {
+    field.handleBlur();
+    onBlur?.(e);
+  };
 
   return (
     <div className="space-y-2">
@@ -108,11 +114,44 @@ export const SelectField = ({ label, options, ...selectProps }: iSelectFieldProp
           id={field.name}
           value={field.state.value}
           onValueChange={(value) => (value ? field.handleChange(value) : undefined)}
-          onBlur={field.handleBlur}
+          onBlur={handleBlur}
           options={options}
           {...selectProps}
         />
       </div>
+      {description ? <FieldDescription>{description}</FieldDescription> : null}
+      <FieldError errors={field?.state?.meta?.errors} />
+    </div>
+  );
+};
+
+interface iMultiSelectFieldProps extends Omit<iMultiSelectProps, 'value' | 'onValueChange'> {
+  label: string;
+  description?: ReactNode;
+}
+
+export const MultiSelectField = ({ label, description, options, onBlur, ...selectProps }: iMultiSelectFieldProps) => {
+  const field = useFieldContext<string[]>();
+
+  const handleBlur: iMultiSelectProps['onBlur'] = (e) => {
+    field.handleBlur();
+    onBlur?.(e);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="space-y-1">
+        <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+        <MultiSelect
+          id={field.name}
+          value={field.state.value ?? []}
+          onValueChange={(values) => field.handleChange(values)}
+          onBlur={handleBlur}
+          options={options}
+          {...selectProps}
+        />
+      </div>
+      {description ? <FieldDescription>{description}</FieldDescription> : null}
       <FieldError errors={field?.state?.meta?.errors} />
     </div>
   );

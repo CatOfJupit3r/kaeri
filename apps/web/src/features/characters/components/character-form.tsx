@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { LuX } from 'react-icons/lu';
-import z from 'zod';
 
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
@@ -20,6 +19,7 @@ import { RelationshipPicker } from '@~/features/knowledge-base/components/relati
 import { useCreateCharacter } from '../hooks/mutations/use-create-character';
 import { useUpdateCharacter } from '../hooks/mutations/use-update-character';
 import type { CharacterListItem } from '../hooks/queries/use-character-list';
+import { characterFormSchema } from '../schemas/character.schema';
 import { AppearancePicker } from './appearance-picker';
 
 type Relationship = NonNullable<CharacterListItem['relationships']>[number];
@@ -56,19 +56,15 @@ export function CharacterForm({ seriesId, characters, open, onOpenChange, initia
       appearances: initialData?.appearances ?? ([] as Appearance[]),
     },
     onSubmit: async ({ value }) => {
-      const normalizedName = value.name.trim();
-      const normalizedDescription = value.description.trim();
-      const normalizedAvatarUrl = value.avatarUrl.trim();
-
       if (isEditMode && initialData) {
         updateCharacter(
           {
             id: initialData._id,
             seriesId,
             patch: {
-              name: normalizedName,
-              description: normalizedDescription || undefined,
-              avatarUrl: normalizedAvatarUrl || undefined,
+              name: value.name,
+              description: value.description || undefined,
+              avatarUrl: value.avatarUrl || undefined,
               traits: value.traits.length > 0 ? value.traits : undefined,
               relationships: value.relationships.length > 0 ? value.relationships : undefined,
               appearances: value.appearances.length > 0 ? value.appearances : undefined,
@@ -85,9 +81,9 @@ export function CharacterForm({ seriesId, characters, open, onOpenChange, initia
           {
             seriesId,
             value: {
-              name: normalizedName,
-              description: normalizedDescription || undefined,
-              avatarUrl: normalizedAvatarUrl || undefined,
+              name: value.name,
+              description: value.description || undefined,
+              avatarUrl: value.avatarUrl || undefined,
               traits: value.traits.length > 0 ? value.traits : undefined,
               relationships: value.relationships.length > 0 ? value.relationships : undefined,
               appearances: value.appearances.length > 0 ? value.appearances : undefined,
@@ -103,31 +99,7 @@ export function CharacterForm({ seriesId, characters, open, onOpenChange, initia
       }
     },
     validators: {
-      onSubmit: z.object({
-        name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
-        description: z.string().trim().max(500, 'Description must be 500 characters or less'),
-        avatarUrl: z
-          .string()
-          .trim()
-          .refine((val) => !val || z.string().url().safeParse(val).success, {
-            message: 'Must be a valid URL',
-          }),
-        traits: z.array(z.string()),
-        relationships: z.array(
-          z.object({
-            targetId: z.string(),
-            type: z.string(),
-            note: z.string().optional(),
-          }),
-        ),
-        appearances: z.array(
-          z.object({
-            scriptId: z.string(),
-            sceneRef: z.string(),
-            locationId: z.string().optional(),
-          }),
-        ),
-      }),
+      onSubmit: characterFormSchema,
     },
   });
 

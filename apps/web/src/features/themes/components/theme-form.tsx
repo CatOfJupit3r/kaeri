@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { LuX } from 'react-icons/lu';
-import z from 'zod';
 
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
@@ -20,6 +19,7 @@ import { SingleSelect } from '@~/components/ui/select';
 import { useCreateTheme } from '../hooks/mutations/use-create-theme';
 import { useUpdateTheme } from '../hooks/mutations/use-update-theme';
 import type { ThemeListItem } from '../hooks/queries/use-theme-list';
+import { themeFormSchema } from '../schemas/theme.schema';
 
 type CharacterConnection = NonNullable<ThemeListItem['relatedCharacters']>[number];
 type EvolutionEntry = NonNullable<ThemeListItem['evolution']>[number];
@@ -74,16 +74,13 @@ export function ThemeForm({ seriesId, open, onOpenChange, initialData }: iThemeF
       visualMotifs: initialData?.visualMotifs ?? ([] as string[]),
     },
     onSubmit: async ({ value }) => {
-      const normalizedName = value.name.trim();
-      const normalizedDescription = value.description.trim();
-
       if (isEditMode && initialData) {
         updateTheme(
           {
             themeId: initialData._id,
             patch: {
-              name: normalizedName,
-              description: normalizedDescription || undefined,
+              name: value.name,
+              description: value.description || undefined,
               color: value.color || undefined,
               visualMotifs: value.visualMotifs.length > 0 ? value.visualMotifs : undefined,
               relatedCharacters: characterConnections.length > 0 ? characterConnections : undefined,
@@ -102,8 +99,8 @@ export function ThemeForm({ seriesId, open, onOpenChange, initialData }: iThemeF
           {
             seriesId,
             value: {
-              name: normalizedName,
-              description: normalizedDescription || undefined,
+              name: value.name,
+              description: value.description || undefined,
               color: value.color || undefined,
               visualMotifs: value.visualMotifs.length > 0 ? value.visualMotifs : undefined,
               relatedCharacters: characterConnections.length > 0 ? characterConnections : undefined,
@@ -124,12 +121,7 @@ export function ThemeForm({ seriesId, open, onOpenChange, initialData }: iThemeF
       }
     },
     validators: {
-      onSubmit: z.object({
-        name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
-        description: z.string().trim().max(1000, 'Description must be 1000 characters or less'),
-        color: z.string().trim(),
-        visualMotifs: z.array(z.string()),
-      }),
+      onSubmit: themeFormSchema,
     },
   });
 

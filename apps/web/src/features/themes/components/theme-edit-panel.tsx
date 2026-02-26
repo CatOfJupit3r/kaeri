@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { LuArrowLeft, LuCheck, LuLoader, LuPalette, LuPlus, LuTrash2 } from 'react-icons/lu';
-import z from 'zod';
+import { useState } from 'react';
+import { LuArrowLeft, LuPalette, LuPlus, LuTrash2 } from 'react-icons/lu';
 
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
@@ -13,10 +12,12 @@ import { SingleSelect } from '@~/components/ui/select';
 import { Separator } from '@~/components/ui/separator';
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
+import { useAutoSave } from '@~/hooks/use-auto-save';
 
 import { useUpdateTheme } from '../hooks/mutations/use-update-theme';
 import type { ThemeDetailQueryReturnType } from '../hooks/queries/use-theme';
 import { useThemeDetail } from '../hooks/queries/use-theme';
+import { themeEditSchema } from '../schemas/theme.schema';
 
 interface iThemeEditPanelProps {
   themeId: string;
@@ -90,10 +91,6 @@ function ThemeEditForm({ theme, seriesId, onClose }: iThemeEditFormProps) {
   const scripts = scriptsData?.items ?? [];
   const characters = charactersData?.items ?? [];
 
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isInitializedRef = useRef(false);
-
   // State for array fields - initialize with theme data
   const [visualMotifs, setVisualMotifs] = useState<string[]>(theme.visualMotifs ?? []);
   const [motifInput, setMotifInput] = useState('');
@@ -111,81 +108,24 @@ function ThemeEditForm({ theme, seriesId, onClose }: iThemeEditFormProps) {
       color: theme.color ?? '',
     },
     onSubmit: async ({ value }) => {
-      const normalizedName = value.name.trim();
-      const normalizedDescription = value.description.trim();
-
-      updateTheme(
-        {
-          themeId: theme._id,
-          patch: {
-            name: normalizedName,
-            description: normalizedDescription || undefined,
-            color: value.color || undefined,
-            visualMotifs: visualMotifs.length > 0 ? visualMotifs : undefined,
-            relatedCharacters: relatedCharacters.length > 0 ? relatedCharacters : undefined,
-            evolution: evolution.length > 0 ? evolution : undefined,
-          },
+      updateTheme({
+        themeId: theme._id,
+        patch: {
+          name: value.name || undefined,
+          description: value.description || undefined,
+          color: value.color || undefined,
+          visualMotifs: visualMotifs.length > 0 ? visualMotifs : undefined,
+          relatedCharacters: relatedCharacters.length > 0 ? relatedCharacters : undefined,
+          evolution: evolution.length > 0 ? evolution : undefined,
         },
-        {
-          onSuccess: () => {
-            // Stay open on save, form is now synced
-          },
-        },
-      );
+      });
     },
     validators: {
-      onSubmit: z.object({
-        name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
-        description: z.string().trim().max(1000, 'Description must be 1000 characters or less'),
-        color: z
-          .string()
-          .refine(
-            (val) => val === '' || /^#[0-9A-Fa-f]{6}$/.test(val),
-            'Color must be a valid hex color (e.g., #FF5733)',
-          ),
-      }),
+      onSubmit: themeEditSchema,
     },
   });
 
-  // Auto-save function
-  const handleAutoSave = useCallback(() => {
-    if (!isInitializedRef.current) return;
-
-    // Clear any existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    setSaveStatus('saving');
-    form.handleSubmit().catch(() => {
-      // Handle submit errors silently - the form validators will show errors
-    });
-  }, [form]);
-
-  // Mark as initialized after a short delay to avoid autosave on initial load
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      isInitializedRef.current = true;
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Update save status when mutation completes
-  useEffect(() => {
-    if (!isUpdating && saveStatus === 'saving') {
-      setSaveStatus('saved');
-      // Clear saved status after 2 seconds
-      saveTimeoutRef.current = setTimeout(() => {
-        setSaveStatus('idle');
-      }, 2000);
-    }
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [isUpdating, saveStatus]);
+  const { handleAutoSave } = useAutoSave(form, { isUpdating });
 
   // Visual motif management
   const handleAddMotif = () => {
@@ -253,21 +193,6 @@ function ThemeEditForm({ theme, seriesId, onClose }: iThemeEditFormProps) {
           </Button>
           <Separator orientation="vertical" className="h-6" />
           <h2 className="text-lg font-bold">Edit Theme</h2>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          {saveStatus === 'saving' && (
-            <span className="flex items-center gap-1.5">
-              <LuLoader className="size-4 animate-spin" />
-              Saving...
-            </span>
-          )}
-          {saveStatus === 'saved' && (
-            <span className="flex items-center gap-1.5 text-green-600">
-              <LuCheck className="size-4" />
-              Saved
-            </span>
-          )}
-          {saveStatus === 'idle' && <span>Auto-save enabled</span>}
         </div>
       </div>
 

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { LuX } from 'react-icons/lu';
-import z from 'zod';
 
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
@@ -19,6 +18,7 @@ import { MultiSelect } from '@~/components/ui/select';
 
 import { useCreateLocation } from '../hooks/mutations/use-create-location';
 import { useUpdateLocation } from '../hooks/mutations/use-update-location';
+import { locationFormSchema } from '../schemas/location.schema';
 
 interface iImage {
   url: string;
@@ -99,26 +99,21 @@ export function LocationForm({ seriesId, characters, props, open, onOpenChange, 
       timeOfDay: initialData?.timeOfDay ?? ([] as string[]),
     },
     onSubmit: async ({ value }) => {
-      const normalizedName = value.name.trim();
-      const normalizedDescription = value.description.trim();
-      const normalizedProductionNotes = value.productionNotes.trim();
-      const normalizedMood = value.mood.trim();
-
       if (isEditMode && initialData) {
         updateLocation(
           {
             id: initialData._id,
             seriesId,
             patch: {
-              name: normalizedName,
-              description: normalizedDescription || undefined,
+              name: value.name,
+              description: value.description || undefined,
               tags: value.tags.length > 0 ? value.tags : undefined,
               images: images.length > 0 ? images : undefined,
               associatedCharacterIds:
                 value.associatedCharacterIds.length > 0 ? value.associatedCharacterIds : undefined,
               propIds: value.propIds.length > 0 ? value.propIds : undefined,
-              productionNotes: normalizedProductionNotes || undefined,
-              mood: normalizedMood || undefined,
+              productionNotes: value.productionNotes || undefined,
+              mood: value.mood || undefined,
               timeOfDay: value.timeOfDay.length > 0 ? value.timeOfDay : undefined,
             },
           },
@@ -133,15 +128,15 @@ export function LocationForm({ seriesId, characters, props, open, onOpenChange, 
           {
             seriesId,
             value: {
-              name: normalizedName,
-              description: normalizedDescription || undefined,
+              name: value.name,
+              description: value.description || undefined,
               tags: value.tags.length > 0 ? value.tags : undefined,
               images: images.length > 0 ? images : undefined,
               associatedCharacterIds:
                 value.associatedCharacterIds.length > 0 ? value.associatedCharacterIds : undefined,
               propIds: value.propIds.length > 0 ? value.propIds : undefined,
-              productionNotes: normalizedProductionNotes || undefined,
-              mood: normalizedMood || undefined,
+              productionNotes: value.productionNotes || undefined,
+              mood: value.mood || undefined,
               timeOfDay: value.timeOfDay.length > 0 ? value.timeOfDay : undefined,
             },
           },
@@ -156,16 +151,7 @@ export function LocationForm({ seriesId, characters, props, open, onOpenChange, 
       }
     },
     validators: {
-      onSubmit: z.object({
-        name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
-        description: z.string().trim().max(500, 'Description must be 500 characters or less'),
-        tags: z.array(z.string()),
-        associatedCharacterIds: z.array(z.string()),
-        propIds: z.array(z.string()),
-        productionNotes: z.string().trim().max(1000, 'Production notes must be 1000 characters or less'),
-        mood: z.string().trim().max(100, 'Mood must be 100 characters or less'),
-        timeOfDay: z.array(z.string()),
-      }),
+      onSubmit: locationFormSchema,
     },
   });
 

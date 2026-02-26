@@ -16,6 +16,8 @@ import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
 import { SingleSelect } from '@~/components/ui/select';
 
+import { variationFormSchema } from '../schemas/variation.schema';
+
 interface iScript {
   _id: string;
   title: string;
@@ -65,6 +67,9 @@ export function VariationForm({
         age: value.age || undefined,
         appearance: value.appearance || undefined,
       });
+    },
+    validators: {
+      onSubmit: variationFormSchema,
     },
   });
 

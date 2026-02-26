@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import z from 'zod';
 
 import {
   Dialog,
@@ -13,6 +12,7 @@ import { useAppForm, withForm } from '@~/components/ui/field';
 
 import { useCreateWildcard } from '../hooks/mutations/use-create-wildcard';
 import { useUpdateWildcard } from '../hooks/mutations/use-update-wildcard';
+import { wildcardFormSchema } from '../schemas/wildcard.schema';
 
 interface iWildcard {
   _id: string;
@@ -92,19 +92,15 @@ export function WildcardForm({ seriesId, open, onOpenChange, initialData }: iWil
       tag: initialData?.tag ?? '',
     },
     onSubmit: async ({ value }) => {
-      const normalizedTitle = value.title.trim();
-      const normalizedBody = value.body.trim();
-      const normalizedTag = value.tag.trim();
-
       if (isEditMode && initialData) {
         updateWildcard(
           {
             id: initialData._id,
             seriesId,
             patch: {
-              title: normalizedTitle,
-              body: normalizedBody || undefined,
-              tag: normalizedTag || undefined,
+              title: value.title,
+              body: value.body || undefined,
+              tag: value.tag || undefined,
             },
           },
           {
@@ -118,9 +114,9 @@ export function WildcardForm({ seriesId, open, onOpenChange, initialData }: iWil
           {
             seriesId,
             value: {
-              title: normalizedTitle,
-              body: normalizedBody || undefined,
-              tag: normalizedTag || undefined,
+              title: value.title,
+              body: value.body || undefined,
+              tag: value.tag || undefined,
             },
           },
           {
@@ -133,11 +129,7 @@ export function WildcardForm({ seriesId, open, onOpenChange, initialData }: iWil
       }
     },
     validators: {
-      onSubmit: z.object({
-        title: z.string().trim().min(1, 'Title is required').max(100, 'Title must be 100 characters or less'),
-        body: z.string().trim().max(1000, 'Content must be 1000 characters or less'),
-        tag: z.string().trim().max(50, 'Tag must be 50 characters or less'),
-      }),
+      onSubmit: wildcardFormSchema,
     },
   });
 

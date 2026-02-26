@@ -11,6 +11,7 @@ import { SingleSelect } from '@~/components/ui/select';
 import { useCreateStoryArc } from '../hooks/mutations/use-create-story-arc';
 import { useUpdateStoryArc } from '../hooks/mutations/use-update-story-arc';
 import type { StoryArcListItem } from '../hooks/queries/use-story-arc-list';
+import { storyArcFormSchema } from '../schemas/story-arc.schema';
 
 interface iScript {
   _id: string;
@@ -133,6 +134,9 @@ export function StoryArcForm({
       } else {
         createStoryArc(payload, { onSuccess: handleSuccess });
       }
+    },
+    validators: {
+      onSubmit: storyArcFormSchema,
     },
   });
 
