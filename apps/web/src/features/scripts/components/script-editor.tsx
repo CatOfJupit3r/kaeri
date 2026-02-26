@@ -7,6 +7,7 @@ import Italic from '@tiptap/extension-italic';
 import Placeholder from '@tiptap/extension-placeholder';
 import Text from '@tiptap/extension-text';
 import Underline from '@tiptap/extension-underline';
+import { Selection } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LuBookOpen, LuPenTool, LuPlus, LuSparkles } from 'react-icons/lu';
@@ -26,6 +27,7 @@ import {
 import { BLOCK_CONFIG } from '../helpers/block-config';
 import type { ScriptBlockType } from '../types';
 import { BLOCK_TYPE_CYCLE_ORDER } from '../types';
+import { BlockMenu } from './block-menu';
 import { EditorToolbar } from './editor-toolbar';
 import { KnowledgeBasePanel } from './knowledge-base-panel';
 
@@ -117,6 +119,7 @@ export function ScriptEditor({
   lastEditedAt,
 }: iScriptEditorProps) {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const editorScrollRef = useRef<HTMLDivElement>(null);
   const [rightPanelTab, setRightPanelTab] = useState('knowledge');
 
   const editor = useEditor({
@@ -171,6 +174,20 @@ export function ScriptEditor({
     [],
   );
 
+  // Scroll to bottom when editor loads - users typically edit from bottom to top
+  useEffect(() => {
+    if (!editor || !editorScrollRef.current) return undefined;
+
+    // Small delay to ensure content is rendered
+    const timeoutId = setTimeout(() => {
+      if (editorScrollRef.current) {
+        editorScrollRef.current.scrollTop = editorScrollRef.current.scrollHeight;
+      }
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [editor]);
+
   const addBlock = useCallback(
     (type: ScriptBlockType) => {
       if (!editor) return;
@@ -185,11 +202,23 @@ export function ScriptEditor({
               const endPos = state.doc.content.size;
               const newNode = nodeType.create();
               tr.insert(endPos, newNode);
+              // Move cursor to the new block
+              tr.setSelection(Selection.near(tr.doc.resolve(endPos + 1)));
             }
           }
           return true;
         })
         .run();
+
+      // Scroll to the new block after DOM update
+      requestAnimationFrame(() => {
+        if (editorScrollRef.current) {
+          editorScrollRef.current.scrollTo({
+            top: editorScrollRef.current.scrollHeight,
+            behavior: 'smooth',
+          });
+        }
+      });
     },
     [editor],
   );
@@ -219,7 +248,8 @@ export function ScriptEditor({
         {/* Editor Panel */}
         <div className="flex h-1/2 w-full flex-col overflow-hidden border-b border-border lg:h-full lg:w-1/2 lg:border-r lg:border-b-0">
           {/* Editor Content */}
-          <div className="flex-1 overflow-y-auto">
+          <div ref={editorScrollRef} className="relative flex-1 overflow-y-auto pl-16">
+            {editor ? <BlockMenu editor={editor} containerRef={editorScrollRef} /> : null}
             <EditorContent editor={editor} className="h-full" />
           </div>
 

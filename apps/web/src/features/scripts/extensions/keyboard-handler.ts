@@ -23,7 +23,7 @@ export const ScriptKeyboardHandler = Extension.create({
         const nextType = NEXT_BLOCK_TYPE_MAP[currentType] ?? 'action';
 
         // Insert a new block of the appropriate type after current position
-        return editor
+        editor
           .chain()
           .focus()
           .command(({ tr, dispatch }) => {
@@ -41,6 +41,32 @@ export const ScriptKeyboardHandler = Extension.create({
             return true;
           })
           .run();
+
+        // Scroll the new block into view after a brief delay for DOM update
+        requestAnimationFrame(() => {
+          const { view } = editor;
+          const { from } = editor.state.selection;
+          try {
+            const coords = view.coordsAtPos(from);
+            const editorContainer = view.dom.closest('.overflow-y-auto');
+            if (editorContainer) {
+              const containerRect = editorContainer.getBoundingClientRect();
+              const scrollPadding = 100; // Extra space below the new block
+
+              // If new block is below visible area, scroll to show it
+              if (coords.bottom > containerRect.bottom - scrollPadding) {
+                editorContainer.scrollTo({
+                  top: editorContainer.scrollTop + (coords.bottom - containerRect.bottom) + scrollPadding,
+                  behavior: 'smooth',
+                });
+              }
+            }
+          } catch {
+            // Ignore scroll errors
+          }
+        });
+
+        return true;
       },
 
       Tab: ({ editor }) => {
