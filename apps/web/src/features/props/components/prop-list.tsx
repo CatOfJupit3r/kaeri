@@ -22,7 +22,7 @@ import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
 import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
 
 import { useDeleteProp } from '../hooks/mutations/use-delete-prop';
-import { PropForm } from './prop-form';
+import { PropCreateForm } from './prop-create-form';
 
 interface iProp {
   _id: string;
@@ -70,7 +70,7 @@ function PropListPending() {
 
 export function PropList({ seriesId, onPropSelect }: iPropListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingProp, setEditingProp] = useState<iProp | undefined>(undefined);
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [propToDelete, setPropToDelete] = useState<iProp | undefined>(undefined);
   const { data, isPending, error, refetch } = usePropList(seriesId);
@@ -90,8 +90,7 @@ export function PropList({ seriesId, onPropSelect }: iPropListProps) {
   };
 
   const handleEditClick = (prop: iProp) => {
-    setEditingProp(prop);
-    setIsFormOpen(true);
+    onPropSelect?.(prop._id);
   };
 
   const handleDeleteClick = (prop: iProp) => {
@@ -110,13 +109,6 @@ export function PropList({ seriesId, onPropSelect }: iPropListProps) {
           },
         },
       );
-    }
-  };
-
-  const handleFormOpenChange = (open: boolean) => {
-    setIsFormOpen(open);
-    if (!open) {
-      setEditingProp(undefined);
     }
   };
 
@@ -146,14 +138,13 @@ export function PropList({ seriesId, onPropSelect }: iPropListProps) {
             <Button onClick={() => setIsFormOpen(true)}>New Prop</Button>
           </EmptyContent>
         </Empty>
-        <PropForm
+        <PropCreateForm
           seriesId={seriesId}
           characters={characters}
           locations={locations}
           scripts={scripts}
           open={isFormOpen}
-          onOpenChange={handleFormOpenChange}
-          initialData={editingProp}
+          onOpenChange={setIsFormOpen}
         />
       </>
     );
@@ -244,14 +235,13 @@ export function PropList({ seriesId, onPropSelect }: iPropListProps) {
           })}
         </div>
       </div>
-      <PropForm
+      <PropCreateForm
         seriesId={seriesId}
         characters={characters}
         locations={locations}
         scripts={scripts}
         open={isFormOpen}
-        onOpenChange={handleFormOpenChange}
-        initialData={editingProp}
+        onOpenChange={setIsFormOpen}
       />
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>

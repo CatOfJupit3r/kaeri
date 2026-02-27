@@ -20,14 +20,11 @@ import { ListErrorState, ListPendingState } from '@~/features/knowledge-base/com
 import { useWildcardList } from '@~/features/wildcards/hooks/queries/use-wildcard-list';
 
 import { useDeleteWildcard } from '../hooks/mutations/use-delete-wildcard';
-import { WildcardForm } from './wildcard-form';
+import type { WildcardQueryReturnType } from '../hooks/queries/use-wildcard';
+import { WildcardCreateForm } from './wildcard-create-form';
+import { WildcardEditForm } from './wildcard-edit-form';
 
-interface iWildcard {
-  _id: string;
-  title: string;
-  body?: string;
-  tag?: string;
-}
+type Wildcard = WildcardQueryReturnType;
 
 interface iWildcardListProps {
   seriesId: string;
@@ -65,10 +62,11 @@ function WildcardListPending() {
 }
 
 export function WildcardList({ seriesId, onWildcardSelect }: iWildcardListProps) {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingWildcard, setEditingWildcard] = useState<iWildcard | undefined>(undefined);
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [editingWildcard, setEditingWildcard] = useState<Wildcard | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [wildcardToDelete, setWildcardToDelete] = useState<iWildcard | undefined>(undefined);
+  const [wildcardToDelete, setWildcardToDelete] = useState<Wildcard | undefined>(undefined);
   const { data, isPending, error, refetch } = useWildcardList(seriesId);
   const { deleteWildcard, isPending: isDeleting } = useDeleteWildcard();
 
@@ -78,12 +76,12 @@ export function WildcardList({ seriesId, onWildcardSelect }: iWildcardListProps)
     }
   };
 
-  const handleEditClick = (wildcard: iWildcard) => {
+  const handleEditClick = (wildcard: Wildcard) => {
     setEditingWildcard(wildcard);
-    setIsFormOpen(true);
+    setIsEditFormOpen(true);
   };
 
-  const handleDeleteClick = (wildcard: iWildcard) => {
+  const handleDeleteClick = (wildcard: Wildcard) => {
     setWildcardToDelete(wildcard);
     setIsDeleteDialogOpen(true);
   };
@@ -102,8 +100,8 @@ export function WildcardList({ seriesId, onWildcardSelect }: iWildcardListProps)
     }
   };
 
-  const handleFormOpenChange = (open: boolean) => {
-    setIsFormOpen(open);
+  const handleEditFormOpenChange = (open: boolean) => {
+    setIsEditFormOpen(open);
     if (!open) {
       setEditingWildcard(undefined);
     }
@@ -133,15 +131,10 @@ export function WildcardList({ seriesId, onWildcardSelect }: iWildcardListProps)
             <EmptyDescription>Create your first Wild Card to store miscellaneous notes and ideas.</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={() => setIsFormOpen(true)}>New Wild Card</Button>
+            <Button onClick={() => setIsCreateFormOpen(true)}>New Wild Card</Button>
           </EmptyContent>
         </Empty>
-        <WildcardForm
-          seriesId={seriesId}
-          open={isFormOpen}
-          onOpenChange={handleFormOpenChange}
-          initialData={editingWildcard}
-        />
+        <WildcardCreateForm seriesId={seriesId} open={isCreateFormOpen} onOpenChange={setIsCreateFormOpen} />
       </>
     );
   }
@@ -153,7 +146,7 @@ export function WildcardList({ seriesId, onWildcardSelect }: iWildcardListProps)
           <p className="text-sm text-muted-foreground">
             {data?.total ?? 0} {data?.total === 1 ? 'Wild Card' : 'Wild Cards'}
           </p>
-          <Button onClick={() => setIsFormOpen(true)}>New Wild Card</Button>
+          <Button onClick={() => setIsCreateFormOpen(true)}>New Wild Card</Button>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -228,12 +221,17 @@ export function WildcardList({ seriesId, onWildcardSelect }: iWildcardListProps)
           ))}
         </div>
       </div>
-      <WildcardForm
-        seriesId={seriesId}
-        open={isFormOpen}
-        onOpenChange={handleFormOpenChange}
-        initialData={editingWildcard}
-      />
+      <WildcardCreateForm seriesId={seriesId} open={isCreateFormOpen} onOpenChange={setIsCreateFormOpen} />
+      {editingWildcard ? (
+        <WildcardEditForm
+          mode="dialog"
+          seriesId={seriesId}
+          open={isEditFormOpen}
+          onOpenChange={handleEditFormOpenChange}
+          initialData={editingWildcard}
+          onClose={() => handleEditFormOpenChange(false)}
+        />
+      ) : null}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

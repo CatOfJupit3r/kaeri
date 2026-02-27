@@ -22,7 +22,7 @@ import { useLocationList } from '@~/features/locations/hooks/queries/use-locatio
 import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
 
 import { useDeleteLocation } from '../hooks/mutations/use-delete-location';
-import { LocationForm } from './location-form';
+import { LocationCreateForm } from './location-create-form';
 
 interface iLocation {
   _id: string;
@@ -65,7 +65,6 @@ function LocationListPending() {
 
 export function LocationList({ seriesId, onLocationSelect }: iLocationListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingLocation, setEditingLocation] = useState<iLocation | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [locationToDelete, setLocationToDelete] = useState<iLocation | undefined>(undefined);
   const { data, isPending, error, refetch } = useLocationList(seriesId);
@@ -84,8 +83,7 @@ export function LocationList({ seriesId, onLocationSelect }: iLocationListProps)
   };
 
   const handleEditClick = (location: iLocation) => {
-    setEditingLocation(location);
-    setIsFormOpen(true);
+    onLocationSelect?.(location._id);
   };
 
   const handleDeleteClick = (location: iLocation) => {
@@ -104,13 +102,6 @@ export function LocationList({ seriesId, onLocationSelect }: iLocationListProps)
           },
         },
       );
-    }
-  };
-
-  const handleFormOpenChange = (open: boolean) => {
-    setIsFormOpen(open);
-    if (!open) {
-      setEditingLocation(undefined);
     }
   };
 
@@ -141,13 +132,12 @@ export function LocationList({ seriesId, onLocationSelect }: iLocationListProps)
             <Button onClick={() => setIsFormOpen(true)}>New Location</Button>
           </EmptyContent>
         </Empty>
-        <LocationForm
+        <LocationCreateForm
           seriesId={seriesId}
           characters={characters}
           props={props}
           open={isFormOpen}
-          onOpenChange={handleFormOpenChange}
-          initialData={editingLocation}
+          onOpenChange={setIsFormOpen}
         />
       </>
     );
@@ -241,13 +231,12 @@ export function LocationList({ seriesId, onLocationSelect }: iLocationListProps)
           })}
         </div>
       </div>
-      <LocationForm
+      <LocationCreateForm
         seriesId={seriesId}
         characters={characters}
         props={props}
         open={isFormOpen}
-        onOpenChange={handleFormOpenChange}
-        initialData={editingLocation}
+        onOpenChange={setIsFormOpen}
       />
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>

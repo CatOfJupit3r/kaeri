@@ -26,7 +26,7 @@ import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list
 import { useDeleteScene } from '../hooks/mutations/use-delete-scene';
 import type { SceneListItem } from '../hooks/queries/use-scene-list';
 import { useSceneList } from '../hooks/queries/use-scene-list';
-import { SceneForm } from './scene-form';
+import { SceneCreateForm } from './scene-create-form';
 
 interface iSceneListProps {
   seriesId: string;
@@ -73,7 +73,6 @@ function SceneListPending() {
 export function SceneList({ seriesId, onSceneSelect }: iSceneListProps) {
   const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingScene, setEditingScene] = useState<SceneListItem | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [sceneToDelete, setSceneToDelete] = useState<SceneListItem | undefined>(undefined);
 
@@ -112,13 +111,8 @@ export function SceneList({ seriesId, onSceneSelect }: iSceneListProps) {
 
   const handleEditClick = (scene: SceneListItem, event: React.MouseEvent) => {
     event.stopPropagation();
-    // If onSceneSelect is provided, use edit panel, otherwise use modal form
-    if (onSceneSelect) {
-      onSceneSelect(scene._id);
-    } else {
-      setEditingScene(scene);
-      setIsFormOpen(true);
-    }
+    // Always use panel for editing - trigger card click
+    handleCardClick(scene._id);
   };
 
   const handleDeleteClick = (scene: SceneListItem, event: React.MouseEvent) => {
@@ -143,9 +137,6 @@ export function SceneList({ seriesId, onSceneSelect }: iSceneListProps) {
 
   const handleFormOpenChange = (open: boolean) => {
     setIsFormOpen(open);
-    if (!open) {
-      setEditingScene(undefined);
-    }
   };
 
   if (isPending) {
@@ -184,7 +175,7 @@ export function SceneList({ seriesId, onSceneSelect }: iSceneListProps) {
             Add Scene
           </Button>
         </Empty>
-        <SceneForm
+        <SceneCreateForm
           seriesId={seriesId}
           scripts={scripts}
           locations={locations}
@@ -272,7 +263,7 @@ export function SceneList({ seriesId, onSceneSelect }: iSceneListProps) {
         })}
       </div>
 
-      <SceneForm
+      <SceneCreateForm
         seriesId={seriesId}
         scripts={scripts}
         locations={locations}
@@ -280,7 +271,6 @@ export function SceneList({ seriesId, onSceneSelect }: iSceneListProps) {
         props={props}
         open={isFormOpen}
         onOpenChange={handleFormOpenChange}
-        initialData={editingScene}
       />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

@@ -7,7 +7,8 @@ import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
-import { CharacterForm } from '@~/features/characters/components/character-form';
+import { CharacterEditForm } from '@~/features/characters/components/character-edit-form';
+import { EDIT_FORM_MODES } from '@~/types/form.types';
 
 import type { CharacterDetailQueryReturnType } from '../hooks/queries/use-character-detail';
 
@@ -202,12 +203,13 @@ export function CharacterDetail({ character, seriesId, allCharacters = [] }: iCh
       </div>
 
       {/* Character Edit Form */}
-      <CharacterForm
+      <CharacterEditForm
+        mode={EDIT_FORM_MODES.dialog}
         seriesId={seriesId}
-        characters={allCharacters}
+        initialData={character}
+        onClose={() => setIsFormOpen(false)}
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
-        initialData={character}
       />
     </>
   );

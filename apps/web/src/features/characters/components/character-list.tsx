@@ -22,7 +22,7 @@ import { ListErrorState, ListPendingState } from '@~/features/knowledge-base/com
 
 import { useDeleteCharacter } from '../hooks/mutations/use-delete-character';
 import type { CharacterListItem } from '../hooks/queries/use-character-list';
-import { CharacterForm } from './character-form';
+import { CharacterCreateForm } from './character-create-form';
 
 interface iCharacterListProps {
   seriesId: string;
@@ -59,7 +59,6 @@ function CharacterListPending() {
 export function CharacterList({ seriesId, onCharacterSelect }: iCharacterListProps) {
   const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingCharacter, setEditingCharacter] = useState<CharacterListItem | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [characterToDelete, setCharacterToDelete] = useState<CharacterListItem | undefined>(undefined);
   const { data, isPending, error, refetch } = useCharacterList(seriesId);
@@ -79,8 +78,7 @@ export function CharacterList({ seriesId, onCharacterSelect }: iCharacterListPro
   };
 
   const handleEditClick = (character: CharacterListItem) => {
-    setEditingCharacter(character);
-    setIsFormOpen(true);
+    onCharacterSelect?.(character._id);
   };
 
   const handleDeleteClick = (character: CharacterListItem) => {
@@ -99,13 +97,6 @@ export function CharacterList({ seriesId, onCharacterSelect }: iCharacterListPro
           },
         },
       );
-    }
-  };
-
-  const handleFormOpenChange = (open: boolean) => {
-    setIsFormOpen(open);
-    if (!open) {
-      setEditingCharacter(undefined);
     }
   };
 
@@ -135,12 +126,11 @@ export function CharacterList({ seriesId, onCharacterSelect }: iCharacterListPro
             <Button onClick={() => setIsFormOpen(true)}>New Character</Button>
           </EmptyContent>
         </Empty>
-        <CharacterForm
+        <CharacterCreateForm
           seriesId={seriesId}
           characters={characters}
           open={isFormOpen}
-          onOpenChange={handleFormOpenChange}
-          initialData={editingCharacter}
+          onOpenChange={setIsFormOpen}
         />
       </>
     );
@@ -244,13 +234,7 @@ export function CharacterList({ seriesId, onCharacterSelect }: iCharacterListPro
           })}
         </div>
       </div>
-      <CharacterForm
-        seriesId={seriesId}
-        characters={characters}
-        open={isFormOpen}
-        onOpenChange={handleFormOpenChange}
-        initialData={editingCharacter}
-      />
+      <CharacterCreateForm seriesId={seriesId} characters={characters} open={isFormOpen} onOpenChange={setIsFormOpen} />
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

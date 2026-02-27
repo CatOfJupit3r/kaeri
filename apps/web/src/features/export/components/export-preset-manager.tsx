@@ -35,7 +35,7 @@ export function ExportPresetManager({ isOpen, onClose }: iExportPresetManagerPro
       try {
         await deletePresetAsync({ presetId: preset._id });
         toastSuccess(`Preset "${preset.name}" deleted`);
-      } catch (_error) {
+      } catch {
         toastError('Failed to delete preset');
       }
     },
@@ -47,7 +47,7 @@ export function ExportPresetManager({ isOpen, onClose }: iExportPresetManagerPro
       try {
         const newPreset = await duplicatePresetAsync({ presetId: preset._id });
         toastSuccess(`Created "${newPreset.name}"`);
-      } catch (_error) {
+      } catch {
         toastError('Failed to duplicate preset');
       }
     },

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { LuGripVertical, LuPlus, LuTrash2 } from 'react-icons/lu';
 
 import { Button } from '@~/components/ui/button';
@@ -9,8 +9,7 @@ import { Label } from '@~/components/ui/label';
 import { SingleSelect } from '@~/components/ui/select';
 
 import { useCreateStoryArc } from '../hooks/mutations/use-create-story-arc';
-import { useUpdateStoryArc } from '../hooks/mutations/use-update-story-arc';
-import type { StoryArcListItem } from '../hooks/queries/use-story-arc-list';
+import type { StoryArcStatus } from '../schemas/story-arc.schema';
 import { storyArcFormSchema } from '../schemas/story-arc.schema';
 
 interface iScript {
@@ -28,14 +27,13 @@ interface iTheme {
   name: string;
 }
 
-interface iStoryArcFormProps {
+interface iStoryArcCreateFormProps {
   seriesId: string;
   scripts: iScript[];
   characters: iCharacter[];
   themes: iTheme[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialData?: StoryArcListItem;
 }
 
 interface iBeat {
@@ -56,37 +54,36 @@ const STATUS_OPTIONS = [
   { value: 'abandoned', label: 'Abandoned' },
 ] as const;
 
-export function StoryArcForm({
+/**
+ * Create form for story arcs.
+ * Renders in a dialog with manual submit.
+ */
+export function StoryArcCreateForm({
   seriesId,
   scripts,
   characters,
   themes,
   open,
   onOpenChange,
-  initialData,
-}: iStoryArcFormProps) {
-  const isEditMode = !!initialData;
-  const { createStoryArc, isPending: isCreating } = useCreateStoryArc();
-  const { updateStoryArc, isPending: isUpdating } = useUpdateStoryArc();
-  const isPending = isCreating || isUpdating;
+}: iStoryArcCreateFormProps) {
+  const { createStoryArc, isPending } = useCreateStoryArc();
 
-  const [beats, setBeats] = useState<iBeat[]>(
-    initialData?.keyBeats ?? [{ id: crypto.randomUUID(), order: 0, description: '' }],
-  );
+  // Local state for array fields
+  const [beats, setBeats] = useState<iBeat[]>([{ id: crypto.randomUUID(), order: 0, description: '' }]);
   const [beatInput, setBeatInput] = useState('');
-  const [characterRoles, setCharacterRoles] = useState<iCharacterRole[]>(initialData?.characters ?? []);
+  const [characterRoles, setCharacterRoles] = useState<iCharacterRole[]>([]);
   const [selectedCharacterId, setSelectedCharacterId] = useState('');
   const [characterRoleInput, setCharacterRoleInput] = useState('');
-  const [selectedThemeIds, setSelectedThemeIds] = useState<string[]>(initialData?.themeIds ?? []);
+  const [selectedThemeIds, setSelectedThemeIds] = useState<string[]>([]);
 
   const form = useAppForm({
     defaultValues: {
-      name: initialData?.name ?? '',
-      description: initialData?.description ?? '',
-      status: initialData?.status ?? ('planned' as const),
-      startScriptId: initialData?.startScriptId ?? '',
-      endScriptId: initialData?.endScriptId ?? '',
-      resolution: initialData?.resolution ?? '',
+      name: '',
+      description: '',
+      status: 'planned' as StoryArcStatus,
+      startScriptId: '',
+      endScriptId: '',
+      resolution: '',
     },
     onSubmit: async ({ value }) => {
       const payload = {
@@ -96,44 +93,19 @@ export function StoryArcForm({
         status: value.status,
         startScriptId: value.startScriptId || undefined,
         endScriptId: value.endScriptId || undefined,
-        keyBeats: beats,
+        keyBeats: beats.filter((b) => b.description.trim()),
         resolution: value.resolution || undefined,
         characters: characterRoles,
         themeIds: selectedThemeIds,
       };
 
-      const handleSuccess = () => {
-        onOpenChange(false);
-        form.reset();
-        setBeats([{ id: crypto.randomUUID(), order: 0, description: '' }]);
-        setCharacterRoles([]);
-        setSelectedThemeIds([]);
-        setBeatInput('');
-        setSelectedCharacterId('');
-        setCharacterRoleInput('');
-      };
-
-      if (isEditMode && initialData) {
-        updateStoryArc(
-          {
-            storyArcId: initialData._id,
-            patch: {
-              name: value.name,
-              description: value.description,
-              status: value.status,
-              startScriptId: value.startScriptId || undefined,
-              endScriptId: value.endScriptId || undefined,
-              keyBeats: beats,
-              resolution: value.resolution || undefined,
-              characters: characterRoles,
-              themeIds: selectedThemeIds,
-            },
-          },
-          { onSuccess: handleSuccess },
-        );
-      } else {
-        createStoryArc(payload, { onSuccess: handleSuccess });
-      }
+      createStoryArc(payload, {
+        onSuccess: () => {
+          onOpenChange(false);
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          resetForm();
+        },
+      });
     },
     validators: {
       onSubmit: storyArcFormSchema,
@@ -150,6 +122,13 @@ export function StoryArcForm({
     setCharacterRoleInput('');
   }, [form]);
 
+  useEffect(() => {
+    if (!open) {
+      resetForm();
+    }
+  }, [open, resetForm]);
+
+  // Beat management
   const handleAddBeat = () => {
     if (beatInput.trim()) {
       setBeats([...beats, { id: crypto.randomUUID(), order: beats.length, description: beatInput.trim() }]);
@@ -176,10 +155,10 @@ export function StoryArcForm({
     setBeats(newBeats.map((b, i) => ({ ...b, order: i })));
   };
 
+  // Character management
   const handleAddCharacter = () => {
     if (selectedCharacterId && characterRoleInput.trim()) {
-      // Avoid duplicates
-      if (!characterRoles.find((c) => c.characterId === selectedCharacterId)) {
+      if (!characterRoles.some((c) => c.characterId === selectedCharacterId)) {
         setCharacterRoles([...characterRoles, { characterId: selectedCharacterId, role: characterRoleInput.trim() }]);
         setSelectedCharacterId('');
         setCharacterRoleInput('');
@@ -191,6 +170,7 @@ export function StoryArcForm({
     setCharacterRoles(characterRoles.filter((c) => c.characterId !== characterId));
   };
 
+  // Theme management
   const handleAddTheme = (themeId: string) => {
     if (themeId && !selectedThemeIds.includes(themeId)) {
       setSelectedThemeIds([...selectedThemeIds, themeId]);
@@ -205,18 +185,11 @@ export function StoryArcForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? 'Edit Story Arc' : 'Create Story Arc'}</DialogTitle>
+          <DialogTitle>Create Story Arc</DialogTitle>
         </DialogHeader>
 
         <form.AppForm>
-          <form.Form
-            className="space-y-4 p-0"
-            onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
-              e.preventDefault();
-              e.stopPropagation();
-              void form.handleSubmit();
-            }}
-          >
+          <form.Form className="space-y-4 p-0">
             <form.AppField name="name">
               {(field) => <field.TextField label="Arc Name" placeholder="e.g., Hero's Journey" required />}
             </form.AppField>
@@ -367,7 +340,7 @@ export function StoryArcForm({
                   value={selectedCharacterId}
                   onValueChange={(value: string | null) => setSelectedCharacterId(value ?? '')}
                   options={characters
-                    .filter((c) => !characterRoles.find((cr) => cr.characterId === c._id))
+                    .filter((c) => !characterRoles.some((cr) => cr.characterId === c._id))
                     .map((c) => ({ value: c._id, label: c.name }))}
                   placeholder="Select character"
                 />
@@ -434,8 +407,8 @@ export function StoryArcForm({
                   onOpenChange(false);
                   resetForm();
                 }}
-                submitLabel={isEditMode ? 'Update' : 'Create'}
-                loadingLabel={isEditMode ? 'Updating...' : 'Creating...'}
+                submitLabel="Create"
+                loadingLabel="Creating..."
                 isDisabled={isPending}
               />
             </DialogFooter>

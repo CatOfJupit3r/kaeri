@@ -6,11 +6,10 @@ import { Button } from '@~/components/ui/button';
 import { Card } from '@~/components/ui/card';
 import { Progress } from '@~/components/ui/progress';
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
-import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
 import { useThemeList } from '@~/features/themes/hooks/queries/use-theme-list';
 
 import type { StoryArcDetailQueryReturnType } from '../hooks/queries/use-story-arc';
-import { StoryArcForm } from './story-arc-form';
+import { StoryArcEditForm } from './story-arc-edit-form';
 
 interface iStoryArcDetailProps {
   storyArc: StoryArcDetailQueryReturnType;
@@ -34,12 +33,10 @@ const STATUS_LABELS = {
 export function StoryArcDetail({ storyArc, seriesId }: iStoryArcDetailProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  // Fetch data for display and StoryArcForm
-  const { data: scriptsData } = useScriptList(seriesId);
+  // Fetch data for display
   const { data: charactersData } = useCharacterList(seriesId, 100, 0);
   const { data: themesData } = useThemeList(seriesId, 100, 0);
 
-  const scripts = scriptsData?.items ?? [];
   const characters = charactersData?.items ?? [];
   const themes = themesData?.items ?? [];
 
@@ -168,14 +165,13 @@ export function StoryArcDetail({ storyArc, seriesId }: iStoryArcDetailProps) {
         </div>
       </div>
 
-      <StoryArcForm
+      <StoryArcEditForm
+        mode="dialog"
         seriesId={seriesId}
-        scripts={scripts}
-        characters={characters}
-        themes={themes}
+        initialData={storyArc}
+        onClose={() => setIsFormOpen(false)}
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
-        initialData={storyArc}
       />
     </>
   );

@@ -9,6 +9,8 @@ interface iUseAutoSaveOptions {
   isUpdating: boolean;
   /** Debounce delay in milliseconds (default: 0 - no debounce, immediate save) */
   debounceMs?: number;
+  /** Whether auto-save is enabled (default: true). Set to false for dialog mode. */
+  enabled?: boolean;
 }
 
 /**
@@ -23,7 +25,10 @@ interface iUseAutoSaveOptions {
  * <field.TextField label="Name" onBlur={handleAutoSave} />
  * ```
  */
-export function useAutoSave(form: iFormWithHandleSubmit, { isUpdating, debounceMs = 0 }: iUseAutoSaveOptions) {
+export function useAutoSave(
+  form: iFormWithHandleSubmit,
+  { isUpdating, debounceMs = 0, enabled = true }: iUseAutoSaveOptions,
+) {
   const isInitializedRef = useRef(false);
   const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -49,6 +54,9 @@ export function useAutoSave(form: iFormWithHandleSubmit, { isUpdating, debounceM
   );
 
   const handleAutoSave = useCallback(() => {
+    // Skip auto-save if disabled (e.g., in dialog mode)
+    if (!enabled) return;
+
     if (!isInitializedRef.current) return;
 
     // Don't trigger if already updating
@@ -70,7 +78,7 @@ export function useAutoSave(form: iFormWithHandleSubmit, { isUpdating, debounceM
     } else {
       performSave();
     }
-  }, [form, isUpdating, debounceMs]);
+  }, [form, isUpdating, debounceMs, enabled]);
 
   /**
    * Reset initialization state.

@@ -113,7 +113,7 @@ export function ExportPresetForm({ preset, onSave, onCancel }: iExportPresetForm
           toastSuccess('Preset created');
         }
         onSave();
-      } catch (_error) {
+      } catch {
         toastError('Failed to save preset');
       }
     },

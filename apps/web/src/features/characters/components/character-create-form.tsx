@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { LuX } from 'react-icons/lu';
 
 import { Badge } from '@~/components/ui/badge';
@@ -17,149 +16,72 @@ import { Label } from '@~/components/ui/label';
 import { RelationshipPicker } from '@~/features/knowledge-base/components/relationship-picker';
 
 import { useCreateCharacter } from '../hooks/mutations/use-create-character';
-import { useUpdateCharacter } from '../hooks/mutations/use-update-character';
 import type { CharacterListItem } from '../hooks/queries/use-character-list';
 import { characterFormSchema } from '../schemas/character.schema';
 import { AppearancePicker } from './appearance-picker';
+import { CharacterFormFields } from './character-form-fields';
 
 type Relationship = NonNullable<CharacterListItem['relationships']>[number];
 type Appearance = NonNullable<CharacterListItem['appearances']>[number];
-type Character = CharacterListItem;
 
-interface iCharacter {
-  _id: string;
-  name: string;
-}
-
-interface iCharacterFormProps {
+interface iCharacterCreateFormProps {
   seriesId: string;
-  characters: iCharacter[];
+  characters: Array<{ _id: string; name: string }>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialData?: Character;
 }
 
-export function CharacterForm({ seriesId, characters, open, onOpenChange, initialData }: iCharacterFormProps) {
-  const { createCharacter, isPending: isCreating } = useCreateCharacter();
-  const { updateCharacter, isPending: isUpdating } = useUpdateCharacter();
-
-  const isPending = isCreating || isUpdating;
-  const isEditMode = !!initialData;
+export function CharacterCreateForm({ seriesId, characters, open, onOpenChange }: iCharacterCreateFormProps) {
+  const { createCharacter, isPending } = useCreateCharacter();
 
   const form = useAppForm({
     defaultValues: {
-      name: initialData?.name ?? '',
-      description: initialData?.description ?? '',
-      avatarUrl: initialData?.avatarUrl ?? '',
-      traits: initialData?.traits ?? ([] as string[]),
-      relationships: initialData?.relationships ?? ([] as Relationship[]),
-      appearances: initialData?.appearances ?? ([] as Appearance[]),
+      name: '',
+      description: '',
+      avatarUrl: '',
+      traits: [] as string[],
+      relationships: [] as Relationship[],
+      appearances: [] as Appearance[],
     },
     onSubmit: async ({ value }) => {
-      if (isEditMode && initialData) {
-        updateCharacter(
-          {
-            id: initialData._id,
-            seriesId,
-            patch: {
-              name: value.name,
-              description: value.description || undefined,
-              avatarUrl: value.avatarUrl || undefined,
-              traits: value.traits.length > 0 ? value.traits : undefined,
-              relationships: value.relationships.length > 0 ? value.relationships : undefined,
-              appearances: value.appearances.length > 0 ? value.appearances : undefined,
-            },
+      createCharacter(
+        {
+          seriesId,
+          value: {
+            name: value.name,
+            description: value.description || undefined,
+            avatarUrl: value.avatarUrl || undefined,
+            traits: value.traits.length > 0 ? value.traits : undefined,
+            relationships: value.relationships.length > 0 ? value.relationships : undefined,
+            appearances: value.appearances.length > 0 ? value.appearances : undefined,
           },
-          {
-            onSuccess: () => {
-              onOpenChange(false);
-            },
+        },
+        {
+          onSuccess: () => {
+            onOpenChange(false);
+            form.reset();
           },
-        );
-      } else {
-        createCharacter(
-          {
-            seriesId,
-            value: {
-              name: value.name,
-              description: value.description || undefined,
-              avatarUrl: value.avatarUrl || undefined,
-              traits: value.traits.length > 0 ? value.traits : undefined,
-              relationships: value.relationships.length > 0 ? value.relationships : undefined,
-              appearances: value.appearances.length > 0 ? value.appearances : undefined,
-            },
-          },
-          {
-            onSuccess: () => {
-              onOpenChange(false);
-              form.reset();
-            },
-          },
-        );
-      }
+        },
+      );
     },
     validators: {
       onSubmit: characterFormSchema,
     },
   });
 
-  useEffect(() => {
-    if (open && initialData) {
-      form.reset({
-        name: initialData.name,
-        description: initialData.description ?? '',
-        avatarUrl: initialData.avatarUrl ?? '',
-        traits: initialData.traits ?? [],
-        relationships: initialData.relationships ?? [],
-        appearances: initialData.appearances ?? [],
-      });
-    } else if (!open) {
-      form.reset({
-        name: '',
-        description: '',
-        avatarUrl: '',
-        traits: [],
-        relationships: [],
-        appearances: [],
-      });
-    }
-  }, [open, initialData, form]);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? 'Edit Character' : 'Create Character'}</DialogTitle>
-          <DialogDescription>
-            {isEditMode
-              ? 'Update the character details below.'
-              : 'Add a new character to your series. Fill in the details below.'}
-          </DialogDescription>
+          <DialogTitle>Create Character</DialogTitle>
+          <DialogDescription>Add a new character to your series. Fill in the details below.</DialogDescription>
         </DialogHeader>
 
         <form.AppForm>
           <form.Form className="space-y-4 p-0">
-            <div className="grid grid-cols-2 gap-4">
-              <form.AppField name="name">
-                {(field) => <field.TextField label="Name" placeholder="Enter character name" required />}
-              </form.AppField>
+            <CharacterFormFields form={form} isPending={isPending} />
 
-              <form.AppField name="avatarUrl">
-                {(field) => <field.TextField label="Avatar URL" placeholder="https://example.com/avatar.jpg" />}
-              </form.AppField>
-            </div>
-
-            <form.AppField name="description">
-              {(field) => (
-                <field.TextareaField
-                  label="Description"
-                  placeholder="Describe the character..."
-                  rows={3}
-                  maxLength={500}
-                />
-              )}
-            </form.AppField>
-
+            {/* Traits */}
             <form.Field name="traits" mode="array">
               {(field) => {
                 const traits = field.state.value || [];
@@ -224,6 +146,7 @@ export function CharacterForm({ seriesId, characters, open, onOpenChange, initia
               }}
             </form.Field>
 
+            {/* Relationships */}
             <form.Field name="relationships" mode="array">
               {(field) => {
                 const relationships = field.state.value ?? [];
@@ -233,7 +156,7 @@ export function CharacterForm({ seriesId, characters, open, onOpenChange, initia
                     <div id="character-relationships">
                       <RelationshipPicker
                         characters={characters}
-                        currentCharacterId={initialData?._id}
+                        currentCharacterId={undefined}
                         relationships={relationships}
                         onAdd={(relationship) => {
                           const existingIndex = relationships.findIndex(
@@ -259,6 +182,7 @@ export function CharacterForm({ seriesId, characters, open, onOpenChange, initia
               }}
             </form.Field>
 
+            {/* Appearances */}
             <form.Field name="appearances" mode="array">
               {(field) => {
                 const appearances = field.state.value ?? [];
@@ -282,8 +206,8 @@ export function CharacterForm({ seriesId, characters, open, onOpenChange, initia
             <DialogFooter>
               <form.FormActions
                 onCancel={() => onOpenChange(false)}
-                submitLabel={isEditMode ? 'Update Character' : 'Create Character'}
-                loadingLabel={isEditMode ? 'Updating...' : 'Creating...'}
+                submitLabel="Create Character"
+                loadingLabel="Creating..."
                 isDisabled={isPending}
               />
             </DialogFooter>

@@ -8,7 +8,7 @@ import { Card } from '@~/components/ui/card';
 import { Skeleton } from '@~/components/ui/skeleton';
 
 import type { SceneDetailQueryReturnType } from '../hooks/queries/use-scene';
-import { SceneForm } from './scene-form';
+import { SceneEditForm } from './scene-edit-form';
 
 interface iSceneDetailProps {
   scene: SceneDetailQueryReturnType;
@@ -19,9 +19,6 @@ interface iSceneDetailProps {
   characters?: Array<{ _id: string; name: string }>;
   location?: { _id: string; name: string };
   props?: Array<{ _id: string; name: string }>;
-  // Data for SceneForm dropdowns
-  scripts?: Array<{ _id: string; title: string }>;
-  locations?: Array<{ _id: string; name: string }>;
 }
 
 export function SceneDetail({
@@ -33,8 +30,6 @@ export function SceneDetail({
   characters = [],
   location,
   props = [],
-  scripts = [],
-  locations = [],
 }: iSceneDetailProps) {
   const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -252,15 +247,13 @@ export function SceneDetail({
         </div>
       </div>
 
-      <SceneForm
+      <SceneEditForm
+        mode="dialog"
         seriesId={seriesId}
-        scripts={scripts}
-        locations={locations}
-        characters={characters}
-        props={props}
+        initialData={scene}
+        onClose={() => setIsFormOpen(false)}
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
-        initialData={scene}
       />
     </>
   );

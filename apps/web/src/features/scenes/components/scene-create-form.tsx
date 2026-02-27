@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { LuX } from 'react-icons/lu';
 
 import { Badge } from '@~/components/ui/badge';
@@ -17,49 +17,21 @@ import { Label } from '@~/components/ui/label';
 import { SingleSelect } from '@~/components/ui/select';
 
 import { useCreateScene } from '../hooks/mutations/use-create-scene';
-import { useUpdateScene } from '../hooks/mutations/use-update-scene';
-import type { SceneDetailQueryReturnType } from '../hooks/queries/use-scene';
-import type { SceneListItem } from '../hooks/queries/use-scene-list';
 import { sceneFormSchema } from '../schemas/scene.schema';
+import type { iSceneBeat } from './scene-form-fields';
+import { SceneFormFields } from './scene-form-fields';
 
-interface iSceneBeat {
-  order: number;
-  description: string;
-}
-type Scene = SceneDetailQueryReturnType | SceneListItem;
-
-interface iScript {
-  _id: string;
-  title: string;
-}
-
-interface iLocation {
-  _id: string;
-  name: string;
-}
-
-interface iCharacter {
-  _id: string;
-  name: string;
-}
-
-interface iProp {
-  _id: string;
-  name: string;
-}
-
-interface iSceneFormProps {
+interface iSceneCreateFormProps {
   seriesId: string;
-  scripts: iScript[];
-  locations: iLocation[];
-  characters: iCharacter[];
-  props: iProp[];
+  scripts: Array<{ _id: string; title: string }>;
+  locations: Array<{ _id: string; name: string }>;
+  characters: Array<{ _id: string; name: string }>;
+  props: Array<{ _id: string; name: string }>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialData?: Scene;
 }
 
-export function SceneForm({
+export function SceneCreateForm({
   seriesId,
   scripts,
   locations,
@@ -67,152 +39,73 @@ export function SceneForm({
   props,
   open,
   onOpenChange,
-  initialData,
-}: iSceneFormProps) {
-  const { createScene, isPending: isCreating } = useCreateScene();
-  const { updateScene, isPending: isUpdating } = useUpdateScene();
-
-  const isPending = isCreating || isUpdating;
-  const isEditMode = !!initialData;
-
+}: iSceneCreateFormProps) {
+  const { createScene, isPending } = useCreateScene();
   const [beatInput, setBeatInput] = useState('');
-
-  const fullSceneData = initialData && 'beats' in initialData ? initialData : null;
 
   const form = useAppForm({
     defaultValues: {
-      scriptId: initialData?.scriptId ?? '',
-      heading: fullSceneData?.heading ?? '',
-      locationId: initialData?.locationId ?? '',
-      timeOfDay: fullSceneData?.timeOfDay ?? '',
-      duration: fullSceneData?.duration ?? '',
-      emotionalTone: initialData?.emotionalTone ?? '',
-      conflict: fullSceneData?.conflict ?? '',
-      beats: fullSceneData?.beats ?? ([] as iSceneBeat[]),
-      characterIds: initialData?.characterIds ?? ([] as string[]),
-      propIds: fullSceneData?.propIds ?? ([] as string[]),
-      lighting: fullSceneData?.lighting ?? '',
-      sound: fullSceneData?.sound ?? '',
-      camera: fullSceneData?.camera ?? '',
-      storyNotes: fullSceneData?.storyNotes ?? '',
-      storyboardUrl: fullSceneData?.storyboardUrl ?? '',
+      scriptId: '',
+      heading: '',
+      locationId: '',
+      timeOfDay: '',
+      duration: '',
+      emotionalTone: '',
+      conflict: '',
+      beats: [] as iSceneBeat[],
+      characterIds: [] as string[],
+      propIds: [] as string[],
+      lighting: '',
+      sound: '',
+      camera: '',
+      storyNotes: '',
+      storyboardUrl: '',
     },
     onSubmit: async ({ value }) => {
-      if (isEditMode && initialData) {
-        updateScene(
-          {
-            sceneId: initialData._id,
-            patch: {
-              heading: value.heading,
-              locationId: value.locationId || undefined,
-              timeOfDay: value.timeOfDay || undefined,
-              duration: value.duration || undefined,
-              emotionalTone: value.emotionalTone || undefined,
-              conflict: value.conflict || undefined,
-              beats: value.beats.length > 0 ? value.beats : undefined,
-              characterIds: value.characterIds.length > 0 ? value.characterIds : undefined,
-              propIds: value.propIds.length > 0 ? value.propIds : undefined,
-              lighting: value.lighting || undefined,
-              sound: value.sound || undefined,
-              camera: value.camera || undefined,
-              storyNotes: value.storyNotes || undefined,
-              storyboardUrl: value.storyboardUrl || undefined,
-            },
+      createScene(
+        {
+          seriesId,
+          scriptId: value.scriptId,
+          heading: value.heading,
+          locationId: value.locationId || undefined,
+          timeOfDay: value.timeOfDay || undefined,
+          duration: value.duration || undefined,
+          emotionalTone: value.emotionalTone || undefined,
+          conflict: value.conflict || undefined,
+          beats: value.beats.length > 0 ? value.beats : undefined,
+          characterIds: value.characterIds.length > 0 ? value.characterIds : undefined,
+          propIds: value.propIds.length > 0 ? value.propIds : undefined,
+          lighting: value.lighting || undefined,
+          sound: value.sound || undefined,
+          camera: value.camera || undefined,
+          storyNotes: value.storyNotes || undefined,
+          storyboardUrl: value.storyboardUrl || undefined,
+        },
+        {
+          onSuccess: () => {
+            onOpenChange(false);
+            form.reset();
+            setBeatInput('');
           },
-          {
-            onSuccess: () => {
-              onOpenChange(false);
-            },
-          },
-        );
-      } else {
-        createScene(
-          {
-            seriesId,
-            scriptId: value.scriptId,
-            heading: value.heading,
-            locationId: value.locationId || undefined,
-            timeOfDay: value.timeOfDay || undefined,
-            duration: value.duration || undefined,
-            emotionalTone: value.emotionalTone || undefined,
-            conflict: value.conflict || undefined,
-            beats: value.beats.length > 0 ? value.beats : undefined,
-            characterIds: value.characterIds.length > 0 ? value.characterIds : undefined,
-            propIds: value.propIds.length > 0 ? value.propIds : undefined,
-            lighting: value.lighting || undefined,
-            sound: value.sound || undefined,
-            camera: value.camera || undefined,
-            storyNotes: value.storyNotes || undefined,
-            storyboardUrl: value.storyboardUrl || undefined,
-          },
-          {
-            onSuccess: () => {
-              onOpenChange(false);
-              form.reset();
-            },
-          },
-        );
-      }
+        },
+      );
     },
     validators: {
       onSubmit: sceneFormSchema,
     },
   });
 
-  useEffect(() => {
-    if (open && initialData) {
-      const fullData = initialData && 'beats' in initialData ? initialData : null;
-      form.reset({
-        scriptId: initialData.scriptId,
-        heading: fullData?.heading ?? '',
-        locationId: initialData.locationId ?? '',
-        timeOfDay: fullData?.timeOfDay ?? '',
-        duration: fullData?.duration ?? '',
-        emotionalTone: initialData.emotionalTone ?? '',
-        conflict: fullData?.conflict ?? '',
-        beats: fullData?.beats ?? [],
-        characterIds: initialData.characterIds ?? [],
-        propIds: fullData?.propIds ?? [],
-        lighting: fullData?.lighting ?? '',
-        sound: fullData?.sound ?? '',
-        camera: fullData?.camera ?? '',
-        storyNotes: fullData?.storyNotes ?? '',
-        storyboardUrl: fullData?.storyboardUrl ?? '',
-      });
-    } else if (!open) {
-      form.reset({
-        scriptId: '',
-        heading: '',
-        locationId: '',
-        timeOfDay: '',
-        duration: '',
-        emotionalTone: '',
-        conflict: '',
-        beats: [],
-        characterIds: [],
-        propIds: [],
-        lighting: '',
-        sound: '',
-        camera: '',
-        storyNotes: '',
-        storyboardUrl: '',
-      });
-      setBeatInput('');
-    }
-  }, [open, initialData, form]);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? 'Edit Scene' : 'Create Scene'}</DialogTitle>
-          <DialogDescription>
-            {isEditMode ? 'Update the scene details below.' : 'Add a new scene to your script.'}
-          </DialogDescription>
+          <DialogTitle>Create Scene</DialogTitle>
+          <DialogDescription>Add a new scene to your script.</DialogDescription>
         </DialogHeader>
 
         <form.AppForm>
           <form.Form className="space-y-4 p-0">
+            {/* Script Selection */}
             <form.Field name="scriptId">
               {(field) => (
                 <div className="space-y-2">
@@ -225,7 +118,7 @@ export function SceneForm({
                     onValueChange={(value) => field.handleChange(value ?? '')}
                     options={scripts.map((script) => ({ label: script.title, value: script._id }))}
                     placeholder="Select a script"
-                    isDisabled={isPending || isEditMode}
+                    isDisabled={isPending}
                   />
                   {field.state.meta.errors.length > 0 && (
                     <p className="text-sm text-destructive">{String(field.state.meta.errors[0])}</p>
@@ -234,13 +127,10 @@ export function SceneForm({
               )}
             </form.Field>
 
-            <form.AppField name="heading">
-              {(field) => (
-                <field.TextField label="Heading" placeholder="INT. COFFEE SHOP - DAY" required maxLength={200} />
-              )}
-            </form.AppField>
+            <SceneFormFields form={form} isPending={isPending} />
 
             <div className="grid grid-cols-2 gap-4">
+              {/* Location */}
               <form.Field name="locationId">
                 {(field) => (
                   <div className="space-y-2">
@@ -259,31 +149,11 @@ export function SceneForm({
               </form.Field>
 
               <form.AppField name="timeOfDay">
-                {(field) => <field.TextField label="Time of Day" placeholder="Night" />}
+                {(field) => <field.TextField label="Time of Day" placeholder="Night" disabled={isPending} />}
               </form.AppField>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <form.AppField name="duration">
-                {(field) => <field.TextField label="Duration" placeholder="2 pages" />}
-              </form.AppField>
-
-              <form.AppField name="emotionalTone">
-                {(field) => <field.TextField label="Emotional Tone" placeholder="Tense, Chaotic" />}
-              </form.AppField>
-            </div>
-
-            <form.AppField name="conflict">
-              {(field) => (
-                <field.TextareaField
-                  label="Conflict"
-                  placeholder="Describe the conflict..."
-                  rows={3}
-                  maxLength={1000}
-                />
-              )}
-            </form.AppField>
-
+            {/* Beats */}
             <form.Field name="beats" mode="array">
               {(field) => {
                 const beats = field.state.value || [];
@@ -351,6 +221,7 @@ export function SceneForm({
               }}
             </form.Field>
 
+            {/* Characters */}
             <form.Field name="characterIds" mode="array">
               {(field) => {
                 const selectedIds = field.state.value || [];
@@ -397,6 +268,7 @@ export function SceneForm({
               }}
             </form.Field>
 
+            {/* Props */}
             <form.Field name="propIds" mode="array">
               {(field) => {
                 const selectedIds = field.state.value || [];
@@ -443,19 +315,41 @@ export function SceneForm({
               }}
             </form.Field>
 
+            {/* Production Details */}
             <div className="space-y-4 rounded-lg border p-4">
               <h3 className="font-medium">Production Details</h3>
 
               <form.AppField name="lighting">
-                {(field) => <field.TextareaField label="Lighting" placeholder="Neon strobes, fog..." rows={2} />}
+                {(field) => (
+                  <field.TextareaField
+                    label="Lighting"
+                    placeholder="Neon strobes, fog..."
+                    rows={2}
+                    disabled={isPending}
+                  />
+                )}
               </form.AppField>
 
               <form.AppField name="sound">
-                {(field) => <field.TextareaField label="Sound Design" placeholder="Loud techno music..." rows={2} />}
+                {(field) => (
+                  <field.TextareaField
+                    label="Sound Design"
+                    placeholder="Loud techno music..."
+                    rows={2}
+                    disabled={isPending}
+                  />
+                )}
               </form.AppField>
 
               <form.AppField name="camera">
-                {(field) => <field.TextareaField label="Camera" placeholder="Wide shots, close-ups..." rows={2} />}
+                {(field) => (
+                  <field.TextareaField
+                    label="Camera"
+                    placeholder="Wide shots, close-ups..."
+                    rows={2}
+                    disabled={isPending}
+                  />
+                )}
               </form.AppField>
             </div>
 
@@ -466,19 +360,26 @@ export function SceneForm({
                   placeholder="Story notes and directions..."
                   rows={3}
                   maxLength={2000}
+                  disabled={isPending}
                 />
               )}
             </form.AppField>
 
             <form.AppField name="storyboardUrl">
-              {(field) => <field.TextField label="Storyboard URL" placeholder="https://example.com/storyboard.jpg" />}
+              {(field) => (
+                <field.TextField
+                  label="Storyboard URL"
+                  placeholder="https://example.com/storyboard.jpg"
+                  disabled={isPending}
+                />
+              )}
             </form.AppField>
 
             <DialogFooter>
               <form.FormActions
                 onCancel={() => onOpenChange(false)}
-                submitLabel={isEditMode ? 'Update Scene' : 'Create Scene'}
-                loadingLabel={isEditMode ? 'Updating...' : 'Creating...'}
+                submitLabel="Create Scene"
+                loadingLabel="Creating..."
                 isDisabled={isPending}
               />
             </DialogFooter>

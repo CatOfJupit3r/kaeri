@@ -15,23 +15,23 @@ import {
 import { Input } from '@~/components/ui/input';
 import { ScrollArea } from '@~/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
-import { CharacterEditPanel } from '@~/features/characters/components/character-edit-panel';
 import { CharacterList } from '@~/features/characters/components/character-list';
+import { CharacterPanel } from '@~/features/characters/components/character-panel';
 import { KBAllView } from '@~/features/knowledge-base/components/kb-all-view';
-import { LocationEditPanel } from '@~/features/locations/components/location-edit-panel';
 import { LocationList } from '@~/features/locations/components/location-list';
-import { PropEditPanel } from '@~/features/props/components/prop-edit-panel';
+import { LocationPanel } from '@~/features/locations/components/location-panel';
 import { PropList } from '@~/features/props/components/prop-list';
-import { SceneEditPanel } from '@~/features/scenes/components/scene-edit-panel';
+import { PropPanel } from '@~/features/props/components/prop-panel';
 import { SceneList } from '@~/features/scenes/components/scene-list';
-import { StoryArcEditPanel } from '@~/features/story-arcs/components/story-arc-edit-panel';
+import { ScenePanel } from '@~/features/scenes/components/scene-panel';
 import { StoryArcList } from '@~/features/story-arcs/components/story-arc-list';
-import { ThemeEditPanel } from '@~/features/themes/components/theme-edit-panel';
+import { StoryArcPanel } from '@~/features/story-arcs/components/story-arc-panel';
 import { ThemeList } from '@~/features/themes/components/theme-list';
-import { TimelineEditPanel } from '@~/features/timelines/components/timeline-edit-panel';
+import { ThemePanel } from '@~/features/themes/components/theme-panel';
 import { TimelineList } from '@~/features/timelines/components/timeline-list';
-import { WildcardEditPanel } from '@~/features/wildcards/components/wildcard-edit-panel';
+import { TimelinePanel } from '@~/features/timelines/components/timeline-panel';
 import { WildcardList } from '@~/features/wildcards/components/wildcard-list';
+import { WildcardPanel } from '@~/features/wildcards/components/wildcard-panel';
 
 interface iKnowledgeBasePanelProps {
   seriesId: string;
@@ -142,44 +142,42 @@ export function KnowledgeBasePanel({ seriesId }: iKnowledgeBasePanelProps) {
 
   // Show character edit panel when a character is selected
   if (selectedCharacterId) {
-    return (
-      <CharacterEditPanel characterId={selectedCharacterId} seriesId={seriesId} onClose={handleCloseCharacterEdit} />
-    );
+    return <CharacterPanel characterId={selectedCharacterId} seriesId={seriesId} onClose={handleCloseCharacterEdit} />;
   }
 
   // Show location edit panel when a location is selected
   if (selectedLocationId) {
-    return <LocationEditPanel locationId={selectedLocationId} seriesId={seriesId} onClose={handleCloseLocationEdit} />;
+    return <LocationPanel locationId={selectedLocationId} seriesId={seriesId} onClose={handleCloseLocationEdit} />;
   }
 
   // Show prop edit panel when a prop is selected
   if (selectedPropId) {
-    return <PropEditPanel propId={selectedPropId} seriesId={seriesId} onClose={handleClosePropEdit} />;
+    return <PropPanel propId={selectedPropId} seriesId={seriesId} onClose={handleClosePropEdit} />;
   }
 
   // Show scene edit panel when a scene is selected
   if (selectedSceneId) {
-    return <SceneEditPanel sceneId={selectedSceneId} seriesId={seriesId} onClose={handleCloseSceneEdit} />;
+    return <ScenePanel sceneId={selectedSceneId} seriesId={seriesId} onClose={handleCloseSceneEdit} />;
   }
 
   // Show timeline edit panel when a timeline entry is selected
   if (selectedTimelineId) {
-    return <TimelineEditPanel timelineId={selectedTimelineId} seriesId={seriesId} onClose={handleCloseTimelineEdit} />;
+    return <TimelinePanel timelineId={selectedTimelineId} seriesId={seriesId} onClose={handleCloseTimelineEdit} />;
   }
 
   // Show wildcard edit panel when a wildcard is selected
   if (selectedWildcardId) {
-    return <WildcardEditPanel wildcardId={selectedWildcardId} seriesId={seriesId} onClose={handleCloseWildcardEdit} />;
+    return <WildcardPanel wildcardId={selectedWildcardId} seriesId={seriesId} onClose={handleCloseWildcardEdit} />;
   }
 
   // Show story arc edit panel when a story arc is selected
   if (selectedStoryArcId) {
-    return <StoryArcEditPanel storyArcId={selectedStoryArcId} seriesId={seriesId} onClose={handleCloseStoryArcEdit} />;
+    return <StoryArcPanel storyArcId={selectedStoryArcId} seriesId={seriesId} onClose={handleCloseStoryArcEdit} />;
   }
 
   // Show theme edit panel when a theme is selected
   if (selectedThemeId) {
-    return <ThemeEditPanel themeId={selectedThemeId} seriesId={seriesId} onClose={handleCloseThemeEdit} />;
+    return <ThemePanel themeId={selectedThemeId} seriesId={seriesId} onClose={handleCloseThemeEdit} />;
   }
 
   return (

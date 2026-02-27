@@ -19,14 +19,12 @@ import { ListErrorState, ListPendingState } from '@~/features/knowledge-base/com
 import { useTimelineList } from '@~/features/timelines/hooks/queries/use-timeline-list';
 
 import { useDeleteTimeline } from '../hooks/mutations/use-delete-timeline';
-import { TimelineForm } from './timeline-form';
+import type { TimelineQueryReturnType } from '../hooks/queries/use-timeline';
+import { TimelineCreateForm } from './timeline-create-form';
+import { TimelineEditForm } from './timeline-edit-form';
 
-interface iTimelineEntry {
-  _id: string;
-  label: string;
-  timestamp?: string;
-  order?: number;
-}
+// Timeline entry with required seriesId for edit form compatibility
+type TimelineEntry = TimelineQueryReturnType;
 
 interface iTimelineListProps {
   seriesId: string;
@@ -63,10 +61,11 @@ function TimelineListPending() {
 }
 
 export function TimelineList({ seriesId, onTimelineSelect }: iTimelineListProps) {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<iTimelineEntry | undefined>(undefined);
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<TimelineEntry | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [entryToDelete, setEntryToDelete] = useState<iTimelineEntry | undefined>(undefined);
+  const [entryToDelete, setEntryToDelete] = useState<TimelineEntry | undefined>(undefined);
   const { data, isPending, error, refetch } = useTimelineList(seriesId);
   const { deleteTimeline, isPending: isDeleting } = useDeleteTimeline();
 
@@ -85,12 +84,12 @@ export function TimelineList({ seriesId, onTimelineSelect }: iTimelineListProps)
     });
   }, [data?.items]);
 
-  const handleEditClick = (entry: iTimelineEntry) => {
+  const handleEditClick = (entry: TimelineEntry) => {
     setEditingEntry(entry);
-    setIsFormOpen(true);
+    setIsEditFormOpen(true);
   };
 
-  const handleDeleteClick = (entry: iTimelineEntry) => {
+  const handleDeleteClick = (entry: TimelineEntry) => {
     setEntryToDelete(entry);
     setIsDeleteDialogOpen(true);
   };
@@ -109,8 +108,8 @@ export function TimelineList({ seriesId, onTimelineSelect }: iTimelineListProps)
     }
   };
 
-  const handleFormOpenChange = (open: boolean) => {
-    setIsFormOpen(open);
+  const handleEditFormOpenChange = (open: boolean) => {
+    setIsEditFormOpen(open);
     if (!open) {
       setEditingEntry(undefined);
     }
@@ -152,10 +151,10 @@ export function TimelineList({ seriesId, onTimelineSelect }: iTimelineListProps)
             <EmptyDescription>Create your first timeline entry to start tracking story events.</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={() => setIsFormOpen(true)}>New Timeline Entry</Button>
+            <Button onClick={() => setIsCreateFormOpen(true)}>New Timeline Entry</Button>
           </EmptyContent>
         </Empty>
-        <TimelineForm seriesId={seriesId} open={isFormOpen} onOpenChange={handleFormOpenChange} />
+        <TimelineCreateForm seriesId={seriesId} open={isCreateFormOpen} onOpenChange={setIsCreateFormOpen} />
       </>
     );
   }
@@ -167,7 +166,7 @@ export function TimelineList({ seriesId, onTimelineSelect }: iTimelineListProps)
           <p className="text-sm text-muted-foreground">
             {data?.total ?? 0} {data?.total === 1 ? 'entry' : 'entries'}
           </p>
-          <Button onClick={() => setIsFormOpen(true)}>New Timeline Entry</Button>
+          <Button onClick={() => setIsCreateFormOpen(true)}>New Timeline Entry</Button>
         </div>
 
         <div className="space-y-3">
@@ -242,12 +241,17 @@ export function TimelineList({ seriesId, onTimelineSelect }: iTimelineListProps)
           })}
         </div>
       </div>
-      <TimelineForm
-        seriesId={seriesId}
-        open={isFormOpen}
-        onOpenChange={handleFormOpenChange}
-        initialData={editingEntry}
-      />
+      <TimelineCreateForm seriesId={seriesId} open={isCreateFormOpen} onOpenChange={setIsCreateFormOpen} />
+      {editingEntry ? (
+        <TimelineEditForm
+          mode="dialog"
+          seriesId={seriesId}
+          open={isEditFormOpen}
+          onOpenChange={handleEditFormOpenChange}
+          initialData={editingEntry}
+          onClose={() => handleEditFormOpenChange(false)}
+        />
+      ) : null}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

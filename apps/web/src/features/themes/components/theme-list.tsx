@@ -21,7 +21,7 @@ import { ListErrorState, ListPendingState } from '@~/features/knowledge-base/com
 import { useDeleteTheme } from '../hooks/mutations/use-delete-theme';
 import type { ThemeListItem } from '../hooks/queries/use-theme-list';
 import { useThemeList } from '../hooks/queries/use-theme-list';
-import { ThemeForm } from './theme-form';
+import { ThemeCreateForm } from './theme-create-form';
 
 interface iThemeListProps {
   seriesId: string;
@@ -65,31 +65,20 @@ function ThemeListPending() {
 }
 
 export function ThemeList({ seriesId, onThemeSelect }: iThemeListProps) {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingTheme, setEditingTheme] = useState<ThemeListItem | undefined>(undefined);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [themeToDelete, setThemeToDelete] = useState<ThemeListItem | undefined>(undefined);
   const { data, isPending, error, refetch } = useThemeList(seriesId);
   const { deleteTheme, isPending: isDeleting } = useDeleteTheme();
 
   const handleCardClick = (theme: ThemeListItem) => {
-    // If onThemeSelect is provided, use edit panel, otherwise use modal form
-    if (onThemeSelect) {
-      onThemeSelect(theme._id);
-    } else {
-      setEditingTheme(theme);
-      setIsFormOpen(true);
-    }
+    // Use edit panel for editing (onThemeSelect opens the panel)
+    onThemeSelect?.(theme._id);
   };
 
   const handleEditClick = (theme: ThemeListItem) => {
-    // If onThemeSelect is provided, use edit panel, otherwise use modal form
-    if (onThemeSelect) {
-      onThemeSelect(theme._id);
-    } else {
-      setEditingTheme(theme);
-      setIsFormOpen(true);
-    }
+    // Use edit panel for editing (onThemeSelect opens the panel)
+    onThemeSelect?.(theme._id);
   };
 
   const handleDeleteClick = (theme: ThemeListItem) => {
@@ -111,11 +100,8 @@ export function ThemeList({ seriesId, onThemeSelect }: iThemeListProps) {
     }
   };
 
-  const handleFormOpenChange = (open: boolean) => {
-    setIsFormOpen(open);
-    if (!open) {
-      setEditingTheme(undefined);
-    }
+  const handleCreateOpenChange = (open: boolean) => {
+    setIsCreateOpen(open);
   };
 
   if (isPending) {
@@ -141,15 +127,10 @@ export function ThemeList({ seriesId, onThemeSelect }: iThemeListProps) {
             <EmptyDescription>Create your first theme to start tracking story motifs and patterns.</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={() => setIsFormOpen(true)}>New Theme</Button>
+            <Button onClick={() => setIsCreateOpen(true)}>New Theme</Button>
           </EmptyContent>
         </Empty>
-        <ThemeForm
-          seriesId={seriesId}
-          open={isFormOpen}
-          onOpenChange={handleFormOpenChange}
-          initialData={editingTheme}
-        />
+        <ThemeCreateForm seriesId={seriesId} open={isCreateOpen} onOpenChange={handleCreateOpenChange} />
       </>
     );
   }
@@ -178,7 +159,7 @@ export function ThemeList({ seriesId, onThemeSelect }: iThemeListProps) {
           <p className="text-sm text-muted-foreground">
             {data?.total ?? 0} {data?.total === 1 ? 'theme' : 'themes'}
           </p>
-          <Button onClick={() => setIsFormOpen(true)}>New Theme</Button>
+          <Button onClick={() => setIsCreateOpen(true)}>New Theme</Button>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -262,7 +243,7 @@ export function ThemeList({ seriesId, onThemeSelect }: iThemeListProps) {
           })}
         </div>
       </div>
-      <ThemeForm seriesId={seriesId} open={isFormOpen} onOpenChange={handleFormOpenChange} initialData={editingTheme} />
+      <ThemeCreateForm seriesId={seriesId} open={isCreateOpen} onOpenChange={handleCreateOpenChange} />
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

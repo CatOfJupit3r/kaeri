@@ -6,7 +6,7 @@ import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
 
 import type { ThemeDetailQueryReturnType } from '../hooks/queries/use-theme';
-import { ThemeForm } from './theme-form';
+import { ThemeEditForm } from './theme-edit-form';
 
 interface iThemeDetailProps {
   theme: ThemeDetailQueryReturnType;
@@ -176,7 +176,14 @@ export function ThemeDetail({ theme, seriesId }: iThemeDetailProps) {
       </div>
 
       {/* Edit Form */}
-      <ThemeForm seriesId={seriesId} open={isFormOpen} onOpenChange={setIsFormOpen} initialData={theme} />
+      <ThemeEditForm
+        mode="dialog"
+        seriesId={seriesId}
+        initialData={theme}
+        onClose={() => setIsFormOpen(false)}
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+      />
     </>
   );
 }

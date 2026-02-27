@@ -25,7 +25,7 @@ import { useThemeList } from '@~/features/themes/hooks/queries/use-theme-list';
 import { useDeleteStoryArc } from '../hooks/mutations/use-delete-story-arc';
 import type { StoryArcListItem } from '../hooks/queries/use-story-arc-list';
 import { useStoryArcList } from '../hooks/queries/use-story-arc-list';
-import { StoryArcForm } from './story-arc-form';
+import { StoryArcCreateForm } from './story-arc-create-form';
 
 interface iStoryArcListProps {
   seriesId: string;
@@ -77,14 +77,13 @@ const STATUS_LABELS = {
 } as const;
 
 export function StoryArcList({ seriesId, onStoryArcSelect }: iStoryArcListProps) {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingStoryArc, setEditingStoryArc] = useState<StoryArcListItem | undefined>(undefined);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [storyArcToDelete, setStoryArcToDelete] = useState<StoryArcListItem | undefined>(undefined);
   const { data, isPending, error } = useStoryArcList(seriesId);
   const { deleteStoryArc, isPending: isDeleting } = useDeleteStoryArc();
 
-  // Fetch data for StoryArcForm dropdowns
+  // Fetch data for StoryArcCreateForm dropdowns
   const { data: scriptsData } = useScriptList(seriesId);
   const { data: charactersData } = useCharacterList(seriesId, 100, 0);
   const { data: themesData } = useThemeList(seriesId, 100, 0);
@@ -94,19 +93,12 @@ export function StoryArcList({ seriesId, onStoryArcSelect }: iStoryArcListProps)
   const themes = themesData?.items ?? [];
 
   const handleCardClick = (storyArc: StoryArcListItem) => {
-    if (onStoryArcSelect) {
-      onStoryArcSelect(storyArc._id);
-    }
+    onStoryArcSelect?.(storyArc._id);
   };
 
   const handleEditClick = (e: React.MouseEvent, storyArc: StoryArcListItem) => {
     e.stopPropagation();
-    if (onStoryArcSelect) {
-      onStoryArcSelect(storyArc._id);
-    } else {
-      setEditingStoryArc(storyArc);
-      setIsFormOpen(true);
-    }
+    onStoryArcSelect?.(storyArc._id);
   };
 
   const handleDeleteClick = (e: React.MouseEvent, storyArc: StoryArcListItem) => {
@@ -129,11 +121,8 @@ export function StoryArcList({ seriesId, onStoryArcSelect }: iStoryArcListProps)
     }
   };
 
-  const handleFormOpenChange = (open: boolean) => {
-    setIsFormOpen(open);
-    if (!open) {
-      setEditingStoryArc(undefined);
-    }
+  const handleCreateOpenChange = (open: boolean) => {
+    setIsCreateOpen(open);
   };
 
   const calculateProgress = (arc: StoryArcListItem): number => {
@@ -156,7 +145,7 @@ export function StoryArcList({ seriesId, onStoryArcSelect }: iStoryArcListProps)
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">{storyArcs.length} story arcs</p>
-          <Button onClick={() => setIsFormOpen(true)} size="sm">
+          <Button onClick={() => setIsCreateOpen(true)} size="sm">
             Create Story Arc
           </Button>
         </div>
@@ -171,7 +160,7 @@ export function StoryArcList({ seriesId, onStoryArcSelect }: iStoryArcListProps)
               <EmptyDescription>Create your first story arc to track narrative progression.</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button onClick={() => setIsFormOpen(true)}>Create Story Arc</Button>
+              <Button onClick={() => setIsCreateOpen(true)}>Create Story Arc</Button>
             </EmptyContent>
           </Empty>
         ) : (
@@ -241,14 +230,13 @@ export function StoryArcList({ seriesId, onStoryArcSelect }: iStoryArcListProps)
         )}
       </div>
 
-      <StoryArcForm
+      <StoryArcCreateForm
         seriesId={seriesId}
         scripts={scripts}
         characters={characters}
         themes={themes}
-        open={isFormOpen}
-        onOpenChange={handleFormOpenChange}
-        initialData={editingStoryArc}
+        open={isCreateOpen}
+        onOpenChange={handleCreateOpenChange}
       />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
