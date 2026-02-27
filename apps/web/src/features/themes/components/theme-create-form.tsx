@@ -1,8 +1,5 @@
-import { useEffect, useState } from 'react';
-import { LuPlus, LuX } from 'react-icons/lu';
+import { useEffect } from 'react';
 
-import { Badge } from '@~/components/ui/badge';
-import { Button } from '@~/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -12,11 +9,10 @@ import {
   DialogTitle,
 } from '@~/components/ui/dialog';
 import { useAppForm } from '@~/components/ui/field';
-import { Input } from '@~/components/ui/input';
-import { Label } from '@~/components/ui/label';
 
 import { useCreateTheme } from '../hooks/mutations/use-create-theme';
 import { themeFormSchema } from '../schemas/theme.schema';
+import type { iCharacterConnection, iThemeEvolution } from './theme-form-fields';
 import { ThemeFormFields } from './theme-form-fields';
 
 interface iThemeCreateFormProps {
@@ -33,15 +29,14 @@ interface iThemeCreateFormProps {
 export function ThemeCreateForm({ seriesId, open, onOpenChange }: iThemeCreateFormProps) {
   const { createTheme, isPending } = useCreateTheme();
 
-  // Local state for visual motifs (separate from form)
-  const [visualMotifs, setVisualMotifs] = useState<string[]>([]);
-  const [motifInput, setMotifInput] = useState('');
-
   const form = useAppForm({
     defaultValues: {
       name: '',
       description: '',
       color: '',
+      visualMotifs: [] as string[],
+      relatedCharacters: [] as iCharacterConnection[],
+      evolution: [] as iThemeEvolution[],
     },
     onSubmit: async ({ value }) => {
       createTheme(
@@ -51,14 +46,13 @@ export function ThemeCreateForm({ seriesId, open, onOpenChange }: iThemeCreateFo
             name: value.name,
             description: value.description || undefined,
             color: value.color || undefined,
-            visualMotifs: visualMotifs.length > 0 ? visualMotifs : undefined,
+            visualMotifs: value.visualMotifs.length > 0 ? value.visualMotifs : undefined,
           },
         },
         {
           onSuccess: () => {
             onOpenChange(false);
             form.reset();
-            setVisualMotifs([]);
           },
         },
       );
@@ -72,22 +66,8 @@ export function ThemeCreateForm({ seriesId, open, onOpenChange }: iThemeCreateFo
   useEffect(() => {
     if (!open) {
       form.reset();
-      setMotifInput('');
-      setVisualMotifs([]);
     }
   }, [open, form]);
-
-  const handleAddMotif = () => {
-    const trimmedMotif = motifInput.trim();
-    if (trimmedMotif && !visualMotifs.includes(trimmedMotif)) {
-      setVisualMotifs([...visualMotifs, trimmedMotif]);
-      setMotifInput('');
-    }
-  };
-
-  const handleRemoveMotif = (index: number) => {
-    setVisualMotifs(visualMotifs.filter((_, i) => i !== index));
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -102,46 +82,15 @@ export function ThemeCreateForm({ seriesId, open, onOpenChange }: iThemeCreateFo
             <ThemeFormFields form={form} />
 
             {/* Visual Motifs */}
-            <div className="space-y-2">
-              <Label htmlFor="motifs">Visual Motifs</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="motifs"
-                  value={motifInput}
-                  onChange={(e) => setMotifInput(e.target.value)}
+            <form.AppField name="visualMotifs" mode="array">
+              {(field) => (
+                <field.TagArrayField
+                  label="Visual Motifs"
                   placeholder="Add a visual motif (press Enter)"
                   disabled={isPending}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddMotif();
-                    }
-                  }}
                 />
-                <Button type="button" onClick={handleAddMotif} disabled={isPending || !motifInput.trim()} size="sm">
-                  <LuPlus className="mr-1 size-4" />
-                  Add
-                </Button>
-              </div>
-              {visualMotifs.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {visualMotifs.map((motif, index) => (
-                    // eslint-disable-next-line react/no-array-index-key
-                    <Badge key={`${motif}-${index}`} variant="secondary" className="gap-1">
-                      {motif}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveMotif(index)}
-                        className="ml-1 rounded-full hover:bg-muted"
-                        disabled={isPending}
-                      >
-                        <LuX className="size-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+              )}
+            </form.AppField>
 
             <DialogFooter>
               <form.FormActions

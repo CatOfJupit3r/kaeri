@@ -1,15 +1,28 @@
 import { withForm } from '@~/components/ui/field';
 
 const COLOR_OPTIONS = [
-  { value: 'red', label: 'Red' },
-  { value: 'orange', label: 'Orange' },
-  { value: 'yellow', label: 'Yellow' },
-  { value: 'green', label: 'Green' },
-  { value: 'blue', label: 'Blue' },
-  { value: 'indigo', label: 'Indigo' },
-  { value: 'purple', label: 'Purple' },
-  { value: 'pink', label: 'Pink' },
+  { value: '', label: 'No color' },
+  { value: '#EF4444', label: 'Red' },
+  { value: '#F97316', label: 'Orange' },
+  { value: '#EAB308', label: 'Yellow' },
+  { value: '#22C55E', label: 'Green' },
+  { value: '#3B82F6', label: 'Blue' },
+  { value: '#6366F1', label: 'Indigo' },
+  { value: '#A855F7', label: 'Purple' },
+  { value: '#EC4899', label: 'Pink' },
 ] as const;
+
+interface iCharacterConnection {
+  characterId: string;
+  connection: string;
+}
+
+interface iThemeEvolution {
+  scriptId: string;
+  notes: string;
+}
+
+export type { iCharacterConnection, iThemeEvolution };
 
 interface iThemeFormFieldsProps {
   /** Optional blur handler for auto-save (panel mode only) */
@@ -19,14 +32,16 @@ interface iThemeFormFieldsProps {
 /**
  * Shared basic form fields for theme forms.
  * Used by both create and edit forms.
- * Note: Complex array fields (visualMotifs, relatedCharacters, evolution, appearances)
- * are managed with local state in the parent form components.
+ * Array fields (visualMotifs, relatedCharacters, evolution) should be added separately in parent forms.
  */
 export const ThemeFormFields = withForm({
   defaultValues: {
     name: '',
     description: '',
     color: '',
+    visualMotifs: [] as string[],
+    relatedCharacters: [] as iCharacterConnection[],
+    evolution: [] as iThemeEvolution[],
   },
   props: {} as iThemeFormFieldsProps,
   render: function Render({ form, handleBlur }) {

@@ -1,8 +1,3 @@
-import { useState } from 'react';
-import { LuX } from 'react-icons/lu';
-
-import { Badge } from '@~/components/ui/badge';
-import { Button } from '@~/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -12,7 +7,6 @@ import {
   DialogTitle,
 } from '@~/components/ui/dialog';
 import { useAppForm } from '@~/components/ui/field';
-import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
 import { SingleSelect } from '@~/components/ui/select';
 
@@ -41,7 +35,10 @@ export function SceneCreateForm({
   onOpenChange,
 }: iSceneCreateFormProps) {
   const { createScene, isPending } = useCreateScene();
-  const [beatInput, setBeatInput] = useState('');
+
+  const locationOptions = locations.map((l) => ({ label: l.name, value: l._id }));
+  const characterOptions = characters.map((c) => ({ label: c.name, value: c._id }));
+  const propOptions = props.map((p) => ({ label: p.name, value: p._id }));
 
   const form = useAppForm({
     defaultValues: {
@@ -85,7 +82,6 @@ export function SceneCreateForm({
           onSuccess: () => {
             onOpenChange(false);
             form.reset();
-            setBeatInput('');
           },
         },
       );
@@ -105,7 +101,7 @@ export function SceneCreateForm({
 
         <form.AppForm>
           <form.Form className="space-y-4 p-0">
-            {/* Script Selection */}
+            {/* Script Selection - separate because it's create-form specific */}
             <form.Field name="scriptId">
               {(field) => (
                 <div className="space-y-2">
@@ -127,253 +123,13 @@ export function SceneCreateForm({
               )}
             </form.Field>
 
-            <SceneFormFields form={form} isPending={isPending} />
-
-            <div className="grid grid-cols-2 gap-4">
-              {/* Location */}
-              <form.Field name="locationId">
-                {(field) => (
-                  <div className="space-y-2">
-                    <Label htmlFor={field.name}>Location</Label>
-                    <SingleSelect
-                      inputId={field.name}
-                      value={field.state.value || null}
-                      onValueChange={(value) => field.handleChange(value ?? '')}
-                      options={locations.map((location) => ({ label: location.name, value: location._id }))}
-                      placeholder="Select a location"
-                      isClearable
-                      isDisabled={isPending}
-                    />
-                  </div>
-                )}
-              </form.Field>
-
-              <form.AppField name="timeOfDay">
-                {(field) => <field.TextField label="Time of Day" placeholder="Night" disabled={isPending} />}
-              </form.AppField>
-            </div>
-
-            {/* Beats */}
-            <form.Field name="beats" mode="array">
-              {(field) => {
-                const beats = field.state.value || [];
-                return (
-                  <div className="space-y-2">
-                    <Label htmlFor="beats">Scene Beats</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="beats"
-                        placeholder="Add a beat (press Enter)"
-                        value={beatInput}
-                        onChange={(e) => setBeatInput(e.target.value)}
-                        disabled={isPending}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            const trimmed = beatInput.trim();
-                            if (trimmed) {
-                              field.pushValue({ order: beats.length, description: trimmed });
-                              setBeatInput('');
-                            }
-                          }
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        onClick={() => {
-                          const trimmed = beatInput.trim();
-                          if (trimmed) {
-                            field.pushValue({ order: beats.length, description: trimmed });
-                            setBeatInput('');
-                          }
-                        }}
-                        disabled={isPending}
-                        size="sm"
-                      >
-                        Add
-                      </Button>
-                    </div>
-                    {beats.length > 0 && (
-                      <div className="space-y-2">
-                        {beats.map((beat, index) => (
-                          // eslint-disable-next-line react/no-array-index-key
-                          <div key={index} className="flex items-center gap-2 rounded-md border bg-muted/50 p-2">
-                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                              {index + 1}
-                            </span>
-                            <p className="flex-1 text-sm">{beat.description}</p>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => field.removeValue(index)}
-                              disabled={isPending}
-                              className="h-6 w-6 p-0"
-                            >
-                              <LuX className="size-4" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              }}
-            </form.Field>
-
-            {/* Characters */}
-            <form.Field name="characterIds" mode="array">
-              {(field) => {
-                const selectedIds = field.state.value || [];
-                return (
-                  <div className="space-y-2">
-                    <Label htmlFor="characterIds">Characters</Label>
-                    <SingleSelect
-                      inputId="characterIds"
-                      value={null}
-                      onValueChange={(value) => {
-                        if (value && !selectedIds.includes(value)) {
-                          field.pushValue(value);
-                        }
-                      }}
-                      options={characters
-                        .filter((char) => !selectedIds.includes(char._id))
-                        .map((char) => ({ label: char.name, value: char._id }))}
-                      placeholder="Add a character"
-                      isDisabled={isPending}
-                    />
-                    {selectedIds.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {selectedIds.map((id, index) => {
-                          const character = characters.find((c) => c._id === id);
-                          return (
-                            // eslint-disable-next-line react/no-array-index-key
-                            <Badge key={`${id}-${index}`} variant="secondary" className="gap-1">
-                              {character?.name ?? 'Unknown'}
-                              <button
-                                type="button"
-                                onClick={() => field.removeValue(index)}
-                                className="ml-1 rounded-full hover:bg-muted"
-                                disabled={isPending}
-                              >
-                                <LuX className="size-3" />
-                              </button>
-                            </Badge>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              }}
-            </form.Field>
-
-            {/* Props */}
-            <form.Field name="propIds" mode="array">
-              {(field) => {
-                const selectedIds = field.state.value || [];
-                return (
-                  <div className="space-y-2">
-                    <Label htmlFor="propIds">Props</Label>
-                    <SingleSelect
-                      inputId="propIds"
-                      value={null}
-                      onValueChange={(value) => {
-                        if (value && !selectedIds.includes(value)) {
-                          field.pushValue(value);
-                        }
-                      }}
-                      options={props
-                        .filter((prop) => !selectedIds.includes(prop._id))
-                        .map((prop) => ({ label: prop.name, value: prop._id }))}
-                      placeholder="Add a prop"
-                      isDisabled={isPending}
-                    />
-                    {selectedIds.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {selectedIds.map((id, index) => {
-                          const prop = props.find((p) => p._id === id);
-                          return (
-                            // eslint-disable-next-line react/no-array-index-key
-                            <Badge key={`${id}-${index}`} variant="outline" className="gap-1">
-                              {prop?.name ?? 'Unknown'}
-                              <button
-                                type="button"
-                                onClick={() => field.removeValue(index)}
-                                className="ml-1 rounded-full hover:bg-muted"
-                                disabled={isPending}
-                              >
-                                <LuX className="size-3" />
-                              </button>
-                            </Badge>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              }}
-            </form.Field>
-
-            {/* Production Details */}
-            <div className="space-y-4 rounded-lg border p-4">
-              <h3 className="font-medium">Production Details</h3>
-
-              <form.AppField name="lighting">
-                {(field) => (
-                  <field.TextareaField
-                    label="Lighting"
-                    placeholder="Neon strobes, fog..."
-                    rows={2}
-                    disabled={isPending}
-                  />
-                )}
-              </form.AppField>
-
-              <form.AppField name="sound">
-                {(field) => (
-                  <field.TextareaField
-                    label="Sound Design"
-                    placeholder="Loud techno music..."
-                    rows={2}
-                    disabled={isPending}
-                  />
-                )}
-              </form.AppField>
-
-              <form.AppField name="camera">
-                {(field) => (
-                  <field.TextareaField
-                    label="Camera"
-                    placeholder="Wide shots, close-ups..."
-                    rows={2}
-                    disabled={isPending}
-                  />
-                )}
-              </form.AppField>
-            </div>
-
-            <form.AppField name="storyNotes">
-              {(field) => (
-                <field.TextareaField
-                  label="Director's Notes"
-                  placeholder="Story notes and directions..."
-                  rows={3}
-                  maxLength={2000}
-                  disabled={isPending}
-                />
-              )}
-            </form.AppField>
-
-            <form.AppField name="storyboardUrl">
-              {(field) => (
-                <field.TextField
-                  label="Storyboard URL"
-                  placeholder="https://example.com/storyboard.jpg"
-                  disabled={isPending}
-                />
-              )}
-            </form.AppField>
+            <SceneFormFields
+              form={form}
+              isPending={isPending}
+              locationOptions={locationOptions}
+              characterOptions={characterOptions}
+              propOptions={propOptions}
+            />
 
             <DialogFooter>
               <form.FormActions

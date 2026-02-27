@@ -10,11 +10,16 @@ import { cn } from '@~/lib/utils';
 
 // eslint-disable-next-line import-x/no-cycle
 import {
+  CharacterRoleField,
   CheckboxField,
+  EntityPickerField,
   FormActions,
+  ImageArrayField,
+  KeyBeatsField,
   MultiSelectField,
   SelectField,
   SubmitButton,
+  TagArrayField,
   TextField,
   TextareaField,
 } from './form-fields';
@@ -40,6 +45,11 @@ export const { useAppForm, withForm, withFieldGroup } = createFormHook({
     CheckboxField,
     SelectField,
     MultiSelectField,
+    TagArrayField,
+    EntityPickerField,
+    ImageArrayField,
+    KeyBeatsField,
+    CharacterRoleField,
   },
   formComponents: {
     FieldLegend,

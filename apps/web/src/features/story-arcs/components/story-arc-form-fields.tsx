@@ -16,6 +16,21 @@ interface iScript {
   title: string;
 }
 
+interface iBeat {
+  id: string;
+  order: number;
+  description: string;
+  scriptId?: string;
+  sceneId?: string;
+}
+
+interface iCharacterRole {
+  characterId: string;
+  role: string;
+}
+
+export type { iBeat, iCharacterRole };
+
 interface iStoryArcFormFieldsProps {
   /** Scripts for dropdown selections */
   scripts?: iScript[];
@@ -26,8 +41,7 @@ interface iStoryArcFormFieldsProps {
 /**
  * Shared basic form fields for story arc forms.
  * Used by both create and edit forms.
- * Note: Complex array fields (beats, characters, themes) are managed
- * with local state in the parent form components.
+ * Array fields (keyBeats, characters, themeIds) should be added separately in parent forms.
  */
 export const StoryArcFormFields = withForm({
   defaultValues: {
@@ -37,6 +51,9 @@ export const StoryArcFormFields = withForm({
     startScriptId: '',
     endScriptId: '',
     resolution: '',
+    keyBeats: [] as iBeat[],
+    characters: [] as iCharacterRole[],
+    themeIds: [] as string[],
   },
   props: {} as iStoryArcFormFieldsProps,
   render: function Render({ form, scripts = [], handleBlur }) {

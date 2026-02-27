@@ -1,9 +1,15 @@
 import z from 'zod';
 
+const imageSchema = z.object({
+  url: z.string(),
+  caption: z.string().optional(),
+});
+
 export const locationFormSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be 100 characters or less'),
   description: z.string().trim().max(500, 'Description must be 500 characters or less'),
   tags: z.array(z.string()),
+  images: z.array(imageSchema),
   associatedCharacterIds: z.array(z.string()),
   propIds: z.array(z.string()),
   productionNotes: z.string().trim().max(1000, 'Production notes must be 1000 characters or less'),

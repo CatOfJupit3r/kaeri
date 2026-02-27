@@ -28,7 +28,12 @@ import { useUpdateProp } from '../hooks/mutations/use-update-prop';
 import type { PropQueryReturnType } from '../hooks/queries/use-prop';
 import { propFormSchema } from '../schemas/prop.schema';
 import type { EntityValue } from './prop-form-fields';
-import { associationsToEntityValues, entityValuesToAssociations, ENTITY_TYPE_PREFIXES } from './prop-form-fields';
+import {
+  associationsToEntityValues,
+  entityValuesToAssociations,
+  ENTITY_TYPE_PREFIXES,
+  PropFormFields,
+} from './prop-form-fields';
 
 interface iPropEditFormProps {
   mode: EditFormMode;
@@ -144,6 +149,11 @@ function PanelAssociationsField({
 export function PropEditForm({ mode, seriesId, initialData, onClose, open, onOpenChange }: iPropEditFormProps) {
   const { updateProp, isPending: isUpdating } = useUpdateProp();
 
+  // Fetch data for associations field (needed for dialog mode with PropFormFields)
+  const { data: charactersData } = useCharacterList(seriesId, 100, 0);
+  const { data: locationsData } = useLocationList(seriesId, 100, 0);
+  const { data: scriptsData } = useScriptList(seriesId, 100, 0);
+
   const form = useAppForm({
     defaultValues: {
       name: initialData.name,
@@ -245,15 +255,13 @@ export function PropEditForm({ mode, seriesId, initialData, onClose, open, onOpe
   const dialogFormContent = (
     <form.AppForm>
       <form.Form className="space-y-4 p-0">
-        <form.AppField name="name">
-          {(field) => <field.TextField label="Name" placeholder="Enter prop name" required />}
-        </form.AppField>
-
-        <form.AppField name="description">
-          {(field) => (
-            <field.TextareaField label="Description" placeholder="Describe the prop..." rows={3} maxLength={500} />
-          )}
-        </form.AppField>
+        <PropFormFields
+          form={form}
+          characters={charactersData?.items ?? []}
+          locations={locationsData?.items ?? []}
+          scripts={scriptsData?.items ?? []}
+          isPending={isUpdating}
+        />
 
         <DialogFooter>
           <form.FormActions
