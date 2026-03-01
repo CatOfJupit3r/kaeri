@@ -2,6 +2,15 @@ import { mergeAttributes, Node } from '@tiptap/core';
 
 import { SCRIPT_BLOCK_TYPES } from '../types';
 
+export interface iCharacterAttributes {
+  /** Linked KB character entity ID (null if unlinked) */
+  characterId: string | null;
+  class: string;
+}
+
+// Type alias for external use
+export type CharacterAttributes = iCharacterAttributes;
+
 declare module '@tiptap/core' {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   interface Commands<ReturnType> {
@@ -10,6 +19,10 @@ declare module '@tiptap/core' {
       setCharacter: () => ReturnType;
       /** Toggle character block */
       toggleCharacter: () => ReturnType;
+      /** Link this character block to a KB character entity */
+      linkCharacter: (characterId: string) => ReturnType;
+      /** Unlink this character block from KB */
+      unlinkCharacter: () => ReturnType;
     };
   }
 }
@@ -25,6 +38,12 @@ export const Character = Node.create({
 
   addAttributes() {
     return {
+      characterId: {
+        default: null,
+        parseHTML: (element) => element.dataset.characterId,
+        renderHTML: (attributes: iCharacterAttributes) =>
+          attributes.characterId ? { 'data-character-id': attributes.characterId } : {},
+      },
       class: {
         default: 'script-block script-block--character',
       },
@@ -60,6 +79,14 @@ export const Character = Node.create({
         () =>
         ({ commands }) =>
           commands.toggleNode(this.name, 'paragraph'),
+      linkCharacter:
+        (characterId: string) =>
+        ({ commands }) =>
+          commands.updateAttributes(this.name, { characterId }),
+      unlinkCharacter:
+        () =>
+        ({ commands }) =>
+          commands.updateAttributes(this.name, { characterId: null }),
     };
   },
 

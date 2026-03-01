@@ -9,6 +9,7 @@ import type { ExportService } from '@~/features/export/export.service';
 import type { KnowledgeBaseService } from '@~/features/knowledge-base/knowledge-base.service';
 import type { LoggerFactory } from '@~/features/logger/logger.types';
 import type { SceneService } from '@~/features/scenes/scene.service';
+import type { ScriptKBIntegrationService } from '@~/features/script-kb-integration/script-kb-integration.service';
 import type { ScriptsService } from '@~/features/scripts/scripts.service';
 import type { SeriesService } from '@~/features/series/series.service';
 import type { StoryArcService } from '@~/features/story-arcs/story-arc.service';
@@ -35,6 +36,7 @@ const exportServiceToken: unique symbol = Symbol.for('ExportService');
 const continuityServiceToken: unique symbol = Symbol.for('ContinuityService');
 const themeServiceToken: unique symbol = Symbol.for('ThemeService');
 const storyArcServiceToken: unique symbol = Symbol.for('StoryArcService');
+const scriptKBIntegrationServiceToken: unique symbol = Symbol.for('ScriptKBIntegrationService');
 
 // Service tokens for dependency injection (unique symbols for type-safe lookups)
 export const TOKENS = {
@@ -56,6 +58,7 @@ export const TOKENS = {
   ContinuityService: continuityServiceToken,
   ThemeService: themeServiceToken,
   StoryArcService: storyArcServiceToken,
+  ScriptKBIntegrationService: scriptKBIntegrationServiceToken,
 } as const;
 
 export interface iTokenRegistry {
@@ -77,6 +80,7 @@ export interface iTokenRegistry {
   [TOKENS.ContinuityService]: ContinuityService;
   [TOKENS.ThemeService]: ThemeService;
   [TOKENS.StoryArcService]: StoryArcService;
+  [TOKENS.ScriptKBIntegrationService]: ScriptKBIntegrationService;
 }
 
 export type InjectionTokens = typeof TOKENS;

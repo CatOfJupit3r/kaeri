@@ -182,7 +182,7 @@ export function BlockMenu({ editor, containerRef }: iBlockMenuProps) {
   // Calculate convert bar position - flip above if it would overflow
   const convertBarTop = isConvertBarFlipped
     ? position.top - CONVERT_BAR_HEIGHT - CONVERT_BAR_MARGIN
-    : position.top + 32;
+    : position.top + position.blockHeight + CONVERT_BAR_MARGIN;
 
   return (
     <>

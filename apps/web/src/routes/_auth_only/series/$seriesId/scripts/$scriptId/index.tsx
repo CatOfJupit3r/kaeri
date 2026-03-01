@@ -75,6 +75,7 @@ function ScriptEditorPage() {
         onContentChange={handleContentChange}
         title={script.title}
         seriesId={seriesId}
+        scriptId={scriptId}
         onOpenSettings={handleOpenSettings}
         onExport={handleExport}
         isSaving={isSaving}
