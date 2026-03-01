@@ -8,11 +8,31 @@
   position: relative;
   padding: 0.75rem 1rem;
   margin: 0.25rem 0;
+  min-height: 3.5rem;
   border-left: 4px solid transparent;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: 'Courier Prime', 'Courier New', monospace;
   font-size: 0.875rem;
   line-height: 1.5;
+}
+
+/* Block type icon indicator at top-left (to the left of the colored bar) */
+.script-block::after {
+  content: '';
+  position: absolute;
+  top: 0.5rem;
+  left: -1.5rem;
+  width: 1rem;
+  height: 1rem;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.script-block:focus-within::after {
+  opacity: 0.9;
 }
 
 /* Animation for newly created blocks */
@@ -43,6 +63,11 @@
   letter-spacing: 0.025em;
 }
 
+.script-block--scene-heading::after {
+  /* Clapperboard icon - unique for scene heading */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 11v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8H4Z'/%3E%3Cpath d='m4 11-.88-2.87a2 2 0 0 1 1.33-2.5l11.48-3.5a2 2 0 0 1 2.5 1.32l.87 2.87L4 11.01Z'/%3E%3Cpath d='m6.6 4.99 3.38 4.2'/%3E%3Cpath d='m11.86 3.38 3.38 4.2'/%3E%3C/svg%3E");
+}
+
 .script-block--scene-heading:focus-within {
   background-color: var(--block-scene-heading-bg);
 }
@@ -50,6 +75,11 @@
 /* Action */
 .script-block--action {
   border-left-color: var(--block-action);
+}
+
+.script-block--action::after {
+  /* Play icon - unique for action */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='5 3 19 12 5 21 5 3'/%3E%3C/svg%3E");
 }
 
 .script-block--action:focus-within {
@@ -66,6 +96,11 @@
   padding-right: 25%;
 }
 
+.script-block--character::after {
+  /* Users icon (multiple people) - unique for character */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M22 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
+}
+
 .script-block--character:focus-within {
   background-color: var(--block-character-bg);
 }
@@ -75,6 +110,11 @@
   border-left-color: var(--block-dialogue);
   padding-left: 15%;
   padding-right: 15%;
+}
+
+.script-block--dialogue::after {
+  /* Quote icon - unique for dialogue */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z'/%3E%3Cpath d='M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z'/%3E%3C/svg%3E");
 }
 
 .script-block--dialogue:focus-within {
@@ -90,6 +130,11 @@
   padding-right: 20%;
 }
 
+.script-block--parenthetical::after {
+  /* Parentheses icon (text in italic) - unique for parenthetical */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 4a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4Z'/%3E%3Cpath d='M9 4v16'/%3E%3C/svg%3E");
+}
+
 .script-block--parenthetical:focus-within {
   background-color: var(--block-parenthetical-bg);
 }
@@ -100,6 +145,11 @@
   text-align: right;
   text-transform: uppercase;
   font-weight: bold;
+}
+
+.script-block--transition::after {
+  /* Arrow Right Circle icon - unique for transition */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m12 16 4-4-4-4'/%3E%3Cpath d='M8 12h8'/%3E%3C/svg%3E");
 }
 
 .script-block--transition:focus-within {

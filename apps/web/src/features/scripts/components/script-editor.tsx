@@ -10,10 +10,21 @@ import Underline from '@tiptap/extension-underline';
 import { Selection } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LuBookOpen, LuPenTool, LuPlus, LuSparkles } from 'react-icons/lu';
+import {
+  LuBookOpen,
+  LuChevronLeft,
+  LuChevronRight,
+  LuKeyboard,
+  LuPenTool,
+  LuPlus,
+  LuSparkles,
+  LuX,
+} from 'react-icons/lu';
 
 import { Button } from '@~/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@~/components/ui/tooltip';
+import { cn } from '@~/lib/utils';
 
 import {
   Action,
@@ -121,8 +132,11 @@ export function ScriptEditor({
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const editorScrollRef = useRef<HTMLDivElement>(null);
   const [rightPanelTab, setRightPanelTab] = useState('knowledge');
+  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
+  const [isShowingKeyboardShortcuts, setIsShowingKeyboardShortcuts] = useState(false);
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       Document,
       Text,
@@ -244,9 +258,14 @@ export function ScriptEditor({
         }}
       />
 
-      <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
+      <div className="relative flex flex-1 flex-col overflow-hidden lg:flex-row">
         {/* Editor Panel */}
-        <div className="flex h-1/2 w-full flex-col overflow-hidden border-b border-border lg:h-full lg:w-1/2 lg:border-r lg:border-b-0">
+        <div
+          className={cn(
+            'flex w-full flex-col overflow-hidden border-b border-border transition-all duration-300 lg:border-r lg:border-b-0',
+            isRightPanelCollapsed ? 'h-full lg:w-full' : 'h-1/2 lg:h-full lg:w-1/2',
+          )}
+        >
           {/* Editor Content */}
           <div ref={editorScrollRef} className="relative flex-1 overflow-y-auto pl-16">
             {editor ? <BlockMenu editor={editor} containerRef={editorScrollRef} /> : null}
@@ -278,12 +297,102 @@ export function ScriptEditor({
               <Button variant="outline" size="sm" onClick={() => addBlock('action')} className="gap-1">
                 <LuPlus className="h-4 w-4" />
               </Button>
+
+              {/* Keyboard Shortcuts Toggle */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsShowingKeyboardShortcuts(!isShowingKeyboardShortcuts)}
+                      className="ml-auto gap-1.5 text-xs text-muted-foreground"
+                    >
+                      <LuKeyboard className="h-4 w-4" />
+                      <span className="hidden sm:inline">Shortcuts</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Show keyboard shortcuts</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
+
+          {/* Keyboard Shortcuts Panel */}
+          {isShowingKeyboardShortcuts ? (
+            <div className="animate-in border-t border-border bg-muted/50 p-3 slide-in-from-bottom-2">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs font-bold text-muted-foreground uppercase">Keyboard Shortcuts</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  onClick={() => setIsShowingKeyboardShortcuts(false)}
+                >
+                  <LuX className="h-3 w-3" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs md:grid-cols-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">Enter</span>
+                  <span>New block</span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">Tab</span>
+                  <span>Next type</span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">Shift+Tab</span>
+                  <span>Previous type</span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">Backspace</span>
+                  <span>Delete empty</span>
+                </div>
+                {BLOCK_TYPE_CYCLE_ORDER.map((type, index) => {
+                  const config = BLOCK_CONFIG[type];
+                  return (
+                    <div key={type} className="flex items-center justify-between gap-2">
+                      <span className="text-muted-foreground">Ctrl+{index + 1}</span>
+                      <span className="flex items-center gap-1">
+                        {config.icon}
+                        {config.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
         </div>
 
+        {/* Panel Toggle Button */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  'absolute top-2 z-50 hidden h-8 w-8 border-2 border-foreground p-0 shadow-[2px_2px_0px_rgb(0,0,0)] lg:flex',
+                  isRightPanelCollapsed ? 'right-2' : 'right-[51%]',
+                )}
+                onClick={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
+              >
+                {isRightPanelCollapsed ? <LuChevronLeft className="h-4 w-4" /> : <LuChevronRight className="h-4 w-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{isRightPanelCollapsed ? 'Show panel' : 'Hide panel'}</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
         {/* Right Panel - Knowledge Base / Canvas */}
-        <div className="flex h-1/2 w-full flex-col overflow-hidden lg:h-full lg:w-1/2">
+        <div
+          className={cn(
+            'flex w-full flex-col overflow-hidden transition-all duration-300',
+            isRightPanelCollapsed ? 'hidden lg:hidden' : 'h-1/2 lg:h-full lg:w-1/2',
+          )}
+        >
           <Tabs value={rightPanelTab} onValueChange={setRightPanelTab} className="flex h-full flex-col">
             <TabsList className="h-auto shrink-0 justify-start gap-0 border-b-2 border-foreground bg-card p-0">
               <TabsTrigger
