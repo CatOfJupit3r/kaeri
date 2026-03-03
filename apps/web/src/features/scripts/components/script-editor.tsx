@@ -9,7 +9,7 @@ import Text from '@tiptap/extension-text';
 import Underline from '@tiptap/extension-underline';
 import { Selection } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   LuBookOpen,
   LuChevronLeft,
@@ -35,11 +35,26 @@ import {
   ScriptKeyboardHandler,
   Transition,
 } from '../extensions';
+import { CharacterBlockSuggestion } from '../extensions/character-block-suggestion';
+import { CharacterMention, PropMention, WildcardMention } from '../extensions/entity-mention';
+import { SceneHeadingSuggestion } from '../extensions/scene-heading-suggestion';
 import { BLOCK_CONFIG } from '../helpers/block-config';
+import {
+  useKBIntegration,
+  useCharacterSuggestions,
+  useLocationSuggestions,
+  usePropSuggestions,
+  useWildcardSuggestions,
+  useSuggestionRenderer,
+  useCharacterBlockSuggestionRenderer,
+  useSceneHeadingSuggestionRenderer,
+  useMentionHoverPreview,
+} from '../hooks';
 import type { ScriptBlockType } from '../types';
 import { BLOCK_TYPE_CYCLE_ORDER } from '../types';
 import { BlockMenu } from './block-menu';
 import { EditorToolbar } from './editor-toolbar';
+import { EntityPreviewCard } from './entity-preview';
 import { KnowledgeBasePanel } from './knowledge-base-panel';
 
 interface iScriptEditorProps {
@@ -51,6 +66,8 @@ interface iScriptEditorProps {
   title?: string;
   /** Series ID for fetching knowledge base data */
   seriesId: string;
+  /** Script ID for KB integration */
+  scriptId: string;
   /** Callback to open script settings */
   onOpenSettings?: () => void;
   /** Callback to open export dialog */
@@ -124,6 +141,7 @@ export function ScriptEditor({
   onContentChange,
   title,
   seriesId,
+  scriptId,
   onOpenSettings,
   onExport,
   isSaving,
@@ -135,9 +153,106 @@ export function ScriptEditor({
   const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
   const [isShowingKeyboardShortcuts, setIsShowingKeyboardShortcuts] = useState(false);
 
-  const editor = useEditor({
-    immediatelyRender: false,
-    extensions: [
+  // Entity mention suggestion query states
+  const [characterQuery, setCharacterQuery] = useState('');
+  const [propQuery, setPropQuery] = useState('');
+  const [wildcardQuery, setWildcardQuery] = useState('');
+
+  // Character block suggestion query (auto-trigger in character blocks)
+  const [characterBlockQuery, setCharacterBlockQuery] = useState('');
+
+  // Scene heading suggestion query (auto-trigger for locations)
+  const [locationQuery, setLocationQuery] = useState('');
+
+  // Fetch entity suggestions for autocomplete
+  const { suggestions: characterSuggestions, isLoading: isLoadingCharacters } = useCharacterSuggestions(
+    seriesId,
+    characterQuery,
+    { scriptId },
+  );
+  const { suggestions: propSuggestions, isLoading: isLoadingProps } = usePropSuggestions(seriesId, propQuery, {
+    scriptId,
+  });
+  const { suggestions: wildcardSuggestions, isLoading: isLoadingWildcard } = useWildcardSuggestions(
+    seriesId,
+    wildcardQuery,
+    { scriptId },
+  );
+
+  // Fetch character suggestions for character block autocomplete
+  const { suggestions: characterBlockSuggestions, isLoading: isLoadingCharacterBlock } = useCharacterSuggestions(
+    seriesId,
+    characterBlockQuery,
+    { scriptId },
+  );
+
+  // Fetch location suggestions for scene heading autocomplete
+  const { suggestions: locationSuggestions, isLoading: isLoadingLocations } = useLocationSuggestions(
+    seriesId,
+    locationQuery,
+    { scriptId },
+  );
+
+  // Create suggestion renderer configurations for each mention type
+  const characterSuggestionConfig = useSuggestionRenderer({
+    entityType: 'character',
+    suggestions: characterSuggestions,
+    isLoading: isLoadingCharacters,
+    onQueryChange: setCharacterQuery,
+    onSelect: () => {
+      // Entity is inserted by the extension command
+    },
+  });
+
+  const propSuggestionConfig = useSuggestionRenderer({
+    entityType: 'prop',
+    suggestions: propSuggestions,
+    isLoading: isLoadingProps,
+    onQueryChange: setPropQuery,
+    onSelect: () => {
+      // Entity is inserted by the extension command
+    },
+  });
+
+  const wildcardSuggestionConfig = useSuggestionRenderer({
+    entityType: 'wildcard',
+    suggestions: wildcardSuggestions,
+    isLoading: isLoadingWildcard,
+    onQueryChange: setWildcardQuery,
+    onSelect: () => {
+      // Entity is inserted by the extension command
+    },
+  });
+
+  // Character block suggestion config (auto-triggers in character blocks)
+  const characterBlockSuggestionConfig = useCharacterBlockSuggestionRenderer({
+    suggestions: characterBlockSuggestions,
+    isLoading: isLoadingCharacterBlock,
+    onQueryChange: setCharacterBlockQuery,
+    onSelect: () => {
+      // Character is linked by the extension command
+    },
+  });
+
+  // Scene heading suggestion config (auto-triggers for locations)
+  const sceneHeadingSuggestionConfig = useSceneHeadingSuggestionRenderer({
+    suggestions: locationSuggestions,
+    isLoading: isLoadingLocations,
+    onQueryChange: setLocationQuery,
+    onSelect: () => {
+      // Location is linked by the extension command
+    },
+  });
+
+  // KB integration for scene tracking and entity mentions
+  const { extensions: kbExtensions } = useKBIntegration({
+    seriesId,
+    scriptId,
+  });
+
+  // Memoize all extensions to prevent unnecessary re-renders
+  const editorExtensions = useMemo(
+    () => [
       Document,
       Text,
       Bold,
@@ -163,7 +278,40 @@ export function ScriptEditor({
       Transition,
       // Custom keyboard handling
       ScriptKeyboardHandler,
+      // KB integration extensions (scene metadata, mention marks)
+      ...kbExtensions,
+      // Entity mention extensions with configured autocomplete
+      CharacterMention.configure({
+        suggestion: characterSuggestionConfig,
+      }),
+      PropMention.configure({
+        suggestion: propSuggestionConfig,
+      }),
+      WildcardMention.configure({
+        suggestion: wildcardSuggestionConfig,
+      }),
+      // Character block autocomplete (auto-triggers when typing in character blocks)
+      CharacterBlockSuggestion.configure({
+        suggestion: characterBlockSuggestionConfig,
+      }),
+      // Scene heading autocomplete (auto-triggers for locations after INT./EXT.)
+      SceneHeadingSuggestion.configure({
+        suggestion: sceneHeadingSuggestionConfig,
+      }),
     ],
+    [
+      kbExtensions,
+      characterSuggestionConfig,
+      propSuggestionConfig,
+      wildcardSuggestionConfig,
+      characterBlockSuggestionConfig,
+      sceneHeadingSuggestionConfig,
+    ],
+  );
+
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: editorExtensions,
     content: parseContent(content),
     editorProps: {
       attributes: {
@@ -242,6 +390,12 @@ export function ScriptEditor({
     const { $from } = editor.state.selection;
     return $from.parent.type.name as ScriptBlockType;
   }, [editor]);
+
+  // Mention hover preview integration
+  const { previewState, hidePreview, handleOpenInKB, onCardMouseEnter, onCardMouseLeave } = useMentionHoverPreview({
+    editor,
+    delay: 500,
+  });
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-background">
@@ -444,6 +598,20 @@ export function ScriptEditor({
           </Tabs>
         </div>
       </div>
+
+      {/* Entity preview card for mention hover */}
+      {previewState.isVisible && previewState.entityId && previewState.entityType && previewState.position ? (
+        <EntityPreviewCard
+          entityId={previewState.entityId}
+          entityType={previewState.entityType}
+          position={previewState.position}
+          onClose={hidePreview}
+          onOpenInKB={handleOpenInKB}
+          onMouseEnter={onCardMouseEnter}
+          onMouseLeave={onCardMouseLeave}
+          seriesId={seriesId}
+        />
+      ) : null}
     </div>
   );
 }

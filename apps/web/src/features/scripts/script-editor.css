@@ -179,3 +179,70 @@
 .script-editor-content ::selection {
   background-color: var(--accent);
 }
+
+/* =====================================================
+   Linked Entity Visual Indicators
+   These styles apply when blocks have KB-linked entities
+   ===================================================== */
+
+/* Character block with linked character (has characterId attribute) */
+.script-block--character[data-character-id] {
+  background-color: color-mix(in srgb, var(--block-character) 8%, transparent);
+  border-left-width: 6px;
+}
+
+.script-block--character[data-character-id]:focus-within {
+  background-color: color-mix(in srgb, var(--block-character) 12%, transparent);
+}
+
+/* Scene heading with linked location (has locationId attribute) */
+.script-block--scene-heading[data-location-id] {
+  background-color: color-mix(in srgb, var(--block-scene-heading) 8%, transparent);
+  border-left-width: 6px;
+}
+
+.script-block--scene-heading[data-location-id]:focus-within {
+  background-color: color-mix(in srgb, var(--block-scene-heading) 12%, transparent);
+}
+
+/* Entity mention marks (inline mentions with @, #, !) */
+.mention {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mention[data-entity-type='character'] {
+  color: var(--block-character);
+  background-color: color-mix(in srgb, var(--block-character) 15%, transparent);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+.mention[data-entity-type='character']:hover {
+  background-color: color-mix(in srgb, var(--block-character) 25%, transparent);
+}
+
+.mention[data-entity-type='prop'] {
+  color: var(--block-action);
+  background-color: color-mix(in srgb, var(--block-action) 15%, transparent);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+.mention[data-entity-type='prop']:hover {
+  background-color: color-mix(in srgb, var(--block-action) 25%, transparent);
+}
+
+.mention[data-entity-type='wildcard'] {
+  color: var(--block-scene-heading);
+  background-color: color-mix(in srgb, var(--block-scene-heading) 15%, transparent);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+.mention[data-entity-type='wildcard']:hover {
+  background-color: color-mix(in srgb, var(--block-scene-heading) 25%, transparent);
+}

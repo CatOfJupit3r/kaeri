@@ -17,4 +17,5 @@ export const GETTERS = {
   ContinuityService: () => resolve(TOKENS.ContinuityService),
   ThemeService: () => resolve(TOKENS.ThemeService),
   StoryArcService: () => resolve(TOKENS.StoryArcService),
+  ScriptKBIntegrationService: () => resolve(TOKENS.ScriptKBIntegrationService),
 };
