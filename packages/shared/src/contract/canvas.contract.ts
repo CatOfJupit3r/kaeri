@@ -3,6 +3,9 @@ import z from 'zod';
 
 import { authProcedure } from './procedures';
 
+// Edge style enum
+const edgeStyleSchema = z.enum(['solid', 'dashed', 'dotted']);
+
 const canvasNodeSchema = z.object({
   _id: z.string(),
   seriesId: z.string(),
@@ -10,6 +13,8 @@ const canvasNodeSchema = z.object({
   content: z.string(),
   position: z.object({ x: z.number(), y: z.number() }),
   style: z.record(z.string(), z.unknown()).optional(),
+  linkedEntityId: z.string().optional(),
+  linkedEntityType: z.enum(['character', 'location', 'scene', 'script', 'theme', 'storyArc']).optional(),
 });
 
 const canvasEdgeSchema = z.object({
@@ -18,6 +23,9 @@ const canvasEdgeSchema = z.object({
   sourceId: z.string(),
   targetId: z.string(),
   label: z.string().optional(),
+  color: z.string().optional(),
+  thickness: z.number().min(1).max(10).optional(),
+  edgeStyle: edgeStyleSchema.optional(),
 });
 
 const getCanvas = authProcedure
@@ -79,4 +87,4 @@ const canvasContract = oc.prefix('/canvas').router({
 });
 
 export default canvasContract;
-export { canvasNodeSchema, canvasEdgeSchema };
+export { canvasNodeSchema, canvasEdgeSchema, edgeStyleSchema };

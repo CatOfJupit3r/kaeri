@@ -53,6 +53,7 @@
     "@tiptap/react": "^3.20.0",
     "@tiptap/suggestion": "^3.20.0",
     "@uidotdev/usehooks": "2.4.1",
+    "@xyflow/react": "^12.10.1",
     "axios": "1.13.2",
     "better-auth": "catalog:",
     "class-variance-authority": "0.7.1",

@@ -1,9 +1,9 @@
 import { Link, useLocation } from '@tanstack/react-router';
-import { LuChartNoAxesColumn, LuBookOpen, LuFileText } from 'react-icons/lu';
+import { LuChartNoAxesColumn, LuBookOpen, LuFileText, LuLayoutDashboard } from 'react-icons/lu';
 
 import { cn } from '@~/lib/utils';
 
-type TabType = 'scripts' | 'knowledge-base' | 'analytics';
+type TabType = 'scripts' | 'knowledge-base' | 'canvas' | 'analytics';
 
 interface iSeriesTabsProps {
   seriesId: string;
@@ -12,6 +12,7 @@ interface iSeriesTabsProps {
 const TABS: Array<{ id: TabType; label: string; href: string; icon: typeof LuFileText }> = [
   { id: 'scripts', label: 'Scripts', href: '/series/$seriesId/scripts', icon: LuFileText },
   { id: 'knowledge-base', label: 'Knowledge Base', href: '/series/$seriesId/knowledge-base', icon: LuBookOpen },
+  { id: 'canvas', label: 'Canvas', href: '/series/$seriesId/canvas', icon: LuLayoutDashboard },
   { id: 'analytics', label: 'Analytics', href: '#', icon: LuChartNoAxesColumn },
 ];
 
@@ -21,6 +22,7 @@ export function SeriesTabs({ seriesId }: iSeriesTabsProps) {
 
   const getActiveTab = (): TabType => {
     if (pathname.includes('/knowledge-base')) return 'knowledge-base';
+    if (pathname.includes('/canvas')) return 'canvas';
     if (pathname.includes('/scripts')) return 'scripts';
     // Default to scripts for the series index page
     return 'scripts';

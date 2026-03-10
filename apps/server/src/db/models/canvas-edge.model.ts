@@ -20,6 +20,15 @@ class CanvasEdgeClass extends RequiredTimeStamps {
 
   @prop()
   public label?: string;
+
+  @prop()
+  public color?: string;
+
+  @prop({ min: 1, max: 10 })
+  public thickness?: number;
+
+  @prop({ enum: ['solid', 'dashed', 'dotted'] })
+  public edgeStyle?: 'solid' | 'dashed' | 'dotted';
 }
 
 export const CanvasEdgeModel = getModelForClass(CanvasEdgeClass);

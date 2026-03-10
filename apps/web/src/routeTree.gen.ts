@@ -18,6 +18,7 @@ import { Route as generalTo_dashboardRouteImport } from './routes/(general)/_to_
 import { Route as generalTo_dashboardAuthRouteImport } from './routes/(general)/_to_dashboard.auth';
 import { Route as Auth_onlySeriesSeriesIdIndexRouteImport } from './routes/_auth_only/series/$seriesId/index';
 import { Route as Auth_onlySeriesSeriesIdKnowledgeBaseRouteImport } from './routes/_auth_only/series/$seriesId/knowledge-base';
+import { Route as Auth_onlySeriesSeriesIdCanvasRouteImport } from './routes/_auth_only/series/$seriesId/canvas';
 import { Route as Auth_onlySeriesSeriesIdScriptsIndexRouteImport } from './routes/_auth_only/series/$seriesId/scripts/index';
 import { Route as Auth_onlySeriesSeriesIdScriptsScriptIdIndexRouteImport } from './routes/_auth_only/series/$seriesId/scripts/$scriptId/index';
 import { Route as Auth_onlySeriesSeriesIdKnowledgeBaseScenesSceneIdRouteImport } from './routes/_auth_only/series/$seriesId/knowledge-base/scenes/$sceneId';
@@ -68,6 +69,12 @@ const Auth_onlySeriesSeriesIdKnowledgeBaseRoute =
     path: '/series/$seriesId/knowledge-base',
     getParentRoute: () => Auth_onlyRoute,
   } as any);
+const Auth_onlySeriesSeriesIdCanvasRoute =
+  Auth_onlySeriesSeriesIdCanvasRouteImport.update({
+    id: '/series/$seriesId/canvas',
+    path: '/series/$seriesId/canvas',
+    getParentRoute: () => Auth_onlyRoute,
+  } as any);
 const Auth_onlySeriesSeriesIdScriptsIndexRoute =
   Auth_onlySeriesSeriesIdScriptsIndexRouteImport.update({
     id: '/series/$seriesId/scripts/',
@@ -99,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof Auth_onlyProfileRoute;
   '/settings': typeof Auth_onlySettingsRoute;
   '/auth': typeof generalTo_dashboardAuthRoute;
+  '/series/$seriesId/canvas': typeof Auth_onlySeriesSeriesIdCanvasRoute;
   '/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren;
   '/series/$seriesId': typeof Auth_onlySeriesSeriesIdIndexRoute;
   '/series/$seriesId/scripts': typeof Auth_onlySeriesSeriesIdScriptsIndexRoute;
@@ -112,6 +120,7 @@ export interface FileRoutesByTo {
   '/profile': typeof Auth_onlyProfileRoute;
   '/settings': typeof Auth_onlySettingsRoute;
   '/auth': typeof generalTo_dashboardAuthRoute;
+  '/series/$seriesId/canvas': typeof Auth_onlySeriesSeriesIdCanvasRoute;
   '/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren;
   '/series/$seriesId': typeof Auth_onlySeriesSeriesIdIndexRoute;
   '/series/$seriesId/scripts': typeof Auth_onlySeriesSeriesIdScriptsIndexRoute;
@@ -128,6 +137,7 @@ export interface FileRoutesById {
   '/_auth_only/profile': typeof Auth_onlyProfileRoute;
   '/_auth_only/settings': typeof Auth_onlySettingsRoute;
   '/(general)/_to_dashboard/auth': typeof generalTo_dashboardAuthRoute;
+  '/_auth_only/series/$seriesId/canvas': typeof Auth_onlySeriesSeriesIdCanvasRoute;
   '/_auth_only/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren;
   '/_auth_only/series/$seriesId/': typeof Auth_onlySeriesSeriesIdIndexRoute;
   '/_auth_only/series/$seriesId/scripts/': typeof Auth_onlySeriesSeriesIdScriptsIndexRoute;
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/auth'
+    | '/series/$seriesId/canvas'
     | '/series/$seriesId/knowledge-base'
     | '/series/$seriesId'
     | '/series/$seriesId/scripts'
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/auth'
+    | '/series/$seriesId/canvas'
     | '/series/$seriesId/knowledge-base'
     | '/series/$seriesId'
     | '/series/$seriesId/scripts'
@@ -171,6 +183,7 @@ export interface FileRouteTypes {
     | '/_auth_only/profile'
     | '/_auth_only/settings'
     | '/(general)/_to_dashboard/auth'
+    | '/_auth_only/series/$seriesId/canvas'
     | '/_auth_only/series/$seriesId/knowledge-base'
     | '/_auth_only/series/$seriesId/'
     | '/_auth_only/series/$seriesId/scripts/'
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteImport;
       parentRoute: typeof Auth_onlyRoute;
     };
+    '/_auth_only/series/$seriesId/canvas': {
+      id: '/_auth_only/series/$seriesId/canvas';
+      path: '/series/$seriesId/canvas';
+      fullPath: '/series/$seriesId/canvas';
+      preLoaderRoute: typeof Auth_onlySeriesSeriesIdCanvasRouteImport;
+      parentRoute: typeof Auth_onlyRoute;
+    };
     '/_auth_only/series/$seriesId/scripts/': {
       id: '/_auth_only/series/$seriesId/scripts/';
       path: '/series/$seriesId/scripts';
@@ -303,6 +323,7 @@ interface Auth_onlyRouteChildren {
   Auth_onlyDashboardRoute: typeof Auth_onlyDashboardRoute;
   Auth_onlyProfileRoute: typeof Auth_onlyProfileRoute;
   Auth_onlySettingsRoute: typeof Auth_onlySettingsRoute;
+  Auth_onlySeriesSeriesIdCanvasRoute: typeof Auth_onlySeriesSeriesIdCanvasRoute;
   Auth_onlySeriesSeriesIdKnowledgeBaseRoute: typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren;
   Auth_onlySeriesSeriesIdIndexRoute: typeof Auth_onlySeriesSeriesIdIndexRoute;
   Auth_onlySeriesSeriesIdScriptsIndexRoute: typeof Auth_onlySeriesSeriesIdScriptsIndexRoute;
@@ -313,6 +334,7 @@ const Auth_onlyRouteChildren: Auth_onlyRouteChildren = {
   Auth_onlyDashboardRoute: Auth_onlyDashboardRoute,
   Auth_onlyProfileRoute: Auth_onlyProfileRoute,
   Auth_onlySettingsRoute: Auth_onlySettingsRoute,
+  Auth_onlySeriesSeriesIdCanvasRoute: Auth_onlySeriesSeriesIdCanvasRoute,
   Auth_onlySeriesSeriesIdKnowledgeBaseRoute:
     Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren,
   Auth_onlySeriesSeriesIdIndexRoute: Auth_onlySeriesSeriesIdIndexRoute,

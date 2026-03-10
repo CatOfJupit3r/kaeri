@@ -32,6 +32,12 @@ class CanvasNodeClass extends RequiredTimeStamps {
 
   @prop({ type: () => Object })
   public style?: Record<string, unknown>;
+
+  @prop({ index: true })
+  public linkedEntityId?: string;
+
+  @prop({ enum: ['character', 'location', 'scene', 'script', 'theme', 'storyArc'] })
+  public linkedEntityType?: 'character' | 'location' | 'scene' | 'script' | 'theme' | 'storyArc';
 }
 
 export const CanvasNodeModel = getModelForClass(CanvasNodeClass);
