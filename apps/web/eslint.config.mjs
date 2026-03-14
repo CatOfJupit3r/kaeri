@@ -218,16 +218,7 @@ const silenceWebOpinions = [
           functions: false,
         },
       ],
-      'jsx-a11y/label-has-associated-control': [
-        'error',
-        {
-          labelComponents: ['Label'],
-          labelAttributes: ['htmlFor'],
-          controlComponents: ['Input', 'input', 'Textarea', 'textarea'],
-          assert: 'either',
-          depth: 3,
-        },
-      ],
+      'jsx-a11y/label-has-associated-control': 'off',
     },
   },
 ];

@@ -4,6 +4,7 @@ import type { AuthService } from '@~/features/auth/auth.service';
 import type { BadgesService } from '@~/features/badges/badges.service';
 import type { CanvasService } from '@~/features/canvas/canvas.service';
 import type { ContinuityService } from '@~/features/continuity/continuity.service';
+import type { EpisodeService } from '@~/features/episodes/episode.service';
 import type { TypedEventBus } from '@~/features/events/event-bus';
 import type { ExportService } from '@~/features/export/export.service';
 import type { KnowledgeBaseService } from '@~/features/knowledge-base/knowledge-base.service';
@@ -37,6 +38,7 @@ const continuityServiceToken: unique symbol = Symbol.for('ContinuityService');
 const themeServiceToken: unique symbol = Symbol.for('ThemeService');
 const storyArcServiceToken: unique symbol = Symbol.for('StoryArcService');
 const scriptKBIntegrationServiceToken: unique symbol = Symbol.for('ScriptKBIntegrationService');
+const episodeServiceToken: unique symbol = Symbol.for('EpisodeService');
 
 // Service tokens for dependency injection (unique symbols for type-safe lookups)
 export const TOKENS = {
@@ -59,6 +61,7 @@ export const TOKENS = {
   ThemeService: themeServiceToken,
   StoryArcService: storyArcServiceToken,
   ScriptKBIntegrationService: scriptKBIntegrationServiceToken,
+  EpisodeService: episodeServiceToken,
 } as const;
 
 export interface iTokenRegistry {
@@ -81,6 +84,7 @@ export interface iTokenRegistry {
   [TOKENS.ThemeService]: ThemeService;
   [TOKENS.StoryArcService]: StoryArcService;
   [TOKENS.ScriptKBIntegrationService]: ScriptKBIntegrationService;
+  [TOKENS.EpisodeService]: EpisodeService;
 }
 
 export type InjectionTokens = typeof TOKENS;

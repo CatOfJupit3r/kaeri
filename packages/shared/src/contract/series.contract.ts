@@ -8,9 +8,39 @@ const paginationSchema = z.object({
   offset: z.number().int().min(0).default(0),
 });
 
+// Series type enum for different project types
+export const seriesTypeSchema = z.enum(['tv-series', 'film-trilogy', 'anthology', 'standalone']);
+export const SERIES_TYPES = seriesTypeSchema.enum;
+export type SeriesType = z.infer<typeof seriesTypeSchema>;
+
+// Type metadata for UI display
+export const SERIES_TYPE_META = {
+  [SERIES_TYPES['tv-series']]: {
+    label: 'TV Series',
+    description: 'Multi-episode television show with seasons',
+    icon: 'Tv',
+  },
+  [SERIES_TYPES['film-trilogy']]: {
+    label: 'Film Trilogy',
+    description: 'Connected series of feature films',
+    icon: 'Film',
+  },
+  [SERIES_TYPES.anthology]: {
+    label: 'Anthology',
+    description: 'Collection of standalone stories',
+    icon: 'Library',
+  },
+  [SERIES_TYPES.standalone]: {
+    label: 'Standalone',
+    description: 'Single feature film or special',
+    icon: 'FileText',
+  },
+} as const;
+
 export const seriesSchema = z.object({
   _id: z.string(),
   title: z.string(),
+  type: seriesTypeSchema.default('standalone'),
   genre: z.string().optional(),
   logline: z.string().optional(),
   coverUrl: z.string().url().optional(),
@@ -20,6 +50,7 @@ export const seriesSchema = z.object({
 const seriesSummarySchema = seriesSchema.pick({
   _id: true,
   title: true,
+  type: true,
   genre: true,
   logline: true,
   coverUrl: true,
@@ -28,6 +59,7 @@ const seriesSummarySchema = seriesSchema.pick({
 
 export const createSeriesInputSchema = z.object({
   title: z.string().min(1),
+  type: seriesTypeSchema.default('standalone'),
   genre: z.string().optional(),
   logline: z.string().optional(),
   coverUrl: z.string().url().optional(),
@@ -36,6 +68,7 @@ export const createSeriesInputSchema = z.object({
 export const updateSeriesPatchSchema = z
   .object({
     title: z.string().min(1).optional(),
+    type: seriesTypeSchema.optional(),
     genre: z.string().optional(),
     logline: z.string().optional(),
     coverUrl: z.string().url().optional(),

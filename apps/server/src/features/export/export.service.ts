@@ -122,7 +122,7 @@ const DEFAULT_PRESET: Omit<ExportPreset, '_id' | 'userId' | 'createdAt' | 'updat
 export class ExportService implements iWithLogger {
   public logger: ReturnType<LoggerFactory['create']>;
 
-  private pdfGenerator: PdfGeneratorService;
+  private readonly pdfGenerator: PdfGeneratorService;
 
   constructor(
     @inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory,
@@ -300,13 +300,6 @@ export class ExportService implements iWithLogger {
       ...presetData
     } = sourcePreset;
 
-    // Suppress unused variable warnings
-    void sourceId;
-    void unusedUserId;
-    void isSystem;
-    void unusedCreatedAt;
-    void unusedUpdatedAt;
-
     const newPreset = await ExportPresetModel.create({
       ...presetData,
       name: duplicateName,
@@ -340,7 +333,7 @@ export class ExportService implements iWithLogger {
     }
 
     // Verify the script's series exists
-    // TODO: Add series ownership check when multi-user support is implemented
+    // Series ownership check will be added with multi-user support
     const series = await SeriesModel.findById(script.seriesId);
     if (!series) {
       throw ORPCNotFoundError(errorCodes.SCRIPT_NOT_FOUND);
@@ -380,7 +373,7 @@ export class ExportService implements iWithLogger {
     });
 
     // Generate filename
-    const safeTitle = script.title.replace(/[^a-zA-Z0-9-_]/g, '_').substring(0, 50);
+    const safeTitle = script.title.replaceAll(/[^a-zA-Z0-9-_]/g, '_').substring(0, 50);
     const filename = `${safeTitle}_${new Date().toISOString().split('T')[0]}.pdf`;
 
     return {
@@ -446,5 +439,146 @@ export class ExportService implements iWithLogger {
 
       return exportData;
     });
+  }
+
+  // ============================================================================
+  // JSON IMPORT
+  // ============================================================================
+
+  /**
+   * Import a single entity, stripping metadata fields
+   */
+  private async importEntity(
+    Model: { create: (data: unknown) => Promise<unknown> },
+    entityData: Record<string, unknown>,
+    seriesId: string,
+    entityType: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const { _id, seriesId: _s, createdAt, updatedAt, ...cleanData } = entityData;
+      await Model.create({ ...cleanData, seriesId });
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: `${entityType} import failed: ${(err as Error).message}` };
+    }
+  }
+
+  /**
+   * Import multiple entities of the same type
+   */
+  private async importEntities(
+    Model: { create: (data: unknown) => Promise<unknown> },
+    entities: Array<Record<string, unknown>> | undefined,
+    seriesId: string,
+    entityType: string,
+  ): Promise<{ imported: number; errors: string[] }> {
+    if (!entities?.length) {
+      return { imported: 0, errors: [] };
+    }
+
+    const results = await Promise.all(
+      entities.map(async (entity) => this.importEntity(Model, entity, seriesId, entityType)),
+    );
+
+    const imported = results.filter((r) => r.success).length;
+    const errors = results.filter((r) => !r.success).map((r) => r.error ?? 'Unknown error');
+
+    return { imported, errors };
+  }
+
+  /**
+   * Import series data from JSON backup
+   */
+  public async importSeriesJson(
+    seriesId: string,
+    data: {
+      series?: Partial<{ title: string; description?: string }>;
+      characters?: Array<Record<string, unknown>>;
+      locations?: Array<Record<string, unknown>>;
+      props?: Array<Record<string, unknown>>;
+      timeline?: Array<Record<string, unknown>>;
+      wildcards?: Array<Record<string, unknown>>;
+      canvas?: {
+        nodes?: Array<Record<string, unknown>>;
+        edges?: Array<Record<string, unknown>>;
+      };
+    },
+    options: {
+      skipKnowledgeBase?: boolean;
+      skipCanvas?: boolean;
+      overwriteExisting?: boolean;
+    } = {},
+  ) {
+    this.logger.info('Starting series JSON import', { seriesId });
+
+    // Verify series exists
+    const series = await SeriesModel.findById(seriesId).lean();
+    if (!series) {
+      throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
+    }
+
+    const imported = {
+      characters: 0,
+      locations: 0,
+      props: 0,
+      timeline: 0,
+      wildcards: 0,
+      canvasNodes: 0,
+      canvasEdges: 0,
+    };
+    const allErrors: string[] = [];
+
+    // Import KB entities
+    if (!options.skipKnowledgeBase) {
+      const charResult = await this.importEntities(CharacterModel, data.characters, seriesId, 'Character');
+      imported.characters = charResult.imported;
+      allErrors.push(...charResult.errors);
+
+      const locResult = await this.importEntities(LocationModel, data.locations, seriesId, 'Location');
+      imported.locations = locResult.imported;
+      allErrors.push(...locResult.errors);
+
+      const propResult = await this.importEntities(PropModel, data.props, seriesId, 'Prop');
+      imported.props = propResult.imported;
+      allErrors.push(...propResult.errors);
+
+      const timelineResult = await this.importEntities(TimelineEntryModel, data.timeline, seriesId, 'Timeline entry');
+      imported.timeline = timelineResult.imported;
+      allErrors.push(...timelineResult.errors);
+
+      const wildcardResult = await this.importEntities(WildCardModel, data.wildcards, seriesId, 'Wildcard');
+      imported.wildcards = wildcardResult.imported;
+      allErrors.push(...wildcardResult.errors);
+    }
+
+    // Import canvas
+    if (!options.skipCanvas && data.canvas) {
+      const nodeResult = await this.importEntities(CanvasNodeModel, data.canvas.nodes, seriesId, 'Canvas node');
+      imported.canvasNodes = nodeResult.imported;
+      allErrors.push(...nodeResult.errors);
+
+      const edgeResult = await this.importEntities(CanvasEdgeModel, data.canvas.edges, seriesId, 'Canvas edge');
+      imported.canvasEdges = edgeResult.imported;
+      allErrors.push(...edgeResult.errors);
+    }
+
+    // Invalidate caches
+    await this.valkey.invalidatePattern(`series:${seriesId}:*`);
+
+    const skipped = allErrors.length;
+
+    this.logger.info('Series JSON import completed', {
+      seriesId,
+      imported,
+      skipped,
+      errorCount: allErrors.length,
+    });
+
+    return {
+      success: true as const,
+      imported,
+      skipped,
+      errors: allErrors.slice(0, 10), // Limit error messages
+    };
   }
 }

@@ -3,4 +3,5 @@ export { useDeleteExportPreset } from './use-delete-export-preset';
 export { useDuplicateExportPreset } from './use-duplicate-export-preset';
 export { useExportScriptPdf } from './use-export-script-pdf';
 export { useExportSeriesJson } from './use-export-series-json';
+export { useImportSeriesJson } from './use-import-series-json';
 export { useUpdateExportPreset } from './use-update-export-preset';

@@ -2,7 +2,7 @@ import { useHotkey } from '@tanstack/react-hotkeys';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useCallback, useState } from 'react';
 import { GiHoneyJar } from 'react-icons/gi';
-import { LuEllipsisVertical, LuPencil, LuTrash2 } from 'react-icons/lu';
+import { LuEllipsisVertical, LuFileText, LuFilm, LuLibrary, LuPencil, LuTrash2, LuTv } from 'react-icons/lu';
 
 import { SeriesError } from '@~/components/errors/series-error';
 import { SeriesEmptyState } from '@~/components/loading/series-empty-state';
@@ -30,6 +30,16 @@ import { useDeleteSeries } from '@~/features/series/hooks/mutations/use-delete-s
 import { seriesListQueryOptions, useSeriesList } from '@~/features/series/hooks/queries/use-series-list';
 import { useCreateBeeMovie } from '@~/hooks/use-create-bee-movie';
 
+// Series type configuration
+const SERIES_TYPE_CONFIG = {
+  'tv-series': { label: 'TV Series', icon: LuTv, color: 'bg-blue-100 text-blue-700' },
+  'film-trilogy': { label: 'Film Trilogy', icon: LuFilm, color: 'bg-pink-100 text-pink-700' },
+  anthology: { label: 'Anthology', icon: LuLibrary, color: 'bg-yellow-100 text-yellow-700' },
+  standalone: { label: 'Standalone', icon: LuFileText, color: 'bg-green-100 text-green-700' },
+} as const;
+
+type SeriesType = keyof typeof SERIES_TYPE_CONFIG;
+
 export const Route = createFileRoute('/_auth_only/dashboard')({
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(seriesListQueryOptions());
@@ -42,6 +52,7 @@ function RouteComponent() {
   const [editingSeries, setEditingSeries] = useState<{
     _id: string;
     title: string;
+    type?: SeriesType;
     genre?: string;
     logline?: string;
     coverUrl?: string;
@@ -162,8 +173,23 @@ function RouteComponent() {
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-2">
                     <Link to="/series/$seriesId" params={{ seriesId: s._id }} className="flex-1 cursor-pointer">
-                      <h3 className="font-semibold text-foreground group-hover:text-primary">{s.title}</h3>
-                      {s.genre ? <p className="text-xs text-muted-foreground">{s.genre}</p> : null}
+                      <div className="flex items-center gap-2">
+                        {/* Series Type Icon */}
+                        {s.type && SERIES_TYPE_CONFIG[s.type] ? (
+                          <div
+                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded ${SERIES_TYPE_CONFIG[s.type].color}`}
+                          >
+                            {(() => {
+                              const Icon = SERIES_TYPE_CONFIG[s.type].icon;
+                              return <Icon className="h-4 w-4" />;
+                            })()}
+                          </div>
+                        ) : null}
+                        <div>
+                          <h3 className="font-semibold text-foreground group-hover:text-primary">{s.title}</h3>
+                          {s.genre ? <p className="text-xs text-muted-foreground">{s.genre}</p> : null}
+                        </div>
+                      </div>
                     </Link>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -178,6 +204,7 @@ function RouteComponent() {
                             handleEdit({
                               _id: s._id,
                               title: s.title,
+                              type: s.type as SeriesType | undefined,
                               genre: s.genre,
                               logline: s.logline,
                               coverUrl: s.coverUrl,

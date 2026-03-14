@@ -228,6 +228,13 @@ export const exportScriptPdfOptionsSchema = z.object({
   includeDraftWatermark: z.boolean().default(false),
   /** Custom watermark text */
   watermarkText: z.string().max(50).optional(),
+  /** Include revision marks (asterisks for changed lines) */
+  includeRevisionMarks: z.boolean().default(false),
+  /** Revision color for changed lines */
+  revisionColor: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/)
+    .optional(),
 });
 
 export type ExportScriptPdfOptions = z.infer<typeof exportScriptPdfOptionsSchema>;

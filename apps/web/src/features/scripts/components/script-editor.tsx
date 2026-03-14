@@ -53,9 +53,11 @@ import {
 import type { ScriptBlockType } from '../types';
 import { BLOCK_TYPE_CYCLE_ORDER } from '../types';
 import { BlockMenu } from './block-menu';
+import { BreakdownModal } from './breakdown-modal';
 import { EditorToolbar } from './editor-toolbar';
 import { EntityPreviewCard } from './entity-preview';
 import { KnowledgeBasePanel } from './knowledge-base-panel';
+import { TableReadModal } from './table-read-modal';
 
 interface iScriptEditorProps {
   /** Script content as JSON string */
@@ -152,6 +154,8 @@ export function ScriptEditor({
   const [rightPanelTab, setRightPanelTab] = useState('knowledge');
   const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
   const [isShowingKeyboardShortcuts, setIsShowingKeyboardShortcuts] = useState(false);
+  const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
+  const [isTableReadOpen, setIsTableReadOpen] = useState(false);
 
   // Entity mention suggestion query states
   const [characterQuery, setCharacterQuery] = useState('');
@@ -404,6 +408,8 @@ export function ScriptEditor({
         title={title}
         onOpenSettings={onOpenSettings}
         onExport={onExport}
+        onBreakdown={() => setIsBreakdownOpen(true)}
+        onTableRead={() => setIsTableReadOpen(true)}
         isSaving={isSaving}
         lastEditedAt={lastEditedAt}
         currentBlockType={getCurrentBlockType()}
@@ -411,6 +417,12 @@ export function ScriptEditor({
           editor?.chain().focus().setNode(type).run();
         }}
       />
+
+      {/* Breakdown Modal */}
+      <BreakdownModal open={isBreakdownOpen} onOpenChange={setIsBreakdownOpen} content={content} scriptTitle={title} />
+
+      {/* Table Read Modal */}
+      <TableReadModal open={isTableReadOpen} onOpenChange={setIsTableReadOpen} content={content} scriptTitle={title} />
 
       <div className="relative flex flex-1 flex-col overflow-hidden lg:flex-row">
         {/* Editor Panel */}

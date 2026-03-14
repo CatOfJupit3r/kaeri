@@ -5,12 +5,14 @@ import {
   LuChevronDown,
   LuFileDown,
   LuItalic,
+  LuLayoutList,
   LuLoader,
   LuPencil,
   LuRedo,
   LuSave,
   LuUnderline,
   LuUndo,
+  LuUsers,
 } from 'react-icons/lu';
 
 import { Button } from '@~/components/ui/button';
@@ -32,7 +34,8 @@ interface iEditorToolbarProps {
   title?: string;
   onOpenSettings?: () => void;
   onExport?: () => void;
-  _onBreakdown?: () => void;
+  onBreakdown?: () => void;
+  onTableRead?: () => void;
   onSave?: () => void;
   isSaving?: boolean;
   lastEditedAt?: Date;
@@ -45,7 +48,8 @@ export function EditorToolbar({
   title,
   onOpenSettings,
   onExport,
-  _onBreakdown,
+  onBreakdown,
+  onTableRead,
   onSave,
   isSaving,
   lastEditedAt,
@@ -71,6 +75,14 @@ export function EditorToolbar({
               Save
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onBreakdown}>
+              <LuLayoutList className="mr-2 h-4 w-4" />
+              Breakdown...
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onTableRead}>
+              <LuUsers className="mr-2 h-4 w-4" />
+              Table Read...
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={onExport}>
               <LuFileDown className="mr-2 h-4 w-4" />
               Export...

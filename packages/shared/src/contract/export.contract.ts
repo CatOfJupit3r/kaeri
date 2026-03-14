@@ -154,6 +154,66 @@ const exportSeriesJson = authProcedure
     }),
   );
 
+// Import input schema (matches export output structure)
+const importSeriesJsonInputSchema = z.object({
+  /** Target series ID to import into (or 'new' to create a new series) */
+  targetSeriesId: z.string(),
+  /** Exported data to import */
+  data: z.object({
+    series: seriesSchema.partial(),
+    scripts: z.array(scriptSummarySchema.partial()).optional(),
+    characters: z.array(characterSchema.partial()).optional(),
+    locations: z.array(locationSchema.partial()).optional(),
+    props: z.array(propSchema.partial()).optional(),
+    timeline: z.array(timelineEntrySchema.partial()).optional(),
+    wildcards: z.array(wildCardSchema.partial()).optional(),
+    canvas: z
+      .object({
+        nodes: z.array(canvasNodeSchema.partial()).optional(),
+        edges: z.array(canvasEdgeSchema.partial()).optional(),
+      })
+      .optional(),
+  }),
+  /** Import options */
+  options: z
+    .object({
+      /** Skip importing scripts */
+      skipScripts: z.boolean().optional(),
+      /** Skip importing KB entities */
+      skipKnowledgeBase: z.boolean().optional(),
+      /** Skip importing canvas */
+      skipCanvas: z.boolean().optional(),
+      /** Overwrite existing entities with same name */
+      overwriteExisting: z.boolean().optional(),
+    })
+    .optional(),
+});
+
+const importSeriesJson = authProcedure
+  .route({
+    path: '/series-json/import',
+    method: 'POST',
+    summary: 'Import series JSON backup',
+    description: 'Imports series data from a JSON export into an existing series.',
+  })
+  .input(importSeriesJsonInputSchema)
+  .output(
+    z.object({
+      success: z.literal(true),
+      imported: z.object({
+        characters: z.number(),
+        locations: z.number(),
+        props: z.number(),
+        timeline: z.number(),
+        wildcards: z.number(),
+        canvasNodes: z.number(),
+        canvasEdges: z.number(),
+      }),
+      skipped: z.number(),
+      errors: z.array(z.string()),
+    }),
+  );
+
 // ============================================================================
 // CONTRACT
 // ============================================================================
@@ -169,6 +229,8 @@ const exportContract = oc.prefix('/export').router({
   // Export operations
   exportScriptPdf,
   exportSeriesJson,
+  // Import operations
+  importSeriesJson,
 });
 
 export default exportContract;

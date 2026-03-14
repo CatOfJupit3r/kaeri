@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
-import { LuLayoutGrid, LuSettings, LuUsers, LuUser, LuZap } from 'react-icons/lu';
+import { LuFileText, LuFilm, LuLayoutGrid, LuLibrary, LuSettings, LuTv, LuUsers, LuUser, LuZap } from 'react-icons/lu';
 
 import { toastInfo } from '@~/components/toastifications';
 import { Button } from '@~/components/ui/button';
@@ -14,10 +14,21 @@ import {
 
 import { SeriesModal } from './series-modal';
 
+// Series type configuration
+const SERIES_TYPE_CONFIG = {
+  'tv-series': { label: 'TV Series', icon: LuTv, color: 'bg-(--brutalist-blue)' },
+  'film-trilogy': { label: 'Film Trilogy', icon: LuFilm, color: 'bg-(--brutalist-pink)' },
+  anthology: { label: 'Anthology', icon: LuLibrary, color: 'bg-(--brutalist-yellow)' },
+  standalone: { label: 'Standalone', icon: LuFileText, color: 'bg-(--brutalist-green)' },
+} as const;
+
+type SeriesType = keyof typeof SERIES_TYPE_CONFIG;
+
 interface iSeriesHeaderProps {
   series: {
     _id: string;
     title: string;
+    type?: SeriesType;
     genre?: string;
     logline?: string;
     coverUrl?: string;
@@ -69,6 +80,18 @@ export function SeriesHeader({ series }: iSeriesHeaderProps) {
           <h1 className="truncate text-lg font-black tracking-tight text-foreground uppercase md:text-xl">
             {series.title}
           </h1>
+          {/* Series Type Badge */}
+          {series.type && SERIES_TYPE_CONFIG[series.type] ? (
+            <span
+              className={`hidden items-center gap-1 border-2 border-foreground px-2 py-0.5 text-xs font-bold uppercase lg:inline-flex ${SERIES_TYPE_CONFIG[series.type].color}`}
+            >
+              {(() => {
+                const Icon = SERIES_TYPE_CONFIG[series.type].icon;
+                return <Icon className="h-3 w-3" />;
+              })()}
+              {SERIES_TYPE_CONFIG[series.type].label}
+            </span>
+          ) : null}
           {series.genre ? (
             <span className="hidden border-2 border-foreground bg-(--brutalist-green) px-2 py-0.5 text-xs font-bold uppercase xl:inline">
               {series.genre}

@@ -12,6 +12,12 @@ const kaeriErrorCodes = {
   SERIES_NOT_FOUND: 'SERIES_NOT_FOUND',
   SERIES_TITLE_REQUIRED: 'SERIES_TITLE_REQUIRED',
   SERIES_DELETE_HAS_DEPENDENCIES: 'SERIES_DELETE_HAS_DEPENDENCIES',
+  // Episode errors
+  EPISODE_NOT_FOUND: 'EPISODE_NOT_FOUND',
+  EPISODE_SERIES_MUST_BE_TV_SERIES: 'EPISODE_SERIES_MUST_BE_TV_SERIES',
+  EPISODE_DUPLICATE_NUMBER: 'EPISODE_DUPLICATE_NUMBER',
+  EPISODE_SCRIPT_ALREADY_LINKED: 'EPISODE_SCRIPT_ALREADY_LINKED',
+  EPISODE_SCRIPT_NOT_LINKED: 'EPISODE_SCRIPT_NOT_LINKED',
   // Script errors
   SCRIPT_NOT_FOUND: 'SCRIPT_NOT_FOUND',
   SCRIPT_TITLE_REQUIRED: 'SCRIPT_TITLE_REQUIRED',
@@ -69,6 +75,12 @@ const kaeriErrorMessages = {
   [kaeriErrorCodes.SERIES_TITLE_REQUIRED]: 'Series title is required',
   [kaeriErrorCodes.SERIES_DELETE_HAS_DEPENDENCIES]:
     'Cannot delete series with existing scripts or knowledge base entities',
+  // Episode errors
+  [kaeriErrorCodes.EPISODE_NOT_FOUND]: 'Episode not found',
+  [kaeriErrorCodes.EPISODE_SERIES_MUST_BE_TV_SERIES]: 'Episodes can only be created for TV Series projects',
+  [kaeriErrorCodes.EPISODE_DUPLICATE_NUMBER]: 'An episode with this season and episode number already exists',
+  [kaeriErrorCodes.EPISODE_SCRIPT_ALREADY_LINKED]: 'This script is already linked to this episode',
+  [kaeriErrorCodes.EPISODE_SCRIPT_NOT_LINKED]: 'This script is not linked to this episode',
   // Script errors
   [kaeriErrorCodes.SCRIPT_NOT_FOUND]: 'Script not found',
   [kaeriErrorCodes.SCRIPT_TITLE_REQUIRED]: 'Script title is required',

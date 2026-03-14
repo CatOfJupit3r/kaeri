@@ -3,6 +3,7 @@ import { achievementsRouter } from './achievements.router';
 import { badgesRouter } from './badges.router';
 import { canvasRouter } from './canvas.router';
 import { continuityRouter } from './continuity.router';
+import { episodeRouter } from './episode.router';
 import { exportRouter } from './export.router';
 import { indexRouter } from './index.router';
 import { knowledgeBaseRouter } from './knowledge-base.router';
@@ -22,6 +23,7 @@ export const appRouter = base.router({
   series: seriesRouter,
   scripts: scriptsRouter,
   scene: sceneRouter,
+  episode: episodeRouter,
   knowledgeBase: knowledgeBaseRouter,
   scriptKBIntegration: scriptKBIntegrationRouter,
   canvas: canvasRouter,

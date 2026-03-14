@@ -37,6 +37,7 @@ export class SeriesService implements iWithLogger {
 
     const series = await SeriesModel.create({
       title: data.title,
+      type: data.type ?? 'standalone',
       genre: data.genre,
       logline: data.logline,
       coverUrl: data.coverUrl,
@@ -58,6 +59,7 @@ export class SeriesService implements iWithLogger {
     }
 
     if (patch.title !== undefined) series.title = patch.title;
+    if (patch.type !== undefined) series.type = patch.type;
     if (patch.genre !== undefined) series.genre = patch.genre;
     if (patch.logline !== undefined) series.logline = patch.logline;
     if (patch.coverUrl !== undefined) series.coverUrl = patch.coverUrl;

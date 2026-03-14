@@ -20,6 +20,7 @@ import { Route as Auth_onlySeriesSeriesIdIndexRouteImport } from './routes/_auth
 import { Route as Auth_onlySeriesSeriesIdKnowledgeBaseRouteImport } from './routes/_auth_only/series/$seriesId/knowledge-base';
 import { Route as Auth_onlySeriesSeriesIdCanvasRouteImport } from './routes/_auth_only/series/$seriesId/canvas';
 import { Route as Auth_onlySeriesSeriesIdScriptsIndexRouteImport } from './routes/_auth_only/series/$seriesId/scripts/index';
+import { Route as Auth_onlySeriesSeriesIdEpisodesIndexRouteImport } from './routes/_auth_only/series/$seriesId/episodes/index';
 import { Route as Auth_onlySeriesSeriesIdScriptsScriptIdIndexRouteImport } from './routes/_auth_only/series/$seriesId/scripts/$scriptId/index';
 import { Route as Auth_onlySeriesSeriesIdKnowledgeBaseScenesSceneIdRouteImport } from './routes/_auth_only/series/$seriesId/knowledge-base/scenes/$sceneId';
 import { Route as Auth_onlySeriesSeriesIdKnowledgeBaseCharactersCharacterIdRouteImport } from './routes/_auth_only/series/$seriesId/knowledge-base/characters/$characterId';
@@ -81,6 +82,12 @@ const Auth_onlySeriesSeriesIdScriptsIndexRoute =
     path: '/series/$seriesId/scripts/',
     getParentRoute: () => Auth_onlyRoute,
   } as any);
+const Auth_onlySeriesSeriesIdEpisodesIndexRoute =
+  Auth_onlySeriesSeriesIdEpisodesIndexRouteImport.update({
+    id: '/series/$seriesId/episodes/',
+    path: '/series/$seriesId/episodes/',
+    getParentRoute: () => Auth_onlyRoute,
+  } as any);
 const Auth_onlySeriesSeriesIdScriptsScriptIdIndexRoute =
   Auth_onlySeriesSeriesIdScriptsScriptIdIndexRouteImport.update({
     id: '/series/$seriesId/scripts/$scriptId/',
@@ -109,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/series/$seriesId/canvas': typeof Auth_onlySeriesSeriesIdCanvasRoute;
   '/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren;
   '/series/$seriesId': typeof Auth_onlySeriesSeriesIdIndexRoute;
+  '/series/$seriesId/episodes': typeof Auth_onlySeriesSeriesIdEpisodesIndexRoute;
   '/series/$seriesId/scripts': typeof Auth_onlySeriesSeriesIdScriptsIndexRoute;
   '/series/$seriesId/knowledge-base/characters/$characterId': typeof Auth_onlySeriesSeriesIdKnowledgeBaseCharactersCharacterIdRoute;
   '/series/$seriesId/knowledge-base/scenes/$sceneId': typeof Auth_onlySeriesSeriesIdKnowledgeBaseScenesSceneIdRoute;
@@ -123,6 +131,7 @@ export interface FileRoutesByTo {
   '/series/$seriesId/canvas': typeof Auth_onlySeriesSeriesIdCanvasRoute;
   '/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren;
   '/series/$seriesId': typeof Auth_onlySeriesSeriesIdIndexRoute;
+  '/series/$seriesId/episodes': typeof Auth_onlySeriesSeriesIdEpisodesIndexRoute;
   '/series/$seriesId/scripts': typeof Auth_onlySeriesSeriesIdScriptsIndexRoute;
   '/series/$seriesId/knowledge-base/characters/$characterId': typeof Auth_onlySeriesSeriesIdKnowledgeBaseCharactersCharacterIdRoute;
   '/series/$seriesId/knowledge-base/scenes/$sceneId': typeof Auth_onlySeriesSeriesIdKnowledgeBaseScenesSceneIdRoute;
@@ -140,6 +149,7 @@ export interface FileRoutesById {
   '/_auth_only/series/$seriesId/canvas': typeof Auth_onlySeriesSeriesIdCanvasRoute;
   '/_auth_only/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren;
   '/_auth_only/series/$seriesId/': typeof Auth_onlySeriesSeriesIdIndexRoute;
+  '/_auth_only/series/$seriesId/episodes/': typeof Auth_onlySeriesSeriesIdEpisodesIndexRoute;
   '/_auth_only/series/$seriesId/scripts/': typeof Auth_onlySeriesSeriesIdScriptsIndexRoute;
   '/_auth_only/series/$seriesId/knowledge-base/characters/$characterId': typeof Auth_onlySeriesSeriesIdKnowledgeBaseCharactersCharacterIdRoute;
   '/_auth_only/series/$seriesId/knowledge-base/scenes/$sceneId': typeof Auth_onlySeriesSeriesIdKnowledgeBaseScenesSceneIdRoute;
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/series/$seriesId/canvas'
     | '/series/$seriesId/knowledge-base'
     | '/series/$seriesId'
+    | '/series/$seriesId/episodes'
     | '/series/$seriesId/scripts'
     | '/series/$seriesId/knowledge-base/characters/$characterId'
     | '/series/$seriesId/knowledge-base/scenes/$sceneId'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '/series/$seriesId/canvas'
     | '/series/$seriesId/knowledge-base'
     | '/series/$seriesId'
+    | '/series/$seriesId/episodes'
     | '/series/$seriesId/scripts'
     | '/series/$seriesId/knowledge-base/characters/$characterId'
     | '/series/$seriesId/knowledge-base/scenes/$sceneId'
@@ -186,6 +198,7 @@ export interface FileRouteTypes {
     | '/_auth_only/series/$seriesId/canvas'
     | '/_auth_only/series/$seriesId/knowledge-base'
     | '/_auth_only/series/$seriesId/'
+    | '/_auth_only/series/$seriesId/episodes/'
     | '/_auth_only/series/$seriesId/scripts/'
     | '/_auth_only/series/$seriesId/knowledge-base/characters/$characterId'
     | '/_auth_only/series/$seriesId/knowledge-base/scenes/$sceneId'
@@ -277,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Auth_onlySeriesSeriesIdScriptsIndexRouteImport;
       parentRoute: typeof Auth_onlyRoute;
     };
+    '/_auth_only/series/$seriesId/episodes/': {
+      id: '/_auth_only/series/$seriesId/episodes/';
+      path: '/series/$seriesId/episodes';
+      fullPath: '/series/$seriesId/episodes';
+      preLoaderRoute: typeof Auth_onlySeriesSeriesIdEpisodesIndexRouteImport;
+      parentRoute: typeof Auth_onlyRoute;
+    };
     '/_auth_only/series/$seriesId/scripts/$scriptId/': {
       id: '/_auth_only/series/$seriesId/scripts/$scriptId/';
       path: '/series/$seriesId/scripts/$scriptId';
@@ -326,6 +346,7 @@ interface Auth_onlyRouteChildren {
   Auth_onlySeriesSeriesIdCanvasRoute: typeof Auth_onlySeriesSeriesIdCanvasRoute;
   Auth_onlySeriesSeriesIdKnowledgeBaseRoute: typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren;
   Auth_onlySeriesSeriesIdIndexRoute: typeof Auth_onlySeriesSeriesIdIndexRoute;
+  Auth_onlySeriesSeriesIdEpisodesIndexRoute: typeof Auth_onlySeriesSeriesIdEpisodesIndexRoute;
   Auth_onlySeriesSeriesIdScriptsIndexRoute: typeof Auth_onlySeriesSeriesIdScriptsIndexRoute;
   Auth_onlySeriesSeriesIdScriptsScriptIdIndexRoute: typeof Auth_onlySeriesSeriesIdScriptsScriptIdIndexRoute;
 }
@@ -338,6 +359,8 @@ const Auth_onlyRouteChildren: Auth_onlyRouteChildren = {
   Auth_onlySeriesSeriesIdKnowledgeBaseRoute:
     Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren,
   Auth_onlySeriesSeriesIdIndexRoute: Auth_onlySeriesSeriesIdIndexRoute,
+  Auth_onlySeriesSeriesIdEpisodesIndexRoute:
+    Auth_onlySeriesSeriesIdEpisodesIndexRoute,
   Auth_onlySeriesSeriesIdScriptsIndexRoute:
     Auth_onlySeriesSeriesIdScriptsIndexRoute,
   Auth_onlySeriesSeriesIdScriptsScriptIdIndexRoute:

@@ -2,6 +2,7 @@ import achievementsContract from './achievements.contract';
 import badgesContract from './badges.contract';
 import canvasContract from './canvas.contract';
 import continuityContract from './continuity.contract';
+import episodeContract from './episode.contract';
 import exportContract from './export.contract';
 import indexContract from './index.contract';
 import knowledgeBaseContract from './knowledge-base.contract';
@@ -21,6 +22,7 @@ export const CONTRACT = {
   series: seriesContract,
   scripts: scriptsContract,
   scene: sceneContract,
+  episode: episodeContract,
   knowledgeBase: knowledgeBaseContract,
   scriptKBIntegration: scriptKBIntegrationContract,
   canvas: canvasContract,

@@ -33,7 +33,7 @@ function CanvasRoute() {
   return (
     <div className="flex h-full flex-col">
       <SeriesHeader series={series} />
-      <SeriesTabs seriesId={seriesId} />
+      <SeriesTabs seriesId={seriesId} seriesType={series?.type} />
 
       <div className="flex h-[calc(100vh-180px)] min-h-[500px] flex-1 flex-col">
         <CanvasBoard seriesId={seriesId} />

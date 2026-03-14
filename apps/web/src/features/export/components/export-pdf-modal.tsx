@@ -31,6 +31,7 @@ export function ExportPdfModal({ isOpen, onClose, scriptId, scriptTitle, onOpenP
 
   const [selectedPresetId, setSelectedPresetId] = useState<string>('default-screenplay');
   const [shouldIncludeSceneNumbers, setShouldIncludeSceneNumbers] = useState(true);
+  const [shouldIncludeRevisionMarks, setShouldIncludeRevisionMarks] = useState(false);
   const [shouldIncludeDraftWatermark, setShouldIncludeDraftWatermark] = useState(false);
   const [watermarkText, setWatermarkText] = useState('DRAFT');
 
@@ -40,6 +41,7 @@ export function ExportPdfModal({ isOpen, onClose, scriptId, scriptTitle, onOpenP
         scriptId,
         presetId: selectedPresetId !== 'default-screenplay' ? selectedPresetId : undefined,
         includeSceneNumbers: shouldIncludeSceneNumbers,
+        includeRevisionMarks: shouldIncludeRevisionMarks,
         includeDraftWatermark: shouldIncludeDraftWatermark,
         watermarkText: shouldIncludeDraftWatermark ? watermarkText : undefined,
       },
@@ -113,6 +115,17 @@ export function ExportPdfModal({ isOpen, onClose, scriptId, scriptTitle, onOpenP
                 />
                 <Label htmlFor="scene-numbers" className="cursor-pointer font-medium">
                   Include scene numbers
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="revision-marks"
+                  checked={shouldIncludeRevisionMarks}
+                  onCheckedChange={(checked) => setShouldIncludeRevisionMarks(checked === true)}
+                />
+                <Label htmlFor="revision-marks" className="cursor-pointer font-medium">
+                  Include revision marks
                 </Label>
               </div>
 

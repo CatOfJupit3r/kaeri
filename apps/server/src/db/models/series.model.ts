@@ -1,6 +1,9 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import type { SeriesType } from '@kaeri/shared/contract/series.contract';
+import { SERIES_TYPES } from '@kaeri/shared/contract/series.contract';
+
 import { RequiredTimeStamps } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
@@ -11,6 +14,9 @@ class SeriesClass extends RequiredTimeStamps {
 
   @prop({ required: true })
   public title!: string;
+
+  @prop({ enum: Object.values(SERIES_TYPES), default: SERIES_TYPES.standalone })
+  public type!: SeriesType;
 
   @prop()
   public genre?: string;

@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { parseAsStringEnum, useQueryStates } from 'nuqs';
+import { useState } from 'react';
 import {
   LuBookUser,
   LuGlobe,
@@ -17,12 +18,12 @@ import {
 } from 'react-icons/lu';
 import z from 'zod';
 
-import { toastInfo } from '@~/components/toastifications';
 import { Button } from '@~/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
 import { Toggle } from '@~/components/ui/toggle';
 import { CharacterList } from '@~/features/characters/components/character-list';
 import { characterListQueryOptions } from '@~/features/characters/hooks/queries/use-character-list';
+import { ImportModal } from '@~/features/export/components/import-modal';
 import { useExportSeriesJson } from '@~/features/export/hooks/mutations/use-export-series-json';
 import { KBAllView } from '@~/features/knowledge-base/components/kb-all-view';
 import { KBSearch } from '@~/features/knowledge-base/components/kb-search';
@@ -91,6 +92,7 @@ function RouteComponent() {
   const { seriesId } = Route.useParams();
   const { data: series } = useSeries(seriesId);
   const { exportSeriesJson, isPending: isExporting } = useExportSeriesJson();
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [{ tab, viewMode }, setQueryStates] = useQueryStates({
     tab: parseAsStringEnum(TAB_VALUES_ARRAY).withDefault(TAB_VALUES.all),
     viewMode: parseAsStringEnum(VIEW_MODE_ARRAY).withDefault(VIEW_MODE.grid),
@@ -122,8 +124,7 @@ function RouteComponent() {
   };
 
   const handleImport = () => {
-    // TODO: Implement import functionality when backend API is available
-    toastInfo('Import functionality coming soon');
+    setIsImportModalOpen(true);
   };
 
   const handleExport = () => {
@@ -147,7 +148,7 @@ function RouteComponent() {
     <div className="flex h-full flex-col overflow-hidden">
       {/* Series Header */}
       <SeriesHeader series={series} />
-      <SeriesTabs seriesId={seriesId} />
+      <SeriesTabs seriesId={seriesId} seriesType={series.type} />
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
@@ -275,6 +276,9 @@ function RouteComponent() {
           </Tabs>
         </div>
       </div>
+
+      {/* Import Modal */}
+      <ImportModal open={isImportModalOpen} onOpenChange={setIsImportModalOpen} seriesId={seriesId} />
     </div>
   );
 }

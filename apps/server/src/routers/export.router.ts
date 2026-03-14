@@ -45,4 +45,10 @@ export const exportRouter = base.export.router({
     const exportService = GETTERS.ExportService();
     return exportService.exportSeriesJson(input.seriesId);
   }),
+
+  // JSON Import
+  importSeriesJson: protectedProcedure.export.importSeriesJson.handler(async ({ input }) => {
+    const exportService = GETTERS.ExportService();
+    return exportService.importSeriesJson(input.targetSeriesId, input.data, input.options ?? {});
+  }),
 });
