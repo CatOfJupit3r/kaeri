@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable no-restricted-syntax */
 import { useForm } from '@tanstack/react-form';
 import { LuLoader, LuSave } from 'react-icons/lu';

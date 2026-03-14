@@ -6,6 +6,7 @@ import episodeContract from './episode.contract';
 import exportContract from './export.contract';
 import indexContract from './index.contract';
 import knowledgeBaseContract from './knowledge-base.contract';
+import researchContract from './research.contract';
 import sceneContract from './scene.contract';
 import scriptKBIntegrationContract from './script-kb-integration.contract';
 import scriptsContract from './scripts.contract';
@@ -23,6 +24,7 @@ export const CONTRACT = {
   scripts: scriptsContract,
   scene: sceneContract,
   episode: episodeContract,
+  research: researchContract,
   knowledgeBase: knowledgeBaseContract,
   scriptKBIntegration: scriptKBIntegrationContract,
   canvas: canvasContract,

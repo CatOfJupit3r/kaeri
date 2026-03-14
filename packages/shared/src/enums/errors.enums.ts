@@ -47,6 +47,9 @@ const kaeriErrorCodes = {
   STORY_ARC_NAME_REQUIRED: 'STORY_ARC_NAME_REQUIRED',
   STORY_ARC_SERIES_MISMATCH: 'STORY_ARC_SERIES_MISMATCH',
   INVALID_STORY_ARC_STATUS: 'INVALID_STORY_ARC_STATUS',
+  // Research errors
+  RESEARCH_NOT_FOUND: 'RESEARCH_NOT_FOUND',
+  RESEARCH_TITLE_REQUIRED: 'RESEARCH_TITLE_REQUIRED',
   // Canvas errors
   CANVAS_NODE_NOT_FOUND: 'CANVAS_NODE_NOT_FOUND',
   CANVAS_EDGE_NOT_FOUND: 'CANVAS_EDGE_NOT_FOUND',
@@ -110,6 +113,9 @@ const kaeriErrorMessages = {
   [kaeriErrorCodes.STORY_ARC_NAME_REQUIRED]: 'Story arc name is required',
   [kaeriErrorCodes.STORY_ARC_SERIES_MISMATCH]: 'Story arc does not belong to the specified series',
   [kaeriErrorCodes.INVALID_STORY_ARC_STATUS]: 'Invalid story arc status',
+  // Research errors
+  [kaeriErrorCodes.RESEARCH_NOT_FOUND]: 'Research entry not found',
+  [kaeriErrorCodes.RESEARCH_TITLE_REQUIRED]: 'Research title is required',
   // Canvas errors
   [kaeriErrorCodes.CANVAS_NODE_NOT_FOUND]: 'Canvas node not found',
   [kaeriErrorCodes.CANVAS_EDGE_NOT_FOUND]: 'Canvas edge not found',

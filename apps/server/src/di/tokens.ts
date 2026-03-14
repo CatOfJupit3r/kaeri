@@ -1,5 +1,6 @@
 import type { DatabaseService } from '@~/db/database.service';
 import type { AchievementsService } from '@~/features/achievements/achievements.service';
+import type { AuditService } from '@~/features/audit/audit.service';
 import type { AuthService } from '@~/features/auth/auth.service';
 import type { BadgesService } from '@~/features/badges/badges.service';
 import type { CanvasService } from '@~/features/canvas/canvas.service';
@@ -9,6 +10,7 @@ import type { TypedEventBus } from '@~/features/events/event-bus';
 import type { ExportService } from '@~/features/export/export.service';
 import type { KnowledgeBaseService } from '@~/features/knowledge-base/knowledge-base.service';
 import type { LoggerFactory } from '@~/features/logger/logger.types';
+import type { ResearchService } from '@~/features/research/research.service';
 import type { SceneService } from '@~/features/scenes/scene.service';
 import type { ScriptKBIntegrationService } from '@~/features/script-kb-integration/script-kb-integration.service';
 import type { ScriptsService } from '@~/features/scripts/scripts.service';
@@ -39,6 +41,8 @@ const themeServiceToken: unique symbol = Symbol.for('ThemeService');
 const storyArcServiceToken: unique symbol = Symbol.for('StoryArcService');
 const scriptKBIntegrationServiceToken: unique symbol = Symbol.for('ScriptKBIntegrationService');
 const episodeServiceToken: unique symbol = Symbol.for('EpisodeService');
+const auditServiceToken: unique symbol = Symbol.for('AuditService');
+const researchServiceToken: unique symbol = Symbol.for('ResearchService');
 
 // Service tokens for dependency injection (unique symbols for type-safe lookups)
 export const TOKENS = {
@@ -62,6 +66,8 @@ export const TOKENS = {
   StoryArcService: storyArcServiceToken,
   ScriptKBIntegrationService: scriptKBIntegrationServiceToken,
   EpisodeService: episodeServiceToken,
+  AuditService: auditServiceToken,
+  ResearchService: researchServiceToken,
 } as const;
 
 export interface iTokenRegistry {
@@ -85,6 +91,8 @@ export interface iTokenRegistry {
   [TOKENS.StoryArcService]: StoryArcService;
   [TOKENS.ScriptKBIntegrationService]: ScriptKBIntegrationService;
   [TOKENS.EpisodeService]: EpisodeService;
+  [TOKENS.AuditService]: AuditService;
+  [TOKENS.ResearchService]: ResearchService;
 }
 
 export type InjectionTokens = typeof TOKENS;

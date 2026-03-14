@@ -30,6 +30,8 @@ export async function registerServices() {
   const { ScriptKBIntegrationService } =
     await import('@~/features/script-kb-integration/script-kb-integration.service');
   const { EpisodeService } = await import('@~/features/episodes/episode.service');
+  const { AuditService } = await import('@~/features/audit/audit.service');
+  const { ResearchService } = await import('@~/features/research/research.service');
 
   // Register singletons with their tokens
   container.registerSingleton(TOKENS.EventBus, TypedEventBus);
@@ -53,6 +55,8 @@ export async function registerServices() {
   container.register(TOKENS.StoryArcService, StoryArcService, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.ScriptKBIntegrationService, ScriptKBIntegrationService, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.EpisodeService, EpisodeService, { lifecycle: Lifecycle.Transient });
+  container.register(TOKENS.AuditService, AuditService, { lifecycle: Lifecycle.Transient });
+  container.register(TOKENS.ResearchService, ResearchService, { lifecycle: Lifecycle.Transient });
 
   // Initialize services that need registration
   CacheInvalidationService.handleRegistration({ container, token: TOKENS.CacheInvalidationService });

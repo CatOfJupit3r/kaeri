@@ -19,4 +19,6 @@ export const GETTERS = {
   StoryArcService: () => resolve(TOKENS.StoryArcService),
   ScriptKBIntegrationService: () => resolve(TOKENS.ScriptKBIntegrationService),
   EpisodeService: () => resolve(TOKENS.EpisodeService),
+  AuditService: () => resolve(TOKENS.AuditService),
+  ResearchService: () => resolve(TOKENS.ResearchService),
 };

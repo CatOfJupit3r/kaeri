@@ -15,6 +15,9 @@ import {
   LuLayoutGrid,
   LuLayoutList,
   LuLoader,
+  LuNetwork,
+  LuHistory,
+  LuBookOpen,
 } from 'react-icons/lu';
 import z from 'zod';
 
@@ -23,6 +26,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs'
 import { Toggle } from '@~/components/ui/toggle';
 import { CharacterList } from '@~/features/characters/components/character-list';
 import { characterListQueryOptions } from '@~/features/characters/hooks/queries/use-character-list';
+import { AuditHistoryList, ContinuityGraph } from '@~/features/continuity';
+import { useContinuityGraph, useAuditListBySeries } from '@~/features/continuity/hooks/queries';
 import { ImportModal } from '@~/features/export/components/import-modal';
 import { useExportSeriesJson } from '@~/features/export/hooks/mutations/use-export-series-json';
 import { KBAllView } from '@~/features/knowledge-base/components/kb-all-view';
@@ -31,6 +36,7 @@ import { LocationList } from '@~/features/locations/components/location-list';
 import { locationListQueryOptions } from '@~/features/locations/hooks/queries/use-location-list';
 import { PropList } from '@~/features/props/components/prop-list';
 import { propListQueryOptions } from '@~/features/props/hooks/queries/use-prop-list';
+import { ResearchList } from '@~/features/research/components/research-list';
 import { SceneList } from '@~/features/scenes/components/scene-list';
 import { SeriesHeader } from '@~/features/series/components/series-header';
 import { SeriesTabs } from '@~/features/series/components/series-tabs';
@@ -54,6 +60,9 @@ const tabSchema = z.enum([
   'wildcards',
   'story-arcs',
   'themes',
+  'research',
+  'graph',
+  'history',
 ]);
 const TAB_VALUES = tabSchema.enum;
 const TAB_VALUES_ARRAY = Object.values(TAB_VALUES);
@@ -93,12 +102,23 @@ function RouteComponent() {
   const { data: series } = useSeries(seriesId);
   const { exportSeriesJson, isPending: isExporting } = useExportSeriesJson();
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [auditOffset, setAuditOffset] = useState(0);
   const [{ tab, viewMode }, setQueryStates] = useQueryStates({
     tab: parseAsStringEnum(TAB_VALUES_ARRAY).withDefault(TAB_VALUES.all),
     viewMode: parseAsStringEnum(VIEW_MODE_ARRAY).withDefault(VIEW_MODE.grid),
   });
   const activeTab = tab ?? TAB_VALUES.all;
   const activeViewMode = viewMode ?? VIEW_MODE.grid;
+
+  // Continuity data (only fetch when on graph/history tabs)
+  const { data: graphData, isLoading: isGraphLoading } = useContinuityGraph(seriesId, {
+    enabled: activeTab === 'graph',
+  });
+  const { data: auditData, isLoading: isAuditLoading } = useAuditListBySeries(seriesId, {
+    offset: auditOffset,
+    limit: 20,
+    enabled: activeTab === 'history',
+  });
 
   const handleTabChange = (value: string) => {
     setQueryStates({ tab: (value as TabValue) ?? TAB_VALUES.all }).catch(() => {});
@@ -199,7 +219,7 @@ function RouteComponent() {
           </div>
 
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-9">
+            <TabsList className="grid w-full grid-cols-12">
               <TabsTrigger value="all" className="gap-2">
                 <LuLayoutGrid className="size-4" />
                 <span>All</span>
@@ -235,6 +255,18 @@ function RouteComponent() {
               <TabsTrigger value="themes" className="gap-2">
                 <LuLightbulb className="size-4" />
                 <span>Themes</span>
+              </TabsTrigger>
+              <TabsTrigger value="research" className="gap-2">
+                <LuBookOpen className="size-4" />
+                <span>Research</span>
+              </TabsTrigger>
+              <TabsTrigger value="graph" className="gap-2">
+                <LuNetwork className="size-4" />
+                <span>Graph</span>
+              </TabsTrigger>
+              <TabsTrigger value="history" className="gap-2">
+                <LuHistory className="size-4" />
+                <span>History</span>
               </TabsTrigger>
             </TabsList>
 
@@ -272,6 +304,31 @@ function RouteComponent() {
 
             <TabsContent value="themes" className="mt-6 space-y-4">
               <ThemeList seriesId={seriesId} />
+            </TabsContent>
+
+            <TabsContent value="research" className="mt-6 space-y-4">
+              <ResearchList seriesId={seriesId} />
+            </TabsContent>
+
+            <TabsContent value="graph" className="mt-6">
+              <div className="h-[600px] rounded-lg border">
+                <ContinuityGraph
+                  nodes={graphData?.nodes ?? []}
+                  edges={graphData?.edges ?? []}
+                  isLoading={isGraphLoading}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="history" className="mt-6">
+              <div className="h-[600px] rounded-lg border">
+                <AuditHistoryList
+                  items={auditData?.items ?? []}
+                  isLoading={isAuditLoading}
+                  hasMore={(auditData?.total ?? 0) > auditOffset + 20}
+                  onLoadMore={() => setAuditOffset((prev) => prev + 20)}
+                />
+              </div>
             </TabsContent>
           </Tabs>
         </div>

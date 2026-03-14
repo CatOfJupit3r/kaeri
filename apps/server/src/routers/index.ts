@@ -7,6 +7,7 @@ import { episodeRouter } from './episode.router';
 import { exportRouter } from './export.router';
 import { indexRouter } from './index.router';
 import { knowledgeBaseRouter } from './knowledge-base.router';
+import { researchRouter } from './research.router';
 import { sceneRouter } from './scene.router';
 import { scriptKBIntegrationRouter } from './script-kb-integration.router';
 import { scriptsRouter } from './scripts.router';
@@ -24,6 +25,7 @@ export const appRouter = base.router({
   scripts: scriptsRouter,
   scene: sceneRouter,
   episode: episodeRouter,
+  research: researchRouter,
   knowledgeBase: knowledgeBaseRouter,
   scriptKBIntegration: scriptKBIntegrationRouter,
   canvas: canvasRouter,
