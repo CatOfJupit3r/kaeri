@@ -32,6 +32,10 @@ export async function registerServices() {
   const { EpisodeService } = await import('@~/features/episodes/episode.service');
   const { AuditService } = await import('@~/features/audit/audit.service');
   const { ResearchService } = await import('@~/features/research/research.service');
+  const { PermissionService } = await import('@~/features/collaboration/permission.service');
+  const { WorkspaceService } = await import('@~/features/collaboration/workspace.service');
+  const { MemberService } = await import('@~/features/collaboration/member.service');
+  const { InvitationService } = await import('@~/features/collaboration/invitation.service');
 
   // Register singletons with their tokens
   container.registerSingleton(TOKENS.EventBus, TypedEventBus);
@@ -42,6 +46,7 @@ export async function registerServices() {
   container.registerSingleton(TOKENS.LoggerFactory, LoggerFactoryImpl);
   container.registerSingleton(TOKENS.ValkeyService, ValkeyService);
   container.registerSingleton(TOKENS.CacheInvalidationService, CacheInvalidationService);
+  container.registerSingleton(TOKENS.PermissionService, PermissionService);
 
   container.register(TOKENS.UserService, { useClass: UserService }, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.SeriesService, SeriesService, { lifecycle: Lifecycle.Transient });
@@ -57,6 +62,9 @@ export async function registerServices() {
   container.register(TOKENS.EpisodeService, EpisodeService, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.AuditService, AuditService, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.ResearchService, ResearchService, { lifecycle: Lifecycle.Transient });
+  container.register(TOKENS.WorkspaceService, WorkspaceService, { lifecycle: Lifecycle.Transient });
+  container.register(TOKENS.MemberService, MemberService, { lifecycle: Lifecycle.Transient });
+  container.register(TOKENS.InvitationService, InvitationService, { lifecycle: Lifecycle.Transient });
 
   // Initialize services that need registration
   CacheInvalidationService.handleRegistration({ container, token: TOKENS.CacheInvalidationService });

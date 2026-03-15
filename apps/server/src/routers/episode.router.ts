@@ -1,32 +1,32 @@
-import { base, protectedProcedure } from '@~/lib/orpc';
+import { seriesBase, seriesProtected } from '@~/lib/orpc';
 import { GETTERS } from '@~/routers/di-getter';
 
-export const episodeRouter = base.episode.router({
-  createEpisode: protectedProcedure.episode.createEpisode.handler(async ({ input }) =>
+export const episodeRouter = seriesBase.episode.router({
+  createEpisode: seriesProtected.episode.createEpisode.handler(async ({ input }) =>
     GETTERS.EpisodeService().create(input),
   ),
 
-  updateEpisode: protectedProcedure.episode.updateEpisode.handler(async ({ input }) =>
+  updateEpisode: seriesProtected.episode.updateEpisode.handler(async ({ input }) =>
     GETTERS.EpisodeService().update(input.episodeId, input.patch),
   ),
 
-  deleteEpisode: protectedProcedure.episode.deleteEpisode.handler(async ({ input }) =>
+  deleteEpisode: seriesProtected.episode.deleteEpisode.handler(async ({ input }) =>
     GETTERS.EpisodeService().delete(input.episodeId),
   ),
 
-  listEpisodesBySeries: protectedProcedure.episode.listEpisodesBySeries.handler(async ({ input }) =>
+  listEpisodesBySeries: seriesProtected.episode.listEpisodesBySeries.handler(async ({ input }) =>
     GETTERS.EpisodeService().list(input.seriesId, input.seasonNumber, input.limit, input.offset),
   ),
 
-  getEpisode: protectedProcedure.episode.getEpisode.handler(async ({ input }) =>
+  getEpisode: seriesProtected.episode.getEpisode.handler(async ({ input }) =>
     GETTERS.EpisodeService().get(input.episodeId),
   ),
 
-  linkScript: protectedProcedure.episode.linkScript.handler(async ({ input }) =>
+  linkScript: seriesProtected.episode.linkScript.handler(async ({ input }) =>
     GETTERS.EpisodeService().linkScript(input.episodeId, input.scriptId),
   ),
 
-  unlinkScript: protectedProcedure.episode.unlinkScript.handler(async ({ input }) =>
+  unlinkScript: seriesProtected.episode.unlinkScript.handler(async ({ input }) =>
     GETTERS.EpisodeService().unlinkScript(input.episodeId, input.scriptId),
   ),
 });

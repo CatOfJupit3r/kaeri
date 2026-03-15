@@ -4,6 +4,10 @@ import type { AuditService } from '@~/features/audit/audit.service';
 import type { AuthService } from '@~/features/auth/auth.service';
 import type { BadgesService } from '@~/features/badges/badges.service';
 import type { CanvasService } from '@~/features/canvas/canvas.service';
+import type { InvitationService } from '@~/features/collaboration/invitation.service';
+import type { MemberService } from '@~/features/collaboration/member.service';
+import type { PermissionService } from '@~/features/collaboration/permission.service';
+import type { WorkspaceService } from '@~/features/collaboration/workspace.service';
 import type { ContinuityService } from '@~/features/continuity/continuity.service';
 import type { EpisodeService } from '@~/features/episodes/episode.service';
 import type { TypedEventBus } from '@~/features/events/event-bus';
@@ -43,6 +47,10 @@ const scriptKBIntegrationServiceToken: unique symbol = Symbol.for('ScriptKBInteg
 const episodeServiceToken: unique symbol = Symbol.for('EpisodeService');
 const auditServiceToken: unique symbol = Symbol.for('AuditService');
 const researchServiceToken: unique symbol = Symbol.for('ResearchService');
+const permissionServiceToken: unique symbol = Symbol.for('PermissionService');
+const workspaceServiceToken: unique symbol = Symbol.for('WorkspaceService');
+const memberServiceToken: unique symbol = Symbol.for('MemberService');
+const invitationServiceToken: unique symbol = Symbol.for('InvitationService');
 
 // Service tokens for dependency injection (unique symbols for type-safe lookups)
 export const TOKENS = {
@@ -68,6 +76,10 @@ export const TOKENS = {
   EpisodeService: episodeServiceToken,
   AuditService: auditServiceToken,
   ResearchService: researchServiceToken,
+  PermissionService: permissionServiceToken,
+  WorkspaceService: workspaceServiceToken,
+  MemberService: memberServiceToken,
+  InvitationService: invitationServiceToken,
 } as const;
 
 export interface iTokenRegistry {
@@ -93,6 +105,10 @@ export interface iTokenRegistry {
   [TOKENS.EpisodeService]: EpisodeService;
   [TOKENS.AuditService]: AuditService;
   [TOKENS.ResearchService]: ResearchService;
+  [TOKENS.PermissionService]: PermissionService;
+  [TOKENS.WorkspaceService]: WorkspaceService;
+  [TOKENS.MemberService]: MemberService;
+  [TOKENS.InvitationService]: InvitationService;
 }
 
 export type InjectionTokens = typeof TOKENS;

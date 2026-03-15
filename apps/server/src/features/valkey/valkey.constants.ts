@@ -25,6 +25,12 @@ export const CACHE_TTL = {
 
   /** User-specific data (1 minute) */
   USER_DATA: 60,
+
+  /** Permission checks (5 minutes) */
+  PERMISSION: 300,
+
+  /** Rate limiting (1 hour) */
+  RATE_LIMIT: 3600,
 } as const;
 
 /**
@@ -43,6 +49,7 @@ export const CACHE_PREFIX = {
   ACHIEVEMENTS: 'achievements',
   USER: 'user',
   EXPORT: 'export',
+  WORKSPACE: 'workspace',
 } as const;
 
 /**
@@ -78,4 +85,9 @@ export const buildCacheKey = {
   userProfile: (userId: string) => `${CACHE_PREFIX.USER}:${userId}:profile`,
 
   exportSeriesJson: (seriesId: string) => `${CACHE_PREFIX.EXPORT}:${seriesId}:json`,
+
+  // Workspace/collaboration cache keys
+  workspaceMember: (workspaceId: string, userId: string) => `${CACHE_PREFIX.WORKSPACE}:${workspaceId}:member:${userId}`,
+  userWorkspaces: (userId: string) => `${CACHE_PREFIX.USER}:${userId}:workspaces`,
+  invitationRateLimit: (userId: string) => `rate:invitation:${userId}`,
 } as const;

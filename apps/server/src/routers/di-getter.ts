@@ -21,4 +21,8 @@ export const GETTERS = {
   EpisodeService: () => resolve(TOKENS.EpisodeService),
   AuditService: () => resolve(TOKENS.AuditService),
   ResearchService: () => resolve(TOKENS.ResearchService),
+  PermissionService: () => resolve(TOKENS.PermissionService),
+  WorkspaceService: () => resolve(TOKENS.WorkspaceService),
+  MemberService: () => resolve(TOKENS.MemberService),
+  InvitationService: () => resolve(TOKENS.InvitationService),
 };

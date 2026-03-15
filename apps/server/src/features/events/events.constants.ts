@@ -21,6 +21,22 @@ const EventsSchema = z.enum([
   'EDGES_UPSERTED',
   'NODES_DELETED',
   'EDGES_DELETED',
+  // COLLABORATION - WORKSPACE
+  'WORKSPACE_CREATED',
+  'WORKSPACE_UPDATED',
+  'WORKSPACE_DELETED',
+  // COLLABORATION - MEMBERSHIP
+  'MEMBER_ADDED',
+  'MEMBER_REMOVED',
+  'MEMBER_ROLE_CHANGED',
+  'OWNERSHIP_TRANSFERRED',
+  // COLLABORATION - INVITATIONS
+  'INVITATION_SENT',
+  'INVITATION_ACCEPTED',
+  'INVITATION_DECLINED',
+  'INVITATION_REVOKED',
+  // COLLABORATION - SERIES
+  'SERIES_TRANSFERRED',
 ]);
 
 export const EVENTS = EventsSchema.enum;
@@ -63,6 +79,80 @@ interface iCanvasChangedPayload {
   seriesId: string;
 }
 
+// Collaboration event payloads
+export interface iWorkspaceCreatedPayload {
+  workspaceId: string;
+  creatorId: string;
+}
+
+export interface iWorkspaceUpdatedPayload {
+  workspaceId: string;
+  updatedById: string;
+}
+
+export interface iWorkspaceDeletedPayload {
+  workspaceId: string;
+  deletedById: string;
+}
+
+export interface iMemberAddedPayload {
+  workspaceId: string;
+  userId: string;
+  role: string;
+  invitedById?: string;
+}
+
+export interface iMemberRemovedPayload {
+  workspaceId: string;
+  userId: string;
+  removedById: string;
+}
+
+export interface iMemberRoleChangedPayload {
+  workspaceId: string;
+  userId: string;
+  previousRole: string;
+  newRole: string;
+  changedById: string;
+}
+
+export interface iOwnershipTransferredPayload {
+  workspaceId: string;
+  oldOwnerId: string;
+  newOwnerId: string;
+}
+
+export interface iInvitationSentPayload {
+  invitationId: string;
+  workspaceId: string;
+  email: string;
+  invitedById: string;
+}
+
+export interface iInvitationAcceptedPayload {
+  invitationId: string;
+  workspaceId: string;
+  userId: string;
+}
+
+export interface iInvitationDeclinedPayload {
+  invitationId: string;
+  workspaceId: string;
+}
+
+export interface iInvitationRevokedPayload {
+  invitationId: string;
+  workspaceId: string;
+  revokedById: string;
+}
+
+export interface iSeriesTransferredPayload {
+  seriesId: string;
+  fromWorkspaceId: string;
+  toWorkspaceId: string;
+  transferredById: string;
+}
+
 export interface iEventPayloadMap {
   [EVENTS.BETA_EVENT]: iBetaEventPayload;
   [EVENTS.SERIES_CREATED]: iSeriesCreatedPayload;
@@ -80,4 +170,17 @@ export interface iEventPayloadMap {
   [EVENTS.EDGES_UPSERTED]: iCanvasChangedPayload;
   [EVENTS.NODES_DELETED]: iCanvasChangedPayload;
   [EVENTS.EDGES_DELETED]: iCanvasChangedPayload;
+  // Collaboration events
+  [EVENTS.WORKSPACE_CREATED]: iWorkspaceCreatedPayload;
+  [EVENTS.WORKSPACE_UPDATED]: iWorkspaceUpdatedPayload;
+  [EVENTS.WORKSPACE_DELETED]: iWorkspaceDeletedPayload;
+  [EVENTS.MEMBER_ADDED]: iMemberAddedPayload;
+  [EVENTS.MEMBER_REMOVED]: iMemberRemovedPayload;
+  [EVENTS.MEMBER_ROLE_CHANGED]: iMemberRoleChangedPayload;
+  [EVENTS.OWNERSHIP_TRANSFERRED]: iOwnershipTransferredPayload;
+  [EVENTS.INVITATION_SENT]: iInvitationSentPayload;
+  [EVENTS.INVITATION_ACCEPTED]: iInvitationAcceptedPayload;
+  [EVENTS.INVITATION_DECLINED]: iInvitationDeclinedPayload;
+  [EVENTS.INVITATION_REVOKED]: iInvitationRevokedPayload;
+  [EVENTS.SERIES_TRANSFERRED]: iSeriesTransferredPayload;
 }

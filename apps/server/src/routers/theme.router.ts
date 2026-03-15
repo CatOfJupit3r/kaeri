@@ -1,22 +1,22 @@
-import { base, protectedProcedure } from '@~/lib/orpc';
+import { featuresBase, featuresProtected } from '@~/lib/orpc';
 import { GETTERS } from '@~/routers/di-getter';
 
-export const themeRouter = base.theme.router({
-  createTheme: protectedProcedure.theme.createTheme.handler(async ({ input }) =>
+export const themeRouter = featuresBase.theme.router({
+  createTheme: featuresProtected.theme.createTheme.handler(async ({ input }) =>
     GETTERS.ThemeService().create(input.seriesId, input.value),
   ),
 
-  updateTheme: protectedProcedure.theme.updateTheme.handler(async ({ input }) =>
+  updateTheme: featuresProtected.theme.updateTheme.handler(async ({ input }) =>
     GETTERS.ThemeService().update(input.themeId, input.patch),
   ),
 
-  deleteTheme: protectedProcedure.theme.deleteTheme.handler(async ({ input }) =>
+  deleteTheme: featuresProtected.theme.deleteTheme.handler(async ({ input }) =>
     GETTERS.ThemeService().delete(input.themeId),
   ),
 
-  listThemesBySeries: protectedProcedure.theme.listThemesBySeries.handler(async ({ input }) =>
+  listThemesBySeries: featuresProtected.theme.listThemesBySeries.handler(async ({ input }) =>
     GETTERS.ThemeService().list(input.seriesId, input.limit, input.offset),
   ),
 
-  getTheme: protectedProcedure.theme.getTheme.handler(async ({ input }) => GETTERS.ThemeService().get(input.themeId)),
+  getTheme: featuresProtected.theme.getTheme.handler(async ({ input }) => GETTERS.ThemeService().get(input.themeId)),
 });

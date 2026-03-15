@@ -12,6 +12,14 @@ class AuditEntryClass extends RequiredTimeStamps {
   @prop({ required: true, index: true })
   public seriesId!: string;
 
+  /**
+   * Workspace ID for activity aggregation.
+   * Optional for backward compatibility with existing entries.
+   * New entries automatically derive this from series.workspaceId.
+   */
+  @prop({ index: true })
+  public workspaceId?: string;
+
   @prop({ required: true, index: true })
   public entityType!: string;
 

@@ -1,32 +1,28 @@
-import { base, protectedProcedure } from '@~/lib/orpc';
+import { seriesBase, seriesProtected } from '@~/lib/orpc';
 import { GETTERS } from '@~/routers/di-getter';
 
-export const seriesRouter = base.series.router({
-  createSeries: protectedProcedure.series.createSeries.handler(async ({ input }) =>
-    GETTERS.SeriesService().create(input),
-  ),
+export const seriesRouter = seriesBase.series.router({
+  createSeries: seriesProtected.series.createSeries.handler(async ({ input }) => GETTERS.SeriesService().create(input)),
 
-  updateSeries: protectedProcedure.series.updateSeries.handler(async ({ input }) =>
+  updateSeries: seriesProtected.series.updateSeries.handler(async ({ input }) =>
     GETTERS.SeriesService().update(input.seriesId, input.patch),
   ),
 
-  deleteSeries: protectedProcedure.series.deleteSeries.handler(async ({ input }) =>
+  deleteSeries: seriesProtected.series.deleteSeries.handler(async ({ input }) =>
     GETTERS.SeriesService().delete(input.seriesId),
   ),
 
-  listSeries: protectedProcedure.series.listSeries.handler(async ({ input }) =>
+  listSeries: seriesProtected.series.listSeries.handler(async ({ input }) =>
     GETTERS.SeriesService().list(input.limit, input.offset),
   ),
 
-  getSeries: protectedProcedure.series.getSeries.handler(async ({ input }) =>
-    GETTERS.SeriesService().get(input.seriesId),
-  ),
+  getSeries: seriesProtected.series.getSeries.handler(async ({ input }) => GETTERS.SeriesService().get(input.seriesId)),
 
-  exportSeriesSummary: protectedProcedure.series.exportSeriesSummary.handler(async ({ input }) =>
+  exportSeriesSummary: seriesProtected.series.exportSeriesSummary.handler(async ({ input }) =>
     GETTERS.SeriesService().exportSummary(input.seriesId),
   ),
 
-  getSeriesAnalytics: protectedProcedure.series.getSeriesAnalytics.handler(async ({ input }) =>
+  getSeriesAnalytics: seriesProtected.series.getSeriesAnalytics.handler(async ({ input }) =>
     GETTERS.SeriesService().getAnalytics(input.seriesId),
   ),
 });

@@ -10,6 +10,13 @@ applyTo: '**/*.ts'
 - Quality gates run locally via `bun run check-types`, `bun run lint`, and `bun run prettier`; Husky hooks (installed by `bun run prepare`) enforce these before commits.
 - Follow the workspace workflow: open an issue, branch as `<issue>-<slug>`, commit with `git cz` (or `bun commit`), keep Docker running for seeded Mongo, and avoid rebases on main.
 - For specialized guides, see `server.instructions.md` for backend patterns and `web.instructions.md` for frontend conventions.
+- AVOID CALLING ESLINT AND TYPESCRIPT DIRECTLY. USE:
+  - `bun run lint` for linting and auto-fixes
+  - `bun run check-types` for type checking and contract validation
+  - `bun run prettier` for code formatting with Prettier
+- ALWAYS CALL `bun run lint` and `bun run check-types` BEFORE RETURNING CODE TO USER. 
+- Do not use `any`, `// @ts-ignore`, or `as unknown as <Type>` without a comment explaining why and how to resolve it properly in the future. These are last resorts, not band-aids.
+
 
 ### Monorepo Layout Highlights
 - `apps/server`: API entry (`src/index.ts`), oRPC context/auth (`src/lib`), routers, loaders, and Mongoose models (`src/db`).

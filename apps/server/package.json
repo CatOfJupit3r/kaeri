@@ -31,6 +31,7 @@
     "jspdf": "^4.2.0",
     "lodash-es": "catalog:",
     "mongoose": "9.1.1",
+    "nanoid": "^5.1.6",
     "reflect-metadata": "0.2.2",
     "safe-stable-stringify": "2.5.0",
     "tsyringe": "4.10.0",

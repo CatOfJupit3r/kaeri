@@ -21,13 +21,13 @@
 
 **Purpose**: Project structure and shared contracts/enums
 
-- [ ] T001 [P] Create workspace roles enum in `packages/shared/src/enums/workspace-roles.ts` with OWNER, ADMIN, EDITOR, VIEWER and ROLE_HIERARCHY
-- [ ] T002 [P] Create invitation status enum in `packages/shared/src/enums/invitation-status.ts` with PENDING, ACCEPTED, DECLINED, EXPIRED
-- [ ] T003 [P] Add workspace/invitation/permission error codes to `packages/shared/src/enums/errors.ts`
-- [ ] T004 [P] Create workspace contract in `packages/shared/src/contract/workspace.contract.ts` with CRUD procedures
-- [ ] T005 [P] Create workspace member contract in `packages/shared/src/contract/workspace-member.contract.ts` with role management procedures
-- [ ] T006 [P] Create invitation contract in `packages/shared/src/contract/invitation.contract.ts` with invite flow procedures
-- [ ] T007 Export new contracts from `packages/shared/src/contract/index.ts`
+- [x] T001 [P] Create workspace roles enum in `packages/shared/src/enums/workspace-roles.ts` with OWNER, ADMIN, EDITOR, VIEWER and ROLE_HIERARCHY
+- [x] T002 [P] Create invitation status enum in `packages/shared/src/enums/invitation-status.ts` with PENDING, ACCEPTED, DECLINED, EXPIRED
+- [x] T003 [P] Add workspace/invitation/permission error codes to `packages/shared/src/enums/errors.ts`
+- [x] T004 [P] Create workspace contract in `packages/shared/src/contract/workspace.contract.ts` with CRUD procedures
+- [x] T005 [P] Create workspace member contract in `packages/shared/src/contract/workspace-member.contract.ts` with role management procedures
+- [x] T006 [P] Create invitation contract in `packages/shared/src/contract/invitation.contract.ts` with invite flow procedures
+- [x] T007 Export new contracts from `packages/shared/src/contract/index.ts`
 - [ ] T008 Run `bun run check-types` to validate contract schemas
 
 ---

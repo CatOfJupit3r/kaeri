@@ -34,3 +34,15 @@ export function ORPCInternalServerError(code?: ErrorCodesType, additionalData?: 
 export function ORPCUnauthorizedError(code: ErrorCodesType, additionalData?: Record<string, unknown>) {
   return new ORPCError('UNAUTHORIZED', createErrorPayload(code, additionalData));
 }
+
+export function ORPCConflictError(code: ErrorCodesType, additionalData?: Record<string, unknown>) {
+  return new ORPCError('CONFLICT', createErrorPayload(code, additionalData));
+}
+
+export function ORPCGoneError(code: ErrorCodesType, additionalData?: Record<string, unknown>) {
+  return new ORPCError('GONE', createErrorPayload(code, additionalData));
+}
+
+export function ORPCTooManyRequestsError(code: ErrorCodesType, additionalData?: Record<string, unknown>) {
+  return new ORPCError('TOO_MANY_REQUESTS', createErrorPayload(code, additionalData));
+}

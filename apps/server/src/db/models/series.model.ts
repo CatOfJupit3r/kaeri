@@ -30,12 +30,12 @@ class SeriesClass extends RequiredTimeStamps {
   @prop({ default: () => new Date() })
   public lastEditedAt!: Date;
 
-  // Future-ready fields for multi-user support
-  @prop()
-  public workspaceId?: string;
-
-  @prop({ type: () => [String] })
-  public roles?: string[];
+  /**
+   * Workspace this series belongs to.
+   * Every series must belong to exactly one workspace.
+   */
+  @prop({ required: true, index: true })
+  public workspaceId!: string;
 }
 
 export const SeriesModel = getModelForClass(SeriesClass);

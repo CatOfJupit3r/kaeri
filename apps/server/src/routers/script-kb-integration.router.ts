@@ -1,14 +1,14 @@
-import { base, protectedProcedure } from '@~/lib/orpc';
+import { kbBase, kbProtected } from '@~/lib/orpc';
 
 import { GETTERS } from './di-getter';
 
-export const scriptKBIntegrationRouter = base.scriptKBIntegration.router({
+export const scriptKBIntegrationRouter = kbBase.scriptKBIntegration.router({
   /**
    * Fast entity search for inline autocomplete
    *
    * Optimized for <200ms response time with text indexes and caching
    */
-  autocompleteSearch: protectedProcedure.scriptKBIntegration.autocompleteSearch.handler(async ({ input }) => {
+  autocompleteSearch: kbProtected.scriptKBIntegration.autocompleteSearch.handler(async ({ input }) => {
     const service = GETTERS.ScriptKBIntegrationService();
     return service.autocompleteSearch(input);
   }),
@@ -16,7 +16,7 @@ export const scriptKBIntegrationRouter = base.scriptKBIntegration.router({
   /**
    * Bulk sync entity appearances from script save
    */
-  syncAppearances: protectedProcedure.scriptKBIntegration.syncAppearances.handler(async ({ input }) => {
+  syncAppearances: kbProtected.scriptKBIntegration.syncAppearances.handler(async ({ input }) => {
     const service = GETTERS.ScriptKBIntegrationService();
     return service.syncAppearances(input);
   }),
@@ -24,7 +24,7 @@ export const scriptKBIntegrationRouter = base.scriptKBIntegration.router({
   /**
    * Quick create entity from script autocomplete
    */
-  quickCreateEntity: protectedProcedure.scriptKBIntegration.quickCreateEntity.handler(async ({ input }) => {
+  quickCreateEntity: kbProtected.scriptKBIntegration.quickCreateEntity.handler(async ({ input }) => {
     const service = GETTERS.ScriptKBIntegrationService();
     return service.quickCreateEntity(input);
   }),
@@ -32,7 +32,7 @@ export const scriptKBIntegrationRouter = base.scriptKBIntegration.router({
   /**
    * Ensure Scene entity exists for script scene
    */
-  ensureScene: protectedProcedure.scriptKBIntegration.ensureScene.handler(async ({ input }) => {
+  ensureScene: kbProtected.scriptKBIntegration.ensureScene.handler(async ({ input }) => {
     const service = GETTERS.ScriptKBIntegrationService();
     return service.ensureScene(input);
   }),
@@ -40,7 +40,7 @@ export const scriptKBIntegrationRouter = base.scriptKBIntegration.router({
   /**
    * Poll for entity updates (WebSocket-ready)
    */
-  pollEntityUpdates: protectedProcedure.scriptKBIntegration.pollEntityUpdates.handler(async ({ input }) => {
+  pollEntityUpdates: kbProtected.scriptKBIntegration.pollEntityUpdates.handler(async ({ input }) => {
     const service = GETTERS.ScriptKBIntegrationService();
     return service.pollEntityUpdates(input);
   }),
@@ -48,7 +48,7 @@ export const scriptKBIntegrationRouter = base.scriptKBIntegration.router({
   /**
    * Get entity links for a script
    */
-  getScriptEntityLinks: protectedProcedure.scriptKBIntegration.getScriptEntityLinks.handler(async ({ input }) => {
+  getScriptEntityLinks: kbProtected.scriptKBIntegration.getScriptEntityLinks.handler(async ({ input }) => {
     const service = GETTERS.ScriptKBIntegrationService();
     return service.getScriptEntityLinks(input);
   }),
@@ -56,7 +56,7 @@ export const scriptKBIntegrationRouter = base.scriptKBIntegration.router({
   /**
    * Validate entity links exist
    */
-  validateEntityLinks: protectedProcedure.scriptKBIntegration.validateEntityLinks.handler(async ({ input }) => {
+  validateEntityLinks: kbProtected.scriptKBIntegration.validateEntityLinks.handler(async ({ input }) => {
     const service = GETTERS.ScriptKBIntegrationService();
     return service.validateEntityLinks(input);
   }),

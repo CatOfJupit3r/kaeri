@@ -1,37 +1,28 @@
-import achievementsContract from './achievements.contract';
-import badgesContract from './badges.contract';
-import canvasContract from './canvas.contract';
-import continuityContract from './continuity.contract';
-import episodeContract from './episode.contract';
-import exportContract from './export.contract';
-import indexContract from './index.contract';
-import knowledgeBaseContract from './knowledge-base.contract';
-import researchContract from './research.contract';
-import sceneContract from './scene.contract';
-import scriptKBIntegrationContract from './script-kb-integration.contract';
-import scriptsContract from './scripts.contract';
-import seriesContract from './series.contract';
-import storyArcContract from './story-arc.contract';
-import themeContract from './theme.contract';
-import userContract from './user.contract';
+import { COLLABORATION_CONTRACT } from './groups/collaboration.contract';
+import { CONTENT_CONTRACT } from './groups/content.contract';
+import { CORE_CONTRACT } from './groups/core.contract';
+import { FEATURES_CONTRACT } from './groups/features.contract';
+import { GAMIFICATION_CONTRACT } from './groups/gamification.contract';
+import { KNOWLEDGE_CONTRACT } from './groups/knowledge.contract';
+import { SERIES_CONTRACT } from './groups/series.contract';
 
+/**
+ * Contract groups - split for TypeScript type serialization limits
+ */
+export * from './groups';
+
+/**
+ * Full contract - use only for client-side type inference.
+ * Server-side should use individual contract groups to avoid TS7056.
+ */
 export const CONTRACT = {
-  user: userContract,
-  index: indexContract,
-  achievements: achievementsContract,
-  badges: badgesContract,
-  series: seriesContract,
-  scripts: scriptsContract,
-  scene: sceneContract,
-  episode: episodeContract,
-  research: researchContract,
-  knowledgeBase: knowledgeBaseContract,
-  scriptKBIntegration: scriptKBIntegrationContract,
-  canvas: canvasContract,
-  continuity: continuityContract,
-  export: exportContract,
-  theme: themeContract,
-  storyArc: storyArcContract,
+  ...CORE_CONTRACT,
+  ...SERIES_CONTRACT,
+  ...CONTENT_CONTRACT,
+  ...KNOWLEDGE_CONTRACT,
+  ...FEATURES_CONTRACT,
+  ...GAMIFICATION_CONTRACT,
+  ...COLLABORATION_CONTRACT,
 };
 
 export type AppContract = typeof CONTRACT;

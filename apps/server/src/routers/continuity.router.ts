@@ -1,19 +1,19 @@
-import { base, protectedProcedure } from '@~/lib/orpc';
+import { featuresBase, featuresProtected } from '@~/lib/orpc';
 
 import { GETTERS } from './di-getter';
 
-export const continuityRouter = base.continuity.router({
-  continuityGraph: protectedProcedure.continuity.continuityGraph.handler(async ({ input }) => {
+export const continuityRouter = featuresBase.continuity.router({
+  continuityGraph: featuresProtected.continuity.continuityGraph.handler(async ({ input }) => {
     const continuityService = GETTERS.ContinuityService();
     return continuityService.continuityGraph(input.seriesId);
   }),
 
-  appearancesByCharacter: protectedProcedure.continuity.appearancesByCharacter.handler(async ({ input }) => {
+  appearancesByCharacter: featuresProtected.continuity.appearancesByCharacter.handler(async ({ input }) => {
     const continuityService = GETTERS.ContinuityService();
     return continuityService.appearancesByCharacter(input.seriesId, input.characterId);
   }),
 
-  auditListByEntity: protectedProcedure.continuity.auditListByEntity.handler(async ({ input }) => {
+  auditListByEntity: featuresProtected.continuity.auditListByEntity.handler(async ({ input }) => {
     const continuityService = GETTERS.ContinuityService();
     return continuityService.auditListByEntity(
       input.seriesId,
@@ -24,7 +24,7 @@ export const continuityRouter = base.continuity.router({
     );
   }),
 
-  auditListBySeries: protectedProcedure.continuity.auditListBySeries.handler(async ({ input }) => {
+  auditListBySeries: featuresProtected.continuity.auditListBySeries.handler(async ({ input }) => {
     const continuityService = GETTERS.ContinuityService();
     return continuityService.auditListBySeries(input.seriesId, input.offset, input.limit);
   }),
