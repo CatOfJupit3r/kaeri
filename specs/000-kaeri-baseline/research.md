@@ -9,7 +9,7 @@
 
 ### PDF / Export
 - Use server-side `pdf-lib` or `@react-pdf/renderer`? For Bun/Hono backend, prefer `pdf-lib` to avoid DOM; supports custom fonts and layout with manual positioning.
-- Screenplay basics: detect scene headings (`/^(INT|EXT|INT\.\/EXT|INT\/EXT)\b/i`), dialogue indentation (~2.5" for names, ~1.5" for dialogue), transitions right-aligned. Start simple: monospace, 60 lines/page heuristic. Keep formatter modular for later upgrade (FDX, call sheets).
+- Screenplay basics: detect scene headings (`/^(INT|EXT|INT\\.\/EXT|INT\\/EXT)\\b/i`), dialogue indentation (~2.5\" for names, ~1.5\" for dialogue), transitions right-aligned. Start simple: monospace, 60 lines/page heuristic. Keep formatter modular to support multiple export formats (PDF, production PDF, call sheets, plain text).
 
 ### Search & Indexing
 - Mongo indexes: `Series.title`, `Script.title`, `Script.seriesId`, `Character.name`, `Location.name`, `Prop.name`, `TimelineEntry.label`, plus text index for KB search across name/description/traits.

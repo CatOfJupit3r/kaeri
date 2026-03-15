@@ -11,7 +11,10 @@ Status snapshot: router and service exist but PDF export is stubbed (`apps/serve
   - Real PDF generation replacing stub
 
 - [ ] **T036** Add additional export formats (`apps/server/src/features/export/export.service.ts`).
-  - Final Draft (.fdx) XML format for industry compatibility
+  - PDF (standard screenplay format)
+  - Production Script PDF (with scene numbers and revision marks)
+  - Call Sheet (scene breakdown with characters and locations)
+  - Plain Text format
   - Production script PDF with scene numbers and marks
   - Call sheet format with character/location breakdowns
   - Plain text export option
@@ -23,7 +26,7 @@ Status snapshot: router and service exist but PDF export is stubbed (`apps/serve
 
 ### Export UI (P1)
 - [ ] **T038** Build export modal matching V0 design (`apps/web/src/features/scripts/components/export-modal.tsx`).
-  - Dialog with format selection via radio group (PDF, FDX, Production, Call Sheet, Text)
+  - Dialog with format selection via radio group (PDF, Production Script, Call Sheet, Plain Text)
   - Format icons and descriptions (FileText, Share2, Download, Clipboard, Calendar)
   - Options checkboxes (scene numbers, revision marks)
   - Script name in description
@@ -36,7 +39,7 @@ Status snapshot: router and service exist but PDF export is stubbed (`apps/serve
   - Export mutation hook with progress/error handling
 
 ### Testing
-- [ ] **T045-Export** Targeted export tests (PDF timing/format, JSON shape, FDX validation) once test infra is unblocked.
+- [ ] **T045-Export** Targeted export tests (PDF timing/format, JSON shape) once test infra is unblocked.
 
 ## Completed
 - _None yet; router/service stubs exist but require full PDF implementation._

@@ -15,7 +15,7 @@ This document outlines the current implementation status of the foundation platf
    - Entity types (SERIES, SCRIPT, CHARACTER, LOCATION, PROP, etc.)
    - Relationship types (FAMILY, FRIEND, ENEMY, ROMANTIC, etc.)
    - Canvas node types (text, shape, note)
-   - Export formats (PDF, JSON, FDX)
+   - Export formats (PDF, PRODUCTION_PDF, CALL_SHEET, PLAIN_TEXT, JSON)
    - Audit actions (CREATE, UPDATE, DELETE)
    - Continuity edge types (relationship, appearance, location-of, prop-in-scene)
 

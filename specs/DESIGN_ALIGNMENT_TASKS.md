@@ -260,14 +260,14 @@ The mock shows Canvas as a tab in the script editor side panel:
 
 ### Spec Updates Required
 
-#### P1: Additional Export Formats
+#### P1: Additional Export Formats ✅ COMPLETED
 **Task ID**: `DESIGN-040`
 
 Update export spec based on `export-modal.tsx`:
 
-- [ ] Add FR for Final Draft (.fdx) export format
-- [ ] Add FR for Production Script format (with scene numbers and marks)
-- [ ] Add FR for Call Sheet export (character/location breakdowns)
+- [x] Add FR for Production Script format (with scene numbers and marks)
+- [x] Add FR for Call Sheet export (character/location breakdowns)
+- [x] Add FR for Plain Text export
 
 ---
 

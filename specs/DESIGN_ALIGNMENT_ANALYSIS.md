@@ -173,23 +173,18 @@ The `apps/web-mock` Next.js application contains a comprehensive design vision f
 **Mock Design Features**:
 - **Export Formats**:
   - Hollywood Standard PDF
-  - Final Draft (.fdx)
   - Production Script
   - Call Sheet
+  - Plain Text
 - **Options**:
   - Include scene numbers
   - Include revision marks
 
 **Current State**:
 - Export spec exists (`005-export/spec.md`)
-- PDF and JSON export defined
+- PDF, Production PDF, Call Sheet, Plain Text, and JSON export implemented
 
-**Spec Gap**: Missing:
-- Final Draft (.fdx) format
-- Production Script format
-- Call Sheet format
-- Scene numbers option
-- Revision marks option
+**Spec Gap**: None - all export formats implemented
 
 ---
 
@@ -276,9 +271,9 @@ Based on the mock analysis, the following new entity types should be added to sp
 | KB Graph View | `003-knowledge-base/spec.md` | Network graph visualization of entity relationships |
 | KB Timeline View | `003-knowledge-base/spec.md` | Timeline visualization of story events |
 | AI Assistant | New spec or `002-scripts/spec.md` | AI writing assistant panel in script editor |
-| Final Draft Export | `005-export/spec.md` | Export to .fdx format |
 | Production Script Export | `005-export/spec.md` | Export with scene numbers and production marks |
 | Call Sheet Export | `005-export/spec.md` | Production call sheet generation |
+| Plain Text Export | `005-export/spec.md` | Simple text format export |
 
 ---
 

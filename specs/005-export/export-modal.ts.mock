@@ -56,17 +56,6 @@ export function ExportModal({ isOpen, onClose, scriptName }: ExportModalProps) {
               </div>
 
               <div className="flex items-start space-x-3 rounded-lg border border-border p-4 hover:bg-muted/50 transition-colors">
-                <RadioGroupItem value="fdx" id="fdx" className="mt-1" />
-                <div className="flex-1">
-                  <label htmlFor="fdx" className="flex items-center gap-2 font-medium cursor-pointer">
-                    <Film className="h-4 w-4" />
-                    Final Draft (.fdx)
-                  </label>
-                  <p className="text-sm text-muted-foreground mt-1">Compatible with Final Draft software</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3 rounded-lg border border-border p-4 hover:bg-muted/50 transition-colors">
                 <RadioGroupItem value="production" id="production" className="mt-1" />
                 <div className="flex-1">
                   <label htmlFor="production" className="flex items-center gap-2 font-medium cursor-pointer">
