@@ -32,7 +32,7 @@ const TABS: iTabConfig[] = [
   },
   { id: 'knowledge-base', label: 'Knowledge Base', href: '/series/$seriesId/knowledge-base', icon: LuBookOpen },
   { id: 'canvas', label: 'Canvas', href: '/series/$seriesId/canvas', icon: LuLayoutDashboard },
-  { id: 'analytics', label: 'Analytics', href: '#', icon: LuChartNoAxesColumn, disabled: true },
+  { id: 'analytics', label: 'Analytics', href: '/series/$seriesId/analytics', icon: LuChartNoAxesColumn },
 ];
 
 export function SeriesTabs({ seriesId, seriesType }: iSeriesTabsProps) {
@@ -43,6 +43,7 @@ export function SeriesTabs({ seriesId, seriesType }: iSeriesTabsProps) {
     if (pathname.includes('/knowledge-base')) return 'knowledge-base';
     if (pathname.includes('/canvas')) return 'canvas';
     if (pathname.includes('/episodes')) return 'episodes';
+    if (pathname.includes('/analytics')) return 'analytics';
     if (pathname.includes('/scripts')) return 'scripts';
     // Default to scripts for the series index page
     return 'scripts';

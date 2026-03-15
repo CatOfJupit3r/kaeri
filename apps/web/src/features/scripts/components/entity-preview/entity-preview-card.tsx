@@ -7,7 +7,6 @@ import { cn } from '@~/lib/utils';
 
 import type { EntityType } from '../../extensions/entity-mention';
 import { CharacterPreview } from './character-preview';
-import { LocationPreview } from './location-preview';
 import { PropPreview } from './prop-preview';
 import { WildcardPreview } from './wildcard-preview';
 

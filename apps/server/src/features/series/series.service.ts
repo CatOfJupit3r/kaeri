@@ -4,8 +4,13 @@ import type z from 'zod';
 import { errorCodes } from '@kaeri/shared';
 import { createSeriesInputSchema, updateSeriesPatchSchema } from '@kaeri/shared/contract/series.contract';
 
+import { CharacterModel } from '@~/db/models/character.model';
+import { LocationModel } from '@~/db/models/location.model';
+import { PropModel } from '@~/db/models/prop.model';
+import { SceneModel } from '@~/db/models/scene.model';
 import { ScriptModel } from '@~/db/models/script.model';
 import { SeriesModel } from '@~/db/models/series.model';
+import { StoryArcModel } from '@~/db/models/story-arc.model';
 import { TOKENS } from '@~/di/tokens';
 import { buildCacheKey, CACHE_TTL } from '@~/features/valkey/valkey.constants';
 import { ORPCBadRequestError, ORPCNotFoundError, ORPCUnprocessableContentError } from '@~/lib/orpc-error-wrapper';
@@ -124,5 +129,107 @@ export class SeriesService implements iWithLogger {
       .lean();
 
     return { series, scripts };
+  }
+
+  public async getAnalytics(seriesId: string) {
+    const series = await SeriesModel.findById(seriesId);
+    if (!series) {
+      throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
+    }
+
+    // Fetch all counts in parallel
+    const [
+      scriptCount,
+      characterCount,
+      locationCount,
+      propCount,
+      sceneCount,
+      characters,
+      locations,
+      storyArcs,
+      scripts,
+    ] = await Promise.all([
+      ScriptModel.countDocuments({ seriesId }),
+      CharacterModel.countDocuments({ seriesId }),
+      LocationModel.countDocuments({ seriesId }),
+      PropModel.countDocuments({ seriesId }),
+      SceneModel.countDocuments({ seriesId }),
+      CharacterModel.find({ seriesId }).select('_id name appearances').lean(),
+      LocationModel.find({ seriesId }).select('_id name').lean(),
+      StoryArcModel.find({ seriesId }).select('_id name status keyBeats').lean(),
+      ScriptModel.find({ seriesId }).select('_id content updatedAt').lean(),
+    ]);
+
+    // Calculate total word count from scripts
+    let totalWordCount = 0;
+    const writingActivity: Array<{ date: string; wordCount: number; scriptId?: string }> = [];
+
+    for (const script of scripts) {
+      const content = script.content ?? '';
+      const words = content.split(/\s+/).filter(Boolean).length;
+      totalWordCount += words;
+
+      // Track writing activity by date
+      if (script.updatedAt) {
+        const date = new Date(script.updatedAt).toISOString().split('T')[0];
+        writingActivity.push({
+          date,
+          wordCount: words,
+          scriptId: script._id,
+        });
+      }
+    }
+
+    // Get scenes grouped by location
+    const scenesWithLocation = await SceneModel.find({ seriesId, locationId: { $exists: true, $ne: null } })
+      .select('locationId')
+      .lean();
+
+    const locationSceneCount = new Map<string, number>();
+    for (const scene of scenesWithLocation) {
+      if (scene.locationId) {
+        locationSceneCount.set(scene.locationId, (locationSceneCount.get(scene.locationId) ?? 0) + 1);
+      }
+    }
+
+    const locationDistribution = locations
+      .map((loc) => ({
+        locationId: loc._id,
+        locationName: loc.name,
+        sceneCount: locationSceneCount.get(loc._id) ?? 0,
+      }))
+      .sort((a, b) => b.sceneCount - a.sceneCount);
+
+    // Calculate character appearances
+    const characterAppearances = characters
+      .map((char) => ({
+        characterId: char._id,
+        characterName: char.name,
+        appearanceCount: char.appearances?.length ?? 0,
+      }))
+      .sort((a, b) => b.appearanceCount - a.appearanceCount);
+
+    // Story arc progress
+    const storyArcProgress = storyArcs.map((arc) => ({
+      arcId: arc._id,
+      arcName: arc.name,
+      status: arc.status,
+      beatCount: arc.keyBeats?.length ?? 0,
+    }));
+
+    return {
+      overview: {
+        scriptCount,
+        characterCount,
+        locationCount,
+        propCount,
+        sceneCount,
+        totalWordCount,
+      },
+      locationDistribution,
+      characterAppearances,
+      storyArcProgress,
+      writingActivity,
+    };
   }
 }

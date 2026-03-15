@@ -1,8 +1,9 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable max-classes-per-file */
-import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
+import { getModelForClass, index, modelOptions, pre, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
-import { RequiredTimeStamps } from '../base-classes';
+import { VersionedEntity } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
 class SceneBeatClass {
@@ -13,13 +14,20 @@ class SceneBeatClass {
   public description!: string;
 }
 
+@pre<SceneClass>('save', function incrementVersion() {
+  if (!this.isNew) {
+    this._version = (this._version || 1) + 1;
+    this._lastModifiedAt = new Date();
+  }
+})
+@index({ seriesId: 1, _version: 1 })
 @modelOptions({
   schemaOptions: {
     collection: 'scenes',
     timestamps: true,
   },
 })
-class SceneClass extends RequiredTimeStamps {
+class SceneClass extends VersionedEntity {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 

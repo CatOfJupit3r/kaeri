@@ -156,6 +156,68 @@ const exportSeriesSummary = authProcedure
     }),
   );
 
+// Analytics schemas
+const overviewStatsSchema = z.object({
+  scriptCount: z.number(),
+  characterCount: z.number(),
+  locationCount: z.number(),
+  propCount: z.number(),
+  sceneCount: z.number(),
+  totalWordCount: z.number(),
+});
+
+const locationDistributionSchema = z.array(
+  z.object({
+    locationId: z.string(),
+    locationName: z.string(),
+    sceneCount: z.number(),
+  }),
+);
+
+const characterAppearancesSchema = z.array(
+  z.object({
+    characterId: z.string(),
+    characterName: z.string(),
+    appearanceCount: z.number(),
+  }),
+);
+
+const storyArcProgressSchema = z.array(
+  z.object({
+    arcId: z.string(),
+    arcName: z.string(),
+    status: z.string(),
+    beatCount: z.number(),
+  }),
+);
+
+const writingActivitySchema = z.array(
+  z.object({
+    date: z.string(),
+    wordCount: z.number(),
+    scriptId: z.string().optional(),
+  }),
+);
+
+const analyticsSchema = z.object({
+  overview: overviewStatsSchema,
+  locationDistribution: locationDistributionSchema,
+  characterAppearances: characterAppearancesSchema,
+  storyArcProgress: storyArcProgressSchema,
+  writingActivity: writingActivitySchema,
+});
+
+const getSeriesAnalytics = authProcedure
+  .route({
+    path: '/analytics',
+    method: 'GET',
+    summary: 'Get series analytics',
+    description:
+      'Returns aggregated statistics and charts data for a series including entity counts, distributions, and activity.',
+  })
+  .input(z.object({ seriesId: z.string() }))
+  .output(analyticsSchema);
+
 const seriesContract = oc.prefix('/series').router({
   createSeries,
   updateSeries,
@@ -163,6 +225,10 @@ const seriesContract = oc.prefix('/series').router({
   listSeries,
   getSeries,
   exportSeriesSummary,
+  getSeriesAnalytics,
 });
+
+export type SeriesAnalytics = z.infer<typeof analyticsSchema>;
+export type OverviewStats = z.infer<typeof overviewStatsSchema>;
 
 export default seriesContract;

@@ -25,4 +25,8 @@ export const seriesRouter = base.series.router({
   exportSeriesSummary: protectedProcedure.series.exportSeriesSummary.handler(async ({ input }) =>
     GETTERS.SeriesService().exportSummary(input.seriesId),
   ),
+
+  getSeriesAnalytics: protectedProcedure.series.getSeriesAnalytics.handler(async ({ input }) =>
+    GETTERS.SeriesService().getAnalytics(input.seriesId),
+  ),
 });
