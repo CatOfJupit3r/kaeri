@@ -10,14 +10,17 @@
 			"outputs": ["dist/**"]
 		},
 		"lint": {
-			"dependsOn": ["^lint"]
+			"dependsOn": ["^lint"],
+			"cache": false
 		},
 		"check-types": {
-			"dependsOn": ["^check-types"]
+			"dependsOn": ["^check-types"],
+			"cache": false
 		},
 		"test": {
 			"dependsOn": ["^build", "^test"],
-			"outputs": []
+			"outputs": [],
+			"cache": false
 		},
 		"dev": {
 			"dependsOn": ["@kaeri/shared#build"],
