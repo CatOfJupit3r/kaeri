@@ -9,8 +9,8 @@ export type ExportScriptPdfResult = ORPCOutputs['export']['exportScriptPdf'];
 export const exportScriptPdfMutationOptions = tanstackRPC.export.exportScriptPdf.mutationOptions({
   onSuccess: (data) => {
     // Trigger download
-    downloadPdf(data.data, data.filename);
-    toastSuccess('PDF exported successfully');
+    downloadFile(data.data, data.filename, data.fileType);
+    toastSuccess('Export completed successfully');
   },
   onError: (error) => {
     toastError(`Export failed: ${error.message}`);
@@ -18,16 +18,16 @@ export const exportScriptPdfMutationOptions = tanstackRPC.export.exportScriptPdf
 });
 
 /**
- * Downloads a base64-encoded PDF
+ * Downloads a base64-encoded file
  */
-function downloadPdf(base64Data: string, filename: string) {
+function downloadFile(base64Data: string, filename: string, mimeType: string) {
   // Convert base64 to blob
   const binaryString = atob(base64Data);
   const bytes = new Uint8Array(binaryString.length);
   for (let i = 0; i < binaryString.length; i += 1) {
     bytes[i] = binaryString.charCodeAt(i);
   }
-  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const blob = new Blob([bytes], { type: mimeType });
 
   // Create download link
   const url = URL.createObjectURL(blob);

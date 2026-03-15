@@ -103,27 +103,27 @@ const duplicateExportPreset = authProcedure
   .output(exportPresetSchema);
 
 // ============================================================================
-// PDF EXPORT PROCEDURES
+// SCRIPT EXPORT PROCEDURES (PDF, PRODUCTION PDF, CALL SHEET, PLAIN TEXT)
 // ============================================================================
 
 const exportScriptPdf = authProcedure
   .route({
     path: '/script-pdf',
     method: 'POST',
-    summary: 'Export script as PDF',
+    summary: 'Export script',
     description:
-      'Exports a screenplay-friendly PDF for a script using the specified preset or defaults. Returns a base64-encoded PDF.',
+      'Exports a script in various formats (PDF, Production PDF, Call Sheet, Plain Text). Returns base64-encoded data.',
   })
   .input(exportScriptPdfOptionsSchema)
   .output(
     z.object({
       ok: z.literal(true),
-      fileType: z.literal('application/pdf'),
-      /** Base64-encoded PDF data */
+      fileType: z.enum(['application/pdf', 'text/plain']),
+      /** Base64-encoded data */
       data: z.string(),
       /** Suggested filename */
       filename: z.string(),
-      /** PDF size in bytes */
+      /** File size in bytes */
       sizeBytes: z.number(),
     }),
   );

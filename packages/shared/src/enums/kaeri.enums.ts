@@ -37,7 +37,7 @@ export const CANVAS_NODE_TYPES = canvasNodeTypeSchema.enum;
 export type CanvasNodeType = z.infer<typeof canvasNodeTypeSchema>;
 
 // Export Formats
-export const exportFormatSchema = z.enum(['PDF', 'JSON', 'FDX']);
+export const exportFormatSchema = z.enum(['PDF', 'PRODUCTION_PDF', 'CALL_SHEET', 'PLAIN_TEXT', 'JSON']);
 export const EXPORT_FORMATS = exportFormatSchema.enum;
 export type ExportFormat = z.infer<typeof exportFormatSchema>;
 

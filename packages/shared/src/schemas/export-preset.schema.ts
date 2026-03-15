@@ -1,5 +1,7 @@
 import z from 'zod';
 
+import { exportFormatSchema } from '../enums/kaeri.enums';
+
 /**
  * Page size options for PDF export
  */
@@ -218,6 +220,8 @@ export type UpdateExportPresetInput = z.infer<typeof updateExportPresetInputSche
  */
 export const exportScriptPdfOptionsSchema = z.object({
   scriptId: z.string(),
+  /** Export format type */
+  format: exportFormatSchema.default('PDF'),
   /** Preset ID to use, or use inline options */
   presetId: z.string().optional(),
   /** Include line numbers on each page */

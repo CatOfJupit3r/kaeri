@@ -1,6 +1,7 @@
 import { injectable, inject } from 'tsyringe';
 
 import { errorCodes } from '@kaeri/shared/enums/errors.enums';
+import { EXPORT_FORMATS } from '@kaeri/shared/enums/kaeri.enums';
 import type {
   CreateExportPresetInput,
   UpdateExportPresetInput,
@@ -24,7 +25,9 @@ import { buildCacheKey, CACHE_TTL } from '@~/features/valkey/valkey.constants';
 import { ORPCBadRequestError, ORPCNotFoundError } from '@~/lib/orpc-error-wrapper';
 
 import type { ValkeyService } from '../valkey/valkey.service';
+import { CallSheetGeneratorService } from './call-sheet-generator.service';
 import { PdfGeneratorService } from './pdf-generator.service';
+import { PlainTextGeneratorService } from './plain-text-generator.service';
 
 /**
  * Default export preset for standard screenplay formatting
@@ -124,12 +127,18 @@ export class ExportService implements iWithLogger {
 
   private readonly pdfGenerator: PdfGeneratorService;
 
+  private readonly callSheetGenerator: CallSheetGeneratorService;
+
+  private readonly plainTextGenerator: PlainTextGeneratorService;
+
   constructor(
     @inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory,
     @inject(TOKENS.ValkeyService) private readonly valkey: ValkeyService,
   ) {
     this.logger = loggerFactory.create('export-service');
     this.pdfGenerator = new PdfGeneratorService();
+    this.callSheetGenerator = new CallSheetGeneratorService();
+    this.plainTextGenerator = new PlainTextGeneratorService();
   }
 
   // ============================================================================
@@ -317,14 +326,14 @@ export class ExportService implements iWithLogger {
   }
 
   // ============================================================================
-  // PDF EXPORT
+  // SCRIPT EXPORT (PDF, PRODUCTION PDF, CALL SHEET, PLAIN TEXT)
   // ============================================================================
 
   /**
-   * Export script as PDF with preset styling
+   * Export script in various formats
    */
-  public async exportScriptPdf(userId: string, options: ExportScriptPdfOptions) {
-    const { scriptId, presetId } = options;
+  public async exportScript(userId: string, options: ExportScriptPdfOptions) {
+    const { scriptId, presetId, format = EXPORT_FORMATS.PDF } = options;
 
     // Get script
     const script = await ScriptModel.findById(scriptId);
@@ -353,36 +362,95 @@ export class ExportService implements iWithLogger {
       };
     }
 
-    this.logger.info('Generating PDF export', {
+    this.logger.info('Generating export', {
       scriptId,
       scriptTitle: script.title,
+      format,
       presetId: preset._id,
       presetName: preset.name,
     });
 
-    // Generate PDF
     const startTime = Date.now();
-    const { data, sizeBytes } = await this.pdfGenerator.generatePdf(script, preset, options);
+    let data: string;
+    let sizeBytes: number;
+    let fileType: string;
+    let fileExtension: string;
+
+    switch (format) {
+      case EXPORT_FORMATS.PRODUCTION_PDF: {
+        // Production script forces scene numbers and revision marks
+        const productionOptions = {
+          ...options,
+          includeSceneNumbers: true,
+          includeRevisionMarks: true,
+        };
+        const result = await this.pdfGenerator.generatePdf(script, preset, productionOptions);
+        data = result.data;
+        sizeBytes = result.sizeBytes;
+        fileType = 'application/pdf';
+        fileExtension = 'pdf';
+        break;
+      }
+
+      case EXPORT_FORMATS.CALL_SHEET: {
+        const result = await this.callSheetGenerator.generateCallSheet(script, preset);
+        data = result.data;
+        sizeBytes = result.sizeBytes;
+        fileType = 'application/pdf';
+        fileExtension = 'pdf';
+        break;
+      }
+
+      case EXPORT_FORMATS.PLAIN_TEXT: {
+        const result = await this.plainTextGenerator.generatePlainText(script);
+        data = result.data;
+        sizeBytes = result.sizeBytes;
+        fileType = 'text/plain';
+        fileExtension = 'txt';
+        break;
+      }
+
+      case EXPORT_FORMATS.PDF:
+      default: {
+        const result = await this.pdfGenerator.generatePdf(script, preset, options);
+        data = result.data;
+        sizeBytes = result.sizeBytes;
+        fileType = 'application/pdf';
+        fileExtension = 'pdf';
+        break;
+      }
+    }
+
     const duration = Date.now() - startTime;
 
-    this.logger.info('PDF export completed', {
+    this.logger.info('Export completed', {
       scriptId,
       scriptTitle: script.title,
+      format,
       sizeBytes,
       durationMs: duration,
     });
 
     // Generate filename
     const safeTitle = script.title.replaceAll(/[^a-zA-Z0-9-_]/g, '_').substring(0, 50);
-    const filename = `${safeTitle}_${new Date().toISOString().split('T')[0]}.pdf`;
+    const formatSuffix = format !== EXPORT_FORMATS.PDF ? `_${format.toLowerCase()}` : '';
+    const filename = `${safeTitle}${formatSuffix}_${new Date().toISOString().split('T')[0]}.${fileExtension}`;
 
     return {
       ok: true as const,
-      fileType: 'application/pdf' as const,
+      fileType: fileType as 'application/pdf' | 'text/plain',
       data,
       filename,
       sizeBytes,
     };
+  }
+
+  /**
+   * Export script as PDF with preset styling
+   * @deprecated Use exportScript instead
+   */
+  public async exportScriptPdf(userId: string, options: ExportScriptPdfOptions) {
+    return this.exportScript(userId, options);
   }
 
   // ============================================================================
