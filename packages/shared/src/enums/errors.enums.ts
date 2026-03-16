@@ -12,6 +12,7 @@ const kaeriErrorCodes = {
   SERIES_NOT_FOUND: 'SERIES_NOT_FOUND',
   SERIES_TITLE_REQUIRED: 'SERIES_TITLE_REQUIRED',
   SERIES_DELETE_HAS_DEPENDENCIES: 'SERIES_DELETE_HAS_DEPENDENCIES',
+  SERIES_ALREADY_IN_WORKSPACE: 'SERIES_ALREADY_IN_WORKSPACE',
   // Episode errors
   EPISODE_NOT_FOUND: 'EPISODE_NOT_FOUND',
   EPISODE_SERIES_MUST_BE_TV_SERIES: 'EPISODE_SERIES_MUST_BE_TV_SERIES',
@@ -99,6 +100,7 @@ const kaeriErrorMessages = {
   [kaeriErrorCodes.SERIES_TITLE_REQUIRED]: 'Series title is required',
   [kaeriErrorCodes.SERIES_DELETE_HAS_DEPENDENCIES]:
     'Cannot delete series with existing scripts or knowledge base entities',
+  [kaeriErrorCodes.SERIES_ALREADY_IN_WORKSPACE]: 'Series is already in the target workspace',
   // Episode errors
   [kaeriErrorCodes.EPISODE_NOT_FOUND]: 'Episode not found',
   [kaeriErrorCodes.EPISODE_SERIES_MUST_BE_TV_SERIES]: 'Episodes can only be created for TV Series projects',

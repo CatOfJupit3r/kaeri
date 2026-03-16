@@ -25,4 +25,5 @@ export const GETTERS = {
   WorkspaceService: () => resolve(TOKENS.WorkspaceService),
   MemberService: () => resolve(TOKENS.MemberService),
   InvitationService: () => resolve(TOKENS.InvitationService),
+  PresenceService: () => resolve(TOKENS.PresenceService),
 };

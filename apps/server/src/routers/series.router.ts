@@ -12,8 +12,8 @@ export const seriesRouter = seriesBase.series.router({
     GETTERS.SeriesService().delete(input.seriesId),
   ),
 
-  listSeries: seriesProtected.series.listSeries.handler(async ({ input }) =>
-    GETTERS.SeriesService().list(input.limit, input.offset),
+  listSeries: seriesProtected.series.listSeries.handler(async ({ input, context }) =>
+    GETTERS.SeriesService().list(context.session.user.id, input.limit, input.offset),
   ),
 
   getSeries: seriesProtected.series.getSeries.handler(async ({ input }) => GETTERS.SeriesService().get(input.seriesId)),
@@ -24,5 +24,9 @@ export const seriesRouter = seriesBase.series.router({
 
   getSeriesAnalytics: seriesProtected.series.getSeriesAnalytics.handler(async ({ input }) =>
     GETTERS.SeriesService().getAnalytics(input.seriesId),
+  ),
+
+  transferSeries: seriesProtected.series.transferSeries.handler(async ({ input, context }) =>
+    GETTERS.SeriesService().transfer(input.seriesId, input.targetWorkspaceId, context.session.user.id),
   ),
 });

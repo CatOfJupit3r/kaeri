@@ -1,6 +1,7 @@
 import { injectable, inject } from 'tsyringe';
 
 import { AuditEntryModel } from '@~/db/models/audit-entry.model';
+import { SeriesModel } from '@~/db/models/series.model';
 import { TOKENS } from '@~/di/tokens';
 import type { LoggerFactory, iWithLogger } from '@~/features/logger/logger.types';
 
@@ -23,6 +24,17 @@ interface iAuditLogOptions {
   actorId: string;
   before?: object;
   after?: object;
+}
+
+interface iFormattedAuditEntry {
+  _id: string;
+  seriesId: string;
+  workspaceId?: string;
+  entityType: string;
+  entityId: string;
+  action: 'CREATE' | 'UPDATE' | 'DELETE';
+  actorId: string;
+  timestamp: Date;
 }
 
 /**
@@ -103,8 +115,18 @@ export class AuditService implements iWithLogger {
    */
   private async log(options: iAuditLogOptions) {
     try {
+      // Derive workspaceId from the series
+      let workspaceId: string | undefined;
+      try {
+        const series = await SeriesModel.findById(options.seriesId, { workspaceId: 1 }).lean();
+        workspaceId = series?.workspaceId;
+      } catch {
+        // Ignore lookup errors - workspaceId is optional
+      }
+
       await AuditEntryModel.create({
         seriesId: options.seriesId,
+        workspaceId,
         entityType: options.entityType,
         entityId: options.entityId,
         action: options.action,
@@ -116,6 +138,7 @@ export class AuditService implements iWithLogger {
 
       this.logger.debug('Audit entry created', {
         seriesId: options.seriesId,
+        workspaceId,
         entityType: options.entityType,
         entityId: options.entityId,
         action: options.action,
@@ -127,5 +150,72 @@ export class AuditService implements iWithLogger {
         ...options,
       });
     }
+  }
+
+  /**
+   * Get paginated activity entries for a workspace
+   */
+  public async getWorkspaceActivity(
+    workspaceId: string,
+    options: { limit?: number; offset?: number } = {},
+  ): Promise<{ entries: iFormattedAuditEntry[]; total: number }> {
+    const limit = Math.min(options.limit ?? 20, 100);
+    const offset = options.offset ?? 0;
+
+    const [entries, total] = await Promise.all([
+      AuditEntryModel.find({ workspaceId }).sort({ timestamp: -1 }).skip(offset).limit(limit).lean(),
+      AuditEntryModel.countDocuments({ workspaceId }),
+    ]);
+
+    return {
+      entries: entries.map((e) => this.formatAuditEntry(e)),
+      total,
+    };
+  }
+
+  /**
+   * Get paginated activity entries for a series
+   */
+  public async getSeriesActivity(
+    seriesId: string,
+    options: { limit?: number; offset?: number } = {},
+  ): Promise<{ entries: iFormattedAuditEntry[]; total: number }> {
+    const limit = Math.min(options.limit ?? 20, 100);
+    const offset = options.offset ?? 0;
+
+    const [entries, total] = await Promise.all([
+      AuditEntryModel.find({ seriesId }).sort({ timestamp: -1 }).skip(offset).limit(limit).lean(),
+      AuditEntryModel.countDocuments({ seriesId }),
+    ]);
+
+    return {
+      entries: entries.map((e) => this.formatAuditEntry(e)),
+      total,
+    };
+  }
+
+  /**
+   * Format an audit entry for API response
+   */
+  private formatAuditEntry(entry: {
+    _id: string;
+    seriesId: string;
+    workspaceId?: string;
+    entityType: string;
+    entityId: string;
+    action: string;
+    actorId: string;
+    timestamp: Date;
+  }): iFormattedAuditEntry {
+    return {
+      _id: entry._id,
+      seriesId: entry.seriesId,
+      workspaceId: entry.workspaceId,
+      entityType: entry.entityType,
+      entityId: entry.entityId,
+      action: entry.action as 'CREATE' | 'UPDATE' | 'DELETE',
+      actorId: entry.actorId,
+      timestamp: entry.timestamp,
+    };
   }
 }

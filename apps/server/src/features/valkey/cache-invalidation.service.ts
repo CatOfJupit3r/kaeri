@@ -69,6 +69,16 @@ export class CacheInvalidationService implements iWithLogger {
       await this.valkey.invalidatePattern(`${CACHE_PREFIX.CONTINUITY}:${seriesId}:*`);
       this.logger.debug('Series deleted, invalidated all related caches', { seriesId });
     });
+
+    this.eventBus.on(EVENTS.SERIES_TRANSFERRED, async ({ seriesId, fromWorkspaceId, toWorkspaceId }) => {
+      // Invalidate the series cache (workspaceId has changed)
+      await this.valkey.cacheDel(buildCacheKey.series(seriesId));
+      // Invalidate all series lists (both source and target workspace members' lists will change)
+      await this.valkey.invalidatePattern(`${CACHE_PREFIX.SERIES_LIST}:*`);
+      // Invalidate export cache
+      await this.valkey.cacheDel(buildCacheKey.exportSeriesJson(seriesId));
+      this.logger.debug('Series transferred, invalidated caches', { seriesId, fromWorkspaceId, toWorkspaceId });
+    });
   }
 
   /**

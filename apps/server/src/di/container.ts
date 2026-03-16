@@ -36,6 +36,7 @@ export async function registerServices() {
   const { WorkspaceService } = await import('@~/features/collaboration/workspace.service');
   const { MemberService } = await import('@~/features/collaboration/member.service');
   const { InvitationService } = await import('@~/features/collaboration/invitation.service');
+  const { PresenceService } = await import('@~/features/collaboration/presence.service');
 
   // Register singletons with their tokens
   container.registerSingleton(TOKENS.EventBus, TypedEventBus);
@@ -65,6 +66,7 @@ export async function registerServices() {
   container.register(TOKENS.WorkspaceService, WorkspaceService, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.MemberService, MemberService, { lifecycle: Lifecycle.Transient });
   container.register(TOKENS.InvitationService, InvitationService, { lifecycle: Lifecycle.Transient });
+  container.register(TOKENS.PresenceService, PresenceService, { lifecycle: Lifecycle.Transient });
 
   // Initialize services that need registration
   CacheInvalidationService.handleRegistration({ container, token: TOKENS.CacheInvalidationService });

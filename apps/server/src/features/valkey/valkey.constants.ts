@@ -31,6 +31,9 @@ export const CACHE_TTL = {
 
   /** Rate limiting (1 hour) */
   RATE_LIMIT: 3600,
+
+  /** Presence TTL (60 seconds - expires if no heartbeat) */
+  PRESENCE: 60,
 } as const;
 
 /**
@@ -50,6 +53,7 @@ export const CACHE_PREFIX = {
   USER: 'user',
   EXPORT: 'export',
   WORKSPACE: 'workspace',
+  PRESENCE: 'presence',
 } as const;
 
 /**
@@ -90,4 +94,10 @@ export const buildCacheKey = {
   workspaceMember: (workspaceId: string, userId: string) => `${CACHE_PREFIX.WORKSPACE}:${workspaceId}:member:${userId}`,
   userWorkspaces: (userId: string) => `${CACHE_PREFIX.USER}:${userId}:workspaces`,
   invitationRateLimit: (userId: string) => `rate:invitation:${userId}`,
+
+  // Presence cache keys
+  presence: (targetType: string, targetId: string, userId: string) =>
+    `${CACHE_PREFIX.PRESENCE}:${targetType}:${targetId}:${userId}`,
+  presencePattern: (targetType: string, targetId: string) => `${CACHE_PREFIX.PRESENCE}:${targetType}:${targetId}:*`,
+  seriesPresencePattern: (seriesId: string) => `${CACHE_PREFIX.PRESENCE}:*:${seriesId}:*`,
 } as const;

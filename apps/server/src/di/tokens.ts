@@ -7,6 +7,7 @@ import type { CanvasService } from '@~/features/canvas/canvas.service';
 import type { InvitationService } from '@~/features/collaboration/invitation.service';
 import type { MemberService } from '@~/features/collaboration/member.service';
 import type { PermissionService } from '@~/features/collaboration/permission.service';
+import type { PresenceService } from '@~/features/collaboration/presence.service';
 import type { WorkspaceService } from '@~/features/collaboration/workspace.service';
 import type { ContinuityService } from '@~/features/continuity/continuity.service';
 import type { EpisodeService } from '@~/features/episodes/episode.service';
@@ -51,6 +52,7 @@ const permissionServiceToken: unique symbol = Symbol.for('PermissionService');
 const workspaceServiceToken: unique symbol = Symbol.for('WorkspaceService');
 const memberServiceToken: unique symbol = Symbol.for('MemberService');
 const invitationServiceToken: unique symbol = Symbol.for('InvitationService');
+const presenceServiceToken: unique symbol = Symbol.for('PresenceService');
 
 // Service tokens for dependency injection (unique symbols for type-safe lookups)
 export const TOKENS = {
@@ -80,6 +82,7 @@ export const TOKENS = {
   WorkspaceService: workspaceServiceToken,
   MemberService: memberServiceToken,
   InvitationService: invitationServiceToken,
+  PresenceService: presenceServiceToken,
 } as const;
 
 export interface iTokenRegistry {
@@ -109,6 +112,7 @@ export interface iTokenRegistry {
   [TOKENS.WorkspaceService]: WorkspaceService;
   [TOKENS.MemberService]: MemberService;
   [TOKENS.InvitationService]: InvitationService;
+  [TOKENS.PresenceService]: PresenceService;
 }
 
 export type InjectionTokens = typeof TOKENS;

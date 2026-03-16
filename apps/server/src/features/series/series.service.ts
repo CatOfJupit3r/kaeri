@@ -1,7 +1,7 @@
 import { inject, injectable } from 'tsyringe';
 import type z from 'zod';
 
-import { errorCodes } from '@kaeri/shared';
+import { errorCodes, WORKSPACE_ROLES } from '@kaeri/shared';
 import { createSeriesInputSchema, updateSeriesPatchSchema } from '@kaeri/shared/contract/series.contract';
 
 import { CharacterModel } from '@~/db/models/character.model';
@@ -11,7 +11,9 @@ import { SceneModel } from '@~/db/models/scene.model';
 import { ScriptModel } from '@~/db/models/script.model';
 import { SeriesModel } from '@~/db/models/series.model';
 import { StoryArcModel } from '@~/db/models/story-arc.model';
+import { WorkspaceMemberModel } from '@~/db/models/workspace-member.model';
 import { TOKENS } from '@~/di/tokens';
+import type { PermissionService } from '@~/features/collaboration/permission.service';
 import { buildCacheKey, CACHE_TTL } from '@~/features/valkey/valkey.constants';
 import { ORPCBadRequestError, ORPCNotFoundError, ORPCUnprocessableContentError } from '@~/lib/orpc-error-wrapper';
 
@@ -31,6 +33,7 @@ export class SeriesService implements iWithLogger {
     @inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory,
     @inject(TOKENS.ValkeyService) private readonly valkey: ValkeyService,
     @inject(TOKENS.EventBus) private readonly eventBus: TypedEventBus,
+    @inject(TOKENS.PermissionService) private readonly permissionService: PermissionService,
   ) {
     this.logger = loggerFactory.create('series-service');
   }
@@ -102,10 +105,27 @@ export class SeriesService implements iWithLogger {
     return { success: true };
   }
 
-  public async list(limit = 20, offset = 0) {
+  /**
+   * List series accessible to the user.
+   * Only returns series from workspaces where the user is a member.
+   */
+  public async list(userId: string, limit = 20, offset = 0) {
+    // Get all workspace IDs where the user is a member
+    const memberships = await WorkspaceMemberModel.find({ userId }).select('workspaceId').lean();
+    const workspaceIds = memberships.map((m) => m.workspaceId);
+
+    // If user has no workspace memberships, return empty list
+    if (workspaceIds.length === 0) {
+      return { items: [], total: 0 };
+    }
+
     const [items, total] = await Promise.all([
-      SeriesModel.find().sort({ lastEditedAt: -1 }).limit(limit).skip(offset).lean(),
-      SeriesModel.countDocuments(),
+      SeriesModel.find({ workspaceId: { $in: workspaceIds } })
+        .sort({ lastEditedAt: -1 })
+        .limit(limit)
+        .skip(offset)
+        .lean(),
+      SeriesModel.countDocuments({ workspaceId: { $in: workspaceIds } }),
     ]);
 
     return { items, total };
@@ -231,5 +251,59 @@ export class SeriesService implements iWithLogger {
       storyArcProgress,
       writingActivity,
     };
+  }
+
+  /**
+   * Transfer a series to another workspace.
+   *
+   * Requirements:
+   * - User must have ADMIN or higher in the source workspace
+   * - User must have ADMIN or higher in the destination workspace
+   * - All content (scripts, KB entities, canvas) is preserved atomically
+   *
+   * @param seriesId - The series to transfer
+   * @param targetWorkspaceId - The destination workspace
+   * @param userId - The user performing the transfer
+   */
+  public async transfer(seriesId: string, targetWorkspaceId: string, userId: string) {
+    // Fetch the series first
+    const series = await SeriesModel.findById(seriesId);
+    if (!series) {
+      throw ORPCNotFoundError(errorCodes.SERIES_NOT_FOUND);
+    }
+
+    const fromWorkspaceId = series.workspaceId;
+
+    // Cannot transfer to the same workspace
+    if (fromWorkspaceId === targetWorkspaceId) {
+      throw ORPCBadRequestError(errorCodes.SERIES_ALREADY_IN_WORKSPACE);
+    }
+
+    // Verify ADMIN permissions in source workspace
+    await this.permissionService.requirePermission(fromWorkspaceId, userId, WORKSPACE_ROLES.ADMIN);
+
+    // Verify ADMIN permissions in destination workspace
+    await this.permissionService.requirePermission(targetWorkspaceId, userId, WORKSPACE_ROLES.ADMIN);
+
+    // Atomic update - just change the workspaceId
+    // All linked content (scripts, KB entities, canvas) remains tied to the series via seriesId
+    await SeriesModel.updateOne({ _id: seriesId }, { $set: { workspaceId: targetWorkspaceId } });
+
+    // Emit event for cache invalidation
+    this.eventBus.emit(SERIES_EVENTS.TRANSFERRED, {
+      seriesId,
+      fromWorkspaceId,
+      toWorkspaceId: targetWorkspaceId,
+      transferredById: userId,
+    });
+
+    this.logger.info('Series transferred', {
+      seriesId,
+      fromWorkspaceId,
+      toWorkspaceId: targetWorkspaceId,
+      transferredById: userId,
+    });
+
+    return { success: true };
   }
 }

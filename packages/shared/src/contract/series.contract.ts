@@ -218,6 +218,22 @@ const getSeriesAnalytics = authProcedure
   .input(z.object({ seriesId: z.string() }))
   .output(analyticsSchema);
 
+const transferSeries = authProcedure
+  .route({
+    path: '/transfer',
+    method: 'POST',
+    summary: 'Transfer series to another workspace',
+    description:
+      'Transfers a series from its current workspace to a target workspace. User must have ADMIN or higher role in both source and destination workspaces. All content (scripts, KB entities, canvas) is preserved.',
+  })
+  .input(
+    z.object({
+      seriesId: z.string(),
+      targetWorkspaceId: z.string(),
+    }),
+  )
+  .output(z.object({ success: z.boolean() }));
+
 const seriesContract = oc.prefix('/series').router({
   createSeries,
   updateSeries,
@@ -226,6 +242,7 @@ const seriesContract = oc.prefix('/series').router({
   getSeries,
   exportSeriesSummary,
   getSeriesAnalytics,
+  transferSeries,
 });
 
 export type SeriesAnalytics = z.infer<typeof analyticsSchema>;

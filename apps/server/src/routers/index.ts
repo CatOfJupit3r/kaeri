@@ -7,6 +7,7 @@ import { exportRouter } from './export.router';
 import { indexRouter } from './index.router';
 import { invitationRouter } from './invitation.router';
 import { knowledgeBaseRouter } from './knowledge-base.router';
+import { presenceRouter } from './presence.router';
 import { researchRouter } from './research.router';
 import { sceneRouter } from './scene.router';
 import { scriptKBIntegrationRouter } from './script-kb-integration.router';
@@ -50,6 +51,7 @@ export const appRouter = {
   workspace: workspaceRouter,
   workspaceMember: workspaceMemberRouter,
   invitation: invitationRouter,
+  presence: presenceRouter,
 };
 
 export type AppRouter = typeof appRouter;

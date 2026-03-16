@@ -28,7 +28,7 @@
 - [x] T005 [P] Create workspace member contract in `packages/shared/src/contract/workspace-member.contract.ts` with role management procedures
 - [x] T006 [P] Create invitation contract in `packages/shared/src/contract/invitation.contract.ts` with invite flow procedures
 - [x] T007 Export new contracts from `packages/shared/src/contract/index.ts`
-- [ ] T008 Run `bun run check-types` to validate contract schemas
+- [x] T008 Run `bun run check-types` to validate contract schemas
 
 ---
 
@@ -38,18 +38,18 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T009 [P] Create Workspace model in `apps/server/src/db/models/workspace.model.ts` with Typegoose decorators
-- [ ] T010 [P] Create WorkspaceMember model in `apps/server/src/db/models/workspace-member.model.ts` with compound index (workspaceId, userId)
-- [ ] T011 [P] Create Invitation model in `apps/server/src/db/models/invitation.model.ts` with unique code index
-- [ ] T012 Update Series model in `apps/server/src/db/models/series.model.ts` to make workspaceId required
-- [ ] T013 Update AuditEntry model in `apps/server/src/db/models/audit-entry.model.ts` to add optional workspaceId field with index
-- [ ] T014 Create collaboration feature directory `apps/server/src/features/collaboration/`
-- [ ] T015 Create collaboration events file in `apps/server/src/features/collaboration/collaboration.events.ts`
-- [ ] T016 Add collaboration service tokens to `apps/server/src/di/tokens.ts` (WorkspaceService, MemberService, InvitationService, PermissionService)
-- [ ] T017 Create PermissionService in `apps/server/src/features/collaboration/permission.service.ts` with Valkey caching (50ms p95, 5-min TTL)
-- [ ] T018 Register PermissionService in `apps/server/src/di/container.ts`
+- [x] T009 [P] Create Workspace model in `apps/server/src/db/models/workspace.model.ts` with Typegoose decorators
+- [x] T010 [P] Create WorkspaceMember model in `apps/server/src/db/models/workspace-member.model.ts` with compound index (workspaceId, userId)
+- [x] T011 [P] Create Invitation model in `apps/server/src/db/models/invitation.model.ts` with unique code index
+- [x] T012 Update Series model in `apps/server/src/db/models/series.model.ts` to make workspaceId required
+- [x] T013 Update AuditEntry model in `apps/server/src/db/models/audit-entry.model.ts` to add optional workspaceId field with index
+- [x] T014 Create collaboration feature directory `apps/server/src/features/collaboration/`
+- [x] T015 Create collaboration events file in `apps/server/src/features/collaboration/collaboration.events.ts`
+- [x] T016 Add collaboration service tokens to `apps/server/src/di/tokens.ts` (WorkspaceService, MemberService, InvitationService, PermissionService)
+- [x] T017 Create PermissionService in `apps/server/src/features/collaboration/permission.service.ts` with Valkey caching (50ms p95, 5-min TTL)
+- [x] T018 Register PermissionService in `apps/server/src/di/container.ts`
 
-**Checkpoint**: Foundation ready - models exist, permission service available
+**Checkpoint**: Foundation ready - models exist, permission service available ✓
 
 ---
 
@@ -61,15 +61,15 @@
 
 ### Implementation for User Story 1
 
-- [ ] T019 [US1] Create WorkspaceService in `apps/server/src/features/collaboration/workspace.service.ts` with create, update, delete, get, list methods
-- [ ] T020 [US1] Implement personal workspace auto-creation in WorkspaceService (isPersonal flag)
-- [ ] T021 [US1] Create workspace router in `apps/server/src/features/collaboration/workspace.router.ts` implementing workspace contract
-- [ ] T022 [US1] Register workspace router in `apps/server/src/routers/index.ts`
-- [ ] T023 [US1] Add workspace deletion check for dependent series in WorkspaceService
-- [ ] T024 [US1] Add structured logging for workspace mutations in WorkspaceService
-- [ ] T025 [US1] Create Better Auth hook for personal workspace creation on user signup in `apps/server/src/lib/auth.ts`
+- [x] T019 [US1] Create WorkspaceService in `apps/server/src/features/collaboration/workspace.service.ts` with create, update, delete, get, list methods
+- [x] T020 [US1] Implement personal workspace auto-creation in WorkspaceService (isPersonal flag)
+- [x] T021 [US1] Create workspace router in `apps/server/src/routers/workspace.router.ts` implementing workspace contract
+- [x] T022 [US1] Register workspace router in `apps/server/src/routers/index.ts`
+- [x] T023 [US1] Add workspace deletion check for dependent series in WorkspaceService
+- [x] T024 [US1] Add structured logging for workspace mutations in WorkspaceService
+- [x] T025 [US1] Create Better Auth hook for personal workspace creation on user signup in `apps/server/src/features/auth/auth.service.ts`
 
-**Checkpoint**: User Story 1 functional - workspaces can be created, listed, updated, deleted
+**Checkpoint**: User Story 1 functional - workspaces can be created, listed, updated, deleted ✓
 
 ---
 
@@ -81,16 +81,16 @@
 
 ### Implementation for User Story 2
 
-- [ ] T026 [US2] Create InvitationService in `apps/server/src/features/collaboration/invitation.service.ts` with create, accept, decline, revoke, list, getByCode methods
-- [ ] T027 [US2] Implement invitation code generation using nanoid in InvitationService
-- [ ] T028 [US2] Implement invitation expiration check (7-day TTL) in InvitationService
-- [ ] T029 [US2] Implement rate limiting (10/hour/workspace) using Valkey in InvitationService
-- [ ] T030 [US2] Create invitation router in `apps/server/src/features/collaboration/invitation.router.ts` implementing invitation contract
-- [ ] T031 [US2] Register invitation router in `apps/server/src/routers/index.ts`
-- [ ] T032 [US2] Add pending invitation lookup on user registration (matching email) in auth hooks
-- [ ] T033 [US2] Add structured logging for invitation events (send, accept, decline, expire)
+- [x] T026 [US2] Create InvitationService in `apps/server/src/features/collaboration/invitation.service.ts` with create, accept, decline, revoke, list, getByCode methods
+- [x] T027 [US2] Implement invitation code generation using nanoid in InvitationService
+- [x] T028 [US2] Implement invitation expiration check (7-day TTL) in InvitationService
+- [x] T029 [US2] Implement rate limiting (10/hour/workspace) using Valkey in InvitationService
+- [x] T030 [US2] Create invitation router in `apps/server/src/routers/invitation.router.ts` implementing invitation contract
+- [x] T031 [US2] Register invitation router in `apps/server/src/routers/index.ts`
+- [x] T032 [US2] Add pending invitation lookup on user registration (matching email) in auth hooks
+- [x] T033 [US2] Add structured logging for invitation events (send, accept, decline, expire)
 
-**Checkpoint**: User Story 2 functional - invitations can be sent, accepted, declined
+**Checkpoint**: User Story 2 functional - invitations can be sent, accepted, declined ✓
 
 ---
 
@@ -102,17 +102,17 @@
 
 ### Implementation for User Story 3
 
-- [ ] T034 [US3] Create MemberService in `apps/server/src/features/collaboration/member.service.ts` with listMembers, updateRole, removeMember, leave methods
-- [ ] T035 [US3] Implement role update with permission checks in MemberService (Admin cannot modify Owner)
-- [ ] T036 [US3] Implement ownership transfer in MemberService (Owner → Admin demotion)
-- [ ] T037 [US3] Implement leave workspace with Owner protection in MemberService
-- [ ] T038 [US3] Create member router in `apps/server/src/features/collaboration/member.router.ts` implementing workspace-member contract
-- [ ] T039 [US3] Register member router in `apps/server/src/routers/index.ts`
-- [ ] T040 [US3] Add Valkey cache invalidation on role changes in PermissionService
-- [ ] T041 [US3] Update PermissionService with hasPermission helper using role hierarchy
-- [ ] T042 [US3] Add NOT_FOUND stance enforcement in all collaboration routers for inaccessible resources
+- [x] T034 [US3] Create MemberService in `apps/server/src/features/collaboration/member.service.ts` with listMembers, updateRole, removeMember, leave methods
+- [x] T035 [US3] Implement role update with permission checks in MemberService (Admin cannot modify Owner)
+- [x] T036 [US3] Implement ownership transfer in MemberService (Owner → Admin demotion)
+- [x] T037 [US3] Implement leave workspace with Owner protection in MemberService
+- [x] T038 [US3] Create member router in `apps/server/src/routers/workspace-member.router.ts` implementing workspace-member contract
+- [x] T039 [US3] Register member router in `apps/server/src/routers/index.ts`
+- [x] T040 [US3] Add Valkey cache invalidation on role changes in PermissionService
+- [x] T041 [US3] Update PermissionService with hasPermission helper using role hierarchy
+- [x] T042 [US3] Add NOT_FOUND stance enforcement in all collaboration routers for inaccessible resources
 
-**Checkpoint**: User Story 3 functional - roles control access, changes are immediate
+**Checkpoint**: User Story 3 functional - roles control access, changes are immediate ✓
 
 ---
 
@@ -124,13 +124,13 @@
 
 ### Implementation for User Story 4
 
-- [ ] T043 [US4] Update AuditService in `apps/server/src/features/audit/audit.service.ts` to include workspaceId derived from series
-- [ ] T044 [US4] Add getWorkspaceActivity method to AuditService with pagination (default 20, max 100)
-- [ ] T045 [US4] Add activity endpoint to workspace router for workspace activity feed
-- [ ] T046 [US4] Implement activity feed filtering by user's accessible series in AuditService
-- [ ] T047 [US4] Add workspaceId index to existing AuditEntry queries for performance
+- [x] T043 [US4] Update AuditService in `apps/server/src/features/audit/audit.service.ts` to include workspaceId derived from series
+- [x] T044 [US4] Add getWorkspaceActivity method to AuditService with pagination (default 20, max 100)
+- [x] T045 [US4] Add activity endpoint to workspace router for workspace activity feed
+- [x] T046 [US4] Implement activity feed filtering by user's accessible series in AuditService
+- [x] T047 [US4] Add workspaceId index to existing AuditEntry queries for performance
 
-**Checkpoint**: User Story 4 functional - activity feed shows workspace-wide changes
+**Checkpoint**: User Story 4 functional - activity feed shows workspace-wide changes ✓
 
 ---
 
@@ -142,14 +142,14 @@
 
 ### Implementation for User Story 5
 
-- [ ] T048 [US5] Add transferSeries procedure to series contract in `packages/shared/src/contract/series.contract.ts`
-- [ ] T049 [US5] Update SeriesService in `apps/server/src/features/series/series.service.ts` with transfer method and permission checks
-- [ ] T050 [US5] Implement atomic workspace transfer with content preservation in SeriesService
-- [ ] T051 [US5] Update series router to handle transfer endpoint
-- [ ] T052 [US5] Update all series queries in SeriesService to filter by accessible workspaces
-- [ ] T053 [US5] Add cache invalidation for series transfer events
+- [x] T048 [US5] Add transferSeries procedure to series contract in `packages/shared/src/contract/series.contract.ts`
+- [x] T049 [US5] Update SeriesService in `apps/server/src/features/series/series.service.ts` with transfer method and permission checks
+- [x] T050 [US5] Implement atomic workspace transfer with content preservation in SeriesService
+- [x] T051 [US5] Update series router to handle transfer endpoint
+- [x] T052 [US5] Update all series queries in SeriesService to filter by accessible workspaces
+- [x] T053 [US5] Add cache invalidation for series transfer events
 
-**Checkpoint**: User Story 5 functional - series can be transferred with integrity
+**Checkpoint**: User Story 5 functional - series can be transferred with integrity ✓
 
 ---
 
@@ -161,13 +161,13 @@
 
 ### Implementation for User Story 6
 
-- [ ] T054 [P] [US6] Add presence contract in `packages/shared/src/contract/presence.contract.ts` with heartbeat and getPresence procedures
-- [ ] T055 [US6] Create PresenceService in `apps/server/src/features/collaboration/presence.service.ts` using Valkey with 60s TTL
-- [ ] T056 [US6] Implement presence heartbeat endpoint in collaboration router
-- [ ] T057 [US6] Implement getPresence endpoint returning active users per series/script
-- [ ] T058 [US6] Add automatic presence expiration after 60 seconds of no heartbeat
+- [x] T054 [P] [US6] Add presence contract in `packages/shared/src/contract/presence.contract.ts` with heartbeat and getPresence procedures
+- [x] T055 [US6] Create PresenceService in `apps/server/src/features/collaboration/presence.service.ts` using Valkey with 60s TTL
+- [x] T056 [US6] Implement presence heartbeat endpoint in collaboration router
+- [x] T057 [US6] Implement getPresence endpoint returning active users per series/script
+- [x] T058 [US6] Add automatic presence expiration after 60 seconds of no heartbeat
 
-**Checkpoint**: User Story 6 functional - presence indicators work across series
+**Checkpoint**: User Story 6 functional - presence indicators work across series ✓
 
 ---
 
