@@ -26,4 +26,5 @@ export const GETTERS = {
   MemberService: () => resolve(TOKENS.MemberService),
   InvitationService: () => resolve(TOKENS.InvitationService),
   PresenceService: () => resolve(TOKENS.PresenceService),
+  AuthUserLookupService: () => resolve(TOKENS.AuthUserLookupService),
 };

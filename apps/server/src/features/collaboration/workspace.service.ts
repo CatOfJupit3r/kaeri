@@ -18,6 +18,7 @@ import {
 } from '@~/lib/orpc-error-wrapper';
 
 import type { TypedEventBus } from '../events/event-bus';
+import type { AuthUserLookupService } from './auth-user-lookup.service';
 import { COLLABORATION_EVENTS } from './collaboration.events';
 import { PermissionService } from './permission.service';
 
@@ -70,6 +71,7 @@ export class WorkspaceService implements iWithLogger {
     @inject(TOKENS.ValkeyService) private readonly valkey: ValkeyService,
     @inject(TOKENS.EventBus) private readonly eventBus: TypedEventBus,
     @inject(TOKENS.PermissionService) private readonly permissionService: PermissionService,
+    @inject(TOKENS.AuthUserLookupService) private readonly authUserLookup: AuthUserLookupService,
   ) {
     this.logger = loggerFactory.create('workspace-service');
   }
@@ -346,16 +348,27 @@ export class WorkspaceService implements iWithLogger {
 
     const total = await AuditEntryModel.countDocuments({ workspaceId });
 
-    // TODO: Enrich with actor names and entity names
+    // Enrich with actor names
+    const actorIds = [...new Set(entries.map((e) => e.actorId))];
+    const actorsMap = await this.authUserLookup.getUsersByIds(actorIds);
+
+    // Enrich with series titles
+    const seriesIds = [...new Set(entries.map((e) => e.seriesId).filter(Boolean))];
+    const seriesDocs = await SeriesModel.find({ _id: { $in: seriesIds } })
+      .select('_id title')
+      .lean();
+    const seriesMap = new Map(seriesDocs.map((s) => [s._id, s.title]));
 
     return {
       entries: entries.map((e) => ({
         _id: e._id,
         seriesId: e.seriesId,
+        seriesTitle: seriesMap.get(e.seriesId),
         entityType: e.entityType,
         entityId: e.entityId,
         action: e.action,
         actorId: e.actorId,
+        actorName: actorsMap.get(e.actorId)?.name,
         timestamp: e.timestamp,
       })),
       total,

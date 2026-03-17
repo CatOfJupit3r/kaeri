@@ -4,6 +4,7 @@ import type { AuditService } from '@~/features/audit/audit.service';
 import type { AuthService } from '@~/features/auth/auth.service';
 import type { BadgesService } from '@~/features/badges/badges.service';
 import type { CanvasService } from '@~/features/canvas/canvas.service';
+import type { AuthUserLookupService } from '@~/features/collaboration/auth-user-lookup.service';
 import type { InvitationService } from '@~/features/collaboration/invitation.service';
 import type { MemberService } from '@~/features/collaboration/member.service';
 import type { PermissionService } from '@~/features/collaboration/permission.service';
@@ -53,6 +54,7 @@ const workspaceServiceToken: unique symbol = Symbol.for('WorkspaceService');
 const memberServiceToken: unique symbol = Symbol.for('MemberService');
 const invitationServiceToken: unique symbol = Symbol.for('InvitationService');
 const presenceServiceToken: unique symbol = Symbol.for('PresenceService');
+const authUserLookupServiceToken: unique symbol = Symbol.for('AuthUserLookupService');
 
 // Service tokens for dependency injection (unique symbols for type-safe lookups)
 export const TOKENS = {
@@ -83,6 +85,7 @@ export const TOKENS = {
   MemberService: memberServiceToken,
   InvitationService: invitationServiceToken,
   PresenceService: presenceServiceToken,
+  AuthUserLookupService: authUserLookupServiceToken,
 } as const;
 
 export interface iTokenRegistry {
@@ -113,6 +116,7 @@ export interface iTokenRegistry {
   [TOKENS.MemberService]: MemberService;
   [TOKENS.InvitationService]: InvitationService;
   [TOKENS.PresenceService]: PresenceService;
+  [TOKENS.AuthUserLookupService]: AuthUserLookupService;
 }
 
 export type InjectionTokens = typeof TOKENS;

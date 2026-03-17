@@ -11,6 +11,7 @@ import type { iWithLogger, LoggerFactory } from '@~/features/logger/logger.types
 import { ORPCForbiddenError, ORPCNotFoundError } from '@~/lib/orpc-error-wrapper';
 
 import type { TypedEventBus } from '../events/event-bus';
+import type { AuthUserLookupService } from './auth-user-lookup.service';
 import { COLLABORATION_EVENTS } from './collaboration.events';
 import { PermissionService } from './permission.service';
 
@@ -39,6 +40,7 @@ export class MemberService implements iWithLogger {
     @inject(TOKENS.LoggerFactory) loggerFactory: LoggerFactory,
     @inject(TOKENS.EventBus) private readonly eventBus: TypedEventBus,
     @inject(TOKENS.PermissionService) private readonly permissionService: PermissionService,
+    @inject(TOKENS.AuthUserLookupService) private readonly authUserLookup: AuthUserLookupService,
   ) {
     this.logger = loggerFactory.create('member-service');
   }
@@ -50,39 +52,48 @@ export class MemberService implements iWithLogger {
     userId: string,
     workspaceId: string,
     options: { limit?: number; cursor?: string } = {},
-  ): Promise<{ members: iMemberWithUser[]; nextCursor?: string }> {
+  ): Promise<{ members: iMemberWithUser[]; nextCursor?: string; total: number }> {
     // Verify user has access to workspace
     await this.permissionService.requireMembership(workspaceId, userId);
 
     const limit = Math.min(options.limit ?? 50, 100);
     const query = options.cursor ? { workspaceId, _id: { $gt: options.cursor } } : { workspaceId };
 
-    const members = await WorkspaceMemberModel.find(query)
-      .sort({ _id: 1 })
-      .limit(limit + 1)
-      .lean();
+    const [members, total] = await Promise.all([
+      WorkspaceMemberModel.find(query)
+        .sort({ _id: 1 })
+        .limit(limit + 1)
+        .lean(),
+      WorkspaceMemberModel.countDocuments({ workspaceId }),
+    ]);
 
     const hasMore = members.length > limit;
     const resultMembers = hasMore ? members.slice(0, limit) : members;
 
-    // Fetch user details - in a real app, this would join with Better Auth's user table
-    // For now, we'll return placeholder data that frontend can hydrate
-    const membersWithUsers: iMemberWithUser[] = resultMembers.map((member) => ({
-      _id: member._id,
-      workspaceId: member.workspaceId,
-      userId: member.userId,
-      role: member.role,
-      joinedAt: member.joinedAt,
-      user: {
-        _id: member.userId,
-        name: 'User', // TODO: Join with auth users
-        email: '', // TODO: Join with auth users
-      },
-    }));
+    // Fetch user details from Better Auth's user collection
+    const userIds = resultMembers.map((m) => m.userId);
+    const usersMap = await this.authUserLookup.getUsersByIds(userIds);
+
+    const membersWithUsers: iMemberWithUser[] = resultMembers.map((member) => {
+      const user = usersMap.get(member.userId);
+      return {
+        _id: member._id,
+        workspaceId: member.workspaceId,
+        userId: member.userId,
+        role: member.role,
+        joinedAt: member.joinedAt,
+        user: {
+          _id: member.userId,
+          name: user?.name ?? 'Unknown User',
+          email: user?.email ?? '',
+        },
+      };
+    });
 
     return {
       members: membersWithUsers,
       nextCursor: hasMore ? resultMembers[resultMembers.length - 1]._id : undefined,
+      total,
     };
   }
 

@@ -15,8 +15,12 @@ import { Route as Auth_onlySettingsRouteImport } from './routes/_auth_only/setti
 import { Route as Auth_onlyProfileRouteImport } from './routes/_auth_only/profile';
 import { Route as Auth_onlyDashboardRouteImport } from './routes/_auth_only/dashboard';
 import { Route as generalTo_dashboardRouteImport } from './routes/(general)/_to_dashboard';
+import { Route as Auth_onlyWorkspacesIndexRouteImport } from './routes/_auth_only/workspaces/index';
 import { Route as generalTo_dashboardAuthRouteImport } from './routes/(general)/_to_dashboard.auth';
+import { Route as Auth_onlyWorkspacesWorkspaceIdIndexRouteImport } from './routes/_auth_only/workspaces/$workspaceId/index';
 import { Route as Auth_onlySeriesSeriesIdIndexRouteImport } from './routes/_auth_only/series/$seriesId/index';
+import { Route as Auth_onlyWorkspacesInvitationsCodeRouteImport } from './routes/_auth_only/workspaces/invitations.$code';
+import { Route as Auth_onlyWorkspacesWorkspaceIdSettingsRouteImport } from './routes/_auth_only/workspaces/$workspaceId/settings';
 import { Route as Auth_onlySeriesSeriesIdKnowledgeBaseRouteImport } from './routes/_auth_only/series/$seriesId/knowledge-base';
 import { Route as Auth_onlySeriesSeriesIdCanvasRouteImport } from './routes/_auth_only/series/$seriesId/canvas';
 import { Route as Auth_onlySeriesSeriesIdAnalyticsRouteImport } from './routes/_auth_only/series/$seriesId/analytics';
@@ -54,15 +58,39 @@ const generalTo_dashboardRoute = generalTo_dashboardRouteImport.update({
   id: '/(general)/_to_dashboard',
   getParentRoute: () => rootRouteImport,
 } as any);
+const Auth_onlyWorkspacesIndexRoute =
+  Auth_onlyWorkspacesIndexRouteImport.update({
+    id: '/workspaces/',
+    path: '/workspaces/',
+    getParentRoute: () => Auth_onlyRoute,
+  } as any);
 const generalTo_dashboardAuthRoute = generalTo_dashboardAuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => generalTo_dashboardRoute,
 } as any);
+const Auth_onlyWorkspacesWorkspaceIdIndexRoute =
+  Auth_onlyWorkspacesWorkspaceIdIndexRouteImport.update({
+    id: '/workspaces/$workspaceId/',
+    path: '/workspaces/$workspaceId/',
+    getParentRoute: () => Auth_onlyRoute,
+  } as any);
 const Auth_onlySeriesSeriesIdIndexRoute =
   Auth_onlySeriesSeriesIdIndexRouteImport.update({
     id: '/series/$seriesId/',
     path: '/series/$seriesId/',
+    getParentRoute: () => Auth_onlyRoute,
+  } as any);
+const Auth_onlyWorkspacesInvitationsCodeRoute =
+  Auth_onlyWorkspacesInvitationsCodeRouteImport.update({
+    id: '/workspaces/invitations/$code',
+    path: '/workspaces/invitations/$code',
+    getParentRoute: () => Auth_onlyRoute,
+  } as any);
+const Auth_onlyWorkspacesWorkspaceIdSettingsRoute =
+  Auth_onlyWorkspacesWorkspaceIdSettingsRouteImport.update({
+    id: '/workspaces/$workspaceId/settings',
+    path: '/workspaces/$workspaceId/settings',
     getParentRoute: () => Auth_onlyRoute,
   } as any);
 const Auth_onlySeriesSeriesIdKnowledgeBaseRoute =
@@ -120,10 +148,14 @@ export interface FileRoutesByFullPath {
   '/profile': typeof Auth_onlyProfileRoute;
   '/settings': typeof Auth_onlySettingsRoute;
   '/auth': typeof generalTo_dashboardAuthRoute;
+  '/workspaces': typeof Auth_onlyWorkspacesIndexRoute;
   '/series/$seriesId/analytics': typeof Auth_onlySeriesSeriesIdAnalyticsRoute;
   '/series/$seriesId/canvas': typeof Auth_onlySeriesSeriesIdCanvasRoute;
   '/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren;
+  '/workspaces/$workspaceId/settings': typeof Auth_onlyWorkspacesWorkspaceIdSettingsRoute;
+  '/workspaces/invitations/$code': typeof Auth_onlyWorkspacesInvitationsCodeRoute;
   '/series/$seriesId': typeof Auth_onlySeriesSeriesIdIndexRoute;
+  '/workspaces/$workspaceId': typeof Auth_onlyWorkspacesWorkspaceIdIndexRoute;
   '/series/$seriesId/episodes': typeof Auth_onlySeriesSeriesIdEpisodesIndexRoute;
   '/series/$seriesId/scripts': typeof Auth_onlySeriesSeriesIdScriptsIndexRoute;
   '/series/$seriesId/knowledge-base/characters/$characterId': typeof Auth_onlySeriesSeriesIdKnowledgeBaseCharactersCharacterIdRoute;
@@ -136,10 +168,14 @@ export interface FileRoutesByTo {
   '/profile': typeof Auth_onlyProfileRoute;
   '/settings': typeof Auth_onlySettingsRoute;
   '/auth': typeof generalTo_dashboardAuthRoute;
+  '/workspaces': typeof Auth_onlyWorkspacesIndexRoute;
   '/series/$seriesId/analytics': typeof Auth_onlySeriesSeriesIdAnalyticsRoute;
   '/series/$seriesId/canvas': typeof Auth_onlySeriesSeriesIdCanvasRoute;
   '/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren;
+  '/workspaces/$workspaceId/settings': typeof Auth_onlyWorkspacesWorkspaceIdSettingsRoute;
+  '/workspaces/invitations/$code': typeof Auth_onlyWorkspacesInvitationsCodeRoute;
   '/series/$seriesId': typeof Auth_onlySeriesSeriesIdIndexRoute;
+  '/workspaces/$workspaceId': typeof Auth_onlyWorkspacesWorkspaceIdIndexRoute;
   '/series/$seriesId/episodes': typeof Auth_onlySeriesSeriesIdEpisodesIndexRoute;
   '/series/$seriesId/scripts': typeof Auth_onlySeriesSeriesIdScriptsIndexRoute;
   '/series/$seriesId/knowledge-base/characters/$characterId': typeof Auth_onlySeriesSeriesIdKnowledgeBaseCharactersCharacterIdRoute;
@@ -155,10 +191,14 @@ export interface FileRoutesById {
   '/_auth_only/profile': typeof Auth_onlyProfileRoute;
   '/_auth_only/settings': typeof Auth_onlySettingsRoute;
   '/(general)/_to_dashboard/auth': typeof generalTo_dashboardAuthRoute;
+  '/_auth_only/workspaces/': typeof Auth_onlyWorkspacesIndexRoute;
   '/_auth_only/series/$seriesId/analytics': typeof Auth_onlySeriesSeriesIdAnalyticsRoute;
   '/_auth_only/series/$seriesId/canvas': typeof Auth_onlySeriesSeriesIdCanvasRoute;
   '/_auth_only/series/$seriesId/knowledge-base': typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren;
+  '/_auth_only/workspaces/$workspaceId/settings': typeof Auth_onlyWorkspacesWorkspaceIdSettingsRoute;
+  '/_auth_only/workspaces/invitations/$code': typeof Auth_onlyWorkspacesInvitationsCodeRoute;
   '/_auth_only/series/$seriesId/': typeof Auth_onlySeriesSeriesIdIndexRoute;
+  '/_auth_only/workspaces/$workspaceId/': typeof Auth_onlyWorkspacesWorkspaceIdIndexRoute;
   '/_auth_only/series/$seriesId/episodes/': typeof Auth_onlySeriesSeriesIdEpisodesIndexRoute;
   '/_auth_only/series/$seriesId/scripts/': typeof Auth_onlySeriesSeriesIdScriptsIndexRoute;
   '/_auth_only/series/$seriesId/knowledge-base/characters/$characterId': typeof Auth_onlySeriesSeriesIdKnowledgeBaseCharactersCharacterIdRoute;
@@ -173,10 +213,14 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/auth'
+    | '/workspaces'
     | '/series/$seriesId/analytics'
     | '/series/$seriesId/canvas'
     | '/series/$seriesId/knowledge-base'
+    | '/workspaces/$workspaceId/settings'
+    | '/workspaces/invitations/$code'
     | '/series/$seriesId'
+    | '/workspaces/$workspaceId'
     | '/series/$seriesId/episodes'
     | '/series/$seriesId/scripts'
     | '/series/$seriesId/knowledge-base/characters/$characterId'
@@ -189,10 +233,14 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/auth'
+    | '/workspaces'
     | '/series/$seriesId/analytics'
     | '/series/$seriesId/canvas'
     | '/series/$seriesId/knowledge-base'
+    | '/workspaces/$workspaceId/settings'
+    | '/workspaces/invitations/$code'
     | '/series/$seriesId'
+    | '/workspaces/$workspaceId'
     | '/series/$seriesId/episodes'
     | '/series/$seriesId/scripts'
     | '/series/$seriesId/knowledge-base/characters/$characterId'
@@ -207,10 +255,14 @@ export interface FileRouteTypes {
     | '/_auth_only/profile'
     | '/_auth_only/settings'
     | '/(general)/_to_dashboard/auth'
+    | '/_auth_only/workspaces/'
     | '/_auth_only/series/$seriesId/analytics'
     | '/_auth_only/series/$seriesId/canvas'
     | '/_auth_only/series/$seriesId/knowledge-base'
+    | '/_auth_only/workspaces/$workspaceId/settings'
+    | '/_auth_only/workspaces/invitations/$code'
     | '/_auth_only/series/$seriesId/'
+    | '/_auth_only/workspaces/$workspaceId/'
     | '/_auth_only/series/$seriesId/episodes/'
     | '/_auth_only/series/$seriesId/scripts/'
     | '/_auth_only/series/$seriesId/knowledge-base/characters/$characterId'
@@ -268,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof generalTo_dashboardRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    '/_auth_only/workspaces/': {
+      id: '/_auth_only/workspaces/';
+      path: '/workspaces';
+      fullPath: '/workspaces';
+      preLoaderRoute: typeof Auth_onlyWorkspacesIndexRouteImport;
+      parentRoute: typeof Auth_onlyRoute;
+    };
     '/(general)/_to_dashboard/auth': {
       id: '/(general)/_to_dashboard/auth';
       path: '/auth';
@@ -275,11 +334,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof generalTo_dashboardAuthRouteImport;
       parentRoute: typeof generalTo_dashboardRoute;
     };
+    '/_auth_only/workspaces/$workspaceId/': {
+      id: '/_auth_only/workspaces/$workspaceId/';
+      path: '/workspaces/$workspaceId';
+      fullPath: '/workspaces/$workspaceId';
+      preLoaderRoute: typeof Auth_onlyWorkspacesWorkspaceIdIndexRouteImport;
+      parentRoute: typeof Auth_onlyRoute;
+    };
     '/_auth_only/series/$seriesId/': {
       id: '/_auth_only/series/$seriesId/';
       path: '/series/$seriesId';
       fullPath: '/series/$seriesId';
       preLoaderRoute: typeof Auth_onlySeriesSeriesIdIndexRouteImport;
+      parentRoute: typeof Auth_onlyRoute;
+    };
+    '/_auth_only/workspaces/invitations/$code': {
+      id: '/_auth_only/workspaces/invitations/$code';
+      path: '/workspaces/invitations/$code';
+      fullPath: '/workspaces/invitations/$code';
+      preLoaderRoute: typeof Auth_onlyWorkspacesInvitationsCodeRouteImport;
+      parentRoute: typeof Auth_onlyRoute;
+    };
+    '/_auth_only/workspaces/$workspaceId/settings': {
+      id: '/_auth_only/workspaces/$workspaceId/settings';
+      path: '/workspaces/$workspaceId/settings';
+      fullPath: '/workspaces/$workspaceId/settings';
+      preLoaderRoute: typeof Auth_onlyWorkspacesWorkspaceIdSettingsRouteImport;
       parentRoute: typeof Auth_onlyRoute;
     };
     '/_auth_only/series/$seriesId/knowledge-base': {
@@ -363,10 +443,14 @@ interface Auth_onlyRouteChildren {
   Auth_onlyDashboardRoute: typeof Auth_onlyDashboardRoute;
   Auth_onlyProfileRoute: typeof Auth_onlyProfileRoute;
   Auth_onlySettingsRoute: typeof Auth_onlySettingsRoute;
+  Auth_onlyWorkspacesIndexRoute: typeof Auth_onlyWorkspacesIndexRoute;
   Auth_onlySeriesSeriesIdAnalyticsRoute: typeof Auth_onlySeriesSeriesIdAnalyticsRoute;
   Auth_onlySeriesSeriesIdCanvasRoute: typeof Auth_onlySeriesSeriesIdCanvasRoute;
   Auth_onlySeriesSeriesIdKnowledgeBaseRoute: typeof Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren;
+  Auth_onlyWorkspacesWorkspaceIdSettingsRoute: typeof Auth_onlyWorkspacesWorkspaceIdSettingsRoute;
+  Auth_onlyWorkspacesInvitationsCodeRoute: typeof Auth_onlyWorkspacesInvitationsCodeRoute;
   Auth_onlySeriesSeriesIdIndexRoute: typeof Auth_onlySeriesSeriesIdIndexRoute;
+  Auth_onlyWorkspacesWorkspaceIdIndexRoute: typeof Auth_onlyWorkspacesWorkspaceIdIndexRoute;
   Auth_onlySeriesSeriesIdEpisodesIndexRoute: typeof Auth_onlySeriesSeriesIdEpisodesIndexRoute;
   Auth_onlySeriesSeriesIdScriptsIndexRoute: typeof Auth_onlySeriesSeriesIdScriptsIndexRoute;
   Auth_onlySeriesSeriesIdScriptsScriptIdIndexRoute: typeof Auth_onlySeriesSeriesIdScriptsScriptIdIndexRoute;
@@ -376,11 +460,18 @@ const Auth_onlyRouteChildren: Auth_onlyRouteChildren = {
   Auth_onlyDashboardRoute: Auth_onlyDashboardRoute,
   Auth_onlyProfileRoute: Auth_onlyProfileRoute,
   Auth_onlySettingsRoute: Auth_onlySettingsRoute,
+  Auth_onlyWorkspacesIndexRoute: Auth_onlyWorkspacesIndexRoute,
   Auth_onlySeriesSeriesIdAnalyticsRoute: Auth_onlySeriesSeriesIdAnalyticsRoute,
   Auth_onlySeriesSeriesIdCanvasRoute: Auth_onlySeriesSeriesIdCanvasRoute,
   Auth_onlySeriesSeriesIdKnowledgeBaseRoute:
     Auth_onlySeriesSeriesIdKnowledgeBaseRouteWithChildren,
+  Auth_onlyWorkspacesWorkspaceIdSettingsRoute:
+    Auth_onlyWorkspacesWorkspaceIdSettingsRoute,
+  Auth_onlyWorkspacesInvitationsCodeRoute:
+    Auth_onlyWorkspacesInvitationsCodeRoute,
   Auth_onlySeriesSeriesIdIndexRoute: Auth_onlySeriesSeriesIdIndexRoute,
+  Auth_onlyWorkspacesWorkspaceIdIndexRoute:
+    Auth_onlyWorkspacesWorkspaceIdIndexRoute,
   Auth_onlySeriesSeriesIdEpisodesIndexRoute:
     Auth_onlySeriesSeriesIdEpisodesIndexRoute,
   Auth_onlySeriesSeriesIdScriptsIndexRoute:

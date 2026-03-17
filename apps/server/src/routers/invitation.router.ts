@@ -12,13 +12,19 @@ export const invitationRouter = collaborationBase.invitation.router({
       role: input.role,
     });
 
+    // Fetch workspace and inviter details
+    const [workspace, inviter] = await Promise.all([
+      GETTERS.WorkspaceService().get(invitation.workspaceId, userId),
+      GETTERS.AuthUserLookupService().getUserById(userId),
+    ]);
+
     return {
       _id: invitation._id,
       workspaceId: invitation.workspaceId,
-      workspaceName: '', // TODO: populate from workspace
+      workspaceName: workspace?.name ?? 'Unknown Workspace',
       invitedEmail: invitation.invitedEmail,
       invitedByUserId: invitation.invitedByUserId,
-      invitedByName: '', // TODO: populate from user
+      invitedByName: inviter?.name ?? 'Unknown User',
       role: invitation.role,
       code: invitation.code,
       status: invitation.status,
@@ -34,14 +40,21 @@ export const invitationRouter = collaborationBase.invitation.router({
       limit: input.limit,
     });
 
+    // Get workspace details
+    const workspace = await GETTERS.WorkspaceService().get(input.workspaceId, userId);
+
+    // Get all unique inviter IDs and fetch their details
+    const inviterIds = [...new Set(result.invitations.map((i) => i.invitedByUserId))];
+    const invitersMap = await GETTERS.AuthUserLookupService().getUsersByIds(inviterIds);
+
     return {
       invitations: result.invitations.map((inv) => ({
         _id: inv._id,
         workspaceId: inv.workspaceId,
-        workspaceName: '', // TODO: populate
+        workspaceName: workspace?.name ?? 'Unknown Workspace',
         invitedEmail: inv.invitedEmail,
         invitedByUserId: inv.invitedByUserId,
-        invitedByName: '', // TODO: populate
+        invitedByName: invitersMap.get(inv.invitedByUserId)?.name ?? 'Unknown User',
         role: inv.role,
         code: inv.code,
         status: inv.status,
@@ -56,19 +69,25 @@ export const invitationRouter = collaborationBase.invitation.router({
     const invitation = await GETTERS.InvitationService().getByCode(input.code);
     const isExpired = invitation.expiresAt < new Date() || invitation.status !== INVITATION_STATUS.PENDING;
 
+    // Fetch inviter details and check if user exists
+    const [inviter, existingUser] = await Promise.all([
+      GETTERS.AuthUserLookupService().getUserById(invitation.invitedByUserId),
+      GETTERS.AuthUserLookupService().getUserByEmail(invitation.invitedEmail),
+    ]);
+
     return {
       _id: invitation._id,
       workspaceId: invitation.workspaceId,
       workspaceName: invitation.workspace.name,
       invitedEmail: invitation.invitedEmail,
       invitedByUserId: invitation.invitedByUserId,
-      invitedByName: '', // TODO: populate
+      invitedByName: inviter?.name ?? 'Unknown User',
       role: invitation.role,
       status: invitation.status,
       expiresAt: invitation.expiresAt,
       createdAt: invitation.createdAt,
       isExpired,
-      requiresSignup: false, // TODO: check if email belongs to existing user
+      requiresSignup: existingUser === null,
     };
   }),
 
@@ -104,6 +123,10 @@ export const invitationRouter = collaborationBase.invitation.router({
     const userEmail = context.session.user.email;
     const result = await GETTERS.InvitationService().listMyInvitations(userEmail);
 
+    // Get all unique inviter IDs and fetch their details
+    const inviterIds = [...new Set(result.invitations.map((i) => i.invitedByUserId))];
+    const invitersMap = await GETTERS.AuthUserLookupService().getUsersByIds(inviterIds);
+
     return {
       invitations: result.invitations.map((inv) => ({
         _id: inv._id,
@@ -111,7 +134,7 @@ export const invitationRouter = collaborationBase.invitation.router({
         workspaceName: inv.workspace.name,
         invitedEmail: inv.invitedEmail,
         invitedByUserId: inv.invitedByUserId,
-        invitedByName: '', // TODO: populate
+        invitedByName: invitersMap.get(inv.invitedByUserId)?.name ?? 'Unknown User',
         role: inv.role,
         code: inv.code,
         status: inv.status,

@@ -7,6 +7,7 @@ import { ScriptEditor, ScriptSettingsModal } from '@~/features/scripts/component
 import { useSaveScriptContent } from '@~/features/scripts/hooks/mutations/use-save-script-content';
 import { scriptQueryOptions, useScript } from '@~/features/scripts/hooks/queries/use-script';
 import '@~/features/scripts/script-editor.css';
+import { usePresenceHeartbeat } from '@~/hooks/use-presence';
 
 export const Route = createFileRoute('/_auth_only/series/$seriesId/scripts/$scriptId/')({
   loader: async ({ context, params }) => {
@@ -23,6 +24,14 @@ function ScriptEditorPage() {
   const { saveContent, isPending: isSaving } = useSaveScriptContent();
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+
+  // Track presence for this script - sends heartbeat every 30s
+  usePresenceHeartbeat({
+    targetType: 'script',
+    targetId: scriptId,
+    context: 'editing',
+    enabled: !isPending && !error,
+  });
 
   const handleContentChange = useCallback(
     (content: string) => {

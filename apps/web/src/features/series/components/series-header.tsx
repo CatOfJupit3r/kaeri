@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
-import { LuFileText, LuFilm, LuLayoutGrid, LuLibrary, LuSettings, LuTv, LuUsers, LuUser, LuZap } from 'react-icons/lu';
+import { LuFileText, LuFilm, LuLayoutGrid, LuLibrary, LuSettings, LuTv, LuUser, LuUsers, LuZap } from 'react-icons/lu';
 
 import { toastInfo } from '@~/components/toastifications';
 import { Button } from '@~/components/ui/button';
@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@~/components/ui/dropdown-menu';
+import { PresenceIndicator } from '@~/components/workspaces/presence-indicator';
 
 import { SeriesModal } from './series-modal';
 
@@ -100,15 +101,14 @@ export function SeriesHeader({ series }: iSeriesHeaderProps) {
         </div>
 
         <div className="flex shrink-0 items-center gap-3">
-          {/* User avatars - brutalist style */}
-          <div className="flex -space-x-1">
-            <div className="flex h-8 w-8 items-center justify-center border-2 border-foreground bg-(--brutalist-pink) text-xs font-black">
-              U1
-            </div>
-            <div className="flex h-8 w-8 items-center justify-center border-2 border-foreground bg-(--brutalist-blue) text-xs font-black text-white">
-              U2
-            </div>
-          </div>
+          {/* Presence indicator - shows who's viewing this series */}
+          <PresenceIndicator
+            targetType="series"
+            targetId={series._id}
+            context="viewing"
+            maxDisplay={3}
+            showEmpty={false}
+          />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

@@ -9,7 +9,7 @@ export const workspaceMemberRouter = collaborationBase.workspaceMember.router({
     });
     return {
       members: result.members,
-      total: result.members.length, // TODO: implement proper total count
+      total: result.total,
     };
   }),
 
