@@ -1,8 +1,10 @@
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 export type KnowledgeBaseEntity = 'characters' | 'locations' | 'props' | 'timeline' | 'wildcards';
 
-export const KB_LIST_DEFAULT_PARAMS = { limit: 20, offset: 0 } as const;
+export const KB_LIST_DEFAULT_PARAMS = { limit: PAGE_SIZES.DEFAULT, offset: 0 } as const;
 export const KB_COUNT_PARAMS = { limit: 1, offset: 0 } as const;
 
 const isKnowledgeBaseListQuery = (queryKey: QueryKey, entity: KnowledgeBaseEntity, seriesId: string) => {

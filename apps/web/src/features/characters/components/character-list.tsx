@@ -16,9 +16,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@~/components/ui/avatar';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
+import { PaginationControls } from '@~/components/ui/pagination';
 import { Skeleton } from '@~/components/ui/skeleton';
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 import { ListErrorState, ListPendingState } from '@~/features/knowledge-base/components/list-states';
+import { usePagination } from '@~/hooks/use-pagination';
 
 import { useDeleteCharacter } from '../hooks/mutations/use-delete-character';
 import type { CharacterListItem } from '../hooks/queries/use-character-list';
@@ -61,7 +63,8 @@ export function CharacterList({ seriesId, onCharacterSelect }: iCharacterListPro
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [characterToDelete, setCharacterToDelete] = useState<CharacterListItem | undefined>(undefined);
-  const { data, isPending, error, refetch } = useCharacterList(seriesId);
+  const { state: paginationState, controls: paginationControls, queryParams } = usePagination();
+  const { data, isPending, error, refetch } = useCharacterList(seriesId, queryParams.limit, queryParams.offset);
   const { deleteCharacter, isPending: isDeleting } = useDeleteCharacter();
 
   const handleCardClick = (characterId: string) => {
@@ -233,6 +236,17 @@ export function CharacterList({ seriesId, onCharacterSelect }: iCharacterListPro
             );
           })}
         </div>
+
+        {/* Pagination Controls */}
+        <PaginationControls
+          page={paginationState.page}
+          pageSize={paginationState.pageSize}
+          total={data?.total ?? 0}
+          isLoading={isPending}
+          onPageChange={paginationControls.setPage}
+          onPageSizeChange={paginationControls.setPageSize}
+          className="mt-6"
+        />
       </div>
       <CharacterCreateForm seriesId={seriesId} characters={characters} open={isFormOpen} onOpenChange={setIsFormOpen} />
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

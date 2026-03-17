@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
@@ -16,7 +18,12 @@ export const propListQueryOptions = (seriesId: string, params: { limit?: number;
     },
   });
 
-export function usePropList(seriesId: string, limit = 20, offset = 0, params: { enabled?: boolean } = {}) {
+export function usePropList(
+  seriesId: string,
+  limit: number = PAGE_SIZES.DEFAULT,
+  offset = 0,
+  params: { enabled?: boolean } = {},
+) {
   return useQuery({
     ...propListQueryOptions(seriesId, { limit, offset }),
     enabled: (params.enabled ?? true) && !!seriesId,

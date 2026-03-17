@@ -15,6 +15,8 @@ import {
   LuUsers,
 } from 'react-icons/lu';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 import type { iEntitySummaryItem } from '@~/features/knowledge-base/components/entity-summary-card';
 import { EntitySummaryCard } from '@~/features/knowledge-base/components/entity-summary-card';
@@ -56,18 +58,21 @@ export function KBAllView({
 }: iKBAllViewProps) {
   const navigate = useNavigate();
 
-  const { data: charactersData, isPending: isCharactersLoading } = useCharacterList(seriesId, 3, 0);
-  const { data: locationsData, isPending: isLocationsLoading } = useLocationList(seriesId, 3, 0);
-  const { data: propsData, isPending: isPropsLoading } = usePropList(seriesId, 3, 0);
-  const { data: scriptsData } = useScriptList(seriesId, 10, 0);
-  const { data: timelinesData, isPending: isTimelinesLoading } = useTimelineList(seriesId, 3, 0);
-  const { data: wildcardsData, isPending: isWildcardsLoading } = useWildcardList(seriesId, 3, 0);
-  const { data: storyArcsData, isPending: isStoryArcsLoading } = useStoryArcList(seriesId, { limit: 3, offset: 0 });
-  const { data: themesData, isPending: isThemesLoading } = useThemeList(seriesId, 3, 0);
+  const { data: charactersData, isPending: isCharactersLoading } = useCharacterList(seriesId, PAGE_SIZES.SUMMARY, 0);
+  const { data: locationsData, isPending: isLocationsLoading } = useLocationList(seriesId, PAGE_SIZES.SUMMARY, 0);
+  const { data: propsData, isPending: isPropsLoading } = usePropList(seriesId, PAGE_SIZES.SUMMARY, 0);
+  const { data: scriptsData } = useScriptList(seriesId, PAGE_SIZES.AUTOCOMPLETE, 0);
+  const { data: timelinesData, isPending: isTimelinesLoading } = useTimelineList(seriesId, PAGE_SIZES.SUMMARY, 0);
+  const { data: wildcardsData, isPending: isWildcardsLoading } = useWildcardList(seriesId, PAGE_SIZES.SUMMARY, 0);
+  const { data: storyArcsData, isPending: isStoryArcsLoading } = useStoryArcList(seriesId, {
+    limit: PAGE_SIZES.SUMMARY,
+    offset: 0,
+  });
+  const { data: themesData, isPending: isThemesLoading } = useThemeList(seriesId, PAGE_SIZES.SUMMARY, 0);
 
   // Fetch scenes for first script (if any) to show in summary
   const firstScriptId = scriptsData?.items[0]?._id ?? '';
-  const { data: scenesData, isPending: isScenesLoading } = useSceneList(firstScriptId, 3, 0, {
+  const { data: scenesData, isPending: isScenesLoading } = useSceneList(firstScriptId, PAGE_SIZES.SUMMARY, 0, {
     enabled: !!firstScriptId,
   });
 

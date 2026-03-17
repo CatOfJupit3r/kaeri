@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { LuX } from 'react-icons/lu';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import { Button } from '@~/components/ui/button';
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
@@ -28,16 +30,17 @@ export function AppearancePicker({ seriesId, appearances, onAdd, onRemove, disab
   const [sceneRef, setSceneRef] = useState('');
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
 
+  // Use SELECT page size for dropdown data - higher initial load for better UX
   const { data: scriptsData } = useQuery({
     ...tanstackRPC.scripts.listScriptsBySeries.queryOptions({
-      input: { seriesId, limit: 100, offset: 0 },
+      input: { seriesId, limit: PAGE_SIZES.SELECT, offset: 0 },
     }),
     enabled: !!seriesId,
   });
 
   const { data: locationsData } = useQuery({
     ...tanstackRPC.knowledgeBase.locations.list.queryOptions({
-      input: { seriesId, limit: 100, offset: 0 },
+      input: { seriesId, limit: PAGE_SIZES.SELECT, offset: 0 },
     }),
     enabled: !!seriesId,
   });

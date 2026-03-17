@@ -1,14 +1,18 @@
 import { useMutation } from '@tanstack/react-query';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import { toastORPCError, toastSuccess } from '@~/components/toastifications';
+import { invalidateSceneListByScript } from '@~/utils/cache-invalidation';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import type { SceneListQueryReturnType, SceneListItem } from '../queries/use-scene-list';
 
 export const createSceneMutationOptions = tanstackRPC.scene.createScene.mutationOptions({
   onMutate: async ({ scriptId, seriesId, heading }, ctx) => {
+    // Use default params for optimistic update (first page)
     const queryKey = tanstackRPC.scene.listScenesByScript.queryKey({
-      input: { scriptId, limit: 20, offset: 0 },
+      input: { scriptId, limit: PAGE_SIZES.DEFAULT, offset: 0 },
     });
 
     await ctx.client.cancelQueries({ queryKey });
@@ -59,9 +63,8 @@ export const createSceneMutationOptions = tanstackRPC.scene.createScene.mutation
       });
     }
 
-    void ctx.client.invalidateQueries({
-      queryKey: tanstackRPC.scene.listScenesByScript.queryKey({ input: { scriptId, limit: 20, offset: 0 } }),
-    });
+    // Invalidate all pages of scene list for this script
+    void invalidateSceneListByScript(ctx.client, scriptId);
     toastSuccess('Scene created successfully');
   },
   onError: (error, _variables, context, ctx) => {

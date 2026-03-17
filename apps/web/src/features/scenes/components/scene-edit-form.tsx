@@ -1,3 +1,5 @@
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import { EditPanelWrapper } from '@~/components/forms';
 import {
   Dialog,
@@ -8,9 +10,9 @@ import {
   DialogTitle,
 } from '@~/components/ui/dialog';
 import { useAppForm } from '@~/components/ui/field';
-import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
-import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
-import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
+import { useCharacterListInfinite } from '@~/features/characters/hooks/queries/use-character-list-infinite';
+import { useLocationListInfinite } from '@~/features/locations/hooks/queries/use-location-list-infinite';
+import { usePropListInfinite } from '@~/features/props/hooks/queries/use-prop-list-infinite';
 import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
 import { useAutoSave } from '@~/hooks/use-auto-save';
 import type { EditFormMode } from '@~/types/form.types';
@@ -35,16 +37,16 @@ interface iSceneEditFormProps {
 export function SceneEditForm({ mode, seriesId, initialData, onClose, open, onOpenChange }: iSceneEditFormProps) {
   const { updateScene, isPending: isUpdating } = useUpdateScene();
 
-  // Fetch data for dropdowns
+  // Fetch data for dropdowns using infinite queries
   const { data: scriptsData } = useScriptList(seriesId);
-  const { data: locationsData } = useLocationList(seriesId, 100, 0);
-  const { data: charactersData } = useCharacterList(seriesId, 100, 0);
-  const { data: propsData } = usePropList(seriesId, 100, 0);
+  const locationsQuery = useLocationListInfinite(seriesId, { pageSize: PAGE_SIZES.SELECT });
+  const charactersQuery = useCharacterListInfinite(seriesId, { pageSize: PAGE_SIZES.SELECT });
+  const propsQuery = usePropListInfinite(seriesId, { pageSize: PAGE_SIZES.SELECT });
 
   const scripts = scriptsData?.items ?? [];
-  const locations = locationsData?.items ?? [];
-  const characters = charactersData?.items ?? [];
-  const props = propsData?.items ?? [];
+  const locations = locationsQuery.items;
+  const characters = charactersQuery.items;
+  const props = propsQuery.items;
 
   const isPanelMode = mode === EDIT_FORM_MODES.panel;
 
@@ -104,8 +106,21 @@ export function SceneEditForm({ mode, seriesId, initialData, onClose, open, onOp
 
   // Build options for SceneFormFields
   const locationOptions = locations.map((l) => ({ label: l.name, value: l._id }));
-  const characterOptions = characters.map((c) => ({ label: c.name, value: c._id }));
-  const propOptions = props.map((p) => ({ label: p.name, value: p._id }));
+
+  // Build infinite query props for character and prop selects
+  const characterQuery = {
+    items: characters.map((c) => ({ label: c.name, value: c._id })),
+    hasMore: charactersQuery.hasMore,
+    isLoadingMore: charactersQuery.isFetchingNextPage,
+    onLoadMore: async () => charactersQuery.fetchNextPage(),
+  };
+
+  const propQuery = {
+    items: props.map((p) => ({ label: p.name, value: p._id })),
+    hasMore: propsQuery.hasMore,
+    isLoadingMore: propsQuery.isFetchingNextPage,
+    onLoadMore: async () => propsQuery.fetchNextPage(),
+  };
 
   // --- PANEL MODE ---
   if (isPanelMode) {
@@ -122,8 +137,8 @@ export function SceneEditForm({ mode, seriesId, initialData, onClose, open, onOp
               form={form}
               isPending={isUpdating}
               locationOptions={locationOptions}
-              characterOptions={characterOptions}
-              propOptions={propOptions}
+              characterQuery={characterQuery}
+              propQuery={propQuery}
               onFieldBlur={handleAutoSave}
               onFieldChange={handleAutoSave}
             />
@@ -148,8 +163,8 @@ export function SceneEditForm({ mode, seriesId, initialData, onClose, open, onOp
               form={form}
               isPending={isUpdating}
               locationOptions={locationOptions}
-              characterOptions={characterOptions}
-              propOptions={propOptions}
+              characterQuery={characterQuery}
+              propQuery={propQuery}
             />
 
             <DialogFooter>

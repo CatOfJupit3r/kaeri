@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { PAGE_SIZES } from '@kaeri/shared';
 import type {
   AutocompleteEntityType,
   AutocompleteSuggestion,
@@ -79,7 +80,7 @@ export function useEntitySuggestions(options: iUseEntitySuggestionsOptions): iUs
     seriesId,
     entityType,
     query,
-    limit = 5,
+    limit = PAGE_SIZES.AUTOCOMPLETE,
     recentlyUsed,
     scriptId,
     blockType,
@@ -135,7 +136,7 @@ export function useEntitySuggestions(options: iUseEntitySuggestionsOptions): iUs
             seriesId,
             entityType,
             query: '',
-            limit: 10,
+            limit: PAGE_SIZES.AUTOCOMPLETE,
           },
         }),
       );

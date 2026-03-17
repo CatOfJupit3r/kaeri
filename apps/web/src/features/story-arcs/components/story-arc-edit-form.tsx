@@ -1,3 +1,5 @@
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import { EditPanelWrapper } from '@~/components/forms';
 import { Badge } from '@~/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
@@ -61,8 +63,8 @@ export function StoryArcEditForm({ mode, seriesId, initialData, onClose, open, o
 
   // Fetch data for dropdowns
   const { data: scriptsData } = useScriptList(seriesId);
-  const { data: charactersData } = useCharacterList(seriesId, 100, 0);
-  const { data: themesData } = useThemeList(seriesId, 100, 0);
+  const { data: charactersData } = useCharacterList(seriesId, PAGE_SIZES.SELECT, 0);
+  const { data: themesData } = useThemeList(seriesId, PAGE_SIZES.SELECT, 0);
 
   const scripts = scriptsData?.items ?? [];
   const characters = charactersData?.items ?? [];

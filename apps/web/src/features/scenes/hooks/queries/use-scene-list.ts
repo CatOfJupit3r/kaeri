@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
@@ -10,12 +12,17 @@ export const sceneListQueryOptions = (scriptId: string, params: { limit?: number
   tanstackRPC.scene.listScenesByScript.queryOptions({
     input: {
       scriptId,
-      limit: params.limit ?? 20,
+      limit: params.limit ?? PAGE_SIZES.DEFAULT,
       offset: params.offset ?? 0,
     },
   });
 
-export function useSceneList(scriptId: string, limit = 20, offset = 0, params: { enabled?: boolean } = {}) {
+export function useSceneList(
+  scriptId: string,
+  limit: number = PAGE_SIZES.DEFAULT,
+  offset = 0,
+  params: { enabled?: boolean } = {},
+) {
   return useQuery({
     ...sceneListQueryOptions(scriptId, { limit, offset }),
     enabled: (params.enabled ?? true) && !!scriptId,

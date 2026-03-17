@@ -18,14 +18,36 @@ export interface iSceneBeat {
   description: string;
 }
 
+/** Props for infinite query data (used for selects with large datasets) */
+export interface iInfiniteQuerySelectProps {
+  /** Items loaded so far */
+  items: iOptionType[];
+  /** Whether there are more items to load */
+  hasMore: boolean;
+  /** Whether more items are currently loading */
+  isLoadingMore: boolean;
+  /** Callback to load more items */
+  onLoadMore: () => void;
+}
+
 export interface iSceneFormFieldsProps {
   isPending?: boolean;
   /** Location options for the select. */
   locationOptions?: iOptionType[];
-  /** Character options for multi-select. */
+  /**
+   * Character options for multi-select (legacy pattern).
+   * @deprecated Use `characterQuery` for infinite loading
+   */
   characterOptions?: iOptionType[];
-  /** Prop options for multi-select. */
+  /** Character infinite query props for multi-select. */
+  characterQuery?: iInfiniteQuerySelectProps;
+  /**
+   * Prop options for multi-select (legacy pattern).
+   * @deprecated Use `propQuery` for infinite loading
+   */
   propOptions?: iOptionType[];
+  /** Prop infinite query props for multi-select. */
+  propQuery?: iInfiniteQuerySelectProps;
   /** Callback for auto-save on field blur */
   onFieldBlur?: () => void;
   /** Callback for auto-save on field change (for array fields) */
@@ -60,7 +82,9 @@ export const SceneFormFields = withForm({
     isPending,
     locationOptions,
     characterOptions,
+    characterQuery,
     propOptions,
+    propQuery,
     onFieldBlur,
     onFieldChange,
   }) {
@@ -172,7 +196,24 @@ export const SceneFormFields = withForm({
 
         {/* Characters & Props row */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {characterOptions ? (
+          {/* Character selection - supports both infinite query and static options */}
+          {characterQuery ? (
+            <form.AppField name="characterIds">
+              {(field) => (
+                <field.InfiniteMultiSelectField
+                  label="Characters in Scene"
+                  items={characterQuery.items}
+                  hasMore={characterQuery.hasMore}
+                  isLoadingMore={characterQuery.isLoadingMore}
+                  onLoadMore={characterQuery.onLoadMore}
+                  placeholder="Select characters..."
+                  closeMenuOnSelect={false}
+                  onBlur={onFieldBlur}
+                />
+              )}
+            </form.AppField>
+          ) : null}
+          {!characterQuery && characterOptions ? (
             <form.AppField name="characterIds">
               {(field) => (
                 <field.MultiSelectField
@@ -186,7 +227,24 @@ export const SceneFormFields = withForm({
             </form.AppField>
           ) : null}
 
-          {propOptions ? (
+          {/* Prop selection - supports both infinite query and static options */}
+          {propQuery ? (
+            <form.AppField name="propIds">
+              {(field) => (
+                <field.InfiniteMultiSelectField
+                  label="Props in Scene"
+                  items={propQuery.items}
+                  hasMore={propQuery.hasMore}
+                  isLoadingMore={propQuery.isLoadingMore}
+                  onLoadMore={propQuery.onLoadMore}
+                  placeholder="Select props..."
+                  closeMenuOnSelect={false}
+                  onBlur={onFieldBlur}
+                />
+              )}
+            </form.AppField>
+          ) : null}
+          {!propQuery && propOptions ? (
             <form.AppField name="propIds">
               {(field) => (
                 <field.MultiSelectField

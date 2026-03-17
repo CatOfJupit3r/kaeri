@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { LuBookUser, LuGlobe, LuScroll } from 'react-icons/lu';
 import type { GroupBase } from 'react-select';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import { EditPanelWrapper } from '@~/components/forms';
 import { Badge } from '@~/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
@@ -58,9 +60,9 @@ function PanelAssociationsField({
   onChange: (values: string[]) => unknown;
   disabled?: boolean;
 }) {
-  const { data: charactersData, isLoading: isLoadingCharacters } = useCharacterList(seriesId, 100, 0);
-  const { data: locationsData, isLoading: isLoadingLocations } = useLocationList(seriesId, 100, 0);
-  const { data: scriptsData, isLoading: isLoadingScripts } = useScriptList(seriesId, 100, 0);
+  const { data: charactersData, isLoading: isLoadingCharacters } = useCharacterList(seriesId, PAGE_SIZES.SELECT, 0);
+  const { data: locationsData, isLoading: isLoadingLocations } = useLocationList(seriesId, PAGE_SIZES.SELECT, 0);
+  const { data: scriptsData, isLoading: isLoadingScripts } = useScriptList(seriesId, PAGE_SIZES.SELECT, 0);
 
   const options = useMemo(() => {
     const groups: GroupBase<iOptionType>[] = [];
@@ -150,9 +152,9 @@ export function PropEditForm({ mode, seriesId, initialData, onClose, open, onOpe
   const { updateProp, isPending: isUpdating } = useUpdateProp();
 
   // Fetch data for associations field (needed for dialog mode with PropFormFields)
-  const { data: charactersData } = useCharacterList(seriesId, 100, 0);
-  const { data: locationsData } = useLocationList(seriesId, 100, 0);
-  const { data: scriptsData } = useScriptList(seriesId, 100, 0);
+  const { data: charactersData } = useCharacterList(seriesId, PAGE_SIZES.SELECT, 0);
+  const { data: locationsData } = useLocationList(seriesId, PAGE_SIZES.SELECT, 0);
+  const { data: scriptsData } = useScriptList(seriesId, PAGE_SIZES.SELECT, 0);
 
   const form = useAppForm({
     defaultValues: {

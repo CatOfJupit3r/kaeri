@@ -2,14 +2,17 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { formatDistanceToNow } from 'date-fns';
 import { LuClock, LuFileText, LuPlus, LuUsers } from 'react-icons/lu';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import { Button } from '@~/components/ui/button';
 import { Card } from '@~/components/ui/card';
+import { PaginationControls } from '@~/components/ui/pagination';
 import { useCreateScript } from '@~/features/scripts/hooks/mutations/use-create-script';
-import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
+import { scriptListQueryOptions, useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
 import { SeriesHeader } from '@~/features/series/components/series-header';
 import { SeriesTabs } from '@~/features/series/components/series-tabs';
 import { useSeries, seriesQueryOptions } from '@~/features/series/hooks/queries/use-series';
-import { tanstackRPC } from '@~/utils/tanstack-orpc';
+import { usePagination } from '@~/hooks/use-pagination';
 
 const CARD_COLORS = [
   'var(--brutalist-yellow)',
@@ -24,11 +27,7 @@ export const Route = createFileRoute('/_auth_only/series/$seriesId/scripts/')({
     const { seriesId } = params;
     await Promise.all([
       context.queryClient.ensureQueryData(seriesQueryOptions(seriesId)),
-      context.queryClient.ensureQueryData(
-        tanstackRPC.scripts.listScriptsBySeries.queryOptions({
-          input: { seriesId, limit: 100, offset: 0 },
-        }),
-      ),
+      context.queryClient.ensureQueryData(scriptListQueryOptions(seriesId, { limit: PAGE_SIZES.DEFAULT, offset: 0 })),
     ]);
   },
   component: ScriptsLibraryPage,
@@ -38,7 +37,8 @@ function ScriptsLibraryPage() {
   const { seriesId } = Route.useParams();
   const navigate = useNavigate();
   const { data: series } = useSeries(seriesId);
-  const { data: scriptsData, isPending } = useScriptList(seriesId);
+  const { state: paginationState, controls: paginationControls, queryParams } = usePagination();
+  const { data: scriptsData, isPending } = useScriptList(seriesId, queryParams.limit, queryParams.offset);
   const { createScriptAsync, isPending: isCreating } = useCreateScript();
 
   const handleCreateScript = async () => {
@@ -110,76 +110,92 @@ function ScriptsLibraryPage() {
 
           {/* Script grid */}
           {!isPending && scriptsData != null && scriptsData.items.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {scriptsData.items.map((script, index) => (
-                <Link
-                  key={script._id}
-                  to="/series/$seriesId/scripts/$scriptId"
-                  params={{ seriesId, scriptId: script._id }}
-                  className="group"
-                >
-                  <button
-                    type="button"
-                    className="brutalist-shadow flex w-full flex-col overflow-hidden border-3 border-foreground bg-card text-left transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0px_var(--foreground)]"
-                    style={{ borderWidth: '3px' }}
+            <>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {scriptsData.items.map((script, index) => (
+                  <Link
+                    key={script._id}
+                    to="/series/$seriesId/scripts/$scriptId"
+                    params={{ seriesId, scriptId: script._id }}
+                    className="group"
                   >
-                    {/* Color bar */}
-                    <div className="h-3 w-full" style={{ backgroundColor: CARD_COLORS[index % CARD_COLORS.length] }} />
-
-                    {/* Cover image or placeholder */}
-                    {script.coverUrl ? (
+                    <button
+                      type="button"
+                      className="brutalist-shadow flex w-full flex-col overflow-hidden border-3 border-foreground bg-card text-left transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0px_var(--foreground)]"
+                      style={{ borderWidth: '3px' }}
+                    >
+                      {/* Color bar */}
                       <div
-                        className="aspect-video w-full overflow-hidden border-b-3 border-foreground"
-                        style={{ borderBottomWidth: '3px' }}
-                      >
-                        <img
-                          src={script.coverUrl}
-                          alt={script.title}
-                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        className="flex aspect-video w-full items-center justify-center border-b-3 border-foreground bg-muted"
-                        style={{ borderBottomWidth: '3px' }}
-                      >
-                        <LuFileText className="h-12 w-12 text-muted-foreground" strokeWidth={1.5} />
-                      </div>
-                    )}
+                        className="h-3 w-full"
+                        style={{ backgroundColor: CARD_COLORS[index % CARD_COLORS.length] }}
+                      />
 
-                    <div className="flex flex-1 flex-col gap-3 p-4">
-                      <div>
-                        <h3 className="text-lg font-black tracking-tight text-foreground uppercase group-hover:text-(--brutalist-blue)">
-                          {script.title}
-                        </h3>
-                        {script.genre ? (
-                          <span className="mt-1 inline-block border-2 border-foreground bg-(--brutalist-yellow) px-2 py-0.5 text-xs font-bold uppercase">
-                            {script.genre}
-                          </span>
+                      {/* Cover image or placeholder */}
+                      {script.coverUrl ? (
+                        <div
+                          className="aspect-video w-full overflow-hidden border-b-3 border-foreground"
+                          style={{ borderBottomWidth: '3px' }}
+                        >
+                          <img
+                            src={script.coverUrl}
+                            alt={script.title}
+                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          className="flex aspect-video w-full items-center justify-center border-b-3 border-foreground bg-muted"
+                          style={{ borderBottomWidth: '3px' }}
+                        >
+                          <LuFileText className="h-12 w-12 text-muted-foreground" strokeWidth={1.5} />
+                        </div>
+                      )}
+
+                      <div className="flex flex-1 flex-col gap-3 p-4">
+                        <div>
+                          <h3 className="text-lg font-black tracking-tight text-foreground uppercase group-hover:text-(--brutalist-blue)">
+                            {script.title}
+                          </h3>
+                          {script.genre ? (
+                            <span className="mt-1 inline-block border-2 border-foreground bg-(--brutalist-yellow) px-2 py-0.5 text-xs font-bold uppercase">
+                              {script.genre}
+                            </span>
+                          ) : null}
+                        </div>
+
+                        {script.logline ? (
+                          <p className="line-clamp-2 text-sm font-medium text-muted-foreground">{script.logline}</p>
                         ) : null}
-                      </div>
 
-                      {script.logline ? (
-                        <p className="line-clamp-2 text-sm font-medium text-muted-foreground">{script.logline}</p>
-                      ) : null}
-
-                      <div className="mt-auto space-y-2 border-t-2 border-foreground pt-3">
-                        {script.authors && script.authors.length > 0 ? (
+                        <div className="mt-auto space-y-2 border-t-2 border-foreground pt-3">
+                          {script.authors && script.authors.length > 0 ? (
+                            <div className="flex items-center gap-2 text-xs font-bold tracking-wide text-muted-foreground uppercase">
+                              <LuUsers className="h-4 w-4 shrink-0" />
+                              <span className="truncate">{script.authors.join(', ')}</span>
+                            </div>
+                          ) : null}
                           <div className="flex items-center gap-2 text-xs font-bold tracking-wide text-muted-foreground uppercase">
-                            <LuUsers className="h-4 w-4 shrink-0" />
-                            <span className="truncate">{script.authors.join(', ')}</span>
+                            <LuClock className="h-4 w-4 shrink-0" />
+                            <span>{formatDistanceToNow(new Date(script.lastEditedAt), { addSuffix: true })}</span>
                           </div>
-                        ) : null}
-                        <div className="flex items-center gap-2 text-xs font-bold tracking-wide text-muted-foreground uppercase">
-                          <LuClock className="h-4 w-4 shrink-0" />
-                          <span>{formatDistanceToNow(new Date(script.lastEditedAt), { addSuffix: true })}</span>
                         </div>
                       </div>
-                    </div>
-                  </button>
-                </Link>
-              ))}
-            </div>
+                    </button>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              <PaginationControls
+                page={paginationState.page}
+                pageSize={paginationState.pageSize}
+                total={scriptsData.total}
+                isLoading={isPending}
+                onPageChange={paginationControls.setPage}
+                onPageSizeChange={paginationControls.setPageSize}
+                className="mt-8"
+              />
+            </>
           ) : null}
         </div>
       </main>

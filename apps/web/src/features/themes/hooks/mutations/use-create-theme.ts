@@ -1,14 +1,18 @@
 import { useMutation } from '@tanstack/react-query';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import { toastORPCError, toastSuccess } from '@~/components/toastifications';
+import { invalidateThemeList } from '@~/utils/cache-invalidation';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import type { ThemeListItem, ThemeListQueryReturnType } from '../queries/use-theme-list';
 
 export const createThemeMutationOptions = tanstackRPC.theme.createTheme.mutationOptions({
   onMutate: async ({ seriesId, value }, ctx) => {
+    // Use default params for optimistic update (first page)
     const queryKey = tanstackRPC.theme.listThemesBySeries.queryKey({
-      input: { seriesId, limit: 20, offset: 0 },
+      input: { seriesId, limit: PAGE_SIZES.DEFAULT, offset: 0 },
     });
 
     await ctx.client.cancelQueries({ queryKey });
@@ -58,9 +62,8 @@ export const createThemeMutationOptions = tanstackRPC.theme.createTheme.mutation
       });
     }
 
-    void ctx.client.invalidateQueries({
-      queryKey: tanstackRPC.theme.listThemesBySeries.queryKey({ input: { seriesId } }),
-    });
+    // Invalidate all pages of theme list for this series
+    void invalidateThemeList(ctx.client, seriesId);
     toastSuccess('Theme created successfully');
   },
   onError: (error, _variables, context, ctx) => {

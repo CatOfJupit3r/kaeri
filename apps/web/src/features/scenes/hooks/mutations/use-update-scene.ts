@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 
 import { toastORPCError } from '@~/components/toastifications';
+import { invalidateSceneListByScript } from '@~/utils/cache-invalidation';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import type { SceneDetailQueryReturnType } from '../queries/use-scene';
@@ -30,11 +31,8 @@ export const updateSceneMutationOptions = tanstackRPC.scene.updateScene.mutation
       ctx.client.setQueryData<SceneDetailQueryReturnType>(context.detailKey, updatedScene);
     }
 
-    void ctx.client.invalidateQueries({
-      queryKey: tanstackRPC.scene.listScenesByScript.queryKey({
-        input: { scriptId: updatedScene.scriptId, limit: 20, offset: 0 },
-      }),
-    });
+    // Invalidate all pages of scene list for this script
+    void invalidateSceneListByScript(ctx.client, updatedScene.scriptId);
   },
   onError: (error, _variables, context, ctx) => {
     if (context?.detailKey && context.previous) {

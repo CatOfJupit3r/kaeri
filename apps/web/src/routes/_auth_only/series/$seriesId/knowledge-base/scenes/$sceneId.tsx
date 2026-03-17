@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { LuLoader } from 'react-icons/lu';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import { useCharacterList } from '@~/features/characters/hooks/queries/use-character-list';
 import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
 import { usePropList } from '@~/features/props/hooks/queries/use-prop-list';
@@ -32,7 +34,7 @@ function RouteComponent() {
   const { data: locationsData } = useLocationList(seriesId);
   const { data: propsData } = usePropList(seriesId);
 
-  const { data: sceneListData } = useSceneList(scene?.scriptId ?? '', 100, 0, {
+  const { data: sceneListData } = useSceneList(scene?.scriptId ?? '', PAGE_SIZES.SELECT, 0, {
     enabled: !!scene?.scriptId,
   });
 

@@ -7,4 +7,5 @@ export * from './enums/invitation-status.enums';
 export * from './constants/achievements';
 export * from './constants/badges';
 export * from './constants/entity-types';
+export * from './constants/pagination';
 export type * from './helpers/contract-types';

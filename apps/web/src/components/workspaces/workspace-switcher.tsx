@@ -2,6 +2,8 @@ import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { LuBuilding2, LuCheck, LuChevronDown, LuCrown, LuPlus } from 'react-icons/lu';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import { Button } from '@~/components/ui/button';
 import {
   DropdownMenu,
@@ -23,7 +25,8 @@ export function WorkspaceSwitcher({ currentWorkspaceId, onCreateWorkspace }: iWo
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
-  const { data, isLoading } = useWorkspaces({ limit: 100 });
+  // Use SELECT page size for dropdown data - higher initial load for workspace list
+  const { data, isLoading } = useWorkspaces({ limit: PAGE_SIZES.SELECT });
 
   const workspaces = data?.workspaces ?? [];
   const currentWorkspace = workspaces.find((w) => w._id === currentWorkspaceId);

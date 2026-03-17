@@ -1,14 +1,18 @@
 import { useMutation } from '@tanstack/react-query';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import { toastORPCError, toastSuccess } from '@~/components/toastifications';
+import { invalidateResearchList } from '@~/utils/cache-invalidation';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import type { ResearchListItem, ResearchListQueryReturnType } from '../queries/use-research-list';
 
 export const createResearchMutationOptions = tanstackRPC.research.create.mutationOptions({
   onMutate: async ({ seriesId, value }, ctx) => {
+    // Use default params for optimistic update (first page)
     const queryKey = tanstackRPC.research.list.queryKey({
-      input: { seriesId, pagination: { limit: 20, offset: 0 } },
+      input: { seriesId, pagination: { limit: PAGE_SIZES.DEFAULT, offset: 0 } },
     });
 
     await ctx.client.cancelQueries({ queryKey });
@@ -44,7 +48,7 @@ export const createResearchMutationOptions = tanstackRPC.research.create.mutatio
     return { previous, queryKey, tempId };
   },
 
-  onSuccess: (result, _variables, context, ctx) => {
+  onSuccess: (result, { seriesId }, context, ctx) => {
     // Replace temp item with real data
     if (context?.queryKey) {
       ctx.client.setQueryData<ResearchListQueryReturnType>(context.queryKey, (old) => {
@@ -55,6 +59,8 @@ export const createResearchMutationOptions = tanstackRPC.research.create.mutatio
         };
       });
     }
+    // Invalidate all pages of research list for this series
+    void invalidateResearchList(ctx.client, seriesId);
     toastSuccess('Research entry created');
   },
 

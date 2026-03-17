@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { LuPencil, LuTrash2, LuTrendingUp } from 'react-icons/lu';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -85,8 +87,8 @@ export function StoryArcList({ seriesId, onStoryArcSelect }: iStoryArcListProps)
 
   // Fetch data for StoryArcCreateForm dropdowns
   const { data: scriptsData } = useScriptList(seriesId);
-  const { data: charactersData } = useCharacterList(seriesId, 100, 0);
-  const { data: themesData } = useThemeList(seriesId, 100, 0);
+  const { data: charactersData } = useCharacterList(seriesId, PAGE_SIZES.SELECT, 0);
+  const { data: themesData } = useThemeList(seriesId, PAGE_SIZES.SELECT, 0);
 
   const scripts = scriptsData?.items ?? [];
   const characters = charactersData?.items ?? [];

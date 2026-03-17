@@ -1,5 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import { toastORPCError } from '@~/components/toastifications';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
@@ -7,8 +9,9 @@ import type { StoryArcListQueryReturnType, StoryArcListItem } from '../queries/u
 
 export const createStoryArcMutationOptions = tanstackRPC.storyArc.createStoryArc.mutationOptions({
   onMutate: async (input, ctx) => {
+    // Use default params for optimistic update (first page)
     const queryKey = tanstackRPC.storyArc.listStoryArcs.queryKey({
-      input: { seriesId: input.seriesId, limit: 20, offset: 0 },
+      input: { seriesId: input.seriesId, limit: PAGE_SIZES.DEFAULT, offset: 0 },
     });
 
     await ctx.client.cancelQueries({ queryKey });

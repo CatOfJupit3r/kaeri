@@ -21,6 +21,8 @@ import {
 } from 'react-icons/lu';
 import z from 'zod';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import { Button } from '@~/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
 import { Toggle } from '@~/components/ui/toggle';
@@ -116,7 +118,7 @@ function RouteComponent() {
   });
   const { data: auditData, isLoading: isAuditLoading } = useAuditListBySeries(seriesId, {
     offset: auditOffset,
-    limit: 20,
+    limit: PAGE_SIZES.DEFAULT,
     enabled: activeTab === 'history',
   });
 
@@ -325,8 +327,8 @@ function RouteComponent() {
                 <AuditHistoryList
                   items={auditData?.items ?? []}
                   isLoading={isAuditLoading}
-                  hasMore={(auditData?.total ?? 0) > auditOffset + 20}
-                  onLoadMore={() => setAuditOffset((prev) => prev + 20)}
+                  hasMore={(auditData?.total ?? 0) > auditOffset + PAGE_SIZES.DEFAULT}
+                  onLoadMore={() => setAuditOffset((prev) => prev + PAGE_SIZES.DEFAULT)}
                 />
               </div>
             </TabsContent>

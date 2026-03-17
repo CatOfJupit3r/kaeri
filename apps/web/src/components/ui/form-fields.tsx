@@ -8,6 +8,8 @@ import { Button } from './button';
 import type { iButtonProps } from './button';
 // eslint-disable-next-line import-x/no-cycle
 import { useFieldContext, FieldError, useFormContext, FieldDescription, FieldLabel } from './field';
+import { InfiniteMultiSelect, InfiniteSingleSelect } from './infinite-select';
+import type { iInfiniteMultiSelectProps, iInfiniteSingleSelectProps } from './infinite-select';
 import { Input } from './input';
 import { MultiSelect, SingleSelect } from './select';
 import type { iMultiSelectProps, iSingleSelectProps, iOptionType } from './select';
@@ -151,6 +153,130 @@ export const MultiSelectField = ({ label, description, options, onBlur, ...selec
           onValueChange={(values) => field.handleChange(values)}
           onBlur={handleBlur}
           options={options}
+          {...selectProps}
+        />
+      </div>
+      {description ? <FieldDescription>{description}</FieldDescription> : null}
+      <FieldError errors={field?.state?.meta?.errors} />
+    </div>
+  );
+};
+
+// ============================================================================
+// INFINITE SELECT FIELDS (for large datasets with scroll-to-load-more)
+// ============================================================================
+
+interface iInfiniteSingleSelectFieldProps extends Omit<iInfiniteSingleSelectProps, 'value' | 'onValueChange'> {
+  label: string;
+  description?: ReactNode;
+}
+
+/**
+ * Single select field with infinite scroll support.
+ * Use for selects that need to load large datasets incrementally.
+ *
+ * @example
+ * ```tsx
+ * const { items, hasMore, fetchNextPage, isFetchingNextPage, isPending } = useCharacterListInfinite(seriesId);
+ *
+ * <form.AppField name="characterId">
+ *   {(field) => (
+ *     <field.InfiniteSingleSelectField
+ *       label="Character"
+ *       items={items.map(c => ({ label: c.name, value: c._id }))}
+ *       isLoading={isPending}
+ *       isLoadingMore={isFetchingNextPage}
+ *       hasMore={hasMore}
+ *       onLoadMore={() => fetchNextPage()}
+ *     />
+ *   )}
+ * </form.AppField>
+ * ```
+ */
+export const InfiniteSingleSelectField = ({
+  label,
+  description,
+  items,
+  onBlur,
+  ...selectProps
+}: iInfiniteSingleSelectFieldProps) => {
+  const field = useFieldContext<string>();
+
+  const handleBlur: iInfiniteSingleSelectProps['onBlur'] = (e) => {
+    field.handleBlur();
+    onBlur?.(e);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="space-y-1">
+        <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+        <InfiniteSingleSelect
+          inputId={field.name}
+          value={field.state.value}
+          onValueChange={(value) => (value !== null ? field.handleChange(value) : undefined)}
+          onBlur={handleBlur}
+          items={items}
+          {...selectProps}
+        />
+      </div>
+      {description ? <FieldDescription>{description}</FieldDescription> : null}
+      <FieldError errors={field?.state?.meta?.errors} />
+    </div>
+  );
+};
+
+interface iInfiniteMultiSelectFieldProps extends Omit<iInfiniteMultiSelectProps, 'value' | 'onValueChange'> {
+  label: string;
+  description?: ReactNode;
+}
+
+/**
+ * Multi select field with infinite scroll support.
+ * Use for multi-selects that need to load large datasets incrementally.
+ *
+ * @example
+ * ```tsx
+ * const { items, hasMore, fetchNextPage, isFetchingNextPage, isPending } = useCharacterListInfinite(seriesId);
+ *
+ * <form.AppField name="characterIds">
+ *   {(field) => (
+ *     <field.InfiniteMultiSelectField
+ *       label="Characters"
+ *       items={items.map(c => ({ label: c.name, value: c._id }))}
+ *       isLoading={isPending}
+ *       isLoadingMore={isFetchingNextPage}
+ *       hasMore={hasMore}
+ *       onLoadMore={() => fetchNextPage()}
+ *     />
+ *   )}
+ * </form.AppField>
+ * ```
+ */
+export const InfiniteMultiSelectField = ({
+  label,
+  description,
+  items,
+  onBlur,
+  ...selectProps
+}: iInfiniteMultiSelectFieldProps) => {
+  const field = useFieldContext<string[]>();
+
+  const handleBlur: iInfiniteMultiSelectProps['onBlur'] = (e) => {
+    field.handleBlur();
+    onBlur?.(e);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="space-y-1">
+        <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+        <InfiniteMultiSelect
+          inputId={field.name}
+          value={field.state.value ?? []}
+          onValueChange={(values) => field.handleChange(values)}
+          onBlur={handleBlur}
+          items={items}
           {...selectProps}
         />
       </div>

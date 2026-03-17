@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { LuPencil, LuFileText, LuTrendingUp, LuUsers } from 'react-icons/lu';
 
+import { PAGE_SIZES } from '@kaeri/shared';
+
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card } from '@~/components/ui/card';
@@ -34,8 +36,8 @@ export function StoryArcDetail({ storyArc, seriesId }: iStoryArcDetailProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   // Fetch data for display
-  const { data: charactersData } = useCharacterList(seriesId, 100, 0);
-  const { data: themesData } = useThemeList(seriesId, 100, 0);
+  const { data: charactersData } = useCharacterList(seriesId, PAGE_SIZES.SELECT, 0);
+  const { data: themesData } = useThemeList(seriesId, PAGE_SIZES.SELECT, 0);
 
   const characters = charactersData?.items ?? [];
   const themes = themesData?.items ?? [];
