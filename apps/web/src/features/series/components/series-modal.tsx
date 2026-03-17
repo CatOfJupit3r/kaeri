@@ -73,7 +73,7 @@ function TypeSelector({ value, onChange, disabled }: iTypeSelectorProps) {
   return (
     <div className="space-y-2">
       <Label>Project Type</Label>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Project type selection">
         {SERIES_TYPE_OPTIONS.map((option) => {
           const Icon = option.icon;
           const isSelected = value === option.value;
@@ -86,6 +86,16 @@ function TypeSelector({ value, onChange, disabled }: iTypeSelectorProps) {
                 disabled && 'cursor-not-allowed opacity-50',
               )}
               onClick={() => !disabled && onChange(option.value)}
+              onKeyDown={(e) => {
+                if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
+                  e.preventDefault();
+                  onChange(option.value);
+                }
+              }}
+              tabIndex={disabled ? -1 : 0}
+              role="radio"
+              aria-checked={isSelected}
+              aria-label={`${option.label}: ${option.description}`}
             >
               <div className="flex items-start gap-3">
                 <div

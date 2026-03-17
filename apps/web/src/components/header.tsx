@@ -3,6 +3,7 @@ import { LuHouse } from 'react-icons/lu';
 
 import { useMe } from '@~/features/user';
 
+import { KeyboardShortcutsModal } from './keyboard-shortcuts-modal';
 import { ModeToggle } from './mode-toggle';
 import { Logo } from './ui/logo';
 import UserMenu from './user-menu';
@@ -13,39 +14,48 @@ export default function Header() {
   const { isLoggedIn } = useMe();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Logo Section - Left */}
-        <div className="flex items-center gap-2">
-          <Link to="/" className="flex items-center gap-2 text-lg font-semibold transition-opacity hover:opacity-80">
-            <Logo className="h-6 w-6 text-primary" />
-            <span className="hidden sm:inline-block">kaeri</span>
-          </Link>
-        </div>
+    <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:rounded focus:bg-background focus:px-4 focus:py-2 focus:text-foreground focus:ring-2 focus:ring-ring"
+      >
+        Skip to main content
+      </a>
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8">
+          {/* Logo Section - Left */}
+          <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2 text-lg font-semibold transition-opacity hover:opacity-80">
+              <Logo className="h-6 w-6 text-primary" />
+              <span className="hidden sm:inline-block">kaeri</span>
+            </Link>
+          </div>
 
-        {/* Navigation Links - Center */}
-        <nav className="absolute left-1/2 hidden -translate-x-1/2 transform gap-6 md:flex">
-          {HEADER_LINKS.map(({ to, label, authRequired, icon: Icon }) => {
-            if (authRequired && !isLoggedIn) return null;
-            return (
-              <Link
-                key={to}
-                to={to}
-                className="w-32 rounded-md px-2 py-1 text-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground data-[status=active]:bg-foreground data-[status=active]:font-semibold data-[status=active]:text-background"
-              >
-                <Icon className="mr-1 mb-0.5 inline-block h-4 w-4" />
-                {label}
-              </Link>
-            );
-          })}
-        </nav>
+          {/* Navigation Links - Center */}
+          <nav className="absolute left-1/2 hidden -translate-x-1/2 transform gap-6 md:flex">
+            {HEADER_LINKS.map(({ to, label, authRequired, icon: Icon }) => {
+              if (authRequired && !isLoggedIn) return null;
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  className="w-32 rounded-md px-2 py-1 text-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground data-[status=active]:bg-foreground data-[status=active]:font-semibold data-[status=active]:text-background"
+                >
+                  <Icon className="mr-1 mb-0.5 inline-block h-4 w-4" />
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
 
-        {/* User Menu - Right */}
-        <div className="flex items-center gap-2">
-          <ModeToggle />
-          <UserMenu />
+          {/* User Menu - Right */}
+          <div className="flex items-center gap-2">
+            <KeyboardShortcutsModal />
+            <ModeToggle />
+            <UserMenu />
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

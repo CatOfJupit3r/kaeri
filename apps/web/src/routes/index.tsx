@@ -25,14 +25,14 @@ function Metrics() {
       <p className="mb-4 text-sm text-muted-foreground">Join thousands of challenge creators and competitors</p>
       <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground">
         <div className="flex flex-col items-center">
-          <div className="text-lg font-bold text-foreground">
+          <div className="text-lg font-bold text-foreground tabular-nums">
             {isPending || error ? <CountSkeleton /> : metrics?.totalUsers}
           </div>
           <p className="text-xs">Total Users</p>
         </div>
         <div className="h-8 w-px bg-border" />
         <div className="flex flex-col items-center">
-          <div className="text-lg font-bold text-foreground">
+          <div className="text-lg font-bold text-foreground tabular-nums">
             {isPending || error ? <CountSkeleton /> : metrics?.activeSessions}
           </div>
           <p className="text-xs">Active Sessions</p>
@@ -62,17 +62,17 @@ const FEATURES = [
   {
     title: 'Contract-first approach',
     description: 'Start building with clear API contracts using oRPC',
-    icon: <LuServerCog className="h-8 w-8" />,
+    icon: <LuServerCog className="h-8 w-8" aria-hidden="true" />,
   },
   {
     title: 'Shiny new tech',
     description: 'Built with Bun, React, TanStack Router, and more modern technologies.',
-    icon: <HiOutlineSparkles className="h-8 w-8" />,
+    icon: <HiOutlineSparkles className="h-8 w-8" aria-hidden="true" />,
   },
   {
     title: 'Ready-to-use template',
     description: 'Jumpstart your project with a full-stack starter template.',
-    icon: <LuRocket className="h-8 w-8" />,
+    icon: <LuRocket className="h-8 w-8" aria-hidden="true" />,
   },
 ];
 

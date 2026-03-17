@@ -25,6 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@~/components/ui/dropdown-menu';
+import { IS_DEVELOPMENT } from '@~/constants';
 import { SeriesModal } from '@~/features/series/components/series-modal';
 import { useDeleteSeries } from '@~/features/series/hooks/mutations/use-delete-series';
 import { seriesListQueryOptions, useSeriesList } from '@~/features/series/hooks/queries/use-series-list';
@@ -251,17 +252,19 @@ function RouteComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {/* Secret Bee Movie Button - Subtle but discoverable */}
-      <Button
-        onClick={() => createBeeMovieData()}
-        disabled={isCreatingBeeMovie}
-        size="icon"
-        variant="ghost"
-        className="fixed bottom-4 left-4 size-10 opacity-20 transition-all hover:scale-110 hover:opacity-100"
-        title={isCreatingBeeMovie ? 'Creating Bee Movie data...' : 'Create Bee Movie example data (dev only)'}
-      >
-        <GiHoneyJar className="size-5 text-amber-600 dark:text-amber-400" />
-      </Button>
+      {/* Secret Bee Movie Button - Subtle but discoverable (dev only) */}
+      {IS_DEVELOPMENT ? (
+        <Button
+          onClick={() => createBeeMovieData()}
+          disabled={isCreatingBeeMovie}
+          size="icon"
+          variant="ghost"
+          className="fixed bottom-4 left-4 size-10 opacity-20 transition-all hover:scale-110 hover:opacity-100"
+          title={isCreatingBeeMovie ? 'Creating Bee Movie data...' : 'Create Bee Movie example data (dev only)'}
+        >
+          <GiHoneyJar className="size-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+        </Button>
+      ) : null}
     </div>
   );
 }

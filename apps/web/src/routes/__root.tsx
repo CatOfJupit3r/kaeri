@@ -83,7 +83,7 @@ function RootComponent() {
           <NuqsAdapter>
             <div className="flex h-svh flex-col overflow-hidden">
               <Header />
-              <main className="min-h-0 flex-1">
+              <main id="main-content" className="min-h-0 flex-1">
                 <Outlet />
               </main>
             </div>

@@ -46,21 +46,25 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
 
       <form.AppForm>
         <form.Form className="space-y-4 p-0 md:p-0">
-          <form.AppField name="username">{(field) => <field.TextField label="Username" />}</form.AppField>
-          <form.AppField name="name">{(field) => <field.TextField label="Name" />}</form.AppField>
-          <form.AppField name="email">{(field) => <field.TextField label="Email" type="email" />}</form.AppField>
+          <form.AppField name="username">
+            {(field) => <field.TextField label="Username" autoComplete="username" spellCheck={false} />}
+          </form.AppField>
+          <form.AppField name="name">{(field) => <field.TextField label="Name" autoComplete="name" />}</form.AppField>
+          <form.AppField name="email">
+            {(field) => <field.TextField label="Email" type="email" autoComplete="email" spellCheck={false} />}
+          </form.AppField>
           <form.AppField name="password">
-            {(field) => <field.TextField label="Password" type="password" />}
+            {(field) => <field.TextField label="Password" type="password" autoComplete="new-password" />}
           </form.AppField>
           <form.AppField name="passwordConfirm">
-            {(field) => <field.TextField label="Confirm password" type="password" />}
+            {(field) => <field.TextField label="Confirm password" type="password" autoComplete="new-password" />}
           </form.AppField>
           <form.SubmitButton>Sign Up</form.SubmitButton>
         </form.Form>
       </form.AppForm>
 
       <div className="mt-4 text-center">
-        <Button variant="link" onClick={onSwitchToSignIn} className="text-lime-300 hover:text-lime-400">
+        <Button variant="link" onClick={onSwitchToSignIn} className="text-primary hover:text-primary/80">
           Already have an account? Sign In
         </Button>
       </div>

@@ -3,7 +3,8 @@ import { Skeleton } from '@~/components/ui/skeleton';
 
 export function SeriesSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" role="status" aria-label="Loading projects">
+      <span className="sr-only">Loading projects…</span>
       {Array.from({ length: 6 }).map((_, index) => (
         <Card key={`skeleton-${index + 1}`} className="overflow-hidden">
           <div className="p-5">

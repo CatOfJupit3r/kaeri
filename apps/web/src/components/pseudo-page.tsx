@@ -1,21 +1,8 @@
 function PseudoPage() {
   return (
-    <div
-      style={{
-        display: 'flex',
-        height: '100vh',
-        width: '100vw',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div
-        style={{
-          width: `2rem`,
-          height: `2rem`,
-        }}
-      >
-        <svg stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <div className="flex h-screen w-screen items-center justify-center" role="status" aria-live="polite">
+      <div className="size-8">
+        <svg stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <g>
             <circle cx="12" cy="12" r="9.5" fill="none" strokeWidth="3" strokeLinecap="round">
               <animate
@@ -46,6 +33,7 @@ function PseudoPage() {
             />
           </g>
         </svg>
+        <span className="sr-only">Loading…</span>
       </div>
     </div>
   );

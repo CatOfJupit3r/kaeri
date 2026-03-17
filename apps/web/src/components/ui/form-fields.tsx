@@ -363,8 +363,9 @@ export const TagArrayField = ({
                 onClick={() => handleRemove(index)}
                 className="ml-1 rounded-full hover:bg-muted"
                 disabled={disabled}
+                aria-label={`Remove ${tag}`}
               >
-                <LuX className="size-3" />
+                <LuX className="size-3" aria-hidden="true" />
               </button>
             </Badge>
           ))}
@@ -448,8 +449,9 @@ export const EntityPickerField = ({
                 onClick={() => handleRemove(index)}
                 className="ml-1 rounded-full hover:bg-muted"
                 disabled={disabled}
+                aria-label={`Remove ${getLabel(id)}`}
               >
-                <LuX className="size-3" />
+                <LuX className="size-3" aria-hidden="true" />
               </button>
             </Badge>
           ))}
@@ -557,8 +559,9 @@ export const ImageArrayField = ({
                 onClick={() => handleRemove(index)}
                 className="rounded-full p-1 hover:bg-muted"
                 disabled={disabled}
+                aria-label="Remove image"
               >
-                <LuX className="size-4" />
+                <LuX className="size-4" aria-hidden="true" />
               </button>
             </div>
           ))}

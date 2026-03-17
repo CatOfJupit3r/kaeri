@@ -2,6 +2,7 @@ import z from 'zod';
 
 import { Button } from '@~/components/ui/button';
 import { useAppForm } from '@~/components/ui/field';
+import { IS_DEVELOPMENT } from '@~/constants';
 import { QuickSignIn } from '@~/features/dev-tools';
 
 import useLogin from '../hooks/use-login';
@@ -34,18 +35,20 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
 
       <form.AppForm>
         <form.Form className="space-y-4 p-0 md:p-0">
-          <form.AppField name="username">{(field) => <field.TextField label="Username" />}</form.AppField>
+          <form.AppField name="username">
+            {(field) => <field.TextField label="Username" autoComplete="username" spellCheck={false} />}
+          </form.AppField>
           <form.AppField name="password">
-            {(field) => <field.TextField label="Password" type="password" />}
+            {(field) => <field.TextField label="Password" type="password" autoComplete="current-password" />}
           </form.AppField>
           <form.SubmitButton>Sign In</form.SubmitButton>
         </form.Form>
       </form.AppForm>
 
-      <QuickSignIn />
+      {IS_DEVELOPMENT ? <QuickSignIn /> : null}
 
       <div className="text-center">
-        <Button variant="link" onClick={onSwitchToSignUp} className="text-lime-300 hover:text-lime-400">
+        <Button variant="link" onClick={onSwitchToSignUp} className="text-primary hover:text-primary/80">
           Need an account? Sign Up
         </Button>
       </div>
