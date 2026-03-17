@@ -10,16 +10,7 @@ import Underline from '@tiptap/extension-underline';
 import { Selection } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  LuBookOpen,
-  LuChevronLeft,
-  LuChevronRight,
-  LuKeyboard,
-  LuPenTool,
-  LuPlus,
-  LuSparkles,
-  LuX,
-} from 'react-icons/lu';
+import { LuBookOpen, LuChevronLeft, LuChevronRight, LuKeyboard, LuPenTool, LuPlus, LuX } from 'react-icons/lu';
 
 import { Button } from '@~/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
@@ -571,17 +562,10 @@ export function ScriptEditor({
               </TabsTrigger>
               <TabsTrigger
                 value="canvas"
-                className="flex-1 gap-2 border-r-2 border-foreground py-3 font-black tracking-wide uppercase data-[state=active]:bg-(--brutalist-pink)"
+                className="flex-1 gap-2 py-3 font-black tracking-wide uppercase data-[state=active]:bg-(--brutalist-pink)"
               >
                 <LuPenTool className="h-4 w-4" />
                 <span className="hidden sm:inline">Canvas</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="ai"
-                className="flex-1 gap-2 py-3 font-black tracking-wide uppercase data-[state=active]:bg-(--brutalist-green)"
-              >
-                <LuSparkles className="h-4 w-4" />
-                <span className="hidden sm:inline">AI</span>
               </TabsTrigger>
             </TabsList>
 
@@ -591,16 +575,6 @@ export function ScriptEditor({
 
             <TabsContent value="canvas" className="mt-0 flex-1 overflow-hidden">
               <CanvasBoard seriesId={seriesId} />
-            </TabsContent>
-
-            <TabsContent value="ai" className="mt-0 flex-1 overflow-hidden">
-              <div className="flex h-full flex-col items-center justify-center bg-muted/30 p-8 text-center">
-                <div className="brutalist-shadow mb-4 flex h-12 w-12 items-center justify-center border-2 border-foreground bg-(--brutalist-green)">
-                  <LuSparkles className="h-6 w-6" />
-                </div>
-                <p className="text-sm font-black uppercase">AI Assistant</p>
-                <p className="mt-1 text-xs text-muted-foreground">Coming soon</p>
-              </div>
             </TabsContent>
           </Tabs>
         </div>
