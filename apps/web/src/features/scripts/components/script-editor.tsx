@@ -24,6 +24,7 @@ import {
 import { Button } from '@~/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@~/components/ui/tooltip';
+import { CanvasBoard } from '@~/features/canvas/components/board';
 import { cn } from '@~/lib/utils';
 
 import {
@@ -589,13 +590,7 @@ export function ScriptEditor({
             </TabsContent>
 
             <TabsContent value="canvas" className="mt-0 flex-1 overflow-hidden">
-              <div className="flex h-full flex-col items-center justify-center bg-muted/30 p-8 text-center">
-                <div className="brutalist-shadow mb-4 flex h-12 w-12 items-center justify-center border-2 border-foreground bg-(--brutalist-pink)">
-                  <LuPenTool className="h-6 w-6" />
-                </div>
-                <p className="text-sm font-black uppercase">Canvas</p>
-                <p className="mt-1 text-xs text-muted-foreground">Visual planning coming soon</p>
-              </div>
+              <CanvasBoard seriesId={seriesId} />
             </TabsContent>
 
             <TabsContent value="ai" className="mt-0 flex-1 overflow-hidden">
