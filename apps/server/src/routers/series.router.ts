@@ -2,7 +2,9 @@ import { seriesBase, seriesProtected } from '@~/lib/orpc';
 import { GETTERS } from '@~/routers/di-getter';
 
 export const seriesRouter = seriesBase.series.router({
-  createSeries: seriesProtected.series.createSeries.handler(async ({ input }) => GETTERS.SeriesService().create(input)),
+  createSeries: seriesProtected.series.createSeries.handler(async ({ input, context }) =>
+    GETTERS.SeriesService().create(input, context.session.user.id),
+  ),
 
   updateSeries: seriesProtected.series.updateSeries.handler(async ({ input }) =>
     GETTERS.SeriesService().update(input.seriesId, input.patch),

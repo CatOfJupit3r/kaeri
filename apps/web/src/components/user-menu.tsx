@@ -46,7 +46,9 @@ export default function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">{user.name}</Button>
+        <Button variant="outline" data-testid="user-menu-trigger">
+          {user.name}
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 bg-card" align="end">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>

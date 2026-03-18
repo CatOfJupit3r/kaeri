@@ -12,6 +12,7 @@ import { ScriptModel } from '@~/db/models/script.model';
 import { SeriesModel } from '@~/db/models/series.model';
 import { StoryArcModel } from '@~/db/models/story-arc.model';
 import { WorkspaceMemberModel } from '@~/db/models/workspace-member.model';
+import { WorkspaceModel } from '@~/db/models/workspace.model';
 import { TOKENS } from '@~/di/tokens';
 import type { PermissionService } from '@~/features/collaboration/permission.service';
 import { buildCacheKey, CACHE_TTL } from '@~/features/valkey/valkey.constants';
@@ -38,9 +39,26 @@ export class SeriesService implements iWithLogger {
     this.logger = loggerFactory.create('series-service');
   }
 
-  public async create(data: CreateSeriesInput) {
+  public async create(data: CreateSeriesInput, userId: string) {
     if (!data.title?.trim()) {
       throw ORPCBadRequestError(errorCodes.SERIES_TITLE_REQUIRED);
+    }
+
+    // Get or create user's personal workspace
+    let workspace = await WorkspaceModel.findOne({ creatorId: userId, isPersonal: true });
+    if (!workspace) {
+      workspace = await WorkspaceModel.create({
+        name: 'Personal Workspace',
+        isPersonal: true,
+        creatorId: userId,
+      });
+      // Create owner membership
+      await WorkspaceMemberModel.create({
+        workspaceId: workspace._id,
+        userId,
+        role: WORKSPACE_ROLES.OWNER,
+        joinedAt: new Date(),
+      });
     }
 
     const series = await SeriesModel.create({
@@ -49,6 +67,7 @@ export class SeriesService implements iWithLogger {
       genre: data.genre,
       logline: data.logline,
       coverUrl: data.coverUrl,
+      workspaceId: workspace._id,
       lastEditedAt: new Date(),
     });
 
