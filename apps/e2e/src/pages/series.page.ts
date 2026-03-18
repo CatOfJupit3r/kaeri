@@ -19,20 +19,26 @@ export class SeriesPage extends BasePage {
   private readonly seriesHeader = this.page.locator(
     'div.border-b-4.bg-card, [class*="border-b-4"][class*="bg-card"]',
   );
-  private readonly scriptsTab = this.page.locator('[data-tab="scripts"]');
-  private readonly knowledgeBaseTab = this.page.locator(
-    '[data-tab="knowledge-base"]',
-  );
-  private readonly canvasTab = this.page.locator('[data-tab="canvas"]');
-  private readonly settingsTab = this.page.locator('[data-tab="settings"]');
-  private readonly createScriptButton = this.page.locator(
-    'button:has-text("Create Script")',
-  );
+  // Tab navigation is via links, not data-tab attributes
+  private readonly scriptsTab = this.page.getByRole("link", {
+    name: "Scripts",
+  });
+  private readonly knowledgeBaseTab = this.page.getByRole("link", {
+    name: "Knowledge Base",
+  });
+  private readonly canvasTab = this.page.getByRole("link", { name: "Canvas" });
+  private readonly analyticsTab = this.page.getByRole("link", {
+    name: "Analytics",
+  });
+  private readonly createScriptButton = this.page.getByRole("button", {
+    name: "New Script",
+  });
   private readonly scriptsList = this.page.locator(
     '[data-testid="scripts-list"]',
   );
+  // Script cards are Links with h3 titles - use the group class as card container
   private readonly scriptCard = (name: string) =>
-    this.page.locator(`[data-testid="script-card"]:has-text("${name}")`);
+    this.page.locator(`a.group:has(h3:text-is("${name}"))`);
 
   constructor(page: Page) {
     super(page);
@@ -127,24 +133,29 @@ export class SeriesPage extends BasePage {
   // Tab Navigation
   async goToScripts(): Promise<void> {
     await this.scriptsTab.click();
+    await this.page.waitForURL(/\/scripts/);
   }
 
   async goToKnowledgeBase(): Promise<void> {
     await this.knowledgeBaseTab.click();
+    await this.page.waitForURL(/\/knowledge-base/);
   }
 
   async goToCanvas(): Promise<void> {
     await this.canvasTab.click();
+    await this.page.waitForURL(/\/canvas/);
   }
 
-  async goToSettings(): Promise<void> {
-    await this.settingsTab.click();
+  async goToAnalytics(): Promise<void> {
+    await this.analyticsTab.click();
+    await this.page.waitForURL(/\/analytics/);
   }
 
   // Script Actions
   async clickCreateScript(): Promise<void> {
     await this.createScriptButton.click();
-    await this.waitForModal();
+    // Creating a script navigates directly to the editor (no modal)
+    await this.page.waitForURL(/\/scripts\/[a-f0-9]+/);
   }
 
   async openScript(name: string): Promise<void> {

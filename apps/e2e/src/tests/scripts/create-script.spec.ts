@@ -12,59 +12,63 @@ test.describe("Create Script", () => {
     },
   );
 
-  test("should open create script modal", async ({ seriesPage }) => {
-    await seriesPage.clickCreateScript();
-    // Modal assertion is handled in the method
-  });
-
-  test("should create script with title", async ({ seriesPage }) => {
-    const scriptTitle = `New Script ${Date.now()}`;
-
-    await seriesPage.clickCreateScript();
-
-    // Fill in script form
-    const modal = await seriesPage.waitForModal();
-    await modal.locator('input[name="title"]').fill(scriptTitle);
-    await modal
-      .locator('button:has-text("Create"), button:has-text("Save")')
-      .click();
-
-    await seriesPage.expectScriptVisible(scriptTitle);
-  });
-
-  test("should navigate to script editor after creation", async ({
+  test("should navigate to script editor when clicking New Script", async ({
     seriesPage,
     page,
   }) => {
-    const scriptTitle = `Editor Test ${Date.now()}`;
-
     await seriesPage.clickCreateScript();
 
-    const modal = await seriesPage.waitForModal();
-    await modal.locator('input[name="title"]').fill(scriptTitle);
-    await modal
-      .locator('button:has-text("Create"), button:has-text("Save")')
-      .click();
-
-    // Click on the created script
-    await seriesPage.openScript(scriptTitle);
-
-    // Should be in script editor
-    await expect(page).toHaveURL(/\/scripts\/[a-z0-9]+/);
+    // Should be in script editor with valid script ID
+    await expect(page).toHaveURL(/\/scripts\/[a-f0-9]+/);
   });
 
-  test("should show validation error for empty title", async ({
+  test("should create script with default title 'Untitled Script'", async ({
     seriesPage,
-    page: _page,
+    page,
   }) => {
     await seriesPage.clickCreateScript();
 
-    const modal = await seriesPage.waitForModal();
-    await modal
-      .locator('button:has-text("Create"), button:has-text("Save")')
-      .click();
+    // Should navigate to script editor
+    await expect(page).toHaveURL(/\/scripts\/[a-f0-9]+/);
 
-    // Modal should still be open with validation error
-    await expect(modal).toBeVisible();
+    // Script title should be visible in the page
+    await expect(page.locator("text=Untitled Script")).toBeVisible();
+  });
+
+  test("should show new script in scripts list", async ({
+    seriesPage,
+    testSeries,
+    page,
+  }) => {
+    // Create a script
+    await seriesPage.clickCreateScript();
+    await expect(page).toHaveURL(/\/scripts\/[a-f0-9]+/);
+
+    // Go back to scripts list
+    await seriesPage.navigateToSeries(testSeries.id);
+    await seriesPage.goToScripts();
+
+    // Script should be visible in the list
+    await seriesPage.expectScriptVisible("Untitled Script");
+  });
+
+  test("should be able to open existing script", async ({
+    seriesPage,
+    testSeries,
+    page,
+  }) => {
+    // Create a script
+    await seriesPage.clickCreateScript();
+    await expect(page).toHaveURL(/\/scripts\/[a-f0-9]+/);
+
+    // Go back to scripts list
+    await seriesPage.navigateToSeries(testSeries.id);
+    await seriesPage.goToScripts();
+
+    // Open the created script
+    await seriesPage.openScript("Untitled Script");
+
+    // Should be in script editor
+    await expect(page).toHaveURL(/\/scripts\/[a-f0-9]+/);
   });
 });
