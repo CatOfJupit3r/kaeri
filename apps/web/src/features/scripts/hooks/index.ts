@@ -22,6 +22,12 @@ export { useUpdateScript } from './mutations/use-update-script';
 export { useDeleteScript } from './mutations/use-delete-script';
 export { useSaveScriptContent } from './mutations/use-save-script-content';
 
+// Mutations - Script Versions
+export { useCreateScriptVersion } from './mutations/use-create-script-version';
+export { useRestoreScriptVersion } from './mutations/use-restore-script-version';
+export { useDeleteScriptVersion } from './mutations/use-delete-script-version';
+export { useUpdateScriptVersion } from './mutations/use-update-script-version';
+
 // Mutations - KB Integration
 export { useQuickCreateEntity } from './mutations/use-quick-create-entity';
 export type { iQuickCreateEntityInput } from './mutations/use-quick-create-entity';
@@ -31,6 +37,9 @@ export type { iEnsureSceneInput, iEnsureSceneResult } from './mutations/use-ensu
 // Queries
 export { useScript } from './queries/use-script';
 export { useScriptList } from './queries/use-script-list';
+export { useScriptVersions } from './queries/use-script-versions';
+export type { ScriptVersionSummary } from './queries/use-script-versions';
+export { useScriptVersion } from './queries/use-script-version';
 export { useValidateEntityLinks } from './queries/use-validate-entity-links';
 export type { iEntityLinkToValidate } from './queries/use-validate-entity-links';
 export { usePollEntityUpdates } from './queries/use-poll-entity-updates';
@@ -55,3 +64,6 @@ export type { iUseEntitySyncOptions, iUseEntitySyncResult } from './use-entity-s
 // Mention hover preview
 export { useMentionHoverPreview } from './use-mention-hover-preview';
 export type { iUseMentionHoverPreviewOptions, iUseMentionHoverPreviewResult } from './use-mention-hover-preview';
+
+// Auto-versioning
+export { useAutoVersion } from './use-auto-version';

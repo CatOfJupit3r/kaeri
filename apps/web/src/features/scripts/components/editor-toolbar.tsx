@@ -41,6 +41,8 @@ interface iEditorToolbarProps {
   lastEditedAt?: Date;
   currentBlockType: ScriptBlockType | null;
   onChangeBlockType: (type: ScriptBlockType) => void;
+  versionCount?: number;
+  onShowVersions?: () => void;
 }
 
 export function EditorToolbar({
@@ -55,6 +57,8 @@ export function EditorToolbar({
   lastEditedAt,
   currentBlockType,
   onChangeBlockType,
+  versionCount,
+  onShowVersions,
 }: iEditorToolbarProps) {
   const currentConfig = currentBlockType ? BLOCK_CONFIG[currentBlockType] : null;
 
@@ -251,6 +255,15 @@ export function EditorToolbar({
           ) : null}
           {isSaving !== true && lastEditedAt != null ? (
             <span>Saved {formatDistanceToNow(lastEditedAt, { addSuffix: true })}</span>
+          ) : null}
+          {versionCount != null && versionCount > 0 ? (
+            <button
+              type="button"
+              className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium transition-colors hover:bg-muted/80"
+              onClick={onShowVersions}
+            >
+              {versionCount} {versionCount === 1 ? 'version' : 'versions'}
+            </button>
           ) : null}
         </div>
 

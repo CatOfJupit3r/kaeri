@@ -1,11 +1,18 @@
-import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
+/* eslint-disable no-underscore-dangle */
+import { getModelForClass, modelOptions, pre, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
-import { RequiredTimeStamps } from '../base-classes';
+import { VersionedEntity } from '../base-classes';
 import { ObjectIdString } from '../helpers';
 
+@pre<ScriptClass>('save', function incrementVersion() {
+  if (!this.isNew) {
+    this._version = (this._version || 1) + 1;
+    this._lastModifiedAt = new Date();
+  }
+})
 @modelOptions({ schemaOptions: { collection: 'scripts', timestamps: true } })
-class ScriptClass extends RequiredTimeStamps {
+class ScriptClass extends VersionedEntity {
   @prop({ default: () => ObjectIdString() })
   public _id!: string;
 
@@ -29,9 +36,6 @@ class ScriptClass extends RequiredTimeStamps {
 
   @prop({ default: '' })
   public content!: string;
-
-  @prop({ default: 1 })
-  public contentVersion!: number;
 
   @prop({ default: () => new Date() })
   public lastEditedAt!: Date;

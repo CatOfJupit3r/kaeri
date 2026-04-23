@@ -1,15 +1,25 @@
 import { CanvasEdgeModel } from '@~/db/models/canvas-edge.model';
+import type { CanvasEdgeDoc } from '@~/db/models/canvas-edge.model';
 import { CanvasNodeModel } from '@~/db/models/canvas-node.model';
+import type { CanvasNodeDoc } from '@~/db/models/canvas-node.model';
 import { CharacterModel } from '@~/db/models/character.model';
+import type { CharacterDoc } from '@~/db/models/character.model';
 import { LocationModel } from '@~/db/models/location.model';
+import type { LocationDoc } from '@~/db/models/location.model';
 import { PropModel } from '@~/db/models/prop.model';
+import type { PropDoc } from '@~/db/models/prop.model';
 import { SceneModel } from '@~/db/models/scene.model';
+import type { SceneDoc } from '@~/db/models/scene.model';
 import { ScriptModel } from '@~/db/models/script.model';
 import { SeriesModel } from '@~/db/models/series.model';
 import { StoryArcModel } from '@~/db/models/story-arc.model';
+import type { StoryArcDoc } from '@~/db/models/story-arc.model';
 import { ThemeModel } from '@~/db/models/theme.model';
+import type { ThemeDoc } from '@~/db/models/theme.model';
 import { TimelineEntryModel } from '@~/db/models/timeline-entry.model';
+import type { TimelineEntryDoc } from '@~/db/models/timeline-entry.model';
 import { WildCardModel } from '@~/db/models/wildcard.model';
+import type { WildCardDoc } from '@~/db/models/wildcard.model';
 
 const BEE_MOVIE_SCRIPT_CONTENT = `NARRATOR: 
 
@@ -360,7 +370,6 @@ export async function createBeeMovieMockData(): Promise<iBeeMovieCreationResult>
     genre: 'Animated Comedy',
     logline: 'The complete screenplay for Bee Movie (2007)',
     content: BEE_MOVIE_SCRIPT_CONTENT,
-    contentVersion: 1,
     lastEditedAt: new Date(),
   });
 
@@ -522,7 +531,7 @@ export async function createBeeMovieMockData(): Promise<iBeeMovieCreationResult>
     },
   ];
 
-  const createdCharacters = await CharacterModel.insertMany(characterData);
+  const createdCharacters = (await CharacterModel.insertMany(characterData)) as CharacterDoc[];
 
   // Add relationships between characters
   const barryId = createdCharacters[0]._id;
@@ -739,7 +748,7 @@ export async function createBeeMovieMockData(): Promise<iBeeMovieCreationResult>
     },
   ];
 
-  const createdLocations = await LocationModel.insertMany(locationData);
+  const createdLocations = (await LocationModel.insertMany(locationData)) as LocationDoc[];
 
   // ============================================
   // PROPS - Enhanced with associations
@@ -866,7 +875,7 @@ export async function createBeeMovieMockData(): Promise<iBeeMovieCreationResult>
     },
   ];
 
-  const createdProps = await PropModel.insertMany(propData);
+  const createdProps = (await PropModel.insertMany(propData)) as PropDoc[];
 
   // ============================================
   // SCENES - Comprehensive with all fields
@@ -1318,7 +1327,7 @@ export async function createBeeMovieMockData(): Promise<iBeeMovieCreationResult>
     },
   ];
 
-  const createdScenes = await SceneModel.insertMany(sceneData);
+  const createdScenes = (await SceneModel.insertMany(sceneData)) as SceneDoc[];
   const sceneIds = createdScenes.map((s) => s._id);
 
   // ============================================
@@ -1446,7 +1455,7 @@ export async function createBeeMovieMockData(): Promise<iBeeMovieCreationResult>
     },
   ];
 
-  const createdThemes = await ThemeModel.insertMany(themeData);
+  const createdThemes = (await ThemeModel.insertMany(themeData)) as ThemeDoc[];
 
   // ============================================
   // STORY ARCS - Major narrative arcs
@@ -1588,7 +1597,7 @@ export async function createBeeMovieMockData(): Promise<iBeeMovieCreationResult>
     },
   ];
 
-  const createdStoryArcs = await StoryArcModel.insertMany(storyArcData);
+  const createdStoryArcs = (await StoryArcModel.insertMany(storyArcData)) as unknown as StoryArcDoc[];
 
   // ============================================
   // TIMELINE ENTRIES - Chronological events
@@ -1779,7 +1788,7 @@ export async function createBeeMovieMockData(): Promise<iBeeMovieCreationResult>
     },
   ];
 
-  const createdTimeline = await TimelineEntryModel.insertMany(timelineData);
+  const createdTimeline = (await TimelineEntryModel.insertMany(timelineData)) as TimelineEntryDoc[];
 
   // ============================================
   // WILDCARDS - Miscellaneous notes and trivia
@@ -1877,7 +1886,7 @@ export async function createBeeMovieMockData(): Promise<iBeeMovieCreationResult>
     },
   ];
 
-  const createdWildcards = await WildCardModel.insertMany(wildcardData);
+  const createdWildcards = (await WildCardModel.insertMany(wildcardData)) as WildCardDoc[];
 
   // ============================================
   // CANVAS NODES - Visual story mapping
@@ -1973,7 +1982,7 @@ export async function createBeeMovieMockData(): Promise<iBeeMovieCreationResult>
     },
   ];
 
-  const createdCanvasNodes = await CanvasNodeModel.insertMany(canvasNodeData);
+  const createdCanvasNodes = (await CanvasNodeModel.insertMany(canvasNodeData)) as CanvasNodeDoc[];
 
   // ============================================
   // CANVAS EDGES - Connections between nodes
@@ -2045,7 +2054,7 @@ export async function createBeeMovieMockData(): Promise<iBeeMovieCreationResult>
     },
   ];
 
-  const createdCanvasEdges = await CanvasEdgeModel.insertMany(canvasEdgeData);
+  const createdCanvasEdges = (await CanvasEdgeModel.insertMany(canvasEdgeData)) as CanvasEdgeDoc[];
 
   // ============================================
   // Update locations with character associations

@@ -30,4 +30,29 @@ export const scriptsRouter = contentBase.scripts.router({
     // TODO: Implement PDF export
     throw new Error('PDF export not yet implemented');
   }),
+
+  // Version management
+  listScriptVersions: contentProtected.scripts.listScriptVersions.handler(async ({ input }) =>
+    GETTERS.ScriptsService().listVersions(input.scriptId, input.limit, input.offset),
+  ),
+
+  getScriptVersion: contentProtected.scripts.getScriptVersion.handler(async ({ input }) =>
+    GETTERS.ScriptsService().getVersion(input.scriptId, input.versionId),
+  ),
+
+  createScriptVersion: contentProtected.scripts.createScriptVersion.handler(async ({ input, context }) =>
+    GETTERS.ScriptsService().createVersion(input.scriptId, context.session.user.id, { name: input.name }),
+  ),
+
+  restoreScriptVersion: contentProtected.scripts.restoreScriptVersion.handler(async ({ input, context }) =>
+    GETTERS.ScriptsService().restoreVersion(input.scriptId, input.versionId, context.session.user.id),
+  ),
+
+  deleteScriptVersion: contentProtected.scripts.deleteScriptVersion.handler(async ({ input }) =>
+    GETTERS.ScriptsService().deleteVersion(input.scriptId, input.versionId),
+  ),
+
+  updateScriptVersion: contentProtected.scripts.updateScriptVersion.handler(async ({ input }) =>
+    GETTERS.ScriptsService().updateVersionName(input.scriptId, input.versionId, input.name),
+  ),
 });

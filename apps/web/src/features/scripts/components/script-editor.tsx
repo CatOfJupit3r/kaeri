@@ -10,7 +10,17 @@ import Underline from '@tiptap/extension-underline';
 import { Selection } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { LuBookOpen, LuChevronLeft, LuChevronRight, LuKeyboard, LuPenTool, LuPlus, LuX } from 'react-icons/lu';
+import {
+  LuBookOpen,
+  LuChevronLeft,
+  LuChevronRight,
+  LuHistory,
+  LuKeyboard,
+  LuPenTool,
+  LuPlus,
+  LuRotateCcw,
+  LuX,
+} from 'react-icons/lu';
 
 import { Button } from '@~/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
@@ -41,6 +51,10 @@ import {
   useCharacterBlockSuggestionRenderer,
   useSceneHeadingSuggestionRenderer,
   useMentionHoverPreview,
+  useAutoVersion,
+  useScriptVersion,
+  useScriptVersions,
+  useRestoreScriptVersion,
 } from '../hooks';
 import type { ScriptBlockType } from '../types';
 import { BLOCK_TYPE_CYCLE_ORDER } from '../types';
@@ -50,6 +64,7 @@ import { EditorToolbar } from './editor-toolbar';
 import { EntityPreviewCard } from './entity-preview';
 import { KnowledgeBasePanel } from './knowledge-base-panel';
 import { TableReadModal } from './table-read-modal';
+import { VersionHistoryPanel } from './version-history-panel';
 
 interface iScriptEditorProps {
   /** Script content as JSON string */
@@ -143,11 +158,21 @@ export function ScriptEditor({
 }: iScriptEditorProps) {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const editorScrollRef = useRef<HTMLDivElement>(null);
+  const isPreviewingRef = useRef(false);
   const [rightPanelTab, setRightPanelTab] = useState('knowledge');
   const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
   const [isShowingKeyboardShortcuts, setIsShowingKeyboardShortcuts] = useState(false);
   const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
   const [isTableReadOpen, setIsTableReadOpen] = useState(false);
+  const [previewingVersionId, setPreviewingVersionId] = useState<string | null>(null);
+
+  // Auto-version on tab blur / page close
+  const { markContentChanged } = useAutoVersion({ scriptId, enabled: !!scriptId });
+
+  // Version data
+  const { data: versions } = useScriptVersions(scriptId);
+  const { data: previewVersion } = useScriptVersion(scriptId, previewingVersionId ?? '');
+  const { restoreVersion, isPending: isRestoringVersion } = useRestoreScriptVersion();
 
   // Entity mention suggestion query states
   const [characterQuery, setCharacterQuery] = useState('');
@@ -315,12 +340,16 @@ export function ScriptEditor({
       },
     },
     onUpdate: ({ editor: e }) => {
+      // Skip autosave when previewing a version — the content is read-only and not the user's work
+      if (isPreviewingRef.current) return;
+
       // Debounce content changes for autosave
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
         const json = e.getJSON();
         onContentChange?.(JSON.stringify(json));
       }, 300);
+      markContentChanged();
     },
   });
 
@@ -345,6 +374,46 @@ export function ScriptEditor({
 
     return () => clearTimeout(timeoutId);
   }, [editor]);
+
+  // Version preview: swap editor content and toggle read-only
+  const savedContentRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!editor) return;
+
+    if (previewingVersionId && previewVersion?.content) {
+      // Save current content before showing preview
+      savedContentRef.current ??= JSON.stringify(editor.getJSON());
+      isPreviewingRef.current = true;
+      editor.setEditable(false);
+      editor.commands.setContent(parseContent(previewVersion.content));
+    } else if (!previewingVersionId && savedContentRef.current !== null) {
+      // Restore original content
+      isPreviewingRef.current = false;
+      editor.commands.setContent(parseContent(savedContentRef.current));
+      editor.setEditable(true);
+      savedContentRef.current = null;
+    }
+  }, [editor, previewingVersionId, previewVersion?.content]);
+
+  const handleDismissPreview = useCallback(() => {
+    setPreviewingVersionId(null);
+  }, []);
+
+  const handleRestorePreviewedVersion = useCallback(() => {
+    if (!previewingVersionId || !editor) return;
+    restoreVersion(
+      { scriptId, versionId: previewingVersionId },
+      {
+        onSuccess: () => {
+          // The restored content is now the canonical version — don't restore stale saved content
+          savedContentRef.current = null;
+          isPreviewingRef.current = false;
+          editor.setEditable(true);
+          setPreviewingVersionId(null);
+        },
+      },
+    );
+  }, [previewingVersionId, scriptId, restoreVersion, editor]);
 
   const addBlock = useCallback(
     (type: ScriptBlockType) => {
@@ -408,6 +477,11 @@ export function ScriptEditor({
         onChangeBlockType={(type) => {
           editor?.chain().focus().setNode(type).run();
         }}
+        versionCount={versions?.total}
+        onShowVersions={() => {
+          setRightPanelTab('versions');
+          setIsRightPanelCollapsed(false);
+        }}
       />
 
       {/* Breakdown Modal */}
@@ -424,6 +498,32 @@ export function ScriptEditor({
             isRightPanelCollapsed ? 'h-full lg:w-full' : 'h-1/2 lg:h-full lg:w-1/2',
           )}
         >
+          {/* Version Preview Banner */}
+          {previewingVersionId ? (
+            <div className="flex items-center justify-between border-b-2 border-foreground bg-amber-100 px-4 py-2 dark:bg-amber-900/30">
+              <span className="text-sm font-medium">
+                Previewing version {previewVersion?.version ?? '...'}
+                {previewVersion?.name ? ` — ${previewVersion.name}` : ''}
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={handleRestorePreviewedVersion}
+                  disabled={isRestoringVersion}
+                >
+                  <LuRotateCcw className="mr-1 h-3 w-3" />
+                  Restore this version
+                </Button>
+                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={handleDismissPreview}>
+                  <LuX className="mr-1 h-3 w-3" />
+                  Back to current
+                </Button>
+              </div>
+            </div>
+          ) : null}
+
           {/* Editor Content */}
           <div ref={editorScrollRef} className="relative flex-1 overflow-y-auto pl-16">
             {editor ? <BlockMenu editor={editor} containerRef={editorScrollRef} /> : null}
@@ -567,6 +667,13 @@ export function ScriptEditor({
                 <LuPenTool className="h-4 w-4" />
                 <span className="hidden sm:inline">Canvas</span>
               </TabsTrigger>
+              <TabsTrigger
+                value="versions"
+                className="flex-1 gap-2 border-l-2 border-foreground py-3 font-black tracking-wide uppercase data-[state=active]:bg-(--brutalist-yellow)"
+              >
+                <LuHistory className="h-4 w-4" />
+                <span className="hidden sm:inline">Versions</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="knowledge" className="mt-0 flex-1 overflow-hidden">
@@ -575,6 +682,14 @@ export function ScriptEditor({
 
             <TabsContent value="canvas" className="mt-0 flex-1 overflow-hidden">
               <CanvasBoard seriesId={seriesId} />
+            </TabsContent>
+
+            <TabsContent value="versions" className="mt-0 flex-1 overflow-hidden">
+              <VersionHistoryPanel
+                scriptId={scriptId}
+                onPreviewVersion={setPreviewingVersionId}
+                activePreviewId={previewingVersionId}
+              />
             </TabsContent>
           </Tabs>
         </div>

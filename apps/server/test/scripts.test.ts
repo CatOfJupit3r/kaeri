@@ -17,7 +17,6 @@ describe('Scripts API', () => {
       expect(script.seriesId).toBe(series._id);
       expect(script.title).toBe('My Script');
       expect(script.content).toBe('');
-      expect(script.contentVersion).toBe(1);
       expect(script.lastEditedAt).toBeDefined();
     });
 

@@ -24,6 +24,11 @@ const kaeriErrorCodes = {
   SCRIPT_TITLE_REQUIRED: 'SCRIPT_TITLE_REQUIRED',
   SCRIPT_SERIES_MISMATCH: 'SCRIPT_SERIES_MISMATCH',
   SCRIPT_NOT_SAVED: 'SCRIPT_NOT_SAVED',
+  // Script version errors
+  SCRIPT_VERSION_NOT_FOUND: 'SCRIPT_VERSION_NOT_FOUND',
+  SCRIPT_CONTENT_UNCHANGED: 'SCRIPT_CONTENT_UNCHANGED',
+  SCRIPT_VERSION_NAME_TOO_LONG: 'SCRIPT_VERSION_NAME_TOO_LONG',
+  SCRIPT_EMPTY_CONTENT: 'SCRIPT_EMPTY_CONTENT',
   // Scene errors
   SCENE_NOT_FOUND: 'SCENE_NOT_FOUND',
   SCENE_HEADING_REQUIRED: 'SCENE_HEADING_REQUIRED',
@@ -112,6 +117,11 @@ const kaeriErrorMessages = {
   [kaeriErrorCodes.SCRIPT_TITLE_REQUIRED]: 'Script title is required',
   [kaeriErrorCodes.SCRIPT_SERIES_MISMATCH]: 'Script does not belong to the specified series',
   [kaeriErrorCodes.SCRIPT_NOT_SAVED]: 'Script has unsaved changes',
+  // Script version errors
+  [kaeriErrorCodes.SCRIPT_VERSION_NOT_FOUND]: 'Script version not found',
+  [kaeriErrorCodes.SCRIPT_CONTENT_UNCHANGED]: 'Script content has not changed since last version',
+  [kaeriErrorCodes.SCRIPT_VERSION_NAME_TOO_LONG]: 'Version name must be 100 characters or fewer',
+  [kaeriErrorCodes.SCRIPT_EMPTY_CONTENT]: 'Cannot create a version from empty content',
   // Scene errors
   [kaeriErrorCodes.SCENE_NOT_FOUND]: 'Scene not found',
   [kaeriErrorCodes.SCENE_HEADING_REQUIRED]: 'Scene heading is required',
