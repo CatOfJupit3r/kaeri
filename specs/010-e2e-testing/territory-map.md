@@ -28,7 +28,7 @@ The goal is a complete writer-first E2E suite that covers every meaningful user 
 | Dashboard and Series shell | Partial | Basic dashboard flows exist; opening a series from the dashboard into the writing surface is covered |
 | Workspaces | Mapped only | Routes and UI exist; no dedicated E2E coverage yet |
 | Scripts library | Partial | Empty state, create-and-open, card metadata, and reopen coverage exist |
-| Script editor core | Partial | Editor route load, split layout, default starting block, toolbar block-type switching, typing, save-state transition, and explicit save-and-reload persistence are covered |
+| Script editor core | Partial | Editor route load, split layout, default starting block, toolbar block-type switching, Tab cycling, scene-heading and character Enter rules, typing, save-state transition, and explicit save-and-reload persistence are covered |
 | Script x KB integration | Mapped only | Richest unique behavior; should be a dedicated suite, not scattered assertions |
 | Knowledge base | Mapped only | Main route exists with broad entity tabs; entity-family coverage still missing |
 | Canvas | Mapped only | Route exists; interaction-heavy coverage should be staged carefully |
@@ -204,9 +204,9 @@ Scenario inventory:
 - `EDITOR-05` (`Done`, `Now`): Manual or debounced save persists content across reload.
 - `EDITOR-06` (`Done`, `Now`): Save indicator moves through saving and saved states.
 - `EDITOR-07` (`Next`): Block type dropdown changes the current block type.
-- `EDITOR-08` (`Next`): `Tab` cycles block types in the expected order.
-- `EDITOR-09` (`Next`): `Enter` after scene heading creates an action block.
-- `EDITOR-10` (`Next`): `Enter` after character creates a dialogue block.
+- `EDITOR-08` (`Done`, `Next`): `Tab` cycles block types in the expected order.
+- `EDITOR-09` (`Done`, `Next`): `Enter` after scene heading creates an action block.
+- `EDITOR-10` (`Done`, `Next`): `Enter` after character creates a dialogue block.
 - `EDITOR-11` (`Next`): `Enter` after dialogue creates the next speaker block according to editor rules.
 - `EDITOR-12` (`Next`): `Backspace` on an empty block removes it and focuses the previous block.
 - `EDITOR-13` (`Next`): Minimum one block remains after deleting empty blocks.

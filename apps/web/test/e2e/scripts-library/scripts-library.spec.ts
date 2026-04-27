@@ -50,6 +50,63 @@ test.describe('Scripts library', () => {
     await scriptEditorPage.changeCurrentBlockTypeFromToolbar('action');
   });
 
+  test('cycles the current block type with Tab', async ({ dashboardPage, scriptEditorPage, scriptLibraryPage }) => {
+    test.slow();
+
+    const projectTitle = `E2E Tab Cycle ${Date.now()}`;
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.expectDefaultBlock();
+    await scriptEditorPage.cycleCurrentBlockTypeWithTab('action');
+  });
+
+  test('creates an action block after pressing Enter on a scene heading', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Enter Action ${Date.now()}`;
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.expectDefaultBlock();
+    await scriptEditorPage.pressEnterAndExpectNextBlock('action');
+  });
+
+  test('creates a dialogue block after pressing Enter on a character block', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Enter Dialogue ${Date.now()}`;
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.expectDefaultBlock();
+    await scriptEditorPage.changeCurrentBlockTypeFromToolbar('character');
+    await scriptEditorPage.pressEnterAndExpectNextBlock('dialogue');
+  });
+
   test('shows save progress and persists script content after explicit save and reload', async ({
     dashboardPage,
     scriptEditorPage,

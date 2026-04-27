@@ -41,6 +41,16 @@ export class ScriptEditorPage extends BasePage {
     await expect(this.scriptBlocks.first()).toHaveAttribute('data-block-type', expectedBlockType, { timeout: 10_000 });
   }
 
+  async expectBlockCount(expectedCount: number) {
+    await expect(this.scriptBlocks).toHaveCount(expectedCount, { timeout: 10_000 });
+  }
+
+  async expectBlockTypeAt(index: number, expectedBlockType: string) {
+    await expect(this.scriptBlocks.nth(index)).toHaveAttribute('data-block-type', expectedBlockType, {
+      timeout: 10_000,
+    });
+  }
+
   async type(text: string) {
     await expect(this.editor).toBeVisible({ timeout: 10_000 });
 
@@ -56,6 +66,21 @@ export class ScriptEditorPage extends BasePage {
     await this.blockTypeSelector.click();
     await this.page.getByTestId(`block-type-option-${nextBlockType}`).click();
     await this.expectCurrentBlockType(nextBlockType);
+  }
+
+  async cycleCurrentBlockTypeWithTab(
+    nextBlockType: 'action' | 'character' | 'dialogue' | 'parenthetical' | 'scene-heading' | 'transition',
+  ) {
+    await this.editor.click();
+    await this.page.keyboard.press('Tab');
+    await this.expectCurrentBlockType(nextBlockType);
+  }
+
+  async pressEnterAndExpectNextBlock(nextBlockType: string) {
+    await this.editor.click();
+    await this.page.keyboard.press('Enter');
+    await this.expectBlockCount(2);
+    await this.expectBlockTypeAt(1, nextBlockType);
   }
 
   async saveAndExpectIndicatorCycle() {
