@@ -107,6 +107,106 @@ test.describe('Scripts library', () => {
     await scriptEditorPage.pressEnterAndExpectNextBlock('dialogue');
   });
 
+  test('creates a character block after pressing Enter on a dialogue block', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Enter Character ${Date.now()}`;
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.expectDefaultBlock();
+    await scriptEditorPage.changeCurrentBlockTypeFromToolbar('dialogue');
+    await scriptEditorPage.pressEnterAndExpectNextBlock('character');
+  });
+
+  test('deletes an empty block and keeps the previous block editable on Backspace', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Backspace Delete ${Date.now()}`;
+    const blockContent = 'INT. FOCUS RETURN - DAY';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.expectDefaultBlock();
+    await scriptEditorPage.pressEnterAndExpectNextBlock('action');
+    await scriptEditorPage.pressBackspaceOnCurrentBlock();
+    await scriptEditorPage.expectBlockCount(1);
+    await scriptEditorPage.expectCurrentBlockType('scene-heading');
+    await scriptEditorPage.typeAtCurrentSelection(blockContent);
+    await scriptEditorPage.expectContent(blockContent);
+  });
+
+  test('does not delete the final remaining block on Backspace', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Backspace Guard ${Date.now()}`;
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.expectDefaultBlock();
+    await scriptEditorPage.pressBackspaceOnCurrentBlock();
+    await scriptEditorPage.expectBlockCount(1);
+    await scriptEditorPage.expectCurrentBlockType('scene-heading');
+  });
+
+  test('moves between adjacent blocks with Arrow keys', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Arrow Navigation ${Date.now()}`;
+    const sceneHeadingText = 'INT. ARROW MOVE - DAY';
+    const characterText = 'ARROW SPEAKER';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.expectDefaultBlock();
+    await scriptEditorPage.pressEnterAndExpectNextBlock('action');
+    await scriptEditorPage.changeCurrentBlockTypeFromToolbar('character');
+    await scriptEditorPage.focusBlockStart(1);
+    await scriptEditorPage.pressArrowUpAndExpectToolbarBlockType('Scene Heading');
+    await scriptEditorPage.typeAtCurrentSelection(sceneHeadingText);
+    await scriptEditorPage.expectBlockTextAt(0, sceneHeadingText);
+    await scriptEditorPage.focusBlockEnd(0);
+    await scriptEditorPage.pressArrowDownAndExpectToolbarBlockType('Character');
+    await scriptEditorPage.typeAtCurrentSelection(characterText);
+    await scriptEditorPage.expectBlockTextAt(1, characterText);
+  });
+
   test('shows save progress and persists script content after explicit save and reload', async ({
     dashboardPage,
     scriptEditorPage,

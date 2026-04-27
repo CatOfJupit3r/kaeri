@@ -2,6 +2,15 @@ import { type Page, type Route, expect } from '@playwright/test';
 
 import { BasePage } from './base.page';
 
+const BLOCK_TYPE_LABELS = {
+  action: 'Action',
+  character: 'Character',
+  dialogue: 'Dialogue',
+  parenthetical: 'Parenthetical',
+  'scene-heading': 'Scene Heading',
+  transition: 'Transition',
+} as const;
+
 export class ScriptEditorPage extends BasePage {
   private readonly fileMenuButton = this.page.getByRole('button', { name: 'File' });
   private readonly blockTypeSelector = this.page.getByTestId('block-type-selector');
@@ -41,6 +50,10 @@ export class ScriptEditorPage extends BasePage {
     await expect(this.scriptBlocks.first()).toHaveAttribute('data-block-type', expectedBlockType, { timeout: 10_000 });
   }
 
+  async expectToolbarCurrentBlockType(expectedLabel: string) {
+    await expect(this.blockTypeSelector).toContainText(expectedLabel, { timeout: 10_000 });
+  }
+
   async expectBlockCount(expectedCount: number) {
     await expect(this.scriptBlocks).toHaveCount(expectedCount, { timeout: 10_000 });
   }
@@ -51,10 +64,32 @@ export class ScriptEditorPage extends BasePage {
     });
   }
 
+  async expectBlockTextAt(index: number, text: string) {
+    await expect(this.scriptBlocks.nth(index)).toContainText(text, { timeout: 10_000 });
+  }
+
+  async focusBlock(index: number) {
+    await this.scriptBlocks.nth(index).click();
+  }
+
+  async focusBlockStart(index: number) {
+    await this.focusBlock(index);
+    await this.page.keyboard.press('Home');
+  }
+
+  async focusBlockEnd(index: number) {
+    await this.focusBlock(index);
+    await this.page.keyboard.press('End');
+  }
+
   async type(text: string) {
     await expect(this.editor).toBeVisible({ timeout: 10_000 });
 
     await this.editor.click();
+    await this.page.keyboard.type(text);
+  }
+
+  async typeAtCurrentSelection(text: string) {
     await this.page.keyboard.type(text);
   }
 
@@ -65,7 +100,7 @@ export class ScriptEditorPage extends BasePage {
     await expect(this.blockTypeSelector).toBeVisible({ timeout: 5_000 });
     await this.blockTypeSelector.click();
     await this.page.getByTestId(`block-type-option-${nextBlockType}`).click();
-    await this.expectCurrentBlockType(nextBlockType);
+    await this.expectToolbarCurrentBlockType(BLOCK_TYPE_LABELS[nextBlockType]);
   }
 
   async cycleCurrentBlockTypeWithTab(
@@ -81,6 +116,20 @@ export class ScriptEditorPage extends BasePage {
     await this.page.keyboard.press('Enter');
     await this.expectBlockCount(2);
     await this.expectBlockTypeAt(1, nextBlockType);
+  }
+
+  async pressBackspaceOnCurrentBlock() {
+    await this.page.keyboard.press('Backspace');
+  }
+
+  async pressArrowUpAndExpectToolbarBlockType(expectedLabel: string) {
+    await this.page.keyboard.press('ArrowUp');
+    await this.expectToolbarCurrentBlockType(expectedLabel);
+  }
+
+  async pressArrowDownAndExpectToolbarBlockType(expectedLabel: string) {
+    await this.page.keyboard.press('ArrowDown');
+    await this.expectToolbarCurrentBlockType(expectedLabel);
   }
 
   async saveAndExpectIndicatorCycle() {

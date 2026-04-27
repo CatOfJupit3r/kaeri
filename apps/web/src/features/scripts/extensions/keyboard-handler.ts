@@ -1,5 +1,5 @@
 import { Extension } from '@tiptap/core';
-import { Selection } from '@tiptap/pm/state';
+import { Selection, TextSelection } from '@tiptap/pm/state';
 
 import { BLOCK_TYPE_CYCLE_ORDER, NEXT_BLOCK_TYPE_MAP } from '../types';
 import type { ScriptBlockType } from '../types';
@@ -113,6 +113,62 @@ export const ScriptKeyboardHandler = Extension.create({
         }
 
         return false;
+      },
+
+      ArrowUp: ({ editor }) => {
+        const { state } = editor;
+        const { $from, empty: isEmpty } = state.selection;
+
+        if (!isEmpty || $from.parentOffset !== 0) {
+          return false;
+        }
+
+        const currentBlockStart = $from.start($from.depth);
+        if (currentBlockStart <= 1) {
+          return false;
+        }
+
+        const targetPos = currentBlockStart - 2;
+
+        return editor
+          .chain()
+          .focus()
+          .command(({ tr, dispatch }) => {
+            if (dispatch) {
+              tr.setSelection(TextSelection.create(tr.doc, targetPos));
+            }
+
+            return true;
+          })
+          .run();
+      },
+
+      ArrowDown: ({ editor }) => {
+        const { state } = editor;
+        const { $from, empty: isEmpty } = state.selection;
+
+        if (!isEmpty || $from.parentOffset !== $from.parent.content.size) {
+          return false;
+        }
+
+        const currentBlockEnd = $from.end($from.depth);
+        const targetPos = currentBlockEnd + 2;
+
+        if (targetPos > state.doc.content.size) {
+          return false;
+        }
+
+        return editor
+          .chain()
+          .focus()
+          .command(({ tr, dispatch }) => {
+            if (dispatch) {
+              tr.setSelection(TextSelection.create(tr.doc, targetPos));
+            }
+
+            return true;
+          })
+          .run();
       },
 
       Backspace: ({ editor }) => {
