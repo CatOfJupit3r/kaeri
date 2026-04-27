@@ -81,6 +81,8 @@ interface iScriptEditorProps {
   onOpenSettings?: () => void;
   /** Callback to open export dialog */
   onExport?: () => void;
+  /** Callback to trigger an immediate save */
+  onSave?: (content: string) => void;
   /** Whether the content is currently saving */
   isSaving?: boolean;
   /** Last edit timestamp */
@@ -153,6 +155,7 @@ export function ScriptEditor({
   scriptId,
   onOpenSettings,
   onExport,
+  onSave,
   isSaving,
   lastEditedAt,
 }: iScriptEditorProps) {
@@ -469,6 +472,13 @@ export function ScriptEditor({
         title={title}
         onOpenSettings={onOpenSettings}
         onExport={onExport}
+        onSave={
+          editor == null
+            ? undefined
+            : () => {
+                onSave?.(JSON.stringify(editor.getJSON()));
+              }
+        }
         onBreakdown={() => setIsBreakdownOpen(true)}
         onTableRead={() => setIsTableReadOpen(true)}
         isSaving={isSaving}
@@ -525,7 +535,7 @@ export function ScriptEditor({
           ) : null}
 
           {/* Editor Content */}
-          <div ref={editorScrollRef} className="relative flex-1 overflow-y-auto pl-16">
+          <div ref={editorScrollRef} data-testid="script-editor" className="relative flex-1 overflow-y-auto pl-16">
             {editor ? <BlockMenu editor={editor} containerRef={editorScrollRef} /> : null}
             <EditorContent editor={editor} className="h-full" />
           </div>
@@ -676,7 +686,7 @@ export function ScriptEditor({
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="knowledge" className="mt-0 flex-1 overflow-hidden">
+            <TabsContent value="knowledge" data-testid="knowledge-base-panel" className="mt-0 flex-1 overflow-hidden">
               <KnowledgeBasePanel seriesId={seriesId} />
             </TabsContent>
 

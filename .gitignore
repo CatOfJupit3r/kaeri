@@ -5,3 +5,5 @@ node_modules
 mongo/data
 koneko
 pnpm-debug.log*
+test-results
+playwright-report

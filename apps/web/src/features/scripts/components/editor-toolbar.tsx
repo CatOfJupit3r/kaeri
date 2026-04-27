@@ -246,7 +246,7 @@ export function EditorToolbar({
         <div className="flex-1" />
 
         {/* Save Status */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div data-testid="save-indicator" className="flex items-center gap-2 text-xs text-muted-foreground">
           {isSaving === true ? (
             <>
               <LuLoader className="h-3 w-3 animate-spin" />

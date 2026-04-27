@@ -21,7 +21,7 @@ function ScriptEditorPage() {
   const { seriesId, scriptId } = Route.useParams();
   const navigate = useNavigate();
   const { data: script, isPending, error } = useScript(scriptId);
-  const { saveContent, isPending: isSaving } = useSaveScriptContent();
+  const { saveContent, saveContentImmediate, isPending: isSaving } = useSaveScriptContent();
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
@@ -47,6 +47,13 @@ function ScriptEditorPage() {
   const handleExport = useCallback(() => {
     setIsExportModalOpen(true);
   }, []);
+
+  const handleSave = useCallback(
+    (content: string) => {
+      saveContentImmediate(scriptId, content);
+    },
+    [saveContentImmediate, scriptId],
+  );
 
   // Keyboard shortcuts
   useHotkey('Mod+E', handleExport, { preventDefault: true });
@@ -87,6 +94,7 @@ function ScriptEditorPage() {
         scriptId={scriptId}
         onOpenSettings={handleOpenSettings}
         onExport={handleExport}
+        onSave={handleSave}
         isSaving={isSaving}
         lastEditedAt={script.lastEditedAt}
       />

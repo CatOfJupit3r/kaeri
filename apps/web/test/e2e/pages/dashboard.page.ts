@@ -65,6 +65,13 @@ export class DashboardPage extends BasePage {
     await expect(card).toBeVisible({ timeout: 10_000 });
   }
 
+  async openProject(title: string) {
+    const card = this.getSeriesCard(title);
+    await expect(card).toBeVisible({ timeout: 10_000 });
+    await card.getByRole('link').click();
+    await expect(this.page).toHaveURL(/\/series\/[^/]+(?:\/scripts)?$/, { timeout: 10_000 });
+  }
+
   async expectProjectNotVisible(title: string) {
     await expect(this.getSeriesCard(title)).toHaveCount(0, { timeout: 10_000 });
   }
