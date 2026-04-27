@@ -43,6 +43,7 @@ export const Action = Node.create({
     return [
       'div',
       mergeAttributes(HTMLAttributes, {
+        'data-testid': 'block',
         'data-block-type': 'action',
         class: 'script-block script-block--action',
       }),

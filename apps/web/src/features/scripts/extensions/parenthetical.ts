@@ -43,6 +43,7 @@ export const Parenthetical = Node.create({
     return [
       'div',
       mergeAttributes(HTMLAttributes, {
+        'data-testid': 'block',
         'data-block-type': 'parenthetical',
         class: 'script-block script-block--parenthetical',
       }),

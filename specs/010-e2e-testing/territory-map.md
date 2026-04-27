@@ -28,7 +28,7 @@ The goal is a complete writer-first E2E suite that covers every meaningful user 
 | Dashboard and Series shell | Partial | Basic dashboard flows exist; opening a series from the dashboard into the writing surface is covered |
 | Workspaces | Mapped only | Routes and UI exist; no dedicated E2E coverage yet |
 | Scripts library | Partial | Empty state, create-and-open, card metadata, and reopen coverage exist |
-| Script editor core | Partial | Editor route load, typing, and explicit save-and-reload persistence are covered |
+| Script editor core | Partial | Editor route load, split layout, default starting block, toolbar block-type switching, typing, save-state transition, and explicit save-and-reload persistence are covered |
 | Script x KB integration | Mapped only | Richest unique behavior; should be a dedicated suite, not scattered assertions |
 | Knowledge base | Mapped only | Main route exists with broad entity tabs; entity-family coverage still missing |
 | Canvas | Mapped only | Route exists; interaction-heavy coverage should be staged carefully |
@@ -198,11 +198,11 @@ Suggested fixtures and objects:
 
 Scenario inventory:
 - `EDITOR-01` (`Done`, `Now`): Script editor route loads a saved script.
-- `EDITOR-02` (`Now`): Split layout renders editor on the left and side panel on the right.
-- `EDITOR-03` (`Now`): Default empty script starts with at least one editable block.
+- `EDITOR-02` (`Done`, `Now`): Split layout renders editor on the left and side panel on the right.
+- `EDITOR-03` (`Done`, `Now`): Default empty script starts with at least one editable block.
 - `EDITOR-04` (`Done`, `Now`): Typing into the current block updates visible content.
 - `EDITOR-05` (`Done`, `Now`): Manual or debounced save persists content across reload.
-- `EDITOR-06` (`Now`): Save indicator moves through saving and saved states.
+- `EDITOR-06` (`Done`, `Now`): Save indicator moves through saving and saved states.
 - `EDITOR-07` (`Next`): Block type dropdown changes the current block type.
 - `EDITOR-08` (`Next`): `Tab` cycles block types in the expected order.
 - `EDITOR-09` (`Next`): `Enter` after scene heading creates an action block.
@@ -211,7 +211,7 @@ Scenario inventory:
 - `EDITOR-12` (`Next`): `Backspace` on an empty block removes it and focuses the previous block.
 - `EDITOR-13` (`Next`): Minimum one block remains after deleting empty blocks.
 - `EDITOR-14` (`Next`): Arrow-key navigation moves between adjacent blocks.
-- `EDITOR-15` (`Next`): Toolbar block-type switcher updates the current block.
+- `EDITOR-15` (`Done`, `Next`): Toolbar block-type switcher updates the current block.
 - `EDITOR-16` (`Next`): Add-block affordance inserts a new block at the end.
 - `EDITOR-17` (`Next`): Right-panel collapse and expand preserve editor usability.
 - `EDITOR-18` (`Next`): KB and canvas tabs inside the side panel can be switched without losing editor content.

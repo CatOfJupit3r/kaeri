@@ -122,7 +122,12 @@ export function EditorToolbar({
         {/* Format Menu - Block Type Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-9 gap-1 px-3 text-xs font-medium">
+            <Button
+              data-testid="block-type-selector"
+              variant="ghost"
+              size="sm"
+              className="h-9 gap-1 px-3 text-xs font-medium"
+            >
               {currentConfig ? (
                 <>
                   {currentConfig.icon}
@@ -140,6 +145,7 @@ export function EditorToolbar({
               return (
                 <DropdownMenuItem
                   key={type}
+                  data-testid={`block-type-option-${type}`}
                   onClick={() => onChangeBlockType(type)}
                   className={currentBlockType === type ? 'bg-accent' : ''}
                 >

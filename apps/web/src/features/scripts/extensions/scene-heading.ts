@@ -82,6 +82,7 @@ export const SceneHeading = Node.create({
     return [
       'div',
       mergeAttributes(HTMLAttributes, {
+        'data-testid': 'block',
         'data-block-type': 'scene-heading',
         class: 'script-block script-block--scene-heading',
       }),

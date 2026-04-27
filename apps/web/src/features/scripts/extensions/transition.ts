@@ -43,6 +43,7 @@ export const Transition = Node.create({
     return [
       'div',
       mergeAttributes(HTMLAttributes, {
+        'data-testid': 'block',
         'data-block-type': 'transition',
         class: 'script-block script-block--transition',
       }),

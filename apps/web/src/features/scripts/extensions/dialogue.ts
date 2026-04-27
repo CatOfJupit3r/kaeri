@@ -43,6 +43,7 @@ export const Dialogue = Node.create({
     return [
       'div',
       mergeAttributes(HTMLAttributes, {
+        'data-testid': 'block',
         'data-block-type': 'dialogue',
         class: 'script-block script-block--dialogue',
       }),
