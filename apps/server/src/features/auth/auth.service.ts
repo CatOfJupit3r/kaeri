@@ -45,8 +45,8 @@ const createInstance = (db: mongoose.mongo.Db, logger: LoggerType, valkey: Redis
     basePath: '/auth',
     advanced: {
       defaultCookieAttributes: {
-        sameSite: 'none',
-        secure: true,
+        sameSite: env.AUTH_COOKIE_SAME_SITE,
+        secure: env.AUTH_COOKIE_SECURE,
         httpOnly: true,
       },
     },

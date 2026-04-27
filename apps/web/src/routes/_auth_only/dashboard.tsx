@@ -109,7 +109,7 @@ function RouteComponent() {
               <h1 className="text-2xl font-bold text-foreground">My Projects</h1>
               <p className="text-sm text-muted-foreground">Manage all your series and screenplays</p>
             </div>
-            <Button className="gap-2" onClick={handleNewProject}>
+            <Button data-testid="create-series-button" className="gap-2" onClick={handleNewProject}>
               <span>New Project</span>
             </Button>
           </div>
@@ -130,7 +130,7 @@ function RouteComponent() {
               <h1 className="text-2xl font-bold text-foreground">My Projects</h1>
               <p className="text-sm text-muted-foreground">Manage all your series and screenplays</p>
             </div>
-            <Button className="gap-2" onClick={handleNewProject}>
+            <Button data-testid="create-series-button" className="gap-2" onClick={handleNewProject}>
               <span>New Project</span>
             </Button>
           </div>
@@ -158,7 +158,7 @@ function RouteComponent() {
             <p className="text-sm text-muted-foreground">Manage all your series and screenplays</p>
           </div>
 
-          <Button className="gap-2" onClick={handleNewProject}>
+          <Button data-testid="create-series-button" className="gap-2" onClick={handleNewProject}>
             <span>New Project</span>
           </Button>
         </div>
@@ -168,9 +168,13 @@ function RouteComponent() {
         {series.length === 0 ? (
           <SeriesEmptyState onCreateClick={handleNewProject} />
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div data-testid="series-grid" className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {series.map((s) => (
-              <Card key={s._id} className="group overflow-hidden transition-all hover:shadow-md">
+              <Card
+                key={s._id}
+                data-testid="series-card"
+                className="group overflow-hidden transition-all hover:shadow-md"
+              >
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-2">
                     <Link to="/series/$seriesId" params={{ seriesId: s._id }} className="flex-1 cursor-pointer">
@@ -187,14 +191,19 @@ function RouteComponent() {
                           </div>
                         ) : null}
                         <div>
-                          <h3 className="font-semibold text-foreground group-hover:text-primary">{s.title}</h3>
+                          <h3
+                            data-testid="series-card-title"
+                            className="font-semibold text-foreground group-hover:text-primary"
+                          >
+                            {s.title}
+                          </h3>
                           {s.genre ? <p className="text-xs text-muted-foreground">{s.genre}</p> : null}
                         </div>
                       </div>
                     </Link>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="size-8 p-0">
+                        <Button data-testid="series-card-menu" variant="ghost" size="sm" className="size-8 p-0">
                           <LuEllipsisVertical className="size-4" />
                           <span className="sr-only">Open menu</span>
                         </Button>

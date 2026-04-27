@@ -6,7 +6,7 @@
     "build": "tsdown --tsconfig tsconfig.build.json",
     "check-types": "tsgo --noEmit",
     "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js",
+    "start": "node dist/index.mjs",
     "prettier": "prettier --write .",
     "test": "cross-env NODE_ENV=test vitest run",
     "lint": "eslint . --ext .ts",

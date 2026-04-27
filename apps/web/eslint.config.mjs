@@ -223,6 +223,28 @@ const silenceWebOpinions = [
   },
 ];
 
+const playwrightTestConfig = [
+  {
+    files: ['test/e2e/**/*.{ts,tsx}'],
+    rules: {
+      'import-x/no-extraneous-dependencies': 'off',
+      'import-x/consistent-type-specifier-style': 'off',
+      'react-hooks/rules-of-hooks': 'off',
+      'no-await-in-loop': 'off',
+      'no-return-await': 'off',
+      '@typescript-eslint/return-await': 'off',
+      'lines-between-class-members': 'off',
+      '@stylistic/lines-between-class-members': 'off',
+      'no-useless-constructor': 'off',
+      '@typescript-eslint/no-useless-constructor': 'off',
+      '@typescript-eslint/consistent-type-definitions': 'off',
+      '@typescript-eslint/consistent-type-imports': 'off',
+      '@typescript-eslint/naming-convention': 'off',
+      'arrow-body-style': 'off',
+    },
+  },
+];
+
 export default [
   // Ignore .gitignore files/folder in eslint
   includeIgnoreFile(gitignorePath),
@@ -267,4 +289,5 @@ export default [
   ...prettierConfig,
   ...silenceOpinions,
   ...silenceWebOpinions,
+  ...playwrightTestConfig,
 ];
