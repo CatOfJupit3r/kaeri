@@ -205,7 +205,7 @@ describe('Workspace CRUD', () => {
 
       await expectErrorCode(
         () => call(appRouter.workspace.deleteWorkspace, { workspaceId: personal!._id }, ctx()),
-        'BAD_REQUEST',
+        'FORBIDDEN',
       );
     });
 

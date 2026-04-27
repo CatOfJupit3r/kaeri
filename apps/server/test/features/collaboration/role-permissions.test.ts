@@ -271,7 +271,7 @@ describe('Role Permissions', () => {
 
       await expectErrorCode(
         () => call(appRouter.workspaceMember.leaveWorkspace, { workspaceId: workspace._id }, ownerCtx()),
-        'BAD_REQUEST',
+        'FORBIDDEN',
       );
     });
   });

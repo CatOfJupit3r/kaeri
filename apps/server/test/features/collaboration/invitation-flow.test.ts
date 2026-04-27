@@ -128,14 +128,10 @@ describe('Invitation Flow', () => {
         ctx(),
       );
 
-      // Anyone with the code can view it
-      const { ctx: inviteeCtx } = await createUser({
-        email: 'bycode@example.com',
-        name: 'Invitee',
-        password: 'test123',
-      });
+      // Any authenticated user with the code can view it without changing invitation state
+      const { ctx: viewerCtx } = await createUser();
 
-      const fetched = await call(appRouter.invitation.getInvitationByCode, { code: invitation.code }, inviteeCtx());
+      const fetched = await call(appRouter.invitation.getInvitationByCode, { code: invitation.code }, viewerCtx());
 
       expect(fetched.workspaceName).toBe('Code Test');
       expect(fetched.role).toBe(WORKSPACE_ROLES.VIEWER);
@@ -155,7 +151,11 @@ describe('Invitation Flow', () => {
   describe('acceptInvitation', () => {
     it('should add user to workspace on accept', async () => {
       const { ctx: ownerCtx } = await createUser();
-      const inviteeEmail = `accept-test-${Date.now()}@example.com`;
+      const { ctx: inviteeCtx, user: invitee } = await createUser({
+        email: `accept-test-${Date.now()}@example.com`,
+        name: 'Invitee',
+        password: 'password123',
+      });
 
       const workspace = await call(appRouter.workspace.createWorkspace, { name: 'Accept Test' }, ownerCtx());
 
@@ -163,18 +163,11 @@ describe('Invitation Flow', () => {
         appRouter.invitation.createInvitation,
         {
           workspaceId: workspace._id,
-          email: inviteeEmail,
+          email: invitee.email,
           role: WORKSPACE_ROLES.EDITOR,
         },
         ownerCtx(),
       );
-
-      // Create user with matching email
-      const { ctx: inviteeCtx, user: invitee } = await createUser({
-        email: inviteeEmail,
-        name: 'Invitee',
-        password: 'test123',
-      });
 
       const result = await call(appRouter.invitation.acceptInvitation, { code: invitation.code }, inviteeCtx());
 
@@ -193,7 +186,11 @@ describe('Invitation Flow', () => {
 
     it('should update invitation status to ACCEPTED', async () => {
       const { ctx: ownerCtx } = await createUser();
-      const inviteeEmail = `status-test-${Date.now()}@example.com`;
+      const { ctx: inviteeCtx } = await createUser({
+        email: `status-test-${Date.now()}@example.com`,
+        name: 'Invitee',
+        password: 'password123',
+      });
 
       const workspace = await call(appRouter.workspace.createWorkspace, { name: 'Status Test' }, ownerCtx());
 
@@ -201,16 +198,10 @@ describe('Invitation Flow', () => {
         appRouter.invitation.createInvitation,
         {
           workspaceId: workspace._id,
-          email: inviteeEmail,
+          email: inviteeCtx().context.session.user.email,
         },
         ownerCtx(),
       );
-
-      const { ctx: inviteeCtx } = await createUser({
-        email: inviteeEmail,
-        name: 'Invitee',
-        password: 'test123',
-      });
 
       await call(appRouter.invitation.acceptInvitation, { code: invitation.code }, inviteeCtx());
 
@@ -236,7 +227,7 @@ describe('Invitation Flow', () => {
       const { ctx: wrongUserCtx } = await createUser({
         email: 'wrong@example.com',
         name: 'Wrong User',
-        password: 'test123',
+        password: 'password123',
       });
 
       await expectErrorCode(
@@ -249,7 +240,11 @@ describe('Invitation Flow', () => {
   describe('declineInvitation', () => {
     it('should decline invitation', async () => {
       const { ctx: ownerCtx } = await createUser();
-      const inviteeEmail = `decline-test-${Date.now()}@example.com`;
+      const { ctx: inviteeCtx } = await createUser({
+        email: `decline-test-${Date.now()}@example.com`,
+        name: 'Decliner',
+        password: 'password123',
+      });
 
       const workspace = await call(appRouter.workspace.createWorkspace, { name: 'Decline Test' }, ownerCtx());
 
@@ -257,16 +252,10 @@ describe('Invitation Flow', () => {
         appRouter.invitation.createInvitation,
         {
           workspaceId: workspace._id,
-          email: inviteeEmail,
+          email: inviteeCtx().context.session.user.email,
         },
         ownerCtx(),
       );
-
-      const { ctx: inviteeCtx } = await createUser({
-        email: inviteeEmail,
-        name: 'Decliner',
-        password: 'test123',
-      });
 
       const result = await call(appRouter.invitation.declineInvitation, { code: invitation.code }, inviteeCtx());
 
@@ -300,8 +289,9 @@ describe('Invitation Flow', () => {
 
       expect(result.success).toBe(true);
 
-      const deleted = await InvitationModel.findById(invitation._id);
-      expect(deleted).toBeNull();
+      const revoked = await InvitationModel.findById(invitation._id);
+      expect(revoked).toBeDefined();
+      expect(revoked?.status).toBe(INVITATION_STATUS.REVOKED);
     });
 
     it('should not allow non-admin to revoke', async () => {

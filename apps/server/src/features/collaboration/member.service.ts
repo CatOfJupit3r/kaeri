@@ -137,7 +137,7 @@ export class MemberService implements iWithLogger {
 
     // Ensure actor isn't assigning a role higher than their own
     const actorMembership = await this.permissionService.getMembership(workspaceId, actorId);
-    if (actorMembership && ROLE_HIERARCHY[newRole] <= ROLE_HIERARCHY[actorMembership.role]) {
+    if (actorMembership && ROLE_HIERARCHY[newRole] >= ROLE_HIERARCHY[actorMembership.role]) {
       if (actorMembership.role !== WORKSPACE_ROLES.OWNER) {
         throw ORPCForbiddenError(errorCodes.CANNOT_MODIFY_OWNER_ROLE);
       }
