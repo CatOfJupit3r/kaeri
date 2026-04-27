@@ -448,11 +448,11 @@ Required `data-testid` attributes for E2E tests:
 ### Running Tests
 
 ```bash
-bun run test              # All tests
-bun run test:ui           # Interactive UI mode
-bun run test:chromium     # Single browser
-bun run test:debug        # Debug mode with inspector
-bunx playwright test src/tests/auth/login.spec.ts  # Single file
+pnpm test              # All tests
+pnpm test:ui           # Interactive UI mode
+pnpm test:chromium     # Single browser
+pnpm test:debug        # Debug mode with inspector
+pnpm exec playwright test src/tests/auth/login.spec.ts  # Single file
 ```
 
 

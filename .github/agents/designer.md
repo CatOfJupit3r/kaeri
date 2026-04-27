@@ -141,7 +141,7 @@ export function ProfileForm() {
 ### Phase 4 — Accessibility, Tests & Polish
 1. Verify keyboard navigation, focus management, ARIA roles, and screen reader announcements.
 2. Add unit or interaction tests (Vitest/Testing Library) under `apps/web/src/features/.../__tests__` or dedicated test directories.
-3. Run `bun run prettier`, `bun run lint`, and `bun run check-types` before handing off.
+3. Run `pnpm prettier`, `pnpm lint`, and `pnpm check-types` before handing off.
 
 ## Patterns & Snippets
 
@@ -230,7 +230,7 @@ For each UI task, ensure:
 - [ ] Data access through `tanstackRPC` helpers with proper query keys and optimistic updates.
 - [ ] URL state managed via `nuqs` when the UX depends on filters/sorts/pagination.
 - [ ] Accessibility checklist satisfied and Sonner toasts used judiciously.
-- [ ] Tests and workspace checks (`bun run prettier`, `bun run lint`, `bun run check-types`) pass locally.
+- [ ] Tests and workspace checks (`pnpm prettier`, `pnpm lint`, `pnpm check-types`) pass locally.
 
 ## When to call the fullstack-engineer agent
 

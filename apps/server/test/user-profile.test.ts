@@ -1,5 +1,5 @@
 import { call } from '@orpc/server';
-import { it, expect, describe } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import { UserProfileModel } from '@~/db/models/user-profile.model';
 
@@ -13,7 +13,7 @@ describe('User Profile API', () => {
 
       const profile = await call(appRouter.user.getUserProfile, null, ctx());
 
-      expect(profile).not.toBeNil();
+      expect(profile).toBeDefined();
       expect(profile.bio).toBe('');
       expect(profile.userId).toBeDefined();
       expect(profile._id).toBeDefined();
@@ -41,7 +41,7 @@ describe('User Profile API', () => {
 
       const updatedProfile = await call(appRouter.user.updateUserProfile, { bio: 'This is my new bio' }, ctx());
 
-      expect(updatedProfile).not.toBeNil();
+      expect(updatedProfile).toBeDefined();
       expect(updatedProfile.bio).toBe('This is my new bio');
     });
 
@@ -52,7 +52,7 @@ describe('User Profile API', () => {
 
       const updatedProfile = await call(appRouter.user.updateUserProfile, { bio: 'New bio for new profile' }, ctx());
 
-      expect(updatedProfile).not.toBeNil();
+      expect(updatedProfile).toBeDefined();
       expect(updatedProfile.bio).toBe('New bio for new profile');
       expect(updatedProfile.userId).toBeDefined();
       expect(updatedProfile._id).toBeDefined();
@@ -78,7 +78,7 @@ describe('User Profile API', () => {
 
       const updatedProfile = await call(appRouter.user.updateUserProfile, { bio: maxBio }, ctx());
 
-      expect(updatedProfile).not.toBeNil();
+      expect(updatedProfile).toBeDefined();
       expect(updatedProfile.bio).toBe(maxBio);
       expect(updatedProfile.bio.length).toBe(500);
     });
@@ -88,7 +88,7 @@ describe('User Profile API', () => {
 
       const updatedProfile = await call(appRouter.user.updateUserProfile, { bio: '' }, ctx());
 
-      expect(updatedProfile).not.toBeNil();
+      expect(updatedProfile).toBeDefined();
       expect(updatedProfile.bio).toBe('');
     });
 

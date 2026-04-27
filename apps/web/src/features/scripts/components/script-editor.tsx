@@ -156,7 +156,7 @@ export function ScriptEditor({
   isSaving,
   lastEditedAt,
 }: iScriptEditorProps) {
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editorScrollRef = useRef<HTMLDivElement>(null);
   const isPreviewingRef = useRef(false);
   const [rightPanelTab, setRightPanelTab] = useState('knowledge');

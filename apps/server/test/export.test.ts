@@ -1,5 +1,5 @@
 import { call } from '@orpc/server';
-import { it, expect, describe } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import {
   addAppearance,
@@ -67,20 +67,20 @@ describe('Export API', () => {
       expect(result.series._id).toBe(series._id);
       expect(result.series.title).toBe('Empty Series');
       expect(result.series.genre).toBe('Drama');
-      expect(result.scripts).toBeArray();
+      expect(result.scripts).toBeInstanceOf(Array);
       expect(result.scripts.length).toBe(0);
-      expect(result.characters).toBeArray();
+      expect(result.characters).toBeInstanceOf(Array);
       expect(result.characters.length).toBe(0);
-      expect(result.locations).toBeArray();
+      expect(result.locations).toBeInstanceOf(Array);
       expect(result.locations.length).toBe(0);
-      expect(result.props).toBeArray();
+      expect(result.props).toBeInstanceOf(Array);
       expect(result.props.length).toBe(0);
-      expect(result.timeline).toBeArray();
+      expect(result.timeline).toBeInstanceOf(Array);
       expect(result.timeline.length).toBe(0);
-      expect(result.wildcards).toBeArray();
+      expect(result.wildcards).toBeInstanceOf(Array);
       expect(result.wildcards.length).toBe(0);
-      expect(result.canvas.nodes).toBeArray();
-      expect(result.canvas.edges).toBeArray();
+      expect(result.canvas.nodes).toBeInstanceOf(Array);
+      expect(result.canvas.edges).toBeInstanceOf(Array);
     });
 
     it('should export series with scripts', async () => {

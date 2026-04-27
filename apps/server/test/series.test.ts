@@ -1,5 +1,5 @@
 import { call } from '@orpc/server';
-import { it, expect, describe } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import { createScript, createSeries, createSeriesWithUser } from './helpers/factories';
 import { appRouter } from './helpers/instance';
@@ -218,7 +218,7 @@ describe('Series API', () => {
 
       const result = await call(appRouter.series.listSeries, { limit: 20, offset: 0 }, ctx());
 
-      expect(result.items).toBeArray();
+      expect(result.items).toBeInstanceOf(Array);
       expect(result.items.length).toBe(0);
       expect(result.total).toBe(0);
     });
@@ -309,7 +309,7 @@ describe('Series API', () => {
 
       const result = await call(appRouter.series.exportSeriesSummary, { seriesId: series._id }, ctx());
 
-      expect(result.scripts).toBeArray();
+      expect(result.scripts).toBeInstanceOf(Array);
       expect(result.scripts.length).toBe(0);
     });
   });

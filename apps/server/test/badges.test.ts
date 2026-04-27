@@ -1,5 +1,5 @@
 import { call } from '@orpc/server';
-import { it, expect, describe, beforeEach } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import { USER_ACHIEVEMENTS } from '@kaeri/shared';
 import { BADGE_IDS } from '@kaeri/shared/constants/badges';
@@ -17,7 +17,7 @@ describe('Badge Selection API', () => {
 
       const updatedProfile = await call(appRouter.user.updateUserBadge, { badgeId: BADGE_IDS.DEFAULT }, ctx());
 
-      expect(updatedProfile).not.toBeNil();
+      expect(updatedProfile).toBeDefined();
       expect(updatedProfile.selectedBadge).toBe(BADGE_IDS.DEFAULT);
       expect(updatedProfile.userId).toBe(user.id);
     });
@@ -52,7 +52,7 @@ describe('Badge Selection API', () => {
           const badgeId = BADGE_IDS[key as keyof typeof BADGE_IDS];
 
           const updatedProfile = await call(appRouter.user.updateUserBadge, { badgeId }, ctx());
-          expect(updatedProfile).not.toBeNil();
+          expect(updatedProfile).toBeDefined();
           expect(updatedProfile.selectedBadge).toBe(badgeId);
         }),
       );
@@ -65,7 +65,7 @@ describe('Badge Selection API', () => {
 
       const updatedProfile = await call(appRouter.user.updateUserBadge, { badgeId: BADGE_IDS.DEFAULT }, ctx());
 
-      expect(updatedProfile).not.toBeNil();
+      expect(updatedProfile).toBeDefined();
       expect(updatedProfile.selectedBadge).toBe(BADGE_IDS.DEFAULT);
       expect(updatedProfile.userId).toBe(user.id);
       expect(updatedProfile._id).toBeDefined();
@@ -99,7 +99,7 @@ describe('Badge Selection API', () => {
 
       const profile = await call(appRouter.user.getUserProfile, null, ctx());
 
-      expect(profile).not.toBeNil();
+      expect(profile).toBeDefined();
       expect(profile.selectedBadge).toBe(BADGE_IDS.DEFAULT);
     });
 
@@ -108,7 +108,7 @@ describe('Badge Selection API', () => {
 
       const profile = await call(appRouter.user.getUserProfile, null, ctx());
 
-      expect(profile).not.toBeNil();
+      expect(profile).toBeDefined();
       expect(profile.selectedBadge).toBeNull();
     });
   });

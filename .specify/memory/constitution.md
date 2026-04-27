@@ -22,7 +22,7 @@ Characters, locations, props, timelines, and episodes MUST have a single canonic
 The system MUST support multi-writer collaboration without data leaks: authenticated access only, role-aware visibility, audit-friendly change tracking, and no exposure of non-accessible resources (prefer NOT_FOUND over FORBIDDEN when hiding existence).
 
 ### IV. Quality Gates & Test Discipline
-Every change MUST pass contract/type checks and automated tests (`bun run check-types`, `bun run lint`, targeted tests). Tests MUST cover contracts, access rules, and continuity-critical flows; deterministic fixtures only. No feature merges without a verifiable test plan.
+Every change MUST pass contract/type checks and automated tests (`pnpm check-types`, `pnpm lint`, targeted tests). Tests MUST cover contracts, access rules, and continuity-critical flows; deterministic fixtures only. No feature merges without a verifiable test plan.
 
 ### V. Observability & Operational Readiness
 Logs and errors MUST be structured enough to trace contract calls and continuity mutations. Data changes affecting canon MUST be recoverable (backups or reversible migrations). Performance targets MUST be declared for bulk operations (e.g., episode timelines, character graphs) and validated when risk is introduced.

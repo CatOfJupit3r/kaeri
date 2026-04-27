@@ -63,7 +63,7 @@ from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be 
    - **IF EXISTS**: Read quickstart.md for integration scenarios
 
    **CRITICAL - Testing Requirements**:
-   - **NEVER** launch dev servers (`bun run dev`, `npm start`, etc.) for testing purposes
+   - **NEVER** launch dev servers (`pnpm dev`, `npm start`, etc.) for testing purposes
    - **DO NOT** manually test endpoints, web features, or server functionality
    - **ALWAYS** write integration tests in `apps/server/test/` to verify server functionality
    - Web features should NOT be tested - focus only on server-side integration tests

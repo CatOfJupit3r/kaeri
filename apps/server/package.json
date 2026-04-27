@@ -5,11 +5,10 @@
   "scripts": {
     "build": "tsdown --tsconfig tsconfig.build.json",
     "check-types": "tsgo --noEmit",
-    "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
-    "dev": "bun run --hot src/index.ts",
-    "start": "bun run dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
     "prettier": "prettier --write .",
-    "test": "NODE_ENV=test && bun test --preload ./test/helpers/setup.ts",
+    "test": "cross-env NODE_ENV=test vitest run",
     "lint": "eslint . --ext .ts",
     "postinstall": "patch-package"
   },
@@ -17,6 +16,7 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
+    "@hono/node-server": "1.14.3",
     "@hono/standard-validator": "0.2.1",
     "@kaeri/shared": "workspace:*",
     "@orpc/openapi": "catalog:",
@@ -43,11 +43,13 @@
     "@eslint/js": "catalog:",
     "@stylistic/eslint-plugin": "catalog:",
     "@trivago/prettier-plugin-sort-imports": "catalog:",
-    "@types/bun": "catalog:",
     "@types/lodash-es": "catalog:",
+    "@types/node": "22.15.17",
     "@typescript-eslint/eslint-plugin": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "@typescript/native-preview": "catalog:",
+    "@swc/core": "1.15.21",
+    "cross-env": "7.0.3",
     "eslint": "catalog:",
     "eslint-config-airbnb-extended": "catalog:",
     "eslint-config-prettier": "catalog:",
@@ -59,8 +61,11 @@
     "patch-package": "catalog:",
     "prettier": "catalog:",
     "tsdown": "catalog:",
+    "tsx": "4.19.4",
     "typescript": "catalog:",
-    "typescript-eslint": "catalog:"
+    "typescript-eslint": "catalog:",
+    "unplugin-swc": "1.5.9",
+    "vitest": "3.2.3"
   },
   "overrides": {
     "mongodb": "7.0.0"

@@ -1,5 +1,5 @@
 import { call } from '@orpc/server';
-import { it, expect, describe } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import { createScript, createSeriesWithUser } from './helpers/factories';
 import { appRouter } from './helpers/instance';
@@ -268,7 +268,7 @@ describe('Scripts API', () => {
         ctx(),
       );
 
-      expect(result.items).toBeArray();
+      expect(result.items).toBeInstanceOf(Array);
       expect(result.items.length).toBe(0);
       expect(result.total).toBe(0);
     });

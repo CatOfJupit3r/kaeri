@@ -5,7 +5,7 @@ on:
         types: [opened, synchronize, reopened]
         paths:
             - ".github/workflows/pull-request-web.yml"
-            - "bun.lockb"
+            - "pnpm-lock.yaml"
             - "apps/web/**/*.ts"
             - "apps/web/**/*.tsx"
             - "apps/web/package.json"
@@ -18,42 +18,39 @@ jobs:
         defaults:
             run:
                 working-directory: ./apps/web
-        strategy:
-            matrix:
-                bun-version: ["1.2.21", "latest"]
 
         steps:
             - uses: actions/checkout@v4
 
-            - name: Install Node 24.11.1 for tsdown
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+
+            - name: Setup Node
               uses: actions/setup-node@v4
               with:
                   node-version: 24.11.1
+                  cache: pnpm
 
-            - name: Setup Bun ${{ matrix.bun-version }}
-              uses: oven-sh/setup-bun@v1
-              with:
-                  bun-version: ${{ matrix.bun-version }}
-
-            - name: Install dependencies (web)
-              run: bun install
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+              working-directory: ./
 
             - name: Build dependencies
-              run: bun run build:deps
+              run: pnpm run build:deps
               working-directory: ./
 
             - name: Type check
-              run: bun run check-types
+              run: pnpm run check-types
 
             - name: Lint
-              run: bun run lint
+              run: pnpm run lint
 
             - name: Test
-              run: bun run test
+              run: pnpm run test
               env:
                   CI: true
 
             - name: Build
-              run: bun run build
+              run: pnpm run build
               env:
                   VITE_SERVER_URL: http://localhost:3000
