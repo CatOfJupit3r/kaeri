@@ -47,6 +47,7 @@ import { SeriesHeader } from '@~/features/series/components/series-header';
 import { SeriesTabs } from '@~/features/series/components/series-tabs';
 import { useSeries, seriesQueryOptions } from '@~/features/series/hooks/queries/use-series';
 import { StoryArcList } from '@~/features/story-arcs/components/story-arc-list';
+import { StoryArcPanel } from '@~/features/story-arcs/components/story-arc-panel';
 import { storyArcListQueryOptions } from '@~/features/story-arcs/hooks/queries/use-story-arc-list';
 import { ThemeList } from '@~/features/themes/components/theme-list';
 import { ThemePanel } from '@~/features/themes/components/theme-panel';
@@ -114,6 +115,7 @@ function RouteComponent() {
   const [selectedPropId, setSelectedPropId] = useState<string | null>(null);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
   const [selectedResearchId, setSelectedResearchId] = useState<string | null>(null);
+  const [selectedStoryArcId, setSelectedStoryArcId] = useState<string | null>(null);
   const [{ tab, viewMode }, setQueryStates] = useQueryStates({
     tab: parseAsStringEnum(TAB_VALUES_ARRAY).withDefault(TAB_VALUES.all),
     viewMode: parseAsStringEnum(VIEW_MODE_ARRAY).withDefault(VIEW_MODE.grid),
@@ -187,6 +189,14 @@ function RouteComponent() {
     setSelectedResearchId(null);
   };
 
+  const handleStoryArcSelect = (storyArcId: string) => {
+    setSelectedStoryArcId(storyArcId);
+  };
+
+  const handleCloseStoryArcEdit = () => {
+    setSelectedStoryArcId(null);
+  };
+
   const handleImport = () => {
     setIsImportModalOpen(true);
   };
@@ -224,6 +234,10 @@ function RouteComponent() {
     knowledgeBaseContent = <ThemePanel themeId={selectedThemeId} seriesId={seriesId} onClose={handleCloseThemeEdit} />;
   } else if (selectedResearchId != null) {
     knowledgeBaseContent = <ResearchPanel researchId={selectedResearchId} onBack={handleCloseResearchEdit} />;
+  } else if (selectedStoryArcId != null) {
+    knowledgeBaseContent = (
+      <StoryArcPanel storyArcId={selectedStoryArcId} seriesId={seriesId} onClose={handleCloseStoryArcEdit} />
+    );
   }
 
   return (
@@ -339,6 +353,7 @@ function RouteComponent() {
                     onTabChange={handleTabChange}
                     onLocationSelect={handleLocationSelect}
                     onPropSelect={handlePropSelect}
+                    onStoryArcSelect={handleStoryArcSelect}
                     onThemeSelect={handleThemeSelect}
                   />
                 </TabsContent>
@@ -368,7 +383,7 @@ function RouteComponent() {
                 </TabsContent>
 
                 <TabsContent value="story-arcs" className="mt-6 space-y-4">
-                  <StoryArcList seriesId={seriesId} />
+                  <StoryArcList seriesId={seriesId} onStoryArcSelect={handleStoryArcSelect} />
                 </TabsContent>
 
                 <TabsContent value="themes" className="mt-6 space-y-4">

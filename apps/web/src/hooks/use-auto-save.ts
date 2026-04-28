@@ -96,6 +96,18 @@ export function useAutoSave(
 
     if (!isInitializedRef.current) {
       pendingSaveRef.current = true;
+
+      if (isUpdating) {
+        return;
+      }
+
+      if (initializationTimeoutRef.current) {
+        clearTimeout(initializationTimeoutRef.current);
+        initializationTimeoutRef.current = null;
+      }
+
+      isInitializedRef.current = true;
+      performSave();
       return;
     }
 

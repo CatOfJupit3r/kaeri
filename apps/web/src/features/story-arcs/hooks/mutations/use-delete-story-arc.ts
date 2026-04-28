@@ -5,11 +5,17 @@ import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import type { StoryArcListQueryReturnType } from '../queries/use-story-arc-list';
 
+function isStoryArcListQuery(queryKey: readonly unknown[]) {
+  const serializedQueryKey = JSON.stringify(queryKey);
+
+  return serializedQueryKey.includes('"storyArc"') && serializedQueryKey.includes('"listStoryArcs"');
+}
+
 export const deleteStoryArcMutationOptions = tanstackRPC.storyArc.deleteStoryArc.mutationOptions({
   onMutate: async ({ storyArcId }, ctx) => {
-    const listQueryKeys = ctx.client
-      .getQueryCache()
-      .findAll({ predicate: (query) => query.queryKey[0] === 'storyArc' && query.queryKey[1] === 'listStoryArcs' });
+    const listQueryKeys = ctx.client.getQueryCache().findAll({
+      predicate: (query) => isStoryArcListQuery(query.queryKey),
+    });
 
     const previousData: Array<{ queryKey: readonly unknown[]; data: StoryArcListQueryReturnType | undefined }> = [];
 
@@ -30,7 +36,7 @@ export const deleteStoryArcMutationOptions = tanstackRPC.storyArc.deleteStoryArc
   },
   onSuccess: (_data, _variables, _context, ctx) => {
     void ctx.client.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === 'storyArc' && query.queryKey[1] === 'listStoryArcs',
+      predicate: (query) => isStoryArcListQuery(query.queryKey),
     });
     toastSuccess('Story arc deleted successfully');
   },
@@ -44,7 +50,7 @@ export const deleteStoryArcMutationOptions = tanstackRPC.storyArc.deleteStoryArc
     }
 
     void ctx.client.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === 'storyArc' && query.queryKey[1] === 'listStoryArcs',
+      predicate: (query) => isStoryArcListQuery(query.queryKey),
     });
     toastORPCError('Failed to delete story arc', error);
   },

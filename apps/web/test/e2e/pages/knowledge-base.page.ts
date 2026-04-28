@@ -40,6 +40,11 @@ export class KnowledgeBasePage extends BasePage {
   private readonly createResearchDialog = this.page.getByRole('dialog', { name: /^new research entry$/i });
   private readonly editResearchHeading = this.page.getByRole('heading', { name: /^edit research$/i });
   private readonly deleteResearchDialog = this.page.getByRole('alertdialog', { name: /^delete research entry$/i });
+  private readonly newStoryArcButton = this.page.getByRole('button', { name: /^create story arc$/i }).first();
+  private readonly createStoryArcDialog = this.page.getByRole('dialog', { name: /^create story arc$/i });
+  private readonly editStoryArcHeading = this.page.getByRole('heading', { name: /^edit story arc$/i });
+  private readonly editStoryArcBackButton = this.page.getByRole('button', { name: /^back$/i }).first();
+  private readonly deleteStoryArcDialog = this.page.getByRole('alertdialog', { name: /^delete story arc$/i });
 
   constructor(page: Page) {
     super(page);
@@ -159,6 +164,15 @@ export class KnowledgeBasePage extends BasePage {
 
   private getDeleteResearchButton(title: string) {
     return this.getResearchCard(title).getByRole('button').nth(1);
+  }
+
+  private getStoryArcCard(name: string) {
+    return this.page
+      .locator('div.group.cursor-pointer')
+      .filter({
+        has: this.page.getByRole('heading', { name, exact: true }).first(),
+      })
+      .first();
   }
 
   async navigateToKnowledgeBase(seriesId: string, search = '') {
@@ -534,6 +548,61 @@ export class KnowledgeBasePage extends BasePage {
     await this.deleteResearchDialog.getByRole('button', { name: /^delete$/i, exact: true }).click();
     await expect(this.deleteResearchDialog).not.toBeVisible({ timeout: 10_000 });
     await this.expectResearchNotVisible(title);
+  }
+
+  async createStoryArc(data: { name: string; description?: string }) {
+    await expect(this.newStoryArcButton).toBeVisible({ timeout: 10_000 });
+    await this.newStoryArcButton.click();
+    await expect(this.createStoryArcDialog).toBeVisible({ timeout: 10_000 });
+    await this.createStoryArcDialog.getByLabel(/^arc name$/i).fill(data.name);
+
+    if (data.description != null) {
+      await this.createStoryArcDialog.getByLabel(/^description$/i).fill(data.description);
+    }
+
+    await this.createStoryArcDialog.getByRole('button', { name: /^create$/i }).click();
+    await expect(this.createStoryArcDialog).not.toBeVisible({ timeout: 10_000 });
+    await this.expectStoryArcVisible(data.name);
+  }
+
+  async expectStoryArcVisible(name: string) {
+    await expect(this.getStoryArcCard(name)).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectStoryArcNotVisible(name: string) {
+    await expect(this.getStoryArcCard(name)).toHaveCount(0, { timeout: 10_000 });
+  }
+
+  async openStoryArcForEdit(name: string) {
+    await this.getStoryArcCard(name).click();
+    await expect(this.editStoryArcHeading).toBeVisible({ timeout: 10_000 });
+  }
+
+  async updateStoryArcDescription(text: string) {
+    const descriptionField = this.page.getByLabel(/^description$/i);
+
+    await expect(descriptionField).toBeVisible({ timeout: 10_000 });
+    await descriptionField.fill(text);
+    await descriptionField.press('Tab');
+    await this.waitForNetworkIdle();
+  }
+
+  async closeStoryArcEditPanel() {
+    await expect(this.editStoryArcBackButton).toBeVisible({ timeout: 10_000 });
+    await this.editStoryArcBackButton.click();
+    await expect(this.editStoryArcHeading).toHaveCount(0, { timeout: 10_000 });
+  }
+
+  async deleteStoryArc(name: string) {
+    const storyArcCard = this.getStoryArcCard(name);
+
+    await expect(storyArcCard).toBeVisible({ timeout: 10_000 });
+    await storyArcCard.hover();
+    await storyArcCard.getByRole('button').nth(1).click();
+    await expect(this.deleteStoryArcDialog).toBeVisible({ timeout: 10_000 });
+    await this.deleteStoryArcDialog.getByRole('button', { name: /^delete$/i, exact: true }).click();
+    await expect(this.deleteStoryArcDialog).not.toBeVisible({ timeout: 10_000 });
+    await this.expectStoryArcNotVisible(name);
   }
 
   async searchForEntity(query: string) {

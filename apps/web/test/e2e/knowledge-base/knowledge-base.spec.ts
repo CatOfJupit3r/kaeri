@@ -244,4 +244,31 @@ test.describe('Knowledge base', () => {
     });
     await knowledgeBasePage.deleteResearch(researchTitle);
   });
+
+  test('creates a story arc, edits it from the story arcs tab, and deletes it', async ({
+    dashboardPage,
+    knowledgeBasePage,
+  }) => {
+    test.slow();
+
+    const projectTitle = createProjectTitle('E2E KB Story Arc');
+    const storyArcName = `Harbor Redemption ${Date.now()}`;
+    const description = 'A long arc about earning trust back.';
+    const updatedDescription = 'A long arc about earning trust back after a public betrayal.';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await knowledgeBasePage.navigateToKnowledgeBaseFromCurrentSeries('?tab=story-arcs');
+    await knowledgeBasePage.createStoryArc({ name: storyArcName, description });
+    await knowledgeBasePage.openStoryArcForEdit(storyArcName);
+    await knowledgeBasePage.updateStoryArcDescription(updatedDescription);
+    await knowledgeBasePage.closeStoryArcEditPanel();
+    await knowledgeBasePage.expectStoryArcVisible(storyArcName);
+    await expect(knowledgeBasePage.page.getByText(updatedDescription, { exact: false }).first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await knowledgeBasePage.deleteStoryArc(storyArcName);
+  });
 });
