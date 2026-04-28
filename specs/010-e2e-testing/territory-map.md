@@ -30,7 +30,7 @@ The goal is a complete writer-first E2E suite that covers every meaningful user 
 | Scripts library | Partial | Empty state, create-and-open, card metadata, and reopen coverage exist |
 | Script editor core | Partial | Editor route load, split layout, default starting block, toolbar and block-menu type switching, Tab cycling, scene-heading/character/dialogue Enter rules, Backspace deletion guards, arrow navigation, add-block controls, panel collapse/expand, panel tab switching, keyboard shortcuts panel, export/settings shortcuts, breakdown/table-read dialogs, version history open/list/preview/dismiss/restore flows, typing, save-state transition, and explicit save-and-reload persistence are covered |
 | Script x KB integration | Partial | Dedicated editor-integration coverage now exists for character-block KB suggestions and keyboard selection |
-| Knowledge base | Partial | Route default/deep-link behavior, search-to-tab routing, character detail, and character/location/prop create-edit-delete flows are covered |
+| Knowledge base | Partial | Route default/deep-link behavior, search-to-tab routing, character detail, and character/location/prop/theme/wildcard create-edit-delete flows are covered |
 | Canvas | Mapped only | Route exists; interaction-heavy coverage should be staged carefully |
 | Export and import | Mapped only | JSON export/import and PDF export surfaces exist |
 | Continuity and analytics | Mapped only | KB history/graph and analytics routes exist; no executable coverage yet |
@@ -285,9 +285,9 @@ Scenario inventory:
 - `KB-08` (`Done`, `Next`): Prop create, edit, and delete flows work end to end.
 - `KB-09` (`Next`): Scene entity list and detail flows work end to end.
 - `KB-10` (`Next`): Timeline entry create, edit, and delete flows work end to end.
-- `KB-11` (`Next`): Wildcard create, edit, and delete flows work end to end.
+- `KB-11` (`Done`, `Next`): Wildcard create, edit, and delete flows work end to end.
 - `KB-12` (`Next`): Story arc create, edit, and delete flows work end to end.
-- `KB-13` (`Next`): Theme create, edit, and delete flows work end to end.
+- `KB-13` (`Done`, `Next`): Theme create, edit, and delete flows work end to end.
 - `KB-14` (`Next`): Research-item flows exposed in the research tab work end to end.
 - `KB-15` (`Done`, `Next`): Character detail route loads overview data.
 - `KB-16` (`Next`): Character relationships render and navigate safely.

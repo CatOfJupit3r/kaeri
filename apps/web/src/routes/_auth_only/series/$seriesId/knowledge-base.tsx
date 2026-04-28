@@ -48,6 +48,7 @@ import { useSeries, seriesQueryOptions } from '@~/features/series/hooks/queries/
 import { StoryArcList } from '@~/features/story-arcs/components/story-arc-list';
 import { storyArcListQueryOptions } from '@~/features/story-arcs/hooks/queries/use-story-arc-list';
 import { ThemeList } from '@~/features/themes/components/theme-list';
+import { ThemePanel } from '@~/features/themes/components/theme-panel';
 import { themeListQueryOptions } from '@~/features/themes/hooks/queries/use-theme-list';
 import { TimelineList } from '@~/features/timelines/components/timeline-list';
 import { timelineListQueryOptions } from '@~/features/timelines/hooks/queries/use-timeline-list';
@@ -110,6 +111,7 @@ function RouteComponent() {
   const [auditOffset, setAuditOffset] = useState(0);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const [selectedPropId, setSelectedPropId] = useState<string | null>(null);
+  const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
   const [{ tab, viewMode }, setQueryStates] = useQueryStates({
     tab: parseAsStringEnum(TAB_VALUES_ARRAY).withDefault(TAB_VALUES.all),
     viewMode: parseAsStringEnum(VIEW_MODE_ARRAY).withDefault(VIEW_MODE.grid),
@@ -166,6 +168,14 @@ function RouteComponent() {
     setSelectedPropId(null);
   };
 
+  const handleThemeSelect = (themeId: string) => {
+    setSelectedThemeId(themeId);
+  };
+
+  const handleCloseThemeEdit = () => {
+    setSelectedThemeId(null);
+  };
+
   const handleImport = () => {
     setIsImportModalOpen(true);
   };
@@ -199,6 +209,8 @@ function RouteComponent() {
     );
   } else if (selectedPropId != null) {
     knowledgeBaseContent = <PropPanel propId={selectedPropId} seriesId={seriesId} onClose={handleClosePropEdit} />;
+  } else if (selectedThemeId != null) {
+    knowledgeBaseContent = <ThemePanel themeId={selectedThemeId} seriesId={seriesId} onClose={handleCloseThemeEdit} />;
   }
 
   return (
@@ -314,6 +326,7 @@ function RouteComponent() {
                     onTabChange={handleTabChange}
                     onLocationSelect={handleLocationSelect}
                     onPropSelect={handlePropSelect}
+                    onThemeSelect={handleThemeSelect}
                   />
                 </TabsContent>
 
@@ -346,7 +359,7 @@ function RouteComponent() {
                 </TabsContent>
 
                 <TabsContent value="themes" className="mt-6 space-y-4">
-                  <ThemeList seriesId={seriesId} />
+                  <ThemeList seriesId={seriesId} onThemeSelect={handleThemeSelect} />
                 </TabsContent>
 
                 <TabsContent value="research" className="mt-6 space-y-4">

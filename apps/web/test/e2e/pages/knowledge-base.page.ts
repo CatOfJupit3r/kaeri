@@ -23,6 +23,15 @@ export class KnowledgeBasePage extends BasePage {
   private readonly deletePropDialog = this.page.getByRole('alertdialog', { name: /^delete prop$/i });
   private readonly editPropHeading = this.page.getByRole('heading', { name: /^edit prop$/i });
   private readonly editPropBackButton = this.page.getByRole('button', { name: /^back$/i }).first();
+  private readonly newThemeButton = this.page.getByRole('button', { name: /^new theme$/i }).first();
+  private readonly createThemeDialog = this.page.getByRole('dialog', { name: /^create theme$/i });
+  private readonly deleteThemeDialog = this.page.getByRole('alertdialog', { name: /^delete theme$/i });
+  private readonly editThemeHeading = this.page.getByRole('heading', { name: /^edit theme$/i });
+  private readonly editThemeBackButton = this.page.getByRole('button', { name: /^back$/i }).first();
+  private readonly newWildcardButton = this.page.getByRole('button', { name: /^new wild card$/i }).first();
+  private readonly createWildcardDialog = this.page.getByRole('dialog', { name: /^create wild card$/i });
+  private readonly editWildcardDialog = this.page.getByRole('dialog', { name: /^edit wild card$/i });
+  private readonly deleteWildcardDialog = this.page.getByRole('alertdialog', { name: /^delete wild card$/i });
 
   constructor(page: Page) {
     super(page);
@@ -77,6 +86,40 @@ export class KnowledgeBasePage extends BasePage {
   private getDeletePropButton(name: string) {
     return this.page.getByRole('button', {
       name: new RegExp(`^delete ${escapeRegExp(name)}$`, 'i'),
+    });
+  }
+
+  private getThemeCard(name: string) {
+    return this.page.getByRole('button', {
+      name: new RegExp(`^open theme ${escapeRegExp(name)}$`, 'i'),
+    });
+  }
+
+  private getEditThemeButton(name: string) {
+    return this.page.getByRole('button', {
+      name: new RegExp(`^edit ${escapeRegExp(name)}$`, 'i'),
+    });
+  }
+
+  private getDeleteThemeButton(name: string) {
+    return this.page.getByRole('button', {
+      name: new RegExp(`^delete ${escapeRegExp(name)}$`, 'i'),
+    });
+  }
+
+  private getWildcardHeading(title: string) {
+    return this.page.getByRole('heading', { name: title, exact: true }).first();
+  }
+
+  private getEditWildcardButton(title: string) {
+    return this.page.getByRole('button', {
+      name: new RegExp(`^edit ${escapeRegExp(title)}$`, 'i'),
+    });
+  }
+
+  private getDeleteWildcardButton(title: string) {
+    return this.page.getByRole('button', {
+      name: new RegExp(`^delete ${escapeRegExp(title)}$`, 'i'),
     });
   }
 
@@ -259,6 +302,106 @@ export class KnowledgeBasePage extends BasePage {
     await this.deletePropDialog.getByRole('button', { name: /^delete$/i, exact: true }).click();
     await expect(this.deletePropDialog).not.toBeVisible({ timeout: 10_000 });
     await this.expectPropNotVisible(name);
+  }
+
+  async createTheme(data: { name: string; description?: string }) {
+    await expect(this.newThemeButton).toBeVisible({ timeout: 10_000 });
+    await this.newThemeButton.click();
+    await expect(this.createThemeDialog).toBeVisible({ timeout: 10_000 });
+    await this.createThemeDialog.getByLabel(/^theme name$/i).fill(data.name);
+
+    if (data.description != null) {
+      await this.createThemeDialog.getByLabel(/^description$/i).fill(data.description);
+    }
+
+    await this.createThemeDialog.getByRole('button', { name: /^create theme$/i }).click();
+    await expect(this.createThemeDialog).not.toBeVisible({ timeout: 10_000 });
+    await this.expectThemeVisible(data.name);
+  }
+
+  async expectThemeVisible(name: string) {
+    await expect(this.getThemeCard(name)).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectThemeNotVisible(name: string) {
+    await expect(this.getThemeCard(name)).toHaveCount(0, { timeout: 10_000 });
+  }
+
+  async openThemeForEdit(name: string) {
+    await this.getEditThemeButton(name).click();
+    await expect(this.editThemeHeading).toBeVisible({ timeout: 10_000 });
+  }
+
+  async updateThemeDescription(text: string) {
+    const descriptionField = this.page.getByLabel(/^description$/i);
+
+    await expect(descriptionField).toBeVisible({ timeout: 10_000 });
+    await descriptionField.fill(text);
+    await descriptionField.press('Tab');
+    await this.waitForNetworkIdle();
+  }
+
+  async closeThemeEditPanel() {
+    await expect(this.editThemeBackButton).toBeVisible({ timeout: 10_000 });
+    await this.editThemeBackButton.click();
+    await expect(this.editThemeHeading).toHaveCount(0, { timeout: 10_000 });
+  }
+
+  async deleteTheme(name: string) {
+    await this.getDeleteThemeButton(name).click();
+    await expect(this.deleteThemeDialog).toBeVisible({ timeout: 10_000 });
+    await this.deleteThemeDialog.getByRole('button', { name: /^delete$/i, exact: true }).click();
+    await expect(this.deleteThemeDialog).not.toBeVisible({ timeout: 10_000 });
+    await this.expectThemeNotVisible(name);
+  }
+
+  async createWildcard(data: { title: string; body?: string; tag?: string }) {
+    await expect(this.newWildcardButton).toBeVisible({ timeout: 10_000 });
+    await this.newWildcardButton.click();
+    await expect(this.createWildcardDialog).toBeVisible({ timeout: 10_000 });
+    await this.createWildcardDialog.getByLabel(/^title$/i).fill(data.title);
+
+    if (data.tag != null) {
+      await this.createWildcardDialog.getByLabel(/^tag$/i).fill(data.tag);
+    }
+
+    if (data.body != null) {
+      await this.createWildcardDialog.getByLabel(/^content$/i).fill(data.body);
+    }
+
+    await this.createWildcardDialog.getByRole('button', { name: /^create wild card$/i }).click();
+    await expect(this.createWildcardDialog).not.toBeVisible({ timeout: 10_000 });
+    await this.expectWildcardVisible(data.title);
+  }
+
+  async expectWildcardVisible(title: string) {
+    await expect(this.getWildcardHeading(title)).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectWildcardNotVisible(title: string) {
+    await expect(this.getWildcardHeading(title)).toHaveCount(0, { timeout: 10_000 });
+  }
+
+  async openWildcardForEdit(title: string) {
+    await this.getEditWildcardButton(title).click();
+    await expect(this.editWildcardDialog).toBeVisible({ timeout: 10_000 });
+  }
+
+  async updateWildcardContent(text: string) {
+    const contentField = this.editWildcardDialog.getByLabel(/^content$/i);
+
+    await expect(contentField).toBeVisible({ timeout: 10_000 });
+    await contentField.fill(text);
+    await this.editWildcardDialog.getByRole('button', { name: /^update wild card$/i }).click();
+    await expect(this.editWildcardDialog).not.toBeVisible({ timeout: 10_000 });
+  }
+
+  async deleteWildcard(title: string) {
+    await this.getDeleteWildcardButton(title).click();
+    await expect(this.deleteWildcardDialog).toBeVisible({ timeout: 10_000 });
+    await this.deleteWildcardDialog.getByRole('button', { name: /^delete$/i, exact: true }).click();
+    await expect(this.deleteWildcardDialog).not.toBeVisible({ timeout: 10_000 });
+    await this.expectWildcardNotVisible(title);
   }
 
   async searchForEntity(query: string) {

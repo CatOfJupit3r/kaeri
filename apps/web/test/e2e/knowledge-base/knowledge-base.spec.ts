@@ -143,4 +143,57 @@ test.describe('Knowledge base', () => {
     });
     await knowledgeBasePage.deleteProp(propName);
   });
+
+  test('creates a theme, edits it from the themes tab, and deletes it', async ({
+    dashboardPage,
+    knowledgeBasePage,
+  }) => {
+    test.slow();
+
+    const projectTitle = createProjectTitle('E2E KB Theme');
+    const themeName = `Redemption ${Date.now()}`;
+    const description = 'Characters struggle toward redemption.';
+    const updatedDescription = 'Characters struggle toward redemption after betrayal.';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await knowledgeBasePage.navigateToKnowledgeBaseFromCurrentSeries('?tab=themes');
+    await knowledgeBasePage.createTheme({ name: themeName, description });
+    await knowledgeBasePage.openThemeForEdit(themeName);
+    await knowledgeBasePage.updateThemeDescription(updatedDescription);
+    await knowledgeBasePage.closeThemeEditPanel();
+    await knowledgeBasePage.expectThemeVisible(themeName);
+    await expect(knowledgeBasePage.page.getByText(updatedDescription, { exact: false }).first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await knowledgeBasePage.deleteTheme(themeName);
+  });
+
+  test('creates a wild card, edits it from the wild cards tab, and deletes it', async ({
+    dashboardPage,
+    knowledgeBasePage,
+  }) => {
+    test.slow();
+
+    const projectTitle = createProjectTitle('E2E KB Wildcard');
+    const wildcardTitle = `Loose Thread ${Date.now()}`;
+    const body = 'A clue that may matter later.';
+    const updatedBody = 'A clue that definitely matters later.';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await knowledgeBasePage.navigateToKnowledgeBaseFromCurrentSeries('?tab=wildcards');
+    await knowledgeBasePage.createWildcard({ title: wildcardTitle, body, tag: 'mystery' });
+    await knowledgeBasePage.openWildcardForEdit(wildcardTitle);
+    await knowledgeBasePage.updateWildcardContent(updatedBody);
+    await knowledgeBasePage.expectWildcardVisible(wildcardTitle);
+    await expect(knowledgeBasePage.page.getByText(updatedBody, { exact: false }).first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await knowledgeBasePage.deleteWildcard(wildcardTitle);
+  });
 });
