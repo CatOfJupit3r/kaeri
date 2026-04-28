@@ -92,4 +92,55 @@ test.describe('Knowledge base', () => {
     });
     await knowledgeBasePage.deleteCharacter(characterName);
   });
+
+  test('creates a location, edits it from the locations tab, and deletes it', async ({
+    dashboardPage,
+    knowledgeBasePage,
+  }) => {
+    test.slow();
+
+    const projectTitle = createProjectTitle('E2E KB Location');
+    const locationName = `Harbor ${Date.now()}`;
+    const description = 'A foggy harbor at dawn.';
+    const updatedDescription = 'A foggy harbor at sunset.';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await knowledgeBasePage.navigateToKnowledgeBaseFromCurrentSeries('?tab=locations');
+    await knowledgeBasePage.createLocation({ name: locationName, description });
+    await knowledgeBasePage.openLocationForEdit(locationName);
+    await knowledgeBasePage.updateLocationDescription(updatedDescription);
+    await knowledgeBasePage.closeLocationEditPanel();
+    await knowledgeBasePage.expectLocationVisible(locationName);
+    await expect(knowledgeBasePage.page.getByText(updatedDescription, { exact: false }).first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await knowledgeBasePage.deleteLocation(locationName);
+  });
+
+  test('creates a prop, edits it from the props tab, and deletes it', async ({ dashboardPage, knowledgeBasePage }) => {
+    test.slow();
+
+    const projectTitle = createProjectTitle('E2E KB Prop');
+    const propName = `Compass ${Date.now()}`;
+    const description = 'A brass nautical compass.';
+    const updatedDescription = 'A brass nautical compass with a cracked lid.';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await knowledgeBasePage.navigateToKnowledgeBaseFromCurrentSeries('?tab=props');
+    await knowledgeBasePage.createProp({ name: propName, description });
+    await knowledgeBasePage.openPropForEdit(propName);
+    await knowledgeBasePage.updatePropDescription(updatedDescription);
+    await knowledgeBasePage.closePropEditPanel();
+    await knowledgeBasePage.expectPropVisible(propName);
+    await expect(knowledgeBasePage.page.getByText(updatedDescription, { exact: false }).first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await knowledgeBasePage.deleteProp(propName);
+  });
 });

@@ -30,7 +30,7 @@ The goal is a complete writer-first E2E suite that covers every meaningful user 
 | Scripts library | Partial | Empty state, create-and-open, card metadata, and reopen coverage exist |
 | Script editor core | Partial | Editor route load, split layout, default starting block, toolbar and block-menu type switching, Tab cycling, scene-heading/character/dialogue Enter rules, Backspace deletion guards, arrow navigation, add-block controls, panel collapse/expand, panel tab switching, keyboard shortcuts panel, export/settings shortcuts, breakdown/table-read dialogs, version history open/list/preview/dismiss/restore flows, typing, save-state transition, and explicit save-and-reload persistence are covered |
 | Script x KB integration | Partial | Dedicated editor-integration coverage now exists for character-block KB suggestions and keyboard selection |
-| Knowledge base | Partial | Route default/deep-link behavior, search-to-tab routing, and character create/edit/delete/detail flows are covered |
+| Knowledge base | Partial | Route default/deep-link behavior, search-to-tab routing, character detail, and character/location/prop create-edit-delete flows are covered |
 | Canvas | Mapped only | Route exists; interaction-heavy coverage should be staged carefully |
 | Export and import | Mapped only | JSON export/import and PDF export surfaces exist |
 | Continuity and analytics | Mapped only | KB history/graph and analytics routes exist; no executable coverage yet |
@@ -281,8 +281,8 @@ Scenario inventory:
 - `KB-04` (`Done`, `Next`): Global KB search returns matching results across entity families.
 - `KB-05` (`Done`, `Next`): Clicking a search result routes the user to the matching tab or detail surface.
 - `KB-06` (`Done`, `Next`): Character create, edit, and delete flows work end to end.
-- `KB-07` (`Next`): Location create, edit, and delete flows work end to end.
-- `KB-08` (`Next`): Prop create, edit, and delete flows work end to end.
+- `KB-07` (`Done`, `Next`): Location create, edit, and delete flows work end to end.
+- `KB-08` (`Done`, `Next`): Prop create, edit, and delete flows work end to end.
 - `KB-09` (`Next`): Scene entity list and detail flows work end to end.
 - `KB-10` (`Next`): Timeline entry create, edit, and delete flows work end to end.
 - `KB-11` (`Next`): Wildcard create, edit, and delete flows work end to end.

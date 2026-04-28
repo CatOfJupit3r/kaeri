@@ -35,8 +35,10 @@ import { useExportSeriesJson } from '@~/features/export/hooks/mutations/use-expo
 import { KBAllView } from '@~/features/knowledge-base/components/kb-all-view';
 import { KBSearch } from '@~/features/knowledge-base/components/kb-search';
 import { LocationList } from '@~/features/locations/components/location-list';
+import { LocationPanel } from '@~/features/locations/components/location-panel';
 import { locationListQueryOptions } from '@~/features/locations/hooks/queries/use-location-list';
 import { PropList } from '@~/features/props/components/prop-list';
+import { PropPanel } from '@~/features/props/components/prop-panel';
 import { propListQueryOptions } from '@~/features/props/hooks/queries/use-prop-list';
 import { ResearchList } from '@~/features/research/components/research-list';
 import { SceneList } from '@~/features/scenes/components/scene-list';
@@ -106,6 +108,8 @@ function RouteComponent() {
   const { exportSeriesJson, isPending: isExporting } = useExportSeriesJson();
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [auditOffset, setAuditOffset] = useState(0);
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
+  const [selectedPropId, setSelectedPropId] = useState<string | null>(null);
   const [{ tab, viewMode }, setQueryStates] = useQueryStates({
     tab: parseAsStringEnum(TAB_VALUES_ARRAY).withDefault(TAB_VALUES.all),
     viewMode: parseAsStringEnum(VIEW_MODE_ARRAY).withDefault(VIEW_MODE.grid),
@@ -146,6 +150,22 @@ function RouteComponent() {
     }
   };
 
+  const handleLocationSelect = (locationId: string) => {
+    setSelectedLocationId(locationId);
+  };
+
+  const handleCloseLocationEdit = () => {
+    setSelectedLocationId(null);
+  };
+
+  const handlePropSelect = (propId: string) => {
+    setSelectedPropId(propId);
+  };
+
+  const handleClosePropEdit = () => {
+    setSelectedPropId(null);
+  };
+
   const handleImport = () => {
     setIsImportModalOpen(true);
   };
@@ -171,6 +191,16 @@ function RouteComponent() {
     );
   }
 
+  let knowledgeBaseContent = null;
+
+  if (selectedLocationId != null) {
+    knowledgeBaseContent = (
+      <LocationPanel locationId={selectedLocationId} seriesId={seriesId} onClose={handleCloseLocationEdit} />
+    );
+  } else if (selectedPropId != null) {
+    knowledgeBaseContent = <PropPanel propId={selectedPropId} seriesId={seriesId} onClose={handleClosePropEdit} />;
+  }
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Series Header */}
@@ -188,156 +218,164 @@ function RouteComponent() {
             </p>
           </div>
 
-          {/* Action Bar */}
-          <div className="mb-6 flex items-center justify-between gap-4">
-            <div className="flex-1">
-              <KBSearch seriesId={seriesId} onResultClick={handleResultClick} />
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleImport}
-                className="brutalist-shadow-sm gap-2 border-2 border-foreground bg-transparent font-bold tracking-wide uppercase transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-(--brutalist-yellow) hover:shadow-none"
-              >
-                <LuUpload />
-                Import
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExport}
-                disabled={isExporting}
-                className="brutalist-shadow-sm gap-2 border-2 border-foreground bg-transparent font-bold tracking-wide uppercase transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-(--brutalist-green) hover:shadow-none"
-              >
-                {isExporting ? <LuLoader className="animate-spin" /> : <LuDownload />}
-                {isExporting ? 'Exporting...' : 'Export'}
-              </Button>
-              <Toggle
-                pressed={activeViewMode === VIEW_MODE.list}
-                onPressedChange={toggleViewMode}
-                aria-label="Toggle view mode"
-                size="sm"
-                className="border-2 border-foreground"
-              >
-                {activeViewMode === VIEW_MODE.grid ? <LuLayoutGrid /> : <LuLayoutList />}
-              </Toggle>
-            </div>
-          </div>
-
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-12">
-              <TabsTrigger value="all" className="gap-2">
-                <LuLayoutGrid className="size-4" />
-                <span>All</span>
-              </TabsTrigger>
-              <TabsTrigger value="characters" className="gap-2">
-                <LuBookUser className="size-4" />
-                <span>Characters</span>
-              </TabsTrigger>
-              <TabsTrigger value="locations" className="gap-2">
-                <LuGlobe className="size-4" />
-                <span>Locations</span>
-              </TabsTrigger>
-              <TabsTrigger value="props" className="gap-2">
-                <LuPackage className="size-4" />
-                <span>Props</span>
-              </TabsTrigger>
-              <TabsTrigger value="scenes" className="gap-2">
-                <LuFilm className="size-4" />
-                <span>Scenes</span>
-              </TabsTrigger>
-              <TabsTrigger value="timeline" className="gap-2">
-                <LuCalendar className="size-4" />
-                <span>Timeline</span>
-              </TabsTrigger>
-              <TabsTrigger value="wildcards" className="gap-2">
-                <LuSparkles className="size-4" />
-                <span>Wild Cards</span>
-              </TabsTrigger>
-              <TabsTrigger value="story-arcs" className="gap-2">
-                <LuTrendingUp className="size-4" />
-                <span>Story Arcs</span>
-              </TabsTrigger>
-              <TabsTrigger value="themes" className="gap-2">
-                <LuLightbulb className="size-4" />
-                <span>Themes</span>
-              </TabsTrigger>
-              <TabsTrigger value="research" className="gap-2">
-                <LuBookOpen className="size-4" />
-                <span>Research</span>
-              </TabsTrigger>
-              <TabsTrigger value="graph" className="gap-2">
-                <LuNetwork className="size-4" />
-                <span>Graph</span>
-              </TabsTrigger>
-              <TabsTrigger value="history" className="gap-2">
-                <LuHistory className="size-4" />
-                <span>History</span>
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="all" className="mt-6 space-y-4">
-              <KBAllView seriesId={seriesId} onTabChange={handleTabChange} />
-            </TabsContent>
-
-            <TabsContent value="characters" className="mt-6 space-y-4">
-              <CharacterList seriesId={seriesId} />
-            </TabsContent>
-
-            <TabsContent value="locations" className="mt-6 space-y-4">
-              <LocationList seriesId={seriesId} />
-            </TabsContent>
-
-            <TabsContent value="props" className="mt-6 space-y-4">
-              <PropList seriesId={seriesId} />
-            </TabsContent>
-
-            <TabsContent value="scenes" className="mt-6 space-y-4">
-              <SceneList seriesId={seriesId} />
-            </TabsContent>
-
-            <TabsContent value="timeline" className="mt-6 space-y-4">
-              <TimelineList seriesId={seriesId} />
-            </TabsContent>
-
-            <TabsContent value="wildcards" className="mt-6 space-y-4">
-              <WildcardList seriesId={seriesId} />
-            </TabsContent>
-
-            <TabsContent value="story-arcs" className="mt-6 space-y-4">
-              <StoryArcList seriesId={seriesId} />
-            </TabsContent>
-
-            <TabsContent value="themes" className="mt-6 space-y-4">
-              <ThemeList seriesId={seriesId} />
-            </TabsContent>
-
-            <TabsContent value="research" className="mt-6 space-y-4">
-              <ResearchList seriesId={seriesId} />
-            </TabsContent>
-
-            <TabsContent value="graph" className="mt-6">
-              <div className="h-[600px] rounded-lg border">
-                <ContinuityGraph
-                  nodes={graphData?.nodes ?? []}
-                  edges={graphData?.edges ?? []}
-                  isLoading={isGraphLoading}
-                />
+          {knowledgeBaseContent ?? (
+            <>
+              <div className="mb-6 flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  <KBSearch seriesId={seriesId} onResultClick={handleResultClick} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleImport}
+                    className="brutalist-shadow-sm gap-2 border-2 border-foreground bg-transparent font-bold tracking-wide uppercase transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-(--brutalist-yellow) hover:shadow-none"
+                  >
+                    <LuUpload />
+                    Import
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExport}
+                    disabled={isExporting}
+                    className="brutalist-shadow-sm gap-2 border-2 border-foreground bg-transparent font-bold tracking-wide uppercase transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-(--brutalist-green) hover:shadow-none"
+                  >
+                    {isExporting ? <LuLoader className="animate-spin" /> : <LuDownload />}
+                    {isExporting ? 'Exporting...' : 'Export'}
+                  </Button>
+                  <Toggle
+                    pressed={activeViewMode === VIEW_MODE.list}
+                    onPressedChange={toggleViewMode}
+                    aria-label="Toggle view mode"
+                    size="sm"
+                    className="border-2 border-foreground"
+                  >
+                    {activeViewMode === VIEW_MODE.grid ? <LuLayoutGrid /> : <LuLayoutList />}
+                  </Toggle>
+                </div>
               </div>
-            </TabsContent>
 
-            <TabsContent value="history" className="mt-6">
-              <div className="h-[600px] rounded-lg border">
-                <AuditHistoryList
-                  items={auditData?.items ?? []}
-                  isLoading={isAuditLoading}
-                  hasMore={(auditData?.total ?? 0) > auditOffset + PAGE_SIZES.DEFAULT}
-                  onLoadMore={() => setAuditOffset((prev) => prev + PAGE_SIZES.DEFAULT)}
-                />
-              </div>
-            </TabsContent>
-          </Tabs>
+              <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+                <TabsList className="grid w-full grid-cols-12">
+                  <TabsTrigger value="all" className="gap-2">
+                    <LuLayoutGrid className="size-4" />
+                    <span>All</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="characters" className="gap-2">
+                    <LuBookUser className="size-4" />
+                    <span>Characters</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="locations" className="gap-2">
+                    <LuGlobe className="size-4" />
+                    <span>Locations</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="props" className="gap-2">
+                    <LuPackage className="size-4" />
+                    <span>Props</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="scenes" className="gap-2">
+                    <LuFilm className="size-4" />
+                    <span>Scenes</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="timeline" className="gap-2">
+                    <LuCalendar className="size-4" />
+                    <span>Timeline</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="wildcards" className="gap-2">
+                    <LuSparkles className="size-4" />
+                    <span>Wild Cards</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="story-arcs" className="gap-2">
+                    <LuTrendingUp className="size-4" />
+                    <span>Story Arcs</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="themes" className="gap-2">
+                    <LuLightbulb className="size-4" />
+                    <span>Themes</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="research" className="gap-2">
+                    <LuBookOpen className="size-4" />
+                    <span>Research</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="graph" className="gap-2">
+                    <LuNetwork className="size-4" />
+                    <span>Graph</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="history" className="gap-2">
+                    <LuHistory className="size-4" />
+                    <span>History</span>
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="all" className="mt-6 space-y-4">
+                  <KBAllView
+                    seriesId={seriesId}
+                    onTabChange={handleTabChange}
+                    onLocationSelect={handleLocationSelect}
+                    onPropSelect={handlePropSelect}
+                  />
+                </TabsContent>
+
+                <TabsContent value="characters" className="mt-6 space-y-4">
+                  <CharacterList seriesId={seriesId} />
+                </TabsContent>
+
+                <TabsContent value="locations" className="mt-6 space-y-4">
+                  <LocationList seriesId={seriesId} onLocationSelect={handleLocationSelect} />
+                </TabsContent>
+
+                <TabsContent value="props" className="mt-6 space-y-4">
+                  <PropList seriesId={seriesId} onPropSelect={handlePropSelect} />
+                </TabsContent>
+
+                <TabsContent value="scenes" className="mt-6 space-y-4">
+                  <SceneList seriesId={seriesId} />
+                </TabsContent>
+
+                <TabsContent value="timeline" className="mt-6 space-y-4">
+                  <TimelineList seriesId={seriesId} />
+                </TabsContent>
+
+                <TabsContent value="wildcards" className="mt-6 space-y-4">
+                  <WildcardList seriesId={seriesId} />
+                </TabsContent>
+
+                <TabsContent value="story-arcs" className="mt-6 space-y-4">
+                  <StoryArcList seriesId={seriesId} />
+                </TabsContent>
+
+                <TabsContent value="themes" className="mt-6 space-y-4">
+                  <ThemeList seriesId={seriesId} />
+                </TabsContent>
+
+                <TabsContent value="research" className="mt-6 space-y-4">
+                  <ResearchList seriesId={seriesId} />
+                </TabsContent>
+
+                <TabsContent value="graph" className="mt-6">
+                  <div className="h-150 rounded-lg border">
+                    <ContinuityGraph
+                      nodes={graphData?.nodes ?? []}
+                      edges={graphData?.edges ?? []}
+                      isLoading={isGraphLoading}
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="history" className="mt-6">
+                  <div className="h-150 rounded-lg border">
+                    <AuditHistoryList
+                      items={auditData?.items ?? []}
+                      isLoading={isAuditLoading}
+                      hasMore={(auditData?.total ?? 0) > auditOffset + PAGE_SIZES.DEFAULT}
+                      onLoadMore={() => setAuditOffset((prev) => prev + PAGE_SIZES.DEFAULT)}
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </>
+          )}
         </div>
       </div>
 
