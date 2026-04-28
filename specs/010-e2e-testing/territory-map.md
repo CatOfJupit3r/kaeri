@@ -29,8 +29,8 @@ The goal is a complete writer-first E2E suite that covers every meaningful user 
 | Workspaces | Mapped only | Routes and UI exist; no dedicated E2E coverage yet |
 | Scripts library | Partial | Empty state, create-and-open, card metadata, and reopen coverage exist |
 | Script editor core | Partial | Editor route load, split layout, default starting block, toolbar and block-menu type switching, Tab cycling, scene-heading/character/dialogue Enter rules, Backspace deletion guards, arrow navigation, add-block controls, panel collapse/expand, panel tab switching, keyboard shortcuts panel, export/settings shortcuts, breakdown/table-read dialogs, version history open/list/preview/dismiss/restore flows, typing, save-state transition, and explicit save-and-reload persistence are covered |
-| Script x KB integration | Mapped only | Richest unique behavior; should be a dedicated suite, not scattered assertions |
-| Knowledge base | Mapped only | Main route exists with broad entity tabs; entity-family coverage still missing |
+| Script x KB integration | Partial | Dedicated editor-integration coverage now exists for character-block KB suggestions and keyboard selection |
+| Knowledge base | Partial | Route default/deep-link behavior, search-to-tab routing, and character create/edit/delete/detail flows are covered |
 | Canvas | Mapped only | Route exists; interaction-heavy coverage should be staged carefully |
 | Export and import | Mapped only | JSON export/import and PDF export surfaces exist |
 | Continuity and analytics | Mapped only | KB history/graph and analytics routes exist; no executable coverage yet |
@@ -60,7 +60,7 @@ The goal is a complete writer-first E2E suite that covers every meaningful user 
 - Multi-user fixtures that can run two browser contexts with separate auth states for collaboration and role tests.
 - Download helpers for PDF and JSON assertions.
 - Network control helpers for offline, timeout, and retry scenarios.
-- Dedicated page objects beyond the current baseline: `WorkspacePage`, `WorkspaceSettingsPage`, `SeriesPage`, `ScriptLibraryPage`, `ScriptEditorPage`, `KnowledgeBasePage`, `CharacterPage`, `ScenePage`, `CanvasPage`, `ExportPage`, `AnalyticsPage`.
+- Dedicated page objects beyond the current baseline: `WorkspacePage`, `WorkspaceSettingsPage`, `SeriesPage`, `ScenePage`, `CanvasPage`, `ExportPage`, `AnalyticsPage`.
 
 ## Territory By Product Surface
 
@@ -243,8 +243,8 @@ Suggested fixtures and objects:
 - `ScenePage`
 
 Scenario inventory:
-- `INTEGRATION-01` (`Next`): Typing in a character block shows character suggestions from the KB.
-- `INTEGRATION-02` (`Next`): Character suggestions can be navigated with arrow keys and confirmed with `Enter`.
+- `INTEGRATION-01` (`Done`, `Next`): Typing in a character block shows character suggestions from the KB.
+- `INTEGRATION-02` (`Done`, `Next`): Character suggestions can be navigated with arrow keys and confirmed with `Enter`.
 - `INTEGRATION-03` (`Later`): Quick-create from character suggestion flow pre-fills the new character name.
 - `INTEGRATION-04` (`Next`): Typing a scene heading after `INT.` or `EXT.` shows location suggestions.
 - `INTEGRATION-05` (`Later`): Time-of-day suggestions appear after selecting a location and typing a separator.
@@ -275,12 +275,12 @@ Suggested fixtures and objects:
 - `ScenePage`
 
 Scenario inventory:
-- `KB-01` (`Next`): Knowledge Base route loads with the `all` tab by default.
-- `KB-02` (`Next`): Query-string tab state persists and deep-links correctly.
+- `KB-01` (`Done`, `Next`): Knowledge Base route loads with the `all` tab by default.
+- `KB-02` (`Done`, `Next`): Query-string tab state persists and deep-links correctly.
 - `KB-03` (`Next`): Grid/list toggle switches presentation without losing the selected tab.
-- `KB-04` (`Next`): Global KB search returns matching results across entity families.
-- `KB-05` (`Next`): Clicking a search result routes the user to the matching tab or detail surface.
-- `KB-06` (`Next`): Character create, edit, and delete flows work end to end.
+- `KB-04` (`Done`, `Next`): Global KB search returns matching results across entity families.
+- `KB-05` (`Done`, `Next`): Clicking a search result routes the user to the matching tab or detail surface.
+- `KB-06` (`Done`, `Next`): Character create, edit, and delete flows work end to end.
 - `KB-07` (`Next`): Location create, edit, and delete flows work end to end.
 - `KB-08` (`Next`): Prop create, edit, and delete flows work end to end.
 - `KB-09` (`Next`): Scene entity list and detail flows work end to end.
@@ -289,7 +289,7 @@ Scenario inventory:
 - `KB-12` (`Next`): Story arc create, edit, and delete flows work end to end.
 - `KB-13` (`Next`): Theme create, edit, and delete flows work end to end.
 - `KB-14` (`Next`): Research-item flows exposed in the research tab work end to end.
-- `KB-15` (`Next`): Character detail route loads overview data.
+- `KB-15` (`Done`, `Next`): Character detail route loads overview data.
 - `KB-16` (`Next`): Character relationships render and navigate safely.
 - `KB-17` (`Next`): Character appearances tab shows linked script/scene references when data exists.
 - `KB-18` (`Later`): Duplicate-name handling stays usable and disambiguated.

@@ -2,6 +2,10 @@ import { type Page, type Route, expect } from '@playwright/test';
 
 import { BasePage } from './base.page';
 
+function escapeRegExp(value: string) {
+  return value.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 const BLOCK_TYPE_LABELS = {
   action: 'Action',
   character: 'Character',
@@ -30,6 +34,7 @@ export class ScriptEditorPage extends BasePage {
   private readonly restorePreviewedVersionButton = this.page.getByRole('button', { name: 'Restore this version' });
   private readonly editorContainer = this.page.getByTestId('script-editor');
   private readonly editor = this.page.locator('.script-editor-content').first();
+  private readonly characterSuggestionsList = this.page.getByRole('listbox', { name: /character suggestions/i });
   private readonly scriptBlocks = this.page.getByTestId('block');
   private readonly canvasTab = this.page.getByRole('tab', { name: 'Canvas' });
   private readonly knowledgeTab = this.page.getByRole('tab', { name: 'Knowledge' });
@@ -54,6 +59,11 @@ export class ScriptEditorPage extends BasePage {
     await expect(this.editor).toBeVisible({ timeout: 20_000 });
     await expect(this.knowledgeBaseSearchInput).toBeVisible({ timeout: 20_000 });
     await expect(this.saveIndicator).toBeVisible({ timeout: 20_000 });
+  }
+
+  async navigateToScript(seriesId: string, scriptId: string) {
+    await this.goto(`/series/${seriesId}/scripts/${scriptId}`);
+    await this.expectLoaded();
   }
 
   async expectSplitLayout() {
@@ -117,6 +127,28 @@ export class ScriptEditorPage extends BasePage {
 
   async typeAtCurrentSelection(text: string) {
     await this.page.keyboard.type(text);
+  }
+
+  async triggerCharacterBlockSuggestions(query: string) {
+    await this.page.keyboard.type(query);
+    await expect(this.characterSuggestionsList).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectCharacterSuggestionVisible(name: string) {
+    await expect(
+      this.characterSuggestionsList.getByRole('option', { name: new RegExp(escapeRegExp(name), 'i') }).first(),
+    ).toBeVisible({ timeout: 10_000 });
+  }
+
+  async moveAutocompleteSelectionDown(times = 1) {
+    for (let index = 0; index < times; index += 1) {
+      await this.page.keyboard.press('ArrowDown');
+    }
+  }
+
+  async confirmAutocompleteSelection() {
+    await this.page.keyboard.press('Enter');
+    await expect(this.characterSuggestionsList).not.toBeVisible({ timeout: 10_000 });
   }
 
   async changeCurrentBlockTypeFromToolbar(

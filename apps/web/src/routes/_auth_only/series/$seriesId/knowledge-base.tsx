@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { Outlet, createFileRoute, useLocation } from '@tanstack/react-router';
 import { parseAsStringEnum, useQueryStates } from 'nuqs';
 import { useState } from 'react';
 import {
@@ -101,6 +101,7 @@ export const Route = createFileRoute('/_auth_only/series/$seriesId/knowledge-bas
 
 function RouteComponent() {
   const { seriesId } = Route.useParams();
+  const location = useLocation();
   const { data: series } = useSeries(seriesId);
   const { exportSeriesJson, isPending: isExporting } = useExportSeriesJson();
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -157,6 +158,10 @@ function RouteComponent() {
     const newMode = activeViewMode === VIEW_MODE.grid ? VIEW_MODE.list : VIEW_MODE.grid;
     setQueryStates({ viewMode: newMode }).catch(() => {});
   };
+
+  if (location.pathname !== `/series/${seriesId}/knowledge-base`) {
+    return <Outlet />;
+  }
 
   if (!series) {
     return (
