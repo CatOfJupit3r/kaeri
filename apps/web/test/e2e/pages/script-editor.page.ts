@@ -12,12 +12,24 @@ const BLOCK_TYPE_LABELS = {
 } as const;
 
 export class ScriptEditorPage extends BasePage {
+  private readonly blockMenuTypeSelector = this.page.getByTestId('block-menu-type-selector');
   private readonly fileMenuButton = this.page.getByRole('button', { name: 'File' });
+  private readonly breakdownMenuItem = this.page.getByRole('menuitem', { name: 'Breakdown...' });
+  private readonly tableReadMenuItem = this.page.getByRole('menuitem', { name: 'Table Read...' });
   private readonly blockTypeSelector = this.page.getByTestId('block-type-selector');
+  private readonly addBlockControls = this.page.getByTestId('add-block-controls');
+  private readonly rightPanelToggle = this.page.getByTestId('right-panel-toggle');
+  private readonly breakdownDialog = this.page.getByRole('dialog', { name: 'Script Breakdown' });
+  private readonly exportDialog = this.page.getByRole('dialog', { name: 'Export Script' });
+  private readonly settingsDialog = this.page.getByRole('dialog', { name: 'Script Settings' });
+  private readonly tableReadDialog = this.page.getByRole('dialog', { name: 'Table Read' });
   private readonly editorContainer = this.page.getByTestId('script-editor');
   private readonly editor = this.page.locator('.script-editor-content').first();
   private readonly scriptBlocks = this.page.getByTestId('block');
+  private readonly canvasTab = this.page.getByRole('tab', { name: 'Canvas' });
+  private readonly knowledgeTab = this.page.getByRole('tab', { name: 'Knowledge' });
   private readonly knowledgeBasePanel = this.page.getByTestId('knowledge-base-panel');
+  private readonly canvasPanel = this.page.getByTestId('canvas-panel');
   private readonly knowledgeBaseSearchInput = this.page.getByRole('textbox', { name: /search knowledge base/i });
   private readonly saveIndicator = this.page.getByTestId('save-indicator');
   private readonly saveMenuItem = this.page.getByRole('menuitem', { name: /^save$/i });
@@ -28,6 +40,8 @@ export class ScriptEditorPage extends BasePage {
 
   async expectLoaded() {
     await expect(this.fileMenuButton).toBeVisible({ timeout: 20_000 });
+    await expect(this.addBlockControls).toBeVisible({ timeout: 20_000 });
+    await expect(this.rightPanelToggle).toBeVisible({ timeout: 20_000 });
     await expect(this.editorContainer).toBeVisible({ timeout: 20_000 });
     await expect(this.editor).toBeVisible({ timeout: 20_000 });
     await expect(this.knowledgeBaseSearchInput).toBeVisible({ timeout: 20_000 });
@@ -103,6 +117,17 @@ export class ScriptEditorPage extends BasePage {
     await this.expectToolbarCurrentBlockType(BLOCK_TYPE_LABELS[nextBlockType]);
   }
 
+  async changeCurrentBlockTypeFromBlockMenu(
+    nextBlockType: 'action' | 'character' | 'dialogue' | 'parenthetical' | 'scene-heading' | 'transition',
+  ) {
+    await this.editor.click();
+    await expect(this.blockMenuTypeSelector).toBeVisible({ timeout: 5_000 });
+    await this.blockMenuTypeSelector.focus();
+    await this.page.keyboard.press('Enter');
+    await this.page.getByTestId(`block-menu-type-option-${nextBlockType}`).click();
+    await this.expectToolbarCurrentBlockType(BLOCK_TYPE_LABELS[nextBlockType]);
+  }
+
   async cycleCurrentBlockTypeWithTab(
     nextBlockType: 'action' | 'character' | 'dialogue' | 'parenthetical' | 'scene-heading' | 'transition',
   ) {
@@ -130,6 +155,68 @@ export class ScriptEditorPage extends BasePage {
   async pressArrowDownAndExpectToolbarBlockType(expectedLabel: string) {
     await this.page.keyboard.press('ArrowDown');
     await this.expectToolbarCurrentBlockType(expectedLabel);
+  }
+
+  async addBlockFromControls(
+    blockType: 'action' | 'character' | 'dialogue' | 'parenthetical' | 'scene-heading' | 'transition',
+  ) {
+    await expect(this.addBlockControls).toBeVisible({ timeout: 5_000 });
+    await this.page.getByTestId(`add-block-${blockType}`).click();
+  }
+
+  async openExportWithShortcut() {
+    await this.editor.click();
+    await this.page.keyboard.press('Control+e');
+    await expect(this.exportDialog).toBeVisible({ timeout: 10_000 });
+  }
+
+  async openSettingsWithShortcut() {
+    await this.editor.click();
+    await this.page.keyboard.press('Control+,');
+    await expect(this.settingsDialog).toBeVisible({ timeout: 10_000 });
+  }
+
+  async closeOpenDialog() {
+    await this.page.keyboard.press('Escape');
+    await expect(
+      this.exportDialog.or(this.settingsDialog).or(this.breakdownDialog).or(this.tableReadDialog),
+    ).not.toBeVisible({ timeout: 10_000 });
+  }
+
+  async openBreakdownFromFileMenu() {
+    await this.fileMenuButton.click();
+    await expect(this.breakdownMenuItem).toBeVisible({ timeout: 5_000 });
+    await this.breakdownMenuItem.click();
+    await expect(this.breakdownDialog).toBeVisible({ timeout: 10_000 });
+  }
+
+  async openTableReadFromFileMenu() {
+    await this.fileMenuButton.click();
+    await expect(this.tableReadMenuItem).toBeVisible({ timeout: 5_000 });
+    await this.tableReadMenuItem.click();
+    await expect(this.tableReadDialog).toBeVisible({ timeout: 10_000 });
+  }
+
+  async collapseRightPanel() {
+    await expect(this.rightPanelToggle).toBeVisible({ timeout: 5_000 });
+    await this.rightPanelToggle.click();
+    await expect(this.knowledgeBasePanel).not.toBeVisible({ timeout: 10_000 });
+  }
+
+  async expandRightPanel() {
+    await expect(this.rightPanelToggle).toBeVisible({ timeout: 5_000 });
+    await this.rightPanelToggle.click();
+    await expect(this.knowledgeBasePanel).toBeVisible({ timeout: 10_000 });
+  }
+
+  async switchToCanvasPanel() {
+    await this.canvasTab.click();
+    await expect(this.canvasPanel).toBeVisible({ timeout: 10_000 });
+  }
+
+  async switchToKnowledgePanel() {
+    await this.knowledgeTab.click();
+    await expect(this.knowledgeBasePanel).toBeVisible({ timeout: 10_000 });
   }
 
   async saveAndExpectIndicatorCycle() {

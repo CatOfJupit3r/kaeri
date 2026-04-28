@@ -28,7 +28,7 @@ The goal is a complete writer-first E2E suite that covers every meaningful user 
 | Dashboard and Series shell | Partial | Basic dashboard flows exist; opening a series from the dashboard into the writing surface is covered |
 | Workspaces | Mapped only | Routes and UI exist; no dedicated E2E coverage yet |
 | Scripts library | Partial | Empty state, create-and-open, card metadata, and reopen coverage exist |
-| Script editor core | Partial | Editor route load, split layout, default starting block, toolbar block-type switching, Tab cycling, scene-heading/character/dialogue Enter rules, Backspace deletion guards, arrow navigation, typing, save-state transition, and explicit save-and-reload persistence are covered |
+| Script editor core | Partial | Editor route load, split layout, default starting block, toolbar and block-menu type switching, Tab cycling, scene-heading/character/dialogue Enter rules, Backspace deletion guards, arrow navigation, add-block controls, panel collapse/expand, panel tab switching, export/settings shortcuts, breakdown/table-read dialogs, typing, save-state transition, and explicit save-and-reload persistence are covered |
 | Script x KB integration | Mapped only | Richest unique behavior; should be a dedicated suite, not scattered assertions |
 | Knowledge base | Mapped only | Main route exists with broad entity tabs; entity-family coverage still missing |
 | Canvas | Mapped only | Route exists; interaction-heavy coverage should be staged carefully |
@@ -203,7 +203,7 @@ Scenario inventory:
 - `EDITOR-04` (`Done`, `Now`): Typing into the current block updates visible content.
 - `EDITOR-05` (`Done`, `Now`): Manual or debounced save persists content across reload.
 - `EDITOR-06` (`Done`, `Now`): Save indicator moves through saving and saved states.
-- `EDITOR-07` (`Next`): Block type dropdown changes the current block type.
+- `EDITOR-07` (`Done`, `Next`): Block type dropdown changes the current block type.
 - `EDITOR-08` (`Done`, `Next`): `Tab` cycles block types in the expected order.
 - `EDITOR-09` (`Done`, `Next`): `Enter` after scene heading creates an action block.
 - `EDITOR-10` (`Done`, `Next`): `Enter` after character creates a dialogue block.
@@ -212,14 +212,14 @@ Scenario inventory:
 - `EDITOR-13` (`Done`, `Next`): Minimum one block remains after deleting empty blocks.
 - `EDITOR-14` (`Done`, `Next`): Arrow-key navigation moves between adjacent blocks.
 - `EDITOR-15` (`Done`, `Next`): Toolbar block-type switcher updates the current block.
-- `EDITOR-16` (`Next`): Add-block affordance inserts a new block at the end.
-- `EDITOR-17` (`Next`): Right-panel collapse and expand preserve editor usability.
-- `EDITOR-18` (`Next`): KB and canvas tabs inside the side panel can be switched without losing editor content.
+- `EDITOR-16` (`Done`, `Next`): Add-block affordance inserts a new block at the end.
+- `EDITOR-17` (`Done`, `Next`): Right-panel collapse and expand preserve editor usability.
+- `EDITOR-18` (`Done`, `Next`): KB and canvas tabs inside the side panel can be switched without losing editor content.
 - `EDITOR-19` (`Next`): Keyboard shortcut modal does not trap or break editor interaction after close.
-- `EDITOR-20` (`Next`): Opening export with `Mod+E` shows the export modal.
-- `EDITOR-21` (`Next`): Opening script settings with `Mod+,` shows the settings modal.
-- `EDITOR-22` (`Next`): Breakdown modal opens from the toolbar.
-- `EDITOR-23` (`Next`): Table-read modal opens from the toolbar.
+- `EDITOR-20` (`Done`, `Next`): Opening export with `Mod+E` shows the export modal.
+- `EDITOR-21` (`Done`, `Next`): Opening script settings with `Mod+,` shows the settings modal.
+- `EDITOR-22` (`Done`, `Next`): Breakdown modal opens from the toolbar.
+- `EDITOR-23` (`Done`, `Next`): Table-read modal opens from the toolbar.
 - `EDITOR-24` (`Next`): Version history panel opens and lists versions when version data exists.
 - `EDITOR-25` (`Next`): Previewing an older version makes the editor read-only.
 - `EDITOR-26` (`Next`): Dismissing version preview restores the working draft.

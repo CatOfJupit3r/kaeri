@@ -209,6 +209,7 @@ export function BlockMenu({ editor, containerRef }: iBlockMenuProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
+                data-testid="block-menu-type-selector"
                 variant="outline"
                 size="sm"
                 className={cn(
@@ -230,6 +231,7 @@ export function BlockMenu({ editor, containerRef }: iBlockMenuProps) {
                 return (
                   <DropdownMenuItem
                     key={type}
+                    data-testid={`block-menu-type-option-${type}`}
                     onClick={() => handleChangeType(type)}
                     className={isActive ? 'bg-accent' : ''}
                   >

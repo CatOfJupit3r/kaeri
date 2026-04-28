@@ -542,13 +542,14 @@ export function ScriptEditor({
 
           {/* Add Block Button */}
           <div className="border-t border-border p-3">
-            <div className="flex flex-wrap items-center gap-2">
+            <div data-testid="add-block-controls" className="flex flex-wrap items-center gap-2">
               <span className="text-sm text-muted-foreground">Add block:</span>
               {BLOCK_TYPE_CYCLE_ORDER.map((type) => {
                 const config = BLOCK_CONFIG[type];
                 return (
                   <Button
                     key={type}
+                    data-testid={`add-block-${type}`}
                     variant="outline"
                     size="sm"
                     onClick={() => addBlock(type)}
@@ -562,7 +563,13 @@ export function ScriptEditor({
                   </Button>
                 );
               })}
-              <Button variant="outline" size="sm" onClick={() => addBlock('action')} className="gap-1">
+              <Button
+                data-testid="add-block-action-quick"
+                variant="outline"
+                size="sm"
+                onClick={() => addBlock('action')}
+                className="gap-1"
+              >
                 <LuPlus className="h-4 w-4" />
               </Button>
 
@@ -639,6 +646,7 @@ export function ScriptEditor({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
+                data-testid="right-panel-toggle"
                 variant="outline"
                 size="sm"
                 className={cn(
@@ -690,11 +698,11 @@ export function ScriptEditor({
               <KnowledgeBasePanel seriesId={seriesId} />
             </TabsContent>
 
-            <TabsContent value="canvas" className="mt-0 flex-1 overflow-hidden">
+            <TabsContent value="canvas" data-testid="canvas-panel" className="mt-0 flex-1 overflow-hidden">
               <CanvasBoard seriesId={seriesId} />
             </TabsContent>
 
-            <TabsContent value="versions" className="mt-0 flex-1 overflow-hidden">
+            <TabsContent value="versions" data-testid="versions-panel" className="mt-0 flex-1 overflow-hidden">
               <VersionHistoryPanel
                 scriptId={scriptId}
                 onPreviewVersion={setPreviewingVersionId}

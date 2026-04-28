@@ -50,6 +50,27 @@ test.describe('Scripts library', () => {
     await scriptEditorPage.changeCurrentBlockTypeFromToolbar('action');
   });
 
+  test('changes the current block type from the floating block menu', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Block Menu ${Date.now()}`;
+    const sceneHeadingText = 'INT. BLOCK MENU - DAY';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.type(sceneHeadingText);
+    await scriptEditorPage.changeCurrentBlockTypeFromBlockMenu('action');
+  });
+
   test('cycles the current block type with Tab', async ({ dashboardPage, scriptEditorPage, scriptLibraryPage }) => {
     test.slow();
 
@@ -205,6 +226,156 @@ test.describe('Scripts library', () => {
     await scriptEditorPage.pressArrowDownAndExpectToolbarBlockType('Character');
     await scriptEditorPage.typeAtCurrentSelection(characterText);
     await scriptEditorPage.expectBlockTextAt(1, characterText);
+  });
+
+  test('adds a new block from the add-block controls', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Add Block ${Date.now()}`;
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.expectDefaultBlock();
+    await scriptEditorPage.addBlockFromControls('action');
+    await scriptEditorPage.expectBlockCount(2);
+    await scriptEditorPage.expectBlockTypeAt(1, 'action');
+  });
+
+  test('collapses and expands the right panel without losing editor usability', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Panel Toggle ${Date.now()}`;
+    const editorContent = 'INT. PANEL TOGGLE - DAY';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.type(editorContent);
+    await scriptEditorPage.collapseRightPanel();
+    await scriptEditorPage.expectContent(editorContent);
+    await scriptEditorPage.expandRightPanel();
+    await scriptEditorPage.expectContent(editorContent);
+  });
+
+  test('switches between knowledge and canvas tabs without losing editor content', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Panel Tabs ${Date.now()}`;
+    const editorContent = 'INT. TAB SWITCH - NIGHT';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.type(editorContent);
+    await scriptEditorPage.switchToCanvasPanel();
+    await scriptEditorPage.expectContent(editorContent);
+    await scriptEditorPage.switchToKnowledgePanel();
+    await scriptEditorPage.expectContent(editorContent);
+  });
+
+  test('opens the export dialog with the keyboard shortcut', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Export Shortcut ${Date.now()}`;
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.openExportWithShortcut();
+    await scriptEditorPage.closeOpenDialog();
+  });
+
+  test('opens script settings with the keyboard shortcut', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Settings Shortcut ${Date.now()}`;
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.openSettingsWithShortcut();
+    await scriptEditorPage.closeOpenDialog();
+  });
+
+  test('opens the breakdown dialog from the file menu', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Breakdown Modal ${Date.now()}`;
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.openBreakdownFromFileMenu();
+    await scriptEditorPage.closeOpenDialog();
+  });
+
+  test('opens the table read dialog from the file menu', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Table Read Modal ${Date.now()}`;
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.openTableReadFromFileMenu();
+    await scriptEditorPage.closeOpenDialog();
   });
 
   test('shows save progress and persists script content after explicit save and reload', async ({
