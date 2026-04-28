@@ -196,4 +196,52 @@ test.describe('Knowledge base', () => {
     });
     await knowledgeBasePage.deleteWildcard(wildcardTitle);
   });
+
+  test('creates a timeline entry, edits it from the timeline tab, and deletes it', async ({
+    dashboardPage,
+    knowledgeBasePage,
+  }) => {
+    test.slow();
+
+    const projectTitle = createProjectTitle('E2E KB Timeline');
+    const entryLabel = `Inciting Incident ${Date.now()}`;
+    const updatedEntryLabel = `Escalation ${Date.now()}`;
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await knowledgeBasePage.navigateToKnowledgeBaseFromCurrentSeries('?tab=timeline');
+    await knowledgeBasePage.createTimelineEntry({ label: entryLabel, date: '2026-04-28' });
+    await knowledgeBasePage.openTimelineEntryForEdit(entryLabel);
+    await knowledgeBasePage.updateTimelineEntryLabel(updatedEntryLabel);
+    await knowledgeBasePage.expectTimelineEntryVisible(updatedEntryLabel);
+    await knowledgeBasePage.deleteTimelineEntry(updatedEntryLabel);
+  });
+
+  test('creates a research entry, edits it from the research tab, and deletes it', async ({
+    dashboardPage,
+    knowledgeBasePage,
+  }) => {
+    test.slow();
+
+    const projectTitle = createProjectTitle('E2E KB Research');
+    const researchTitle = `Harbor Notes ${Date.now()}`;
+    const content = 'Initial notes about the harbor district.';
+    const updatedContent = 'Updated notes about the harbor district and its hidden tunnels.';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await knowledgeBasePage.navigateToKnowledgeBaseFromCurrentSeries('?tab=research');
+    await knowledgeBasePage.createResearch({ title: researchTitle, content, tags: 'harbor, mystery' });
+    await knowledgeBasePage.openResearchForEdit(researchTitle);
+    await knowledgeBasePage.updateResearchContent(updatedContent);
+    await knowledgeBasePage.expectResearchVisible(researchTitle);
+    await expect(knowledgeBasePage.page.getByText(updatedContent, { exact: false }).first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await knowledgeBasePage.deleteResearch(researchTitle);
+  });
 });

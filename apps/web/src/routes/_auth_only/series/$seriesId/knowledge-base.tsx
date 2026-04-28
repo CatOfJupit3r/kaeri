@@ -41,6 +41,7 @@ import { PropList } from '@~/features/props/components/prop-list';
 import { PropPanel } from '@~/features/props/components/prop-panel';
 import { propListQueryOptions } from '@~/features/props/hooks/queries/use-prop-list';
 import { ResearchList } from '@~/features/research/components/research-list';
+import { ResearchPanel } from '@~/features/research/components/research-panel';
 import { SceneList } from '@~/features/scenes/components/scene-list';
 import { SeriesHeader } from '@~/features/series/components/series-header';
 import { SeriesTabs } from '@~/features/series/components/series-tabs';
@@ -112,6 +113,7 @@ function RouteComponent() {
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const [selectedPropId, setSelectedPropId] = useState<string | null>(null);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
+  const [selectedResearchId, setSelectedResearchId] = useState<string | null>(null);
   const [{ tab, viewMode }, setQueryStates] = useQueryStates({
     tab: parseAsStringEnum(TAB_VALUES_ARRAY).withDefault(TAB_VALUES.all),
     viewMode: parseAsStringEnum(VIEW_MODE_ARRAY).withDefault(VIEW_MODE.grid),
@@ -143,6 +145,7 @@ function RouteComponent() {
       wildcard: 'wildcards',
       storyArc: 'story-arcs',
       theme: 'themes',
+      research: 'research',
       all: 'all',
     };
 
@@ -174,6 +177,14 @@ function RouteComponent() {
 
   const handleCloseThemeEdit = () => {
     setSelectedThemeId(null);
+  };
+
+  const handleResearchSelect = (researchId: string) => {
+    setSelectedResearchId(researchId);
+  };
+
+  const handleCloseResearchEdit = () => {
+    setSelectedResearchId(null);
   };
 
   const handleImport = () => {
@@ -211,6 +222,8 @@ function RouteComponent() {
     knowledgeBaseContent = <PropPanel propId={selectedPropId} seriesId={seriesId} onClose={handleClosePropEdit} />;
   } else if (selectedThemeId != null) {
     knowledgeBaseContent = <ThemePanel themeId={selectedThemeId} seriesId={seriesId} onClose={handleCloseThemeEdit} />;
+  } else if (selectedResearchId != null) {
+    knowledgeBaseContent = <ResearchPanel researchId={selectedResearchId} onBack={handleCloseResearchEdit} />;
   }
 
   return (
@@ -363,7 +376,7 @@ function RouteComponent() {
                 </TabsContent>
 
                 <TabsContent value="research" className="mt-6 space-y-4">
-                  <ResearchList seriesId={seriesId} />
+                  <ResearchList seriesId={seriesId} onResearchSelect={handleResearchSelect} />
                 </TabsContent>
 
                 <TabsContent value="graph" className="mt-6">

@@ -32,6 +32,14 @@ export class KnowledgeBasePage extends BasePage {
   private readonly createWildcardDialog = this.page.getByRole('dialog', { name: /^create wild card$/i });
   private readonly editWildcardDialog = this.page.getByRole('dialog', { name: /^edit wild card$/i });
   private readonly deleteWildcardDialog = this.page.getByRole('alertdialog', { name: /^delete wild card$/i });
+  private readonly newTimelineButton = this.page.getByRole('button', { name: /^new timeline entry$/i }).first();
+  private readonly createTimelineDialog = this.page.getByRole('dialog', { name: /^create timeline entry$/i });
+  private readonly editTimelineDialog = this.page.getByRole('dialog', { name: /^edit timeline entry$/i });
+  private readonly deleteTimelineDialog = this.page.getByRole('alertdialog', { name: /^delete timeline entry$/i });
+  private readonly newResearchButton = this.page.getByRole('button', { name: /^new research$/i }).first();
+  private readonly createResearchDialog = this.page.getByRole('dialog', { name: /^new research entry$/i });
+  private readonly editResearchHeading = this.page.getByRole('heading', { name: /^edit research$/i });
+  private readonly deleteResearchDialog = this.page.getByRole('alertdialog', { name: /^delete research entry$/i });
 
   constructor(page: Page) {
     super(page);
@@ -121,6 +129,36 @@ export class KnowledgeBasePage extends BasePage {
     return this.page.getByRole('button', {
       name: new RegExp(`^delete ${escapeRegExp(title)}$`, 'i'),
     });
+  }
+
+  private getTimelineEntryCard(label: string) {
+    return this.page.getByRole('button', {
+      name: new RegExp(`^open timeline entry ${escapeRegExp(label)}$`, 'i'),
+    });
+  }
+
+  private getEditTimelineButton(label: string) {
+    return this.page.getByRole('button', {
+      name: new RegExp(`^edit ${escapeRegExp(label)}$`, 'i'),
+    });
+  }
+
+  private getDeleteTimelineButton(label: string) {
+    return this.page.getByRole('button', {
+      name: new RegExp(`^delete ${escapeRegExp(label)}$`, 'i'),
+    });
+  }
+
+  private getResearchHeading(title: string) {
+    return this.page.getByRole('heading', { name: title, exact: true }).first();
+  }
+
+  private getResearchCard(title: string) {
+    return this.getResearchHeading(title).locator('xpath=ancestor::div[contains(@class,"flex flex-col gap-3")][1]');
+  }
+
+  private getDeleteResearchButton(title: string) {
+    return this.getResearchCard(title).getByRole('button').nth(1);
   }
 
   async navigateToKnowledgeBase(seriesId: string, search = '') {
@@ -402,6 +440,100 @@ export class KnowledgeBasePage extends BasePage {
     await this.deleteWildcardDialog.getByRole('button', { name: /^delete$/i, exact: true }).click();
     await expect(this.deleteWildcardDialog).not.toBeVisible({ timeout: 10_000 });
     await this.expectWildcardNotVisible(title);
+  }
+
+  async createTimelineEntry(data: { label: string; date?: string }) {
+    await expect(this.newTimelineButton).toBeVisible({ timeout: 10_000 });
+    await this.newTimelineButton.click();
+    await expect(this.createTimelineDialog).toBeVisible({ timeout: 10_000 });
+    await this.createTimelineDialog.getByLabel(/^label$/i).fill(data.label);
+
+    if (data.date != null) {
+      await this.createTimelineDialog.getByLabel(/^date$/i).fill(data.date);
+    }
+
+    await this.createTimelineDialog.getByRole('button', { name: /^create entry$/i }).click();
+    await expect(this.createTimelineDialog).not.toBeVisible({ timeout: 10_000 });
+    await this.expectTimelineEntryVisible(data.label);
+  }
+
+  async expectTimelineEntryVisible(label: string) {
+    await expect(this.getTimelineEntryCard(label)).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectTimelineEntryNotVisible(label: string) {
+    await expect(this.getTimelineEntryCard(label)).toHaveCount(0, { timeout: 10_000 });
+  }
+
+  async openTimelineEntryForEdit(label: string) {
+    await this.getEditTimelineButton(label).click();
+    await expect(this.editTimelineDialog).toBeVisible({ timeout: 10_000 });
+  }
+
+  async updateTimelineEntryLabel(text: string) {
+    const labelField = this.editTimelineDialog.getByLabel(/^label$/i);
+
+    await expect(labelField).toBeVisible({ timeout: 10_000 });
+    await labelField.fill(text);
+    await this.editTimelineDialog.getByRole('button', { name: /^update entry$/i }).click();
+    await expect(this.editTimelineDialog).not.toBeVisible({ timeout: 10_000 });
+  }
+
+  async deleteTimelineEntry(label: string) {
+    await this.getDeleteTimelineButton(label).click();
+    await expect(this.deleteTimelineDialog).toBeVisible({ timeout: 10_000 });
+    await this.deleteTimelineDialog.getByRole('button', { name: /^delete$/i, exact: true }).click();
+    await expect(this.deleteTimelineDialog).not.toBeVisible({ timeout: 10_000 });
+    await this.expectTimelineEntryNotVisible(label);
+  }
+
+  async createResearch(data: { title: string; content?: string; tags?: string }) {
+    await expect(this.newResearchButton).toBeVisible({ timeout: 10_000 });
+    await this.newResearchButton.click();
+    await expect(this.createResearchDialog).toBeVisible({ timeout: 10_000 });
+    await this.createResearchDialog.getByLabel(/^title$/i).fill(data.title);
+
+    if (data.content != null) {
+      await this.createResearchDialog.getByLabel(/^content \(markdown\)$/i).fill(data.content);
+    }
+
+    if (data.tags != null) {
+      await this.createResearchDialog.getByLabel(/^tags \(comma-separated\)$/i).fill(data.tags);
+    }
+
+    await this.createResearchDialog.getByRole('button', { name: /^create$/i }).click();
+    await expect(this.createResearchDialog).not.toBeVisible({ timeout: 10_000 });
+    await this.expectResearchVisible(data.title);
+  }
+
+  async expectResearchVisible(title: string) {
+    await expect(this.getResearchHeading(title)).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectResearchNotVisible(title: string) {
+    await expect(this.getResearchHeading(title)).toHaveCount(0, { timeout: 10_000 });
+  }
+
+  async openResearchForEdit(title: string) {
+    await this.getResearchHeading(title).click();
+    await expect(this.editResearchHeading).toBeVisible({ timeout: 10_000 });
+  }
+
+  async updateResearchContent(text: string) {
+    const contentField = this.page.getByLabel(/^content \(markdown\)$/i);
+
+    await expect(contentField).toBeVisible({ timeout: 10_000 });
+    await contentField.fill(text);
+    await this.page.getByRole('button', { name: /^save changes$/i }).click();
+    await expect(this.editResearchHeading).toHaveCount(0, { timeout: 10_000 });
+  }
+
+  async deleteResearch(title: string) {
+    await this.getDeleteResearchButton(title).click();
+    await expect(this.deleteResearchDialog).toBeVisible({ timeout: 10_000 });
+    await this.deleteResearchDialog.getByRole('button', { name: /^delete$/i, exact: true }).click();
+    await expect(this.deleteResearchDialog).not.toBeVisible({ timeout: 10_000 });
+    await this.expectResearchNotVisible(title);
   }
 
   async searchForEntity(query: string) {
