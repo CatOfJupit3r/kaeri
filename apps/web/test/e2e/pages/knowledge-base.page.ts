@@ -23,6 +23,8 @@ export class KnowledgeBasePage extends BasePage {
   private readonly deletePropDialog = this.page.getByRole('alertdialog', { name: /^delete prop$/i });
   private readonly editPropHeading = this.page.getByRole('heading', { name: /^edit prop$/i });
   private readonly editPropBackButton = this.page.getByRole('button', { name: /^back$/i }).first();
+  private readonly newSceneButton = this.page.getByRole('button', { name: /^add scene$/i }).first();
+  private readonly createSceneDialog = this.page.getByRole('dialog', { name: /^create scene$/i });
   private readonly newThemeButton = this.page.getByRole('button', { name: /^new theme$/i }).first();
   private readonly createThemeDialog = this.page.getByRole('dialog', { name: /^create theme$/i });
   private readonly deleteThemeDialog = this.page.getByRole('alertdialog', { name: /^delete theme$/i });
@@ -88,6 +90,12 @@ export class KnowledgeBasePage extends BasePage {
 
   private getPropHeading(name: string) {
     return this.page.getByRole('heading', { name, exact: true }).first();
+  }
+
+  private getSceneCard(heading: string) {
+    return this.page
+      .getByRole('heading', { name: heading, exact: true })
+      .locator('xpath=ancestor::*[contains(@class,"group") and contains(@class,"cursor-pointer")][1]');
   }
 
   private getEditPropButton(name: string) {
@@ -356,6 +364,43 @@ export class KnowledgeBasePage extends BasePage {
     await this.expectPropNotVisible(name);
   }
 
+  async createScene(data: { heading: string; emotionalTone?: string; conflict?: string; storyNotes?: string }) {
+    await expect(this.newSceneButton).toBeVisible({ timeout: 10_000 });
+    await this.newSceneButton.click();
+    await expect(this.createSceneDialog).toBeVisible({ timeout: 10_000 });
+
+    const scriptSelect = this.createSceneDialog.getByRole('combobox', { name: /^script/i });
+
+    await scriptSelect.click();
+    await this.page.getByRole('option').first().click();
+    await this.createSceneDialog.getByLabel(/^scene heading$/i).fill(data.heading);
+
+    if (data.emotionalTone != null) {
+      await this.createSceneDialog.getByLabel(/^emotional tone$/i).fill(data.emotionalTone);
+    }
+
+    if (data.conflict != null) {
+      await this.createSceneDialog.getByLabel(/^conflict$/i).fill(data.conflict);
+    }
+
+    if (data.storyNotes != null) {
+      await this.createSceneDialog.getByLabel(/^story notes$/i).fill(data.storyNotes);
+    }
+
+    await this.createSceneDialog.getByRole('button', { name: /^create scene$/i }).click();
+    await expect(this.createSceneDialog).not.toBeVisible({ timeout: 10_000 });
+    await this.expectSceneVisible(data.heading);
+  }
+
+  async expectSceneVisible(heading: string) {
+    await expect(this.getSceneCard(heading)).toBeVisible({ timeout: 10_000 });
+  }
+
+  async openScene(heading: string) {
+    await this.getSceneCard(heading).click();
+    await expect(this.page).toHaveURL(/\/knowledge-base\/scenes\/[^/]+(?:\?.*)?$/, { timeout: 10_000 });
+  }
+
   async createTheme(data: { name: string; description?: string }) {
     await expect(this.newThemeButton).toBeVisible({ timeout: 10_000 });
     await this.newThemeButton.click();
@@ -499,6 +544,19 @@ export class KnowledgeBasePage extends BasePage {
     await this.deleteTimelineDialog.getByRole('button', { name: /^delete$/i, exact: true }).click();
     await expect(this.deleteTimelineDialog).not.toBeVisible({ timeout: 10_000 });
     await this.expectTimelineEntryNotVisible(label);
+  }
+
+  async expectTimelineEntriesInOrder(labels: string[]) {
+    const timelinePanel = this.page.getByRole('tabpanel', { name: /^timeline$/i });
+    const entryButtons = timelinePanel.getByRole('button', { name: /^open timeline entry /i });
+    const renderedLabels = await entryButtons.evaluateAll((elements) =>
+      elements
+        .map((element) => element.getAttribute('aria-label'))
+        .filter((value): value is string => value != null)
+        .map((value) => value.replace(/^Open timeline entry /i, '')),
+    );
+
+    expect(renderedLabels.slice(0, labels.length)).toEqual(labels);
   }
 
   async createResearch(data: { title: string; content?: string; tags?: string }) {

@@ -144,6 +144,41 @@ test.describe('Knowledge base', () => {
     await knowledgeBasePage.deleteProp(propName);
   });
 
+  test('creates a scene from the scenes tab and opens its detail route', async ({
+    dashboardPage,
+    knowledgeBasePage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = createProjectTitle('E2E KB Scene');
+    const sceneHeading = `INT. HARBOR OFFICE - NIGHT ${Date.now()}`;
+    const emotionalTone = 'Tense';
+    const conflict = 'The captain refuses to reveal who altered the logbook.';
+    const storyNotes = 'This scene should raise the stakes before the harbor raid.';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+    await scriptLibraryPage.createScript();
+
+    await knowledgeBasePage.navigateToKnowledgeBaseFromCurrentSeries('?tab=scenes');
+    await knowledgeBasePage.createScene({
+      heading: sceneHeading,
+      emotionalTone,
+      conflict,
+      storyNotes,
+    });
+    await knowledgeBasePage.openScene(sceneHeading);
+    await expect(knowledgeBasePage.page.getByRole('heading', { name: sceneHeading, exact: true })).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(knowledgeBasePage.page.getByText('Scene #1', { exact: false })).toBeVisible({ timeout: 10_000 });
+    await expect(knowledgeBasePage.page.getByText(emotionalTone, { exact: true })).toBeVisible({ timeout: 10_000 });
+    await expect(knowledgeBasePage.page.getByText(conflict, { exact: false })).toBeVisible({ timeout: 10_000 });
+    await expect(knowledgeBasePage.page.getByText(storyNotes, { exact: false })).toBeVisible({ timeout: 10_000 });
+  });
+
   test('creates a theme, edits it from the themes tab, and deletes it', async ({
     dashboardPage,
     knowledgeBasePage,
@@ -270,5 +305,25 @@ test.describe('Knowledge base', () => {
       timeout: 10_000,
     });
     await knowledgeBasePage.deleteStoryArc(storyArcName);
+  });
+
+  test('renders timeline entries in chronological order on the timeline tab', async ({
+    dashboardPage,
+    knowledgeBasePage,
+  }) => {
+    test.slow();
+
+    const projectTitle = createProjectTitle('E2E KB Timeline Order');
+    const earlierEntryLabel = `Earlier Event ${Date.now()}`;
+    const laterEntryLabel = `Later Event ${Date.now()}`;
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await knowledgeBasePage.navigateToKnowledgeBaseFromCurrentSeries('?tab=timeline');
+    await knowledgeBasePage.createTimelineEntry({ label: laterEntryLabel, date: '2026-04-29' });
+    await knowledgeBasePage.createTimelineEntry({ label: earlierEntryLabel, date: '2026-04-27' });
+    await knowledgeBasePage.expectTimelineEntriesInOrder([earlierEntryLabel, laterEntryLabel]);
   });
 });
