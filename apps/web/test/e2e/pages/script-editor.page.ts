@@ -18,18 +18,26 @@ export class ScriptEditorPage extends BasePage {
   private readonly tableReadMenuItem = this.page.getByRole('menuitem', { name: 'Table Read...' });
   private readonly blockTypeSelector = this.page.getByTestId('block-type-selector');
   private readonly addBlockControls = this.page.getByTestId('add-block-controls');
+  private readonly keyboardShortcutsToggle = this.page.getByTestId('keyboard-shortcuts-toggle');
+  private readonly keyboardShortcutsPanel = this.page.getByTestId('keyboard-shortcuts-panel');
+  private readonly keyboardShortcutsClose = this.page.getByTestId('keyboard-shortcuts-close');
   private readonly rightPanelToggle = this.page.getByTestId('right-panel-toggle');
   private readonly breakdownDialog = this.page.getByRole('dialog', { name: 'Script Breakdown' });
   private readonly exportDialog = this.page.getByRole('dialog', { name: 'Export Script' });
   private readonly settingsDialog = this.page.getByRole('dialog', { name: 'Script Settings' });
   private readonly tableReadDialog = this.page.getByRole('dialog', { name: 'Table Read' });
+  private readonly backToCurrentButton = this.page.getByRole('button', { name: 'Back to current' });
+  private readonly restorePreviewedVersionButton = this.page.getByRole('button', { name: 'Restore this version' });
   private readonly editorContainer = this.page.getByTestId('script-editor');
   private readonly editor = this.page.locator('.script-editor-content').first();
   private readonly scriptBlocks = this.page.getByTestId('block');
   private readonly canvasTab = this.page.getByRole('tab', { name: 'Canvas' });
   private readonly knowledgeTab = this.page.getByRole('tab', { name: 'Knowledge' });
+  private readonly versionsTab = this.page.getByRole('tab', { name: 'Versions' });
   private readonly knowledgeBasePanel = this.page.getByTestId('knowledge-base-panel');
   private readonly canvasPanel = this.page.getByTestId('canvas-panel');
+  private readonly versionsPanel = this.page.getByTestId('versions-panel');
+  private readonly saveVersionButton = this.page.getByRole('button', { name: 'Save version' });
   private readonly knowledgeBaseSearchInput = this.page.getByRole('textbox', { name: /search knowledge base/i });
   private readonly saveIndicator = this.page.getByTestId('save-indicator');
   private readonly saveMenuItem = this.page.getByRole('menuitem', { name: /^save$/i });
@@ -80,6 +88,10 @@ export class ScriptEditorPage extends BasePage {
 
   async expectBlockTextAt(index: number, text: string) {
     await expect(this.scriptBlocks.nth(index)).toContainText(text, { timeout: 10_000 });
+  }
+
+  async expectBlockDoesNotContainTextAt(index: number, text: string) {
+    await expect(this.scriptBlocks.nth(index)).not.toContainText(text, { timeout: 10_000 });
   }
 
   async focusBlock(index: number) {
@@ -164,6 +176,18 @@ export class ScriptEditorPage extends BasePage {
     await this.page.getByTestId(`add-block-${blockType}`).click();
   }
 
+  async openKeyboardShortcutsPanel() {
+    await expect(this.keyboardShortcutsToggle).toBeVisible({ timeout: 5_000 });
+    await this.keyboardShortcutsToggle.click();
+    await expect(this.keyboardShortcutsPanel).toBeVisible({ timeout: 10_000 });
+  }
+
+  async closeKeyboardShortcutsPanel() {
+    await expect(this.keyboardShortcutsClose).toBeVisible({ timeout: 5_000 });
+    await this.keyboardShortcutsClose.click();
+    await expect(this.keyboardShortcutsPanel).not.toBeVisible({ timeout: 10_000 });
+  }
+
   async openExportWithShortcut() {
     await this.editor.click();
     await this.page.keyboard.press('Control+e');
@@ -217,6 +241,42 @@ export class ScriptEditorPage extends BasePage {
   async switchToKnowledgePanel() {
     await this.knowledgeTab.click();
     await expect(this.knowledgeBasePanel).toBeVisible({ timeout: 10_000 });
+  }
+
+  async switchToVersionsPanel() {
+    await this.versionsTab.click();
+    await expect(this.versionsPanel).toBeVisible({ timeout: 10_000 });
+  }
+
+  async saveVersion() {
+    await expect(this.saveVersionButton).toBeVisible({ timeout: 10_000 });
+    await this.saveVersionButton.click();
+    await this.page.getByRole('button', { name: 'Save', exact: true }).click();
+  }
+
+  async expectVersionVisible(versionLabel: string) {
+    const versionButton = this.page.getByRole('button', { name: new RegExp(versionLabel, 'i') }).first();
+
+    await expect(versionButton).toBeVisible({ timeout: 10_000 });
+  }
+
+  async previewVersion(versionLabel: string) {
+    const versionButton = this.page.getByRole('button', { name: new RegExp(versionLabel, 'i') }).first();
+
+    await versionButton.click();
+    await expect(this.backToCurrentButton).toBeVisible({ timeout: 10_000 });
+  }
+
+  async dismissVersionPreview() {
+    await expect(this.backToCurrentButton).toBeVisible({ timeout: 10_000 });
+    await this.backToCurrentButton.click();
+    await expect(this.backToCurrentButton).not.toBeVisible({ timeout: 10_000 });
+  }
+
+  async restorePreviewedVersion() {
+    await expect(this.restorePreviewedVersionButton).toBeVisible({ timeout: 10_000 });
+    await this.restorePreviewedVersionButton.click();
+    await expect(this.restorePreviewedVersionButton).not.toBeVisible({ timeout: 10_000 });
   }
 
   async saveAndExpectIndicatorCycle() {

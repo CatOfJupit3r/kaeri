@@ -378,6 +378,129 @@ test.describe('Scripts library', () => {
     await scriptEditorPage.closeOpenDialog();
   });
 
+  test('opens and closes keyboard shortcuts without breaking editor typing', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Keyboard Shortcuts ${Date.now()}`;
+    const editorContent = 'INT. SHORTCUT PANEL - DAY';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.openKeyboardShortcutsPanel();
+    await scriptEditorPage.closeKeyboardShortcutsPanel();
+    await scriptEditorPage.type(editorContent);
+    await scriptEditorPage.expectContent(editorContent);
+  });
+
+  test('opens version history and lists a created version', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Versions ${Date.now()}`;
+    const editorContent = 'INT. VERSION TEST - DAY';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.type(editorContent);
+    await scriptEditorPage.saveAndExpectIndicatorCycle();
+    await scriptEditorPage.switchToVersionsPanel();
+    await scriptEditorPage.saveVersion();
+    await scriptEditorPage.expectVersionVisible('v1');
+  });
+
+  test('previews a saved version as read-only and restores the draft after dismiss', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Version Preview ${Date.now()}`;
+    const versionContent = 'INT. VERSION PREVIEW - DAY';
+    const draftSuffix = ' UPDATED';
+    const previewTyping = ' SHOULD-NOT-APPEAR';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.type(versionContent);
+    await scriptEditorPage.saveAndExpectIndicatorCycle();
+    await scriptEditorPage.switchToVersionsPanel();
+    await scriptEditorPage.saveVersion();
+    await scriptEditorPage.expectVersionVisible('v1');
+
+    await scriptEditorPage.type(draftSuffix);
+    await scriptEditorPage.saveAndExpectIndicatorCycle();
+    await scriptEditorPage.expectBlockTextAt(0, `${versionContent}${draftSuffix}`);
+
+    await scriptEditorPage.previewVersion('v1');
+    await scriptEditorPage.expectBlockTextAt(0, versionContent);
+    await scriptEditorPage.expectBlockDoesNotContainTextAt(0, draftSuffix.trim());
+    await scriptEditorPage.typeAtCurrentSelection(previewTyping);
+    await scriptEditorPage.expectBlockDoesNotContainTextAt(0, previewTyping.trim());
+
+    await scriptEditorPage.dismissVersionPreview();
+    await scriptEditorPage.expectBlockTextAt(0, `${versionContent}${draftSuffix}`);
+  });
+
+  test('restores a previewed version as the canonical current content', async ({
+    dashboardPage,
+    scriptEditorPage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = `E2E Version Restore ${Date.now()}`;
+    const versionContent = 'INT. VERSION RESTORE - DAY';
+    const draftSuffix = ' REWRITE';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await scriptLibraryPage.expectLoaded();
+    await scriptLibraryPage.createScript();
+    await scriptEditorPage.expectLoaded();
+    await scriptEditorPage.type(versionContent);
+    await scriptEditorPage.saveAndExpectIndicatorCycle();
+    await scriptEditorPage.switchToVersionsPanel();
+    await scriptEditorPage.saveVersion();
+    await scriptEditorPage.expectVersionVisible('v1');
+
+    await scriptEditorPage.type(draftSuffix);
+    await scriptEditorPage.saveAndExpectIndicatorCycle();
+    await scriptEditorPage.expectBlockTextAt(0, `${versionContent}${draftSuffix}`);
+
+    await scriptEditorPage.previewVersion('v1');
+    await scriptEditorPage.restorePreviewedVersion();
+    await scriptEditorPage.expectBlockTextAt(0, versionContent);
+    await scriptEditorPage.expectBlockDoesNotContainTextAt(0, draftSuffix.trim());
+    await scriptEditorPage.reloadAndExpectLoaded();
+    await scriptEditorPage.expectBlockTextAt(0, versionContent);
+    await scriptEditorPage.expectBlockDoesNotContainTextAt(0, draftSuffix.trim());
+  });
+
   test('shows save progress and persists script content after explicit save and reload', async ({
     dashboardPage,
     scriptEditorPage,

@@ -28,7 +28,7 @@ The goal is a complete writer-first E2E suite that covers every meaningful user 
 | Dashboard and Series shell | Partial | Basic dashboard flows exist; opening a series from the dashboard into the writing surface is covered |
 | Workspaces | Mapped only | Routes and UI exist; no dedicated E2E coverage yet |
 | Scripts library | Partial | Empty state, create-and-open, card metadata, and reopen coverage exist |
-| Script editor core | Partial | Editor route load, split layout, default starting block, toolbar and block-menu type switching, Tab cycling, scene-heading/character/dialogue Enter rules, Backspace deletion guards, arrow navigation, add-block controls, panel collapse/expand, panel tab switching, export/settings shortcuts, breakdown/table-read dialogs, typing, save-state transition, and explicit save-and-reload persistence are covered |
+| Script editor core | Partial | Editor route load, split layout, default starting block, toolbar and block-menu type switching, Tab cycling, scene-heading/character/dialogue Enter rules, Backspace deletion guards, arrow navigation, add-block controls, panel collapse/expand, panel tab switching, keyboard shortcuts panel, export/settings shortcuts, breakdown/table-read dialogs, version history open/list/preview/dismiss/restore flows, typing, save-state transition, and explicit save-and-reload persistence are covered |
 | Script x KB integration | Mapped only | Richest unique behavior; should be a dedicated suite, not scattered assertions |
 | Knowledge base | Mapped only | Main route exists with broad entity tabs; entity-family coverage still missing |
 | Canvas | Mapped only | Route exists; interaction-heavy coverage should be staged carefully |
@@ -215,15 +215,15 @@ Scenario inventory:
 - `EDITOR-16` (`Done`, `Next`): Add-block affordance inserts a new block at the end.
 - `EDITOR-17` (`Done`, `Next`): Right-panel collapse and expand preserve editor usability.
 - `EDITOR-18` (`Done`, `Next`): KB and canvas tabs inside the side panel can be switched without losing editor content.
-- `EDITOR-19` (`Next`): Keyboard shortcut modal does not trap or break editor interaction after close.
+- `EDITOR-19` (`Done`, `Next`): Keyboard shortcut modal does not trap or break editor interaction after close.
 - `EDITOR-20` (`Done`, `Next`): Opening export with `Mod+E` shows the export modal.
 - `EDITOR-21` (`Done`, `Next`): Opening script settings with `Mod+,` shows the settings modal.
 - `EDITOR-22` (`Done`, `Next`): Breakdown modal opens from the toolbar.
 - `EDITOR-23` (`Done`, `Next`): Table-read modal opens from the toolbar.
-- `EDITOR-24` (`Next`): Version history panel opens and lists versions when version data exists.
-- `EDITOR-25` (`Next`): Previewing an older version makes the editor read-only.
-- `EDITOR-26` (`Next`): Dismissing version preview restores the working draft.
-- `EDITOR-27` (`Next`): Restoring a version makes it the canonical current content.
+- `EDITOR-24` (`Done`, `Next`): Version history panel opens and lists versions when version data exists.
+- `EDITOR-25` (`Done`, `Next`): Previewing an older version makes the editor read-only.
+- `EDITOR-26` (`Done`, `Next`): Dismissing version preview restores the working draft.
+- `EDITOR-27` (`Done`, `Next`): Restoring a version makes it the canonical current content.
 - `EDITOR-28` (`Later`): Plain-text paste is parsed into screenplay block types correctly.
 - `EDITOR-29` (`Later`): Copy and paste preserve block semantics where supported.
 - `EDITOR-30` (`Later`): Large scripts remain responsive and save without UI desynchronization.

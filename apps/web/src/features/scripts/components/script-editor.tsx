@@ -578,6 +578,7 @@ export function ScriptEditor({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
+                      data-testid="keyboard-shortcuts-toggle"
                       variant="ghost"
                       size="sm"
                       onClick={() => setIsShowingKeyboardShortcuts(!isShowingKeyboardShortcuts)}
@@ -595,10 +596,14 @@ export function ScriptEditor({
 
           {/* Keyboard Shortcuts Panel */}
           {isShowingKeyboardShortcuts ? (
-            <div className="animate-in border-t border-border bg-muted/50 p-3 slide-in-from-bottom-2">
+            <div
+              data-testid="keyboard-shortcuts-panel"
+              className="animate-in border-t border-border bg-muted/50 p-3 slide-in-from-bottom-2"
+            >
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs font-bold text-muted-foreground uppercase">Keyboard Shortcuts</span>
                 <Button
+                  data-testid="keyboard-shortcuts-close"
                   variant="ghost"
                   size="sm"
                   className="h-6 w-6 p-0"
