@@ -93,6 +93,90 @@ test.describe('Knowledge base', () => {
     await knowledgeBasePage.deleteCharacter(characterName);
   });
 
+  test('renders character relationships and navigates safely to the related character', async ({
+    characterPage,
+    dashboardPage,
+    knowledgeBasePage,
+  }) => {
+    test.slow();
+
+    const projectTitle = createProjectTitle('E2E KB Relationship');
+    const sourceCharacterName = `Captain Mira ${Date.now()}`;
+    const targetCharacterName = `Jonah Vale ${Date.now()}`;
+    const relationshipType = 'FRIEND';
+    const relationshipNote = 'They covered for each other during the harbor mutiny.';
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await knowledgeBasePage.navigateToKnowledgeBaseFromCurrentSeries('?tab=characters');
+    await knowledgeBasePage.createCharacter({
+      name: sourceCharacterName,
+      description: 'A stubborn captain trying to hold the crew together.',
+    });
+    await knowledgeBasePage.createCharacter({
+      name: targetCharacterName,
+      description: 'The only witness who still trusts the captain.',
+    });
+
+    await knowledgeBasePage.openCharacter(sourceCharacterName);
+    await characterPage.expectLoaded(sourceCharacterName);
+    await characterPage.addRelationship({
+      targetName: targetCharacterName,
+      relationshipType,
+      note: relationshipNote,
+    });
+    await characterPage.expectRelationshipVisible({
+      targetName: targetCharacterName,
+      relationshipType,
+      note: relationshipNote,
+    });
+    await characterPage.openRelationship(targetCharacterName);
+    await characterPage.expectLoaded(targetCharacterName);
+  });
+
+  test('shows human-readable character appearances on the appearances tab when data exists', async ({
+    characterPage,
+    dashboardPage,
+    knowledgeBasePage,
+    scriptLibraryPage,
+  }) => {
+    test.slow();
+
+    const projectTitle = createProjectTitle('E2E KB Appearance');
+    const characterName = `Selene Ward ${Date.now()}`;
+    const locationName = `Dock Warehouse ${Date.now()}`;
+    const sceneRef = `Scene ${Date.now()}`;
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+    await scriptLibraryPage.createScript();
+
+    await knowledgeBasePage.navigateToKnowledgeBaseFromCurrentSeries('?tab=locations');
+    await knowledgeBasePage.createLocation({
+      name: locationName,
+      description: 'An abandoned warehouse on the east pier.',
+    });
+
+    await knowledgeBasePage.navigateToKnowledgeBaseFromCurrentSeries('?tab=characters');
+    await knowledgeBasePage.createCharacter({
+      name: characterName,
+      description: 'A dock inspector who never misses a detail.',
+    });
+
+    await knowledgeBasePage.openCharacter(characterName);
+    await characterPage.expectLoaded(characterName);
+    await characterPage.addAppearance({ sceneRef, locationName });
+    await characterPage.openAppearancesTab();
+    await characterPage.expectAppearanceVisible({
+      scriptTitle: 'Untitled Script',
+      sceneRef,
+      locationName,
+    });
+  });
+
   test('creates a location, edits it from the locations tab, and deletes it', async ({
     dashboardPage,
     knowledgeBasePage,

@@ -16,9 +16,17 @@ interface iCharacterDetailProps {
   character: CharacterDetailQueryReturnType;
   seriesId: string;
   allCharacters?: Array<{ _id: string; name: string }>;
+  scripts?: Array<{ _id: string; title: string }>;
+  locations?: Array<{ _id: string; name: string }>;
 }
 
-export function CharacterDetail({ character, seriesId, allCharacters = [] }: iCharacterDetailProps) {
+export function CharacterDetail({
+  character,
+  seriesId,
+  allCharacters = [],
+  scripts = [],
+  locations = [],
+}: iCharacterDetailProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const initials = character.name
@@ -31,6 +39,16 @@ export function CharacterDetail({ character, seriesId, allCharacters = [] }: iCh
   const getCharacterName = (characterId: string) => {
     const char = allCharacters.find((c) => c._id === characterId);
     return char?.name ?? 'Unknown';
+  };
+
+  const getScriptTitle = (scriptId: string) => {
+    const script = scripts.find((item) => item._id === scriptId);
+    return script?.title ?? scriptId;
+  };
+
+  const getLocationName = (locationId: string) => {
+    const location = locations.find((item) => item._id === locationId);
+    return location?.name ?? locationId;
   };
 
   return (
@@ -173,7 +191,7 @@ export function CharacterDetail({ character, seriesId, allCharacters = [] }: iCh
                     <table className="w-full">
                       <thead className="border-b bg-muted/50">
                         <tr>
-                          <th className="px-4 py-3 text-left text-sm font-medium">Script ID</th>
+                          <th className="px-4 py-3 text-left text-sm font-medium">Script</th>
                           <th className="px-4 py-3 text-left text-sm font-medium">Scene Reference</th>
                           <th className="px-4 py-3 text-left text-sm font-medium">Location</th>
                         </tr>
@@ -181,9 +199,11 @@ export function CharacterDetail({ character, seriesId, allCharacters = [] }: iCh
                       <tbody className="divide-y">
                         {character.appearances.map((appearance) => (
                           <tr key={`${appearance.scriptId}-${appearance.sceneRef}`} className="hover:bg-muted/50">
-                            <td className="px-4 py-3 text-sm">{appearance.scriptId}</td>
+                            <td className="px-4 py-3 text-sm">{getScriptTitle(appearance.scriptId)}</td>
                             <td className="px-4 py-3 text-sm font-medium">{appearance.sceneRef}</td>
-                            <td className="px-4 py-3 text-sm text-muted-foreground">{appearance.locationId ?? '—'}</td>
+                            <td className="px-4 py-3 text-sm text-muted-foreground">
+                              {appearance.locationId ? getLocationName(appearance.locationId) : '—'}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
