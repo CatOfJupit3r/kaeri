@@ -391,6 +391,38 @@ test.describe('Knowledge base', () => {
     await knowledgeBasePage.deleteStoryArc(storyArcName);
   });
 
+  test('loads the graph tab with continuity nodes for a populated series', async ({
+    dashboardPage,
+    knowledgeBasePage,
+  }) => {
+    test.slow();
+
+    const projectTitle = createProjectTitle('E2E KB Graph');
+    const characterName = `Graph Character ${Date.now()}`;
+    const locationName = `Graph Location ${Date.now()}`;
+
+    await dashboardPage.navigateToDashboard();
+    await dashboardPage.createProject(projectTitle);
+    await dashboardPage.openProject(projectTitle);
+
+    await knowledgeBasePage.navigateToKnowledgeBaseFromCurrentSeries('?tab=characters');
+    await knowledgeBasePage.createCharacter({
+      name: characterName,
+      description: 'Created for continuity graph coverage.',
+    });
+
+    await knowledgeBasePage.navigateToKnowledgeBaseFromCurrentSeries('?tab=locations');
+    await knowledgeBasePage.createLocation({
+      name: locationName,
+      description: 'Created for continuity graph coverage.',
+    });
+
+    await knowledgeBasePage.switchTab('Graph');
+    await expect(knowledgeBasePage.page.getByText('Node Types', { exact: true })).toBeVisible({ timeout: 10_000 });
+    await knowledgeBasePage.expectGraphNodeVisible(characterName);
+    await knowledgeBasePage.expectGraphNodeVisible(locationName);
+  });
+
   test('renders timeline entries in chronological order on the timeline tab', async ({
     dashboardPage,
     knowledgeBasePage,

@@ -30,10 +30,10 @@ The goal is a complete writer-first E2E suite that covers every meaningful user 
 | Scripts library | Partial | Empty state, create-and-open, card metadata, and reopen coverage exist |
 | Script editor core | Partial | Editor route load, split layout, default starting block, toolbar and block-menu type switching, Tab cycling, scene-heading/character/dialogue Enter rules, Backspace deletion guards, arrow navigation, add-block controls, panel collapse/expand, panel tab switching, keyboard shortcuts panel, export/settings shortcuts, breakdown/table-read dialogs, version history open/list/preview/dismiss/restore flows, typing, save-state transition, and explicit save-and-reload persistence are covered |
 | Script x KB integration | Partial | Dedicated editor-integration coverage now exists for character-block KB suggestions and keyboard selection |
-| Knowledge base | Partial | Route default/deep-link behavior, search-to-tab routing, character detail, character relationships, character appearances, scene list/detail, and character/location/prop/theme/wildcard/timeline/research/story-arc create-edit-delete flows are covered |
+| Knowledge base | Partial | Route default/deep-link behavior, search-to-tab routing, character detail, character relationships, character appearances, scene detail linked-entity rendering, theme/story-arc panel detail persistence, and character/location/prop/theme/wildcard/timeline/research/story-arc create-edit-delete flows are covered |
 | Canvas | Mapped only | Route exists; interaction-heavy coverage should be staged carefully |
 | Export and import | Mapped only | JSON export/import and PDF export surfaces exist |
-| Continuity and analytics | Mapped only | KB history/graph and analytics routes exist; no executable coverage yet |
+| Continuity and analytics | Partial | KB continuity graph, KB history pagination, and analytics dashboard load coverage exist; linked graph-node navigation and filtered history remain uncovered |
 | Collaboration and presence | Mapped only | Workspace, invitation, role, activity, and presence surfaces exist or are partially wired |
 
 ## Domain Overview
@@ -308,13 +308,13 @@ Suggested fixtures and objects:
 - `AnalyticsPage`
 
 Scenario inventory:
-- `NARRATIVE-01` (`Next`): Scene detail page loads scene metadata and linked entities.
-- `NARRATIVE-02` (`Next`): Theme list and theme detail behaviors work for existing data.
-- `NARRATIVE-03` (`Next`): Story-arc list and arc-detail behaviors work for existing data.
+- `NARRATIVE-01` (`Done`, `Next`): Scene detail page loads scene metadata and linked entities.
+- `NARRATIVE-02` (`Done`, `Next`): Theme list and theme detail behaviors work for existing data.
+- `NARRATIVE-03` (`Done`, `Next`): Story-arc list and arc-detail behaviors work for existing data.
 - `NARRATIVE-04` (`Done`, `Next`): Timeline list renders ordered entries correctly.
-- `NARRATIVE-05` (`Next`): Continuity graph tab loads graph data for a populated series.
-- `NARRATIVE-06` (`Next`): Audit history tab loads paginated canon history.
-- `NARRATIVE-07` (`Next`): Series analytics dashboard loads without route errors.
+- `NARRATIVE-05` (`Done`, `Next`): Continuity graph tab loads graph data for a populated series.
+- `NARRATIVE-06` (`Done`, `Next`): Audit history tab loads paginated canon history.
+- `NARRATIVE-07` (`Done`, `Next`): Series analytics dashboard loads without route errors.
 - `NARRATIVE-08` (`Later`): Clicking a continuity-graph node opens the correct detail surface.
 - `NARRATIVE-09` (`Later`): History filters narrow to the selected entity type without leaking other data.
 - `NARRATIVE-10` (`Later`): Analytics widgets reflect recent script and KB changes.

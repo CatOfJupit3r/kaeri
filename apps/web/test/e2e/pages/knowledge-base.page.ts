@@ -183,6 +183,12 @@ export class KnowledgeBasePage extends BasePage {
       .first();
   }
 
+  private getPanelSection(title: string) {
+    return this.page
+      .getByText(new RegExp(`^${escapeRegExp(title)}$`, 'i'))
+      .locator('xpath=ancestor::*[contains(@class,"border")][1]');
+  }
+
   async navigateToKnowledgeBase(seriesId: string, search = '') {
     await this.goto(`/series/${seriesId}/knowledge-base${search}`);
     await this.expectLoaded();
@@ -438,6 +444,51 @@ export class KnowledgeBasePage extends BasePage {
     await this.waitForNetworkIdle();
   }
 
+  async addThemeVisualMotif(motif: string) {
+    const visualMotifsField = this.page.getByPlaceholder('e.g., Mirrors, Rain, Red color');
+
+    await expect(visualMotifsField).toBeVisible({ timeout: 10_000 });
+    await visualMotifsField.fill(motif);
+    await this.page.getByRole('button', { name: /^add$/i }).click();
+    await this.waitForNetworkIdle();
+  }
+
+  async addThemeRelatedCharacter(data: { characterName: string; connection: string }) {
+    const characterSelect = this.page
+      .getByText(/^Related Characters$/i)
+      .locator('xpath=following::*[@role="combobox"][1]');
+
+    await characterSelect.click({ force: true });
+    await this.page.getByRole('option', { name: data.characterName, exact: true }).click({ force: true });
+    await this.page.getByPlaceholder('How they embody this theme...').fill(data.connection);
+    await this.page.getByRole('button', { name: /^add character$/i }).click();
+    await this.waitForNetworkIdle();
+  }
+
+  async addThemeEvolution(data: { scriptTitle: string; notes: string }) {
+    const scriptSelect = this.page.getByText(/^Theme Evolution$/i).locator('xpath=following::*[@role="combobox"][1]');
+
+    await scriptSelect.click({ force: true });
+    await this.page.getByRole('option', { name: data.scriptTitle, exact: true }).click({ force: true });
+    await this.page.getByPlaceholder('How the theme evolves in this script...').fill(data.notes);
+    await this.page.getByRole('button', { name: /^add evolution$/i }).click();
+    await this.waitForNetworkIdle();
+  }
+
+  async expectThemePanelDetails(data: {
+    motif: string;
+    characterName: string;
+    connection: string;
+    scriptTitle: string;
+    evolutionNotes: string;
+  }) {
+    await expect(this.page.getByText(data.motif, { exact: true })).toBeVisible({ timeout: 10_000 });
+    await expect(this.page.getByText(data.characterName, { exact: true })).toBeVisible({ timeout: 10_000 });
+    await expect(this.page.getByText(data.connection, { exact: false })).toBeVisible({ timeout: 10_000 });
+    await expect(this.page.getByText(data.scriptTitle, { exact: true })).toBeVisible({ timeout: 10_000 });
+    await expect(this.page.getByText(data.evolutionNotes, { exact: false })).toBeVisible({ timeout: 10_000 });
+  }
+
   async closeThemeEditPanel() {
     await expect(this.editThemeBackButton).toBeVisible({ timeout: 10_000 });
     await this.editThemeBackButton.click();
@@ -501,7 +552,7 @@ export class KnowledgeBasePage extends BasePage {
     await this.expectWildcardNotVisible(title);
   }
 
-  async createTimelineEntry(data: { label: string; date?: string }) {
+  async createTimelineEntry(data: { label: string; date?: string }, options: { expectVisible?: boolean } = {}) {
     await expect(this.newTimelineButton).toBeVisible({ timeout: 10_000 });
     await this.newTimelineButton.click();
     await expect(this.createTimelineDialog).toBeVisible({ timeout: 10_000 });
@@ -513,7 +564,10 @@ export class KnowledgeBasePage extends BasePage {
 
     await this.createTimelineDialog.getByRole('button', { name: /^create entry$/i }).click();
     await expect(this.createTimelineDialog).not.toBeVisible({ timeout: 10_000 });
-    await this.expectTimelineEntryVisible(data.label);
+
+    if (options.expectVisible ?? true) {
+      await this.expectTimelineEntryVisible(data.label);
+    }
   }
 
   async expectTimelineEntryVisible(label: string) {
@@ -557,6 +611,45 @@ export class KnowledgeBasePage extends BasePage {
     );
 
     expect(renderedLabels.slice(0, labels.length)).toEqual(labels);
+  }
+
+  async expectGraphNodeVisible(label: string) {
+    const graphPanel = this.page.getByRole('tabpanel', { name: /^graph$/i });
+
+    await expect(graphPanel).toBeVisible({ timeout: 10_000 });
+    await expect(graphPanel.getByText(label, { exact: true }).first()).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectHistoryEntryVisible(label: string) {
+    const historyPanel = this.page.getByRole('tabpanel', { name: /^history$/i });
+
+    await expect(historyPanel).toBeVisible({ timeout: 10_000 });
+    await expect(historyPanel.getByText(label, { exact: true }).first()).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectHistoryEntryNotVisible(label: string) {
+    const historyPanel = this.page.getByRole('tabpanel', { name: /^history$/i });
+
+    await expect(historyPanel.getByText(label, { exact: true })).toHaveCount(0, { timeout: 10_000 });
+  }
+
+  async openHistoryEntry(label: string) {
+    const historyPanel = this.page.getByRole('tabpanel', { name: /^history$/i });
+
+    await historyPanel.getByText(label, { exact: true }).locator('xpath=ancestor::button[1]').click();
+  }
+
+  async expectHistoryEntryExpanded(text: string) {
+    const historyPanel = this.page.getByRole('tabpanel', { name: /^history$/i });
+
+    await expect(historyPanel.getByText(text, { exact: false }).first()).toBeVisible({ timeout: 10_000 });
+  }
+
+  async loadMoreHistory() {
+    const historyPanel = this.page.getByRole('tabpanel', { name: /^history$/i });
+
+    await historyPanel.getByRole('button', { name: /^load more$/i }).click();
+    await this.waitForNetworkIdle();
   }
 
   async createResearch(data: { title: string; content?: string; tags?: string }) {
@@ -643,6 +736,44 @@ export class KnowledgeBasePage extends BasePage {
     await descriptionField.fill(text);
     await descriptionField.press('Tab');
     await this.waitForNetworkIdle();
+  }
+
+  async addStoryArcKeyBeat(description: string) {
+    await this.page.getByPlaceholder('Add a beat...').fill(description);
+    await this.page.getByRole('button', { name: /^add$/i }).click();
+    await this.waitForNetworkIdle();
+  }
+
+  async addStoryArcCharacterRole(data: { characterName: string; role: string }) {
+    const characterSelect = this.page.getByText(/^Characters$/i).locator('xpath=following::*[@role="combobox"][1]');
+
+    await characterSelect.focus();
+    await characterSelect.press('ArrowDown');
+    await this.page.getByRole('option', { name: data.characterName, exact: true }).click({ force: true });
+    await this.page.getByPlaceholder('Role (e.g., protagonist)').fill(data.role);
+    await this.page.getByRole('button', { name: /^add character$/i }).click();
+    await this.waitForNetworkIdle();
+  }
+
+  async addStoryArcTheme(themeName: string) {
+    const themeSelect = this.page.getByText(/^Themes$/i).locator('xpath=following::*[@role="combobox"][1]');
+
+    await themeSelect.focus();
+    await themeSelect.press('ArrowDown');
+    await this.page.getByRole('option', { name: themeName, exact: true }).click({ force: true });
+    await this.waitForNetworkIdle();
+  }
+
+  async expectStoryArcPanelDetails(data: {
+    beatDescription: string;
+    characterName: string;
+    role: string;
+    themeName: string;
+  }) {
+    await expect(this.page.getByText(data.beatDescription, { exact: true })).toBeVisible({ timeout: 10_000 });
+    await expect(this.page.getByText(data.characterName, { exact: true })).toBeVisible({ timeout: 10_000 });
+    await expect(this.page.getByText(data.role, { exact: false })).toBeVisible({ timeout: 10_000 });
+    await expect(this.page.getByText(data.themeName, { exact: true })).toBeVisible({ timeout: 10_000 });
   }
 
   async closeStoryArcEditPanel() {
