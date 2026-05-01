@@ -245,24 +245,24 @@ Suggested fixtures and objects:
 Scenario inventory:
 - `INTEGRATION-01` (`Done`, `Next`): Typing in a character block shows character suggestions from the KB.
 - `INTEGRATION-02` (`Done`, `Next`): Character suggestions can be navigated with arrow keys and confirmed with `Enter`.
-- `INTEGRATION-03` (`Later`): Quick-create from character suggestion flow pre-fills the new character name.
-- `INTEGRATION-04` (`Next`): Typing a scene heading after `INT.` or `EXT.` shows location suggestions.
-- `INTEGRATION-05` (`Later`): Time-of-day suggestions appear after selecting a location and typing a separator.
-- `INTEGRATION-06` (`Later`): Quick-create from scene-heading location autocomplete opens with parsed location data.
-- `INTEGRATION-07` (`Next`): Typing `@` in an action block shows character mention suggestions.
-- `INTEGRATION-08` (`Next`): Typing `#` in an action block shows prop suggestions.
-- `INTEGRATION-09` (`Next`): Typing `!` in a block shows wildcard or research suggestions.
-- `INTEGRATION-10` (`Next`): Selecting an entity mention inserts the linked mention into content.
-- `INTEGRATION-11` (`Next`): Hovering a linked entity shows the preview card.
-- `INTEGRATION-12` (`Next`): Clicking "Open in KB" from a preview routes to the relevant detail surface.
-- `INTEGRATION-13` (`Later`): Renaming an entity in the KB updates linked editor references.
-- `INTEGRATION-14` (`Later`): Deleting a linked entity produces a visible orphaned-reference state instead of silent corruption.
-- `INTEGRATION-15` (`Later`): Scene quick editor opens from the scene block menu and persists metadata.
-- `INTEGRATION-16` (`Later`): Linking a scene to characters or props updates the associated narrative entity detail views.
-- `INTEGRATION-17` (`Later`): Character appearances written in the editor show up in character detail appearance lists.
-- `INTEGRATION-18` (`Later`): Theme tagging from selected text persists and surfaces in theme appearances.
-- `INTEGRATION-19` (`Later`): Story-arc linking from scene metadata persists and is visible in arc detail flows.
-- `INTEGRATION-20` (`Later`): Timeline linking from scene metadata appears in timeline views.
+- `INTEGRATION-03` (`Done`, `Next`): Quick-create from character suggestion flow pre-fills the new character name.
+- `INTEGRATION-04` (`Done`, `Next`): Typing a scene heading after `INT.` or `EXT.` shows location suggestions.
+- `INTEGRATION-05` (`Done`, `Next`): Time-of-day suggestions appear after selecting a location and typing a separator.
+- `INTEGRATION-06` (`Done`, `Next`): Quick-create from scene-heading location autocomplete opens with parsed location data.
+- `INTEGRATION-07` (`Done`, `Next`): Typing `@` in an action block shows character mention suggestions.
+- `INTEGRATION-08` (`Done`, `Next`): Typing `#` in an action block shows prop suggestions.
+- `INTEGRATION-09` (`Done`, `Next`): Typing `!` in a block shows wildcard or research suggestions.
+- `INTEGRATION-10` (`Done`, `Next`): Selecting an entity mention inserts the linked mention into content.
+- `INTEGRATION-11` (`Done`, `Next`): Hovering a linked entity shows the preview card.
+- `INTEGRATION-12` (`Done`, `Next`): Clicking "Open in KB" from a preview routes to the relevant detail surface.
+- `INTEGRATION-13` (`Done`, `Next`): Renaming an entity in the KB updates linked editor references.
+- `INTEGRATION-14` (`Done`, `Next`): Deleting a linked entity produces a visible orphaned-reference state instead of silent corruption.
+- `INTEGRATION-15` (`Done`, `Next`): Scene quick editor opens from the scene block menu and persists metadata.
+- `INTEGRATION-16` (`Done`, `Next`): Linking a scene to characters or props updates the associated narrative entity detail views.
+- `INTEGRATION-17` (`Done`, `Next`): Character appearances written in the editor show up in character detail appearance lists.
+- `INTEGRATION-18` (`Done`, `Next`): Theme tagging from selected text persists and surfaces in theme appearances.
+- `INTEGRATION-19` (`Done`, `Next`): Story-arc linking from scene metadata persists and is visible in arc detail flows.
+- `INTEGRATION-20` (`Done`, `Next`): Timeline linking from scene metadata appears in timeline views.
 
 ### 8. Knowledge Base Entity Management
 
