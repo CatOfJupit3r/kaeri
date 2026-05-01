@@ -1,5 +1,5 @@
 import { call } from '@orpc/server';
-import { it, expect, describe, beforeEach } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import { createSeries, createSeriesWithUser } from './helpers/factories';
 import { appRouter } from './helpers/instance';

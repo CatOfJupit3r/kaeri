@@ -1,3 +1,5 @@
 /// <reference types="@kaeri/shared/globals" />
 
-export {};
+declare let process: {
+  env: Record<string, string | undefined>;
+};

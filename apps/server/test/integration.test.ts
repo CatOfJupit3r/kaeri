@@ -1,5 +1,5 @@
 import { call } from '@orpc/server';
-import { it, expect, describe } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import {
   addAppearance,

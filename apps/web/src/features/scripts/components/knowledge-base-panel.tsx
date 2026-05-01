@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   LuBookUser,
   LuCalendar,
@@ -35,6 +35,11 @@ import { WildcardPanel } from '@~/features/wildcards/components/wildcard-panel';
 
 interface iKnowledgeBasePanelProps {
   seriesId: string;
+  requestedTab?: KBTab;
+  characterCreateRequest?: { requestId: number; name: string } | null;
+  onCharacterCreateRequestHandled?: () => void;
+  locationCreateRequest?: { requestId: number; name: string; timeOfDay: string[] } | null;
+  onLocationCreateRequestHandled?: () => void;
 }
 
 type KBTab =
@@ -60,7 +65,14 @@ const TAB_CONFIG: Array<{ id: KBTab; label: string; icon: typeof LuBookUser }> =
   { id: 'themes', label: 'Themes', icon: LuLightbulb },
 ];
 
-export function KnowledgeBasePanel({ seriesId }: iKnowledgeBasePanelProps) {
+export function KnowledgeBasePanel({
+  seriesId,
+  requestedTab,
+  characterCreateRequest,
+  onCharacterCreateRequestHandled,
+  locationCreateRequest,
+  onLocationCreateRequestHandled,
+}: iKnowledgeBasePanelProps) {
   const [activeTab, setActiveTab] = useState<KBTab>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
@@ -75,6 +87,12 @@ export function KnowledgeBasePanel({ seriesId }: iKnowledgeBasePanelProps) {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab as KBTab);
   };
+
+  useEffect(() => {
+    if (requestedTab) {
+      setActiveTab(requestedTab);
+    }
+  }, [requestedTab]);
 
   const handleCharacterSelect = (characterId: string) => {
     setSelectedCharacterId(characterId);
@@ -236,12 +254,22 @@ export function KnowledgeBasePanel({ seriesId }: iKnowledgeBasePanelProps) {
 
           {/* Characters Tab */}
           <TabsContent value="characters" className="mt-0 p-3">
-            <CharacterList seriesId={seriesId} onCharacterSelect={handleCharacterSelect} />
+            <CharacterList
+              seriesId={seriesId}
+              onCharacterSelect={handleCharacterSelect}
+              createRequest={characterCreateRequest}
+              onCreateRequestHandled={onCharacterCreateRequestHandled}
+            />
           </TabsContent>
 
           {/* Locations Tab */}
           <TabsContent value="locations" className="mt-0 p-3">
-            <LocationList seriesId={seriesId} onLocationSelect={handleLocationSelect} />
+            <LocationList
+              seriesId={seriesId}
+              onLocationSelect={handleLocationSelect}
+              createRequest={locationCreateRequest}
+              onCreateRequestHandled={onLocationCreateRequestHandled}
+            />
           </TabsContent>
 
           {/* Props Tab */}

@@ -62,6 +62,7 @@ export const Character = Node.create({
     return [
       'div',
       mergeAttributes(HTMLAttributes, {
+        'data-testid': 'block',
         'data-block-type': 'character',
         class: 'script-block script-block--character',
       }),

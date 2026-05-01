@@ -7,6 +7,8 @@ import {
   characterDetailQueryOptions,
 } from '@~/features/characters/hooks/queries/use-character-detail';
 import { useCharacterList, characterListQueryOptions } from '@~/features/characters/hooks/queries/use-character-list';
+import { useLocationList } from '@~/features/locations/hooks/queries/use-location-list';
+import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list';
 import { SeriesHeader } from '@~/features/series/components/series-header';
 import { useSeries, seriesQueryOptions } from '@~/features/series/hooks/queries/use-series';
 
@@ -28,6 +30,8 @@ function RouteComponent() {
   const { data: series } = useSeries(seriesId);
   const { data: character, isPending, error } = useCharacterDetail(characterId, seriesId);
   const { data: characterListData } = useCharacterList(seriesId);
+  const { data: scriptsData } = useScriptList(seriesId);
+  const { data: locationsData } = useLocationList(seriesId);
 
   if (isPending) {
     return (
@@ -75,6 +79,8 @@ function RouteComponent() {
   }
 
   const allCharacters = characterListData?.items ?? [];
+  const scripts = scriptsData?.items ?? [];
+  const locations = locationsData?.items ?? [];
 
   return (
     <div className="h-full overflow-auto bg-background">
@@ -83,7 +89,13 @@ function RouteComponent() {
 
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <CharacterDetail character={character} seriesId={seriesId} allCharacters={allCharacters} />
+        <CharacterDetail
+          character={character}
+          seriesId={seriesId}
+          allCharacters={allCharacters}
+          scripts={scripts}
+          locations={locations}
+        />
       </div>
     </div>
   );

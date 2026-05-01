@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 
 import { ExportPdfModal } from '@~/features/export';
 import { ScriptEditor, ScriptSettingsModal } from '@~/features/scripts/components';
+import type { EntityType } from '@~/features/scripts/extensions/entity-mention';
 import { useSaveScriptContent } from '@~/features/scripts/hooks/mutations/use-save-script-content';
 import { scriptQueryOptions, useScript } from '@~/features/scripts/hooks/queries/use-script';
 import '@~/features/scripts/script-editor.css';
@@ -21,7 +22,7 @@ function ScriptEditorPage() {
   const { seriesId, scriptId } = Route.useParams();
   const navigate = useNavigate();
   const { data: script, isPending, error } = useScript(scriptId);
-  const { saveContent, isPending: isSaving } = useSaveScriptContent();
+  const { saveContent, saveContentImmediate, isPending: isSaving } = useSaveScriptContent();
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
@@ -47,6 +48,48 @@ function ScriptEditorPage() {
   const handleExport = useCallback(() => {
     setIsExportModalOpen(true);
   }, []);
+
+  const handleSave = useCallback(
+    (content: string) => {
+      saveContentImmediate(scriptId, content);
+    },
+    [saveContentImmediate, scriptId],
+  );
+
+  const handleOpenEntityInKnowledgeBase = useCallback(
+    (entityId: string, entityType: EntityType) => {
+      switch (entityType) {
+        case 'character': {
+          void navigate({
+            to: '/series/$seriesId/knowledge-base/characters/$characterId',
+            params: { seriesId, characterId: entityId },
+            search: { tab: 'characters' },
+          });
+          break;
+        }
+        case 'prop': {
+          void navigate({
+            to: '/series/$seriesId/knowledge-base',
+            params: { seriesId },
+            search: { tab: 'props' },
+          });
+          break;
+        }
+        case 'wildcard': {
+          void navigate({
+            to: '/series/$seriesId/knowledge-base',
+            params: { seriesId },
+            search: { tab: 'wildcards' },
+          });
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    },
+    [navigate, seriesId],
+  );
 
   // Keyboard shortcuts
   useHotkey('Mod+E', handleExport, { preventDefault: true });
@@ -87,8 +130,10 @@ function ScriptEditorPage() {
         scriptId={scriptId}
         onOpenSettings={handleOpenSettings}
         onExport={handleExport}
+        onSave={handleSave}
         isSaving={isSaving}
         lastEditedAt={script.lastEditedAt}
+        onOpenEntityInKnowledgeBase={handleOpenEntityInKnowledgeBase}
       />
       <ExportPdfModal
         scriptId={scriptId}

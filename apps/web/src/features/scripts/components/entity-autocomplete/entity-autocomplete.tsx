@@ -7,6 +7,8 @@ import { CreateEntityOption } from './create-entity-option';
 import { SuggestionList } from './suggestion-list';
 import { useAutocompleteKeyboard } from './use-autocomplete-keyboard';
 
+type AutocompleteEntityType = EntityType | 'location' | 'time-of-day';
+
 export interface iEntityAutocompleteProps {
   /** Current search query */
   query: string;
@@ -15,7 +17,7 @@ export interface iEntityAutocompleteProps {
   /** Suggestions from API */
   suggestions: iEntitySuggestion[];
   /** Entity type being searched */
-  entityType: EntityType;
+  entityType: AutocompleteEntityType;
   /** Called when an entity is selected */
   onSelect: (entity: iEntitySuggestion) => void;
   /** Called when user wants to create a new entity */

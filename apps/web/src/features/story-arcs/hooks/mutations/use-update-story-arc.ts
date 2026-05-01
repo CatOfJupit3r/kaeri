@@ -5,22 +5,28 @@ import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import type { StoryArcListQueryReturnType } from '../queries/use-story-arc-list';
 
+function isStoryArcListQuery(queryKey: readonly unknown[]) {
+  const serializedQueryKey = JSON.stringify(queryKey);
+
+  return serializedQueryKey.includes('"storyArc"') && serializedQueryKey.includes('"listStoryArcs"');
+}
+
 export const updateStoryArcMutationOptions = tanstackRPC.storyArc.updateStoryArc.mutationOptions({
   onMutate: async ({ storyArcId }, ctx) => {
     const detailQueryKey = tanstackRPC.storyArc.getStoryArc.queryKey({ input: { storyArcId } });
     await ctx.client.cancelQueries({ queryKey: detailQueryKey });
 
     void ctx.client.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === 'storyArc' && query.queryKey[1] === 'listStoryArcs',
+      predicate: (query) => isStoryArcListQuery(query.queryKey),
     });
   },
   onSuccess: (updatedStoryArc, _variables, _context, ctx) => {
     const detailQueryKey = tanstackRPC.storyArc.getStoryArc.queryKey({ input: { storyArcId: updatedStoryArc._id } });
     ctx.client.setQueryData(detailQueryKey, updatedStoryArc);
 
-    const listQueryKeys = ctx.client
-      .getQueryCache()
-      .findAll({ predicate: (query) => query.queryKey[0] === 'storyArc' && query.queryKey[1] === 'listStoryArcs' });
+    const listQueryKeys = ctx.client.getQueryCache().findAll({
+      predicate: (query) => isStoryArcListQuery(query.queryKey),
+    });
 
     listQueryKeys.forEach((query) => {
       const oldData = query.state.data as StoryArcListQueryReturnType | undefined;
@@ -37,7 +43,7 @@ export const updateStoryArcMutationOptions = tanstackRPC.storyArc.updateStoryArc
       queryKey: tanstackRPC.storyArc.getStoryArc.queryKey({ input: { storyArcId } }),
     });
     void ctx.client.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === 'storyArc' && query.queryKey[1] === 'listStoryArcs',
+      predicate: (query) => isStoryArcListQuery(query.queryKey),
     });
     toastORPCError('Failed to update story arc', error);
   },

@@ -1,0 +1,28 @@
+name: kaeri-e2e
+services:
+  mongo:
+    image: mongo:8.0
+    container_name: kaeri-mongo-e2e
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_DATABASE=kaeri
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=verysecretpassword
+      - MONGO_USER=username
+      - MONGO_PASSWORD=password
+      - MONGO_DB=kaeri
+    ports:
+      - 6061:27017
+    volumes:
+      - kaeri-e2e-mongo:/data/db
+      - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+
+  valkey:
+    image: valkey/valkey:8.0-alpine
+    container_name: kaeri-valkey-e2e
+    restart: unless-stopped
+    ports:
+      - 6380:6379
+
+volumes:
+  kaeri-e2e-mongo:

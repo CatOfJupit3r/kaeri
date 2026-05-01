@@ -76,9 +76,9 @@ export const SceneTimelineLinker = memo(
     );
 
     return (
-      <div className={cn('flex items-center gap-1.5', className)}>
+      <div data-testid="scene-timeline-linker" className={cn('flex items-center gap-1.5', className)}>
         {linkedEntry ? (
-          <Badge variant="outline" className="gap-1 pr-1">
+          <Badge data-testid={`scene-timeline-linked-${linkedEntry._id}`} variant="outline" className="gap-1 pr-1">
             <LuCalendar className="size-3" />
             {linkedEntry.label}
             {linkedEntry.date ? <span className="text-muted-foreground">({linkedEntry.date})</span> : null}
@@ -97,7 +97,13 @@ export const SceneTimelineLinker = memo(
           !disabled && (
             <Popover open={isOpen} onOpenChange={setIsOpen}>
               <PopoverTrigger asChild>
-                <Button size="sm" variant="ghost" className="h-6 gap-1 px-2 text-xs" disabled={isLoading}>
+                <Button
+                  data-testid="scene-timeline-link-trigger"
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 gap-1 px-2 text-xs"
+                  disabled={isLoading}
+                >
                   <LuLink className="size-3" />
                   Link to Timeline
                 </Button>
@@ -116,6 +122,7 @@ export const SceneTimelineLinker = memo(
                       {availableEntries.map((entry) => (
                         <Button
                           key={entry._id}
+                          data-testid={`scene-timeline-option-${entry._id}`}
                           variant="ghost"
                           size="sm"
                           className="w-full justify-start gap-2 text-xs"

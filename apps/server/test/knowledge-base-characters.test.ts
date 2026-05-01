@@ -1,5 +1,5 @@
 import { call } from '@orpc/server';
-import { it, expect, describe } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import {
   addAppearance,
@@ -214,7 +214,7 @@ describe('Knowledge Base API - Characters', () => {
         ctx(),
       );
 
-      expect(result.items).toBeArray();
+      expect(result.items).toBeInstanceOf(Array);
       expect(result.items.length).toBe(0);
       expect(result.total).toBe(0);
     });

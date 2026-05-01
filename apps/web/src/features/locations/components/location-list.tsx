@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LuGlobe, LuPencil, LuTrash2 } from 'react-icons/lu';
 
 import {
@@ -35,6 +35,10 @@ interface iLocationListProps {
   seriesId: string;
   /** Optional callback for when a location is selected. If not provided, opens edit form. */
   onLocationSelect?: (locationId: string) => void;
+  /** External request to open the create form with prefilled values. */
+  createRequest?: { requestId: number; name: string; timeOfDay: string[] } | null;
+  /** Called after the external create request has been consumed. */
+  onCreateRequestHandled?: () => void;
 }
 
 function LocationListPending() {
@@ -63,8 +67,15 @@ function LocationListPending() {
   );
 }
 
-export function LocationList({ seriesId, onLocationSelect }: iLocationListProps) {
+export function LocationList({
+  seriesId,
+  onLocationSelect,
+  createRequest,
+  onCreateRequestHandled,
+}: iLocationListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [initialCreateName, setInitialCreateName] = useState('');
+  const [initialCreateTimeOfDay, setInitialCreateTimeOfDay] = useState<string[]>([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [locationToDelete, setLocationToDelete] = useState<iLocation | undefined>(undefined);
   const { data, isPending, error, refetch } = useLocationList(seriesId);
@@ -74,6 +85,26 @@ export function LocationList({ seriesId, onLocationSelect }: iLocationListProps)
 
   const characters = charactersData?.items ?? [];
   const props = propsData?.items ?? [];
+
+  useEffect(() => {
+    if (!createRequest) {
+      return;
+    }
+
+    setInitialCreateName(createRequest.name);
+    setInitialCreateTimeOfDay(createRequest.timeOfDay);
+    setIsFormOpen(true);
+    onCreateRequestHandled?.();
+  }, [createRequest, onCreateRequestHandled]);
+
+  const handleCreateFormOpenChange = (open: boolean) => {
+    setIsFormOpen(open);
+
+    if (!open) {
+      setInitialCreateName('');
+      setInitialCreateTimeOfDay([]);
+    }
+  };
 
   const handleCardClick = (locationId: string) => {
     // If onLocationSelect is provided, use it instead of editing
@@ -129,7 +160,15 @@ export function LocationList({ seriesId, onLocationSelect }: iLocationListProps)
             <EmptyDescription>Create your first location to start mapping your story&apos;s world.</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={() => setIsFormOpen(true)}>New Location</Button>
+            <Button
+              onClick={() => {
+                setInitialCreateName('');
+                setInitialCreateTimeOfDay([]);
+                setIsFormOpen(true);
+              }}
+            >
+              New Location
+            </Button>
           </EmptyContent>
         </Empty>
         <LocationCreateForm
@@ -137,7 +176,9 @@ export function LocationList({ seriesId, onLocationSelect }: iLocationListProps)
           characters={characters}
           props={props}
           open={isFormOpen}
-          onOpenChange={setIsFormOpen}
+          onOpenChange={handleCreateFormOpenChange}
+          initialName={initialCreateName}
+          initialTimeOfDay={initialCreateTimeOfDay}
         />
       </>
     );
@@ -150,7 +191,15 @@ export function LocationList({ seriesId, onLocationSelect }: iLocationListProps)
           <p className="text-sm text-muted-foreground">
             {data?.total ?? 0} {data?.total === 1 ? 'location' : 'locations'}
           </p>
-          <Button onClick={() => setIsFormOpen(true)}>New Location</Button>
+          <Button
+            onClick={() => {
+              setInitialCreateName('');
+              setInitialCreateTimeOfDay([]);
+              setIsFormOpen(true);
+            }}
+          >
+            New Location
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -236,7 +285,9 @@ export function LocationList({ seriesId, onLocationSelect }: iLocationListProps)
         characters={characters}
         props={props}
         open={isFormOpen}
-        onOpenChange={setIsFormOpen}
+        onOpenChange={handleCreateFormOpenChange}
+        initialName={initialCreateName}
+        initialTimeOfDay={initialCreateTimeOfDay}
       />
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>

@@ -59,7 +59,7 @@ interface iUseSaveScriptContentOptions {
 export function useSaveScriptContent(options: iUseSaveScriptContentOptions = {}) {
   const { debounceMs = 1000 } = options;
   const mutation = useMutation(saveScriptContentMutationOptions);
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const saveContent = useCallback(
     (scriptId: string, content: string) => {

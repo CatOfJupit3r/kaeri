@@ -3,11 +3,13 @@ import { memo } from 'react';
 import type { iEntitySuggestion, EntityType } from '../../extensions/entity-mention';
 import { SuggestionItem } from './suggestion-item';
 
+type AutocompleteEntityType = EntityType | 'location' | 'time-of-day';
+
 export interface iSuggestionListProps {
   /** List of suggestions to render */
   suggestions: iEntitySuggestion[];
   /** Entity type for styling */
-  entityType: EntityType;
+  entityType: AutocompleteEntityType;
   /** Currently selected index */
   selectedIndex: number;
   /** Called when a suggestion is clicked */

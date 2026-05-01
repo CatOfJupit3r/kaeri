@@ -1,5 +1,5 @@
 import { call } from '@orpc/server';
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import { WORKSPACE_ROLES } from '@kaeri/shared';
 
@@ -205,7 +205,7 @@ describe('Workspace CRUD', () => {
 
       await expectErrorCode(
         () => call(appRouter.workspace.deleteWorkspace, { workspaceId: personal!._id }, ctx()),
-        'BAD_REQUEST',
+        'FORBIDDEN',
       );
     });
 

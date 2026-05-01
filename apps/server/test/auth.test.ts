@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import { createUser } from './helpers/utilities';
 
@@ -11,8 +11,8 @@ describe('Auth', () => {
     };
     const { session, user } = await createUser(userInfo);
 
-    expect(session).not.toBeNil();
-    expect(user).not.toBeNil();
+    expect(session).toBeDefined();
+    expect(user).toBeDefined();
     expect(user.email).toBe('test@example.com');
     expect(user.name).toBe('Test User');
   });

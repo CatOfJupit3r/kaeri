@@ -174,7 +174,7 @@ export class ScriptKBIntegrationService implements iWithLogger {
           ...baseFilter,
           name: searchRegex,
         })
-          .select('_id name images description mood')
+          .select('_id name images description mood timeOfDay')
           .limit(limit * 2)
           .lean();
 
@@ -183,6 +183,7 @@ export class ScriptKBIntegrationService implements iWithLogger {
           name: l.name,
           avatarUrl: l.images?.[0]?.url,
           preview: l.description?.slice(0, 100) ?? l.mood,
+          timeOfDay: l.timeOfDay,
         }));
       }
 
@@ -693,6 +694,11 @@ export class ScriptKBIntegrationService implements iWithLogger {
   public async validateEntityLinks(input: iValidateEntityLinksInput): Promise<{
     orphaned: string[];
     valid: string[];
+    resolved: Array<{
+      entityType: string;
+      entityId: string;
+      entityName: string;
+    }>;
   }> {
     const { seriesId, links } = input;
 
@@ -705,36 +711,48 @@ export class ScriptKBIntegrationService implements iWithLogger {
     }
 
     // Fetch all entity types in parallel
-    const existingIdsByType = await this.fetchExistingEntityIds(byType, seriesId);
+    const existingEntitiesByType = await this.fetchExistingEntitiesByType(byType, seriesId);
 
     // Categorize as valid or orphaned
     const orphaned: string[] = [];
     const valid: string[] = [];
+    const resolved: Array<{
+      entityType: string;
+      entityId: string;
+      entityName: string;
+    }> = [];
 
     for (const link of links) {
-      const existingIds = existingIdsByType.get(link.entityType) ?? new Set();
-      if (existingIds.has(link.entityId)) {
+      const existingEntities = existingEntitiesByType.get(link.entityType) ?? new Map();
+      const entityName = existingEntities.get(link.entityId);
+
+      if (entityName) {
         valid.push(link.entityId);
+        resolved.push({
+          entityType: link.entityType,
+          entityId: link.entityId,
+          entityName,
+        });
       } else {
         orphaned.push(link.entityId);
       }
     }
 
-    return { orphaned, valid };
+    return { orphaned, valid, resolved };
   }
 
   /**
-   * Fetch existing entity IDs for multiple types in parallel
+   * Fetch existing entity names for multiple types in parallel
    */
-  private async fetchExistingEntityIds(
+  private async fetchExistingEntitiesByType(
     byType: Map<string, string[]>,
     seriesId: string,
-  ): Promise<Map<string, Set<string>>> {
-    const results = new Map<string, Set<string>>();
+  ): Promise<Map<string, Map<string, string>>> {
+    const results = new Map<string, Map<string, string>>();
 
     const fetchPromises = [...byType.entries()].map(async ([entityType, ids]) => {
-      const existingIds = await this.fetchEntityIds(entityType, ids, seriesId);
-      results.set(entityType, existingIds);
+      const existingEntities = await this.fetchEntityRecords(entityType, ids, seriesId);
+      results.set(entityType, existingEntities);
     });
 
     await Promise.all(fetchPromises);
@@ -742,39 +760,38 @@ export class ScriptKBIntegrationService implements iWithLogger {
   }
 
   /**
-   * Fetch existing IDs for a single entity type
+   * Fetch existing entity names for a single entity type
    */
-  private async fetchEntityIds(entityType: string, ids: string[], seriesId: string): Promise<Set<string>> {
+  private async fetchEntityRecords(entityType: string, ids: string[], seriesId: string): Promise<Map<string, string>> {
     const filter = { _id: { $in: ids }, seriesId };
-    const projection = { _id: 1 };
 
     switch (entityType) {
       case 'character': {
-        const entities = await CharacterModel.find(filter).select(projection).lean();
-        return new Set(entities.map((e) => e._id));
+        const entities = await CharacterModel.find(filter).select('_id name').lean();
+        return new Map(entities.map((entity) => [entity._id, entity.name]));
       }
       case 'location': {
-        const entities = await LocationModel.find(filter).select(projection).lean();
-        return new Set(entities.map((e) => e._id));
+        const entities = await LocationModel.find(filter).select('_id name').lean();
+        return new Map(entities.map((entity) => [entity._id, entity.name]));
       }
       case 'prop': {
-        const entities = await PropModel.find(filter).select(projection).lean();
-        return new Set(entities.map((e) => e._id));
+        const entities = await PropModel.find(filter).select('_id name').lean();
+        return new Map(entities.map((entity) => [entity._id, entity.name]));
       }
       case 'wildcard': {
-        const entities = await WildCardModel.find(filter).select(projection).lean();
-        return new Set(entities.map((e) => e._id));
+        const entities = await WildCardModel.find(filter).select('_id title').lean();
+        return new Map(entities.map((entity) => [entity._id, entity.title]));
       }
       case 'theme': {
-        const entities = await ThemeModel.find(filter).select(projection).lean();
-        return new Set(entities.map((e) => e._id));
+        const entities = await ThemeModel.find(filter).select('_id name').lean();
+        return new Map(entities.map((entity) => [entity._id, entity.name]));
       }
       case 'storyArc': {
-        const entities = await StoryArcModel.find(filter).select(projection).lean();
-        return new Set(entities.map((e) => e._id));
+        const entities = await StoryArcModel.find(filter).select('_id name').lean();
+        return new Map(entities.map((entity) => [entity._id, entity.name]));
       }
       default:
-        return new Set();
+        return new Map();
     }
   }
 

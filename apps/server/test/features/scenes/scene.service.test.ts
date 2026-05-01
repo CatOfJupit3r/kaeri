@@ -1,5 +1,5 @@
 import { call } from '@orpc/server';
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import { SceneModel } from '@~/db/models/scene.model';
 import { ScriptModel } from '@~/db/models/script.model';

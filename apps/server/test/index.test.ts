@@ -1,4 +1,4 @@
-import { it, expect, describe } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import { app } from './helpers/instance';
 

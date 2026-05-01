@@ -1,5 +1,5 @@
 import { call } from '@orpc/server';
-import { it, expect, describe } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import { AuditEntryModel } from '@~/db/models/audit-entry.model';
 
@@ -23,9 +23,9 @@ describe('Continuity API', () => {
 
       const graph = await call(appRouter.continuity.continuityGraph, { seriesId: series._id }, ctx());
 
-      expect(graph.nodes).toBeArray();
+      expect(graph.nodes).toBeInstanceOf(Array);
       expect(graph.nodes.length).toBe(0);
-      expect(graph.edges).toBeArray();
+      expect(graph.edges).toBeInstanceOf(Array);
       expect(graph.edges.length).toBe(0);
     });
 
@@ -284,7 +284,7 @@ describe('Continuity API', () => {
         ctx(),
       );
 
-      expect(result.items).toBeArray();
+      expect(result.items).toBeInstanceOf(Array);
       expect(result.items.length).toBe(0);
       expect(result.total).toBe(0);
     });
@@ -406,7 +406,7 @@ describe('Continuity API', () => {
         ctx(),
       );
 
-      expect(result.items).toBeArray();
+      expect(result.items).toBeInstanceOf(Array);
       expect(result.items.length).toBe(0);
       expect(result.total).toBe(0);
     });

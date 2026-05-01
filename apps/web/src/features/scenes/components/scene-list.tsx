@@ -1,3 +1,4 @@
+import { useQueries } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { LuFilm, LuPencil, LuPlus, LuTrash2 } from 'react-icons/lu';
@@ -25,7 +26,7 @@ import { useScriptList } from '@~/features/scripts/hooks/queries/use-script-list
 
 import { useDeleteScene } from '../hooks/mutations/use-delete-scene';
 import type { SceneListItem } from '../hooks/queries/use-scene-list';
-import { useSceneList } from '../hooks/queries/use-scene-list';
+import { sceneListQueryOptions } from '../hooks/queries/use-scene-list';
 import { SceneCreateForm } from './scene-create-form';
 
 interface iSceneListProps {
@@ -88,10 +89,12 @@ export function SceneList({ seriesId, onSceneSelect }: iSceneListProps) {
   const characters = charactersData?.items ?? [];
   const props = propsData?.items ?? [];
 
-  const sceneQueries = scriptIds.map((scriptId) =>
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useSceneList(scriptId),
-  );
+  const sceneQueries = useQueries({
+    queries: scriptIds.map((scriptId) => ({
+      ...sceneListQueryOptions(scriptId),
+      enabled: !!scriptId,
+    })),
+  });
 
   const isPending = isScriptsPending || sceneQueries.some((q) => q.isPending);
   const error = scriptsError ?? sceneQueries.find((q) => q.error)?.error;

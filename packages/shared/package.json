@@ -40,7 +40,7 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "prepare": "bun run build",
+    "prepare": "pnpm run build",
     "dev": "tsdown --watch --no-clean",
     "prettier": "prettier --write .",
     "check-types": "tsgo --noEmit",

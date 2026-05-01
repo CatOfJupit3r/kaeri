@@ -1,5 +1,5 @@
 import { call } from '@orpc/server';
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import { WORKSPACE_ROLES } from '@kaeri/shared';
 
@@ -271,7 +271,7 @@ describe('Role Permissions', () => {
 
       await expectErrorCode(
         () => call(appRouter.workspaceMember.leaveWorkspace, { workspaceId: workspace._id }, ownerCtx()),
-        'BAD_REQUEST',
+        'FORBIDDEN',
       );
     });
   });

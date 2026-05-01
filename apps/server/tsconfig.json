@@ -11,7 +11,7 @@
       "@kaeri/shared/globals": ["../../packages/shared/src/globals.d.ts"]
     },
     "outDir": "./dist",
-    "types": ["bun"],
+    "types": ["node", "vitest/globals"],
     "composite": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
@@ -24,5 +24,5 @@
     }
   ],
   "files": ["../../packages/shared/src/globals.d.ts"],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "test/**/*.ts", "test/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "test/**/*.ts", "test/**/*.tsx", "test/**/*.d.ts"]
 }

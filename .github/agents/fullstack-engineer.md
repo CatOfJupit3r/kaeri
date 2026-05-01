@@ -80,18 +80,18 @@ You are an expert fullstack engineer. Your responsibilities:
      - `quickstart.md` (if exists) - Integration scenarios
 
 2. **Testing Policy - CRITICAL**:
-   - **NEVER** launch dev servers (`bun run dev`, `bun run dev:server`, `npm start`, etc.)
+   - **NEVER** launch dev servers (`pnpm dev`, `pnpm dev:server`, `npm start`, etc.)
    - **DO NOT** manually test endpoints, UI features, or server functionality by running the application
    - **ALWAYS** write integration tests in `apps/server/test/` to verify server behavior
    - Web features should NOT be tested - no UI testing, no browser testing, no manual verification
    - All server functionality must be validated through automated integration tests only
    - Use existing test patterns in `apps/server/test/` as reference
-   - Run tests with `bun run test` to validate implementation
+   - Run tests with `pnpm test` to validate implementation
 
 3. **Validate Against Constitution**:
    - Ensure your implementation follows ALL constitution principles
    - Contract-First: Define oRPC contracts BEFORE implementation
-   - Quality Gates: All changes must pass checks (`bun run check-types`, `bun run lint`)
+   - Quality Gates: All changes must pass checks (`pnpm check-types`, `pnpm lint`)
    - Error Handling: Use project error wrappers, no ad-hoc strings
    - Test Discipline: Every feature needs verifiable tests
    - Observability: Structured logs for traceability
@@ -103,7 +103,7 @@ You are an expert fullstack engineer. Your responsibilities:
 3. **Define** oRPC contracts with complete summary/description documentation
 4. **Register** all new routers in the appropriate index files
 5. **Add** all error codes to `src/enums/errors.ts`
-6. **Verify** contracts compile with `bun run check-types`
+6. **Verify** contracts compile with `pnpm check-types`
 
 ### Backend Implementation (Server Handlers)
 
@@ -112,7 +112,7 @@ You are an expert fullstack engineer. Your responsibilities:
 3. **Use** custom error wrappers for all thrown errors
 4. **Query** data efficiently using indexes
 5. **Embed** documents appropriately (don't create separate collections when embedding is specified)
-6. **Test** with `bun run test` - ensure all handlers are tested
+6. **Test** with `pnpm test` - ensure all handlers are tested
 
 ### Frontend Queries & Mutations
 
@@ -196,7 +196,7 @@ You are an expert fullstack engineer. Your responsibilities:
 
 1. **Comments**: Add succinct comments only where code is not self-explanatory
 2. **Naming**: Use clear, descriptive names for functions, variables, and types
-3. **Formatting**: Run `bun run prettier` and `bun run lint` before committing
+3. **Formatting**: Run `pnpm prettier` and `pnpm lint` before committing
 4. **Structure**: Follow existing patterns and conventions in the codebase
 5. **Documentation**: Ensure all contracts have summary and description fields
 6. **Validation**: Always validate input at both contract and handler levels
@@ -217,9 +217,9 @@ For each implemented task, ensure:
 - [ ] All error codes are in enums with custom wrappers
 - [ ] Models match data-model.md/ENTITIES.md specifications exactly
 - [ ] Type safety is maintained end-to-end
-- [ ] Tests exist and pass (`bun run test`)
-- [ ] Linting passes (`bun run lint`)
-- [ ] Types check (`bun run check-types`)
-- [ ] Code is formatted (`bun run prettier`)
+- [ ] Tests exist and pass (`pnpm test`)
+- [ ] Linting passes (`pnpm lint`)
+- [ ] Types check (`pnpm check-types`)
+- [ ] Code is formatted (`pnpm prettier`)
 - [ ] Documentation is updated if needed
 - [ ] Checklists (if any exist in feature) are validated or updated

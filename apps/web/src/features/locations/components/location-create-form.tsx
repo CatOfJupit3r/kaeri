@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import {
   Dialog,
   DialogContent,
@@ -20,9 +22,19 @@ interface iLocationCreateFormProps {
   props: Array<{ _id: string; name: string }>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialName?: string;
+  initialTimeOfDay?: string[];
 }
 
-export function LocationCreateForm({ seriesId, characters, props, open, onOpenChange }: iLocationCreateFormProps) {
+export function LocationCreateForm({
+  seriesId,
+  characters,
+  props,
+  open,
+  onOpenChange,
+  initialName,
+  initialTimeOfDay,
+}: iLocationCreateFormProps) {
   const { createLocation, isPending } = useCreateLocation();
 
   const characterOptions: iOptionType[] = characters.map((char) => ({
@@ -75,6 +87,34 @@ export function LocationCreateForm({ seriesId, characters, props, open, onOpenCh
       onSubmit: locationFormSchema,
     },
   });
+
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        name: initialName ?? '',
+        description: '',
+        tags: [] as string[],
+        images: [] as iImage[],
+        associatedCharacterIds: [] as string[],
+        propIds: [] as string[],
+        productionNotes: '',
+        mood: '',
+        timeOfDay: initialTimeOfDay ?? [],
+      });
+    } else {
+      form.reset({
+        name: '',
+        description: '',
+        tags: [] as string[],
+        images: [] as iImage[],
+        associatedCharacterIds: [] as string[],
+        propIds: [] as string[],
+        productionNotes: '',
+        mood: '',
+        timeOfDay: [] as string[],
+      });
+    }
+  }, [form, initialName, initialTimeOfDay, open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

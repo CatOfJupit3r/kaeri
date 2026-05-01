@@ -5,6 +5,7 @@ import {
   LuChevronDown,
   LuFileDown,
   LuItalic,
+  LuLightbulb,
   LuLayoutList,
   LuLoader,
   LuPencil,
@@ -43,6 +44,9 @@ interface iEditorToolbarProps {
   onChangeBlockType: (type: ScriptBlockType) => void;
   versionCount?: number;
   onShowVersions?: () => void;
+  canApplyTheme: boolean;
+  themeOptions: Array<{ id: string; name: string; color?: string }>;
+  onApplyTheme: (theme: { id: string; name: string; color?: string }) => void;
 }
 
 export function EditorToolbar({
@@ -59,6 +63,9 @@ export function EditorToolbar({
   onChangeBlockType,
   versionCount,
   onShowVersions,
+  canApplyTheme,
+  themeOptions,
+  onApplyTheme,
 }: iEditorToolbarProps) {
   const currentConfig = currentBlockType ? BLOCK_CONFIG[currentBlockType] : null;
 
@@ -74,7 +81,7 @@ export function EditorToolbar({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
-            <DropdownMenuItem onClick={onSave}>
+            <DropdownMenuItem onSelect={onSave}>
               <LuSave className="mr-2 h-4 w-4" />
               Save
             </DropdownMenuItem>
@@ -122,7 +129,12 @@ export function EditorToolbar({
         {/* Format Menu - Block Type Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-9 gap-1 px-3 text-xs font-medium">
+            <Button
+              data-testid="block-type-selector"
+              variant="ghost"
+              size="sm"
+              className="h-9 gap-1 px-3 text-xs font-medium"
+            >
               {currentConfig ? (
                 <>
                   {currentConfig.icon}
@@ -140,6 +152,7 @@ export function EditorToolbar({
               return (
                 <DropdownMenuItem
                   key={type}
+                  data-testid={`block-type-option-${type}`}
                   onClick={() => onChangeBlockType(type)}
                   className={currentBlockType === type ? 'bg-accent' : ''}
                 >
@@ -242,11 +255,53 @@ export function EditorToolbar({
           </Tooltip>
         </TooltipProvider>
 
+        <DropdownMenu>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    data-testid="theme-tag-trigger"
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9"
+                    disabled={!canApplyTheme || themeOptions.length === 0}
+                  >
+                    <LuLightbulb className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>Tag selected text with a theme</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <DropdownMenuContent align="start" className="w-56">
+            {themeOptions.length === 0 ? (
+              <DropdownMenuItem disabled>No themes available</DropdownMenuItem>
+            ) : (
+              themeOptions.map((theme) => (
+                <DropdownMenuItem
+                  key={theme.id}
+                  data-testid={`theme-tag-option-${theme.id}`}
+                  onSelect={() => {
+                    onApplyTheme(theme);
+                  }}
+                >
+                  <span
+                    className="mr-2 inline-block h-3 w-3 rounded-full border border-border"
+                    style={{ backgroundColor: theme.color ?? 'transparent' }}
+                  />
+                  <span className="truncate">{theme.name}</span>
+                </DropdownMenuItem>
+              ))
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         {/* Spacer */}
         <div className="flex-1" />
 
         {/* Save Status */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div data-testid="save-indicator" className="flex items-center gap-2 text-xs text-muted-foreground">
           {isSaving === true ? (
             <>
               <LuLoader className="h-3 w-3 animate-spin" />

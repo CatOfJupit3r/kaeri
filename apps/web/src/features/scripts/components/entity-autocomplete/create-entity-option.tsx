@@ -5,11 +5,13 @@ import { cn } from '@~/lib/utils';
 
 import type { EntityType } from '../../extensions/entity-mention';
 
+type AutocompleteEntityType = EntityType | 'location' | 'time-of-day';
+
 export interface iCreateEntityOptionProps {
   /** The query/name to create */
   query: string;
   /** Entity type being created */
-  entityType: EntityType;
+  entityType: AutocompleteEntityType;
   /** Click handler */
   onClick: () => void;
   /** Whether this option is selected */
@@ -23,7 +25,9 @@ export type CreateEntityOptionProps = iCreateEntityOptionProps;
 
 const ENTITY_TYPE_LABELS = {
   character: 'character',
+  location: 'location',
   prop: 'prop',
+  'time-of-day': 'time of day',
   wildcard: 'entity',
 };
 

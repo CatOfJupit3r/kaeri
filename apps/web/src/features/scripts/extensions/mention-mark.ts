@@ -4,6 +4,7 @@ export interface iMentionMarkAttributes {
   entityId: string;
   entityType: 'character' | 'prop' | 'wildcard' | 'theme' | 'location';
   entityName?: string;
+  orphaned?: boolean;
 }
 
 // Type alias for external use
@@ -55,6 +56,11 @@ export const MentionMark = Mark.create<Record<string, never>, iMentionMarkAttrib
           'data-entity-name': attributes.entityName,
         }),
       },
+      orphaned: {
+        default: false,
+        parseHTML: (element) => element.dataset.orphaned === 'true',
+        renderHTML: (attributes: MentionMarkAttributes) => (attributes.orphaned ? { 'data-orphaned': 'true' } : {}),
+      },
     };
   },
 
@@ -68,7 +74,10 @@ export const MentionMark = Mark.create<Record<string, never>, iMentionMarkAttrib
 
   renderHTML({ HTMLAttributes }) {
     const entityType = HTMLAttributes['data-entity-type'] as string;
-    const className = `mention mention--${entityType}`;
+    const isOrphaned = HTMLAttributes['data-orphaned'] === 'true';
+    const className = isOrphaned
+      ? `mention mention--${entityType} mention--orphaned`
+      : `mention mention--${entityType}`;
 
     return [
       'span',

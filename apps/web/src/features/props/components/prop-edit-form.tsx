@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { LuBookUser, LuGlobe, LuScroll } from 'react-icons/lu';
 import type { GroupBase } from 'react-select';
 
@@ -189,10 +189,14 @@ export function PropEditForm({ mode, seriesId, initialData, onClose, open, onOpe
     },
   });
 
-  const { handleAutoSave } = useAutoSave(form, {
+  const { handleAutoSave, resetInitialization } = useAutoSave(form, {
     isUpdating,
     enabled: mode === EDIT_FORM_MODES.panel,
   });
+
+  useEffect(() => {
+    resetInitialization();
+  }, [initialData._id, resetInitialization]);
 
   const handleBlur = mode === EDIT_FORM_MODES.panel ? handleAutoSave : undefined;
 

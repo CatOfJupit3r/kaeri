@@ -20,6 +20,8 @@ export type { iSceneInfo, iSceneMetadataStorage, iSceneMetadataOptions } from '.
 // Entity mention extensions
 export { MentionMark } from './mention-mark';
 export type { iMentionMarkAttributes } from './mention-mark';
+export { ThemeMark } from './theme-mark';
+export type { iThemeMarkAttributes } from './theme-mark';
 export {
   CharacterMention,
   PropMention,

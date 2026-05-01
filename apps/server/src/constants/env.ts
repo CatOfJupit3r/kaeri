@@ -27,6 +27,8 @@ const envSchema = z.object({
   // AUTH CONFIG
   BETTER_AUTH_SECRET: z.string(),
   BETTER_AUTH_URL: z.url(),
+  AUTH_COOKIE_SECURE: z.coerce.boolean().optional().default(true),
+  AUTH_COOKIE_SAME_SITE: z.enum(['strict', 'lax', 'none']).optional().default('none'),
 
   // DB CONFIG
   MONGO_URI: z.url().optional().default('mongodb://localhost:6060/kaeri'),

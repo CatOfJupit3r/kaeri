@@ -1,5 +1,5 @@
 import { call } from '@orpc/server';
-import { it, expect, describe } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 
 import { appRouter } from './helpers/instance';
 import { createUser } from './helpers/utilities';
@@ -13,9 +13,9 @@ describe('Canvas API', () => {
 
       const canvas = await call(appRouter.canvas.getCanvas, { seriesId: series._id }, ctx());
 
-      expect(canvas.nodes).toBeArray();
+      expect(canvas.nodes).toBeInstanceOf(Array);
       expect(canvas.nodes.length).toBe(0);
-      expect(canvas.edges).toBeArray();
+      expect(canvas.edges).toBeInstanceOf(Array);
       expect(canvas.edges.length).toBe(0);
     });
 
