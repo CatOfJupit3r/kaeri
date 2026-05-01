@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { LuChevronDown, LuChevronUp, LuSave, LuX } from 'react-icons/lu';
 
 import { Button } from '@~/components/ui/button';
@@ -6,17 +6,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@~/components/ui/card'
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
 import { Textarea } from '@~/components/ui/textarea';
+import { useStoryArcList } from '@~/features/story-arcs/hooks/queries/use-story-arc-list';
+import { useTimelineList } from '@~/features/timelines/hooks/queries/use-timeline-list';
 import { cn } from '@~/lib/utils';
 
-import type { iSceneInfo } from '../../extensions/scene-metadata';
+import { SceneArcLinker } from './scene-arc-linker';
+import { SceneTimelineLinker } from './scene-timeline-linker';
+
+export interface iSceneMetadataPanelScene {
+  sceneRef: string;
+}
 
 export interface iSceneMetadataPanelProps {
   /** Scene info from the editor */
-  scene: iSceneInfo;
-  /** Series ID for data fetching */
+  scene: iSceneMetadataPanelScene;
+  /** Series ID for fetching related narrative entities */
   seriesId: string;
-  /** Script ID */
-  scriptId: string;
+  /** Initial persisted scene metadata */
+  initialData?: Partial<iSceneMetadataPanelData>;
   /** Called when scene data changes */
   onChange?: (updates: Partial<iSceneMetadataPanelData>) => void;
   /** Called when save is requested */
@@ -44,6 +51,22 @@ export interface iSceneMetadataPanelData {
 export type SceneMetadataPanelProps = iSceneMetadataPanelProps;
 export type SceneMetadataPanelData = iSceneMetadataPanelData;
 
+function getInitialSceneMetadataPanelData(
+  scene: iSceneMetadataPanelScene,
+  initialData: Partial<iSceneMetadataPanelData> | undefined,
+): iSceneMetadataPanelData {
+  return {
+    heading: scene.sceneRef,
+    emotionalTone: initialData?.emotionalTone ?? '',
+    conflict: initialData?.conflict ?? '',
+    beats: initialData?.beats ?? [],
+    lighting: initialData?.lighting ?? '',
+    notes: initialData?.notes ?? '',
+    storyArcIds: initialData?.storyArcIds ?? [],
+    timelineEntryId: initialData?.timelineEntryId,
+  };
+}
+
 /**
  * Scene Metadata Quick Editor Panel
  *
@@ -53,8 +76,8 @@ export type SceneMetadataPanelData = iSceneMetadataPanelData;
 export const SceneMetadataPanel = memo(
   ({
     scene,
-    seriesId: _seriesId,
-    scriptId: _scriptId,
+    seriesId,
+    initialData,
     onChange,
     onSave,
     onClose,
@@ -62,17 +85,34 @@ export const SceneMetadataPanel = memo(
     isExpanded: initialExpanded = true,
   }: iSceneMetadataPanelProps) => {
     const [isExpanded, setIsExpanded] = useState(initialExpanded);
-    const [formData, setFormData] = useState<iSceneMetadataPanelData>({
-      heading: scene.sceneRef,
-      emotionalTone: '',
-      conflict: '',
-      beats: [],
-      lighting: '',
-      notes: '',
-      storyArcIds: [],
-      timelineEntryId: undefined,
-    });
+    const [formData, setFormData] = useState<iSceneMetadataPanelData>(() =>
+      getInitialSceneMetadataPanelData(scene, initialData),
+    );
     const [isDirty, setIsDirty] = useState(false);
+    const { data: storyArcListData, isPending: isLoadingStoryArcs } = useStoryArcList(seriesId, {
+      limit: 100,
+      offset: 0,
+    });
+    const { data: timelineListData, isPending: isLoadingTimelineEntries } = useTimelineList(seriesId, 100, 0);
+
+    const availableStoryArcs = useMemo(
+      () =>
+        (storyArcListData?.items ?? []).map((storyArc) => ({
+          _id: storyArc._id,
+          name: storyArc.name,
+          description: storyArc.description,
+        })),
+      [storyArcListData?.items],
+    );
+    const availableTimelineEntries = useMemo(
+      () =>
+        (timelineListData?.items ?? []).map((timelineEntry) => ({
+          _id: timelineEntry._id,
+          label: timelineEntry.label,
+          date: timelineEntry.timestamp,
+        })),
+      [timelineListData?.items],
+    );
 
     const handleFieldChange = useCallback(
       <K extends keyof iSceneMetadataPanelData>(field: K, value: iSceneMetadataPanelData[K]) => {
@@ -103,8 +143,42 @@ export const SceneMetadataPanel = memo(
       [handleFieldChange],
     );
 
+    const handleLinkStoryArc = useCallback(
+      (storyArcId: string) => {
+        const linkedStoryArcIds = formData.storyArcIds ?? [];
+
+        if (linkedStoryArcIds.includes(storyArcId)) {
+          return;
+        }
+
+        handleFieldChange('storyArcIds', [...linkedStoryArcIds, storyArcId]);
+      },
+      [formData.storyArcIds, handleFieldChange],
+    );
+
+    const handleUnlinkStoryArc = useCallback(
+      (storyArcId: string) => {
+        handleFieldChange(
+          'storyArcIds',
+          (formData.storyArcIds ?? []).filter((linkedStoryArcId) => linkedStoryArcId !== storyArcId),
+        );
+      },
+      [formData.storyArcIds, handleFieldChange],
+    );
+
+    const handleLinkTimelineEntry = useCallback(
+      (timelineEntryId: string) => {
+        handleFieldChange('timelineEntryId', timelineEntryId);
+      },
+      [handleFieldChange],
+    );
+
+    const handleUnlinkTimelineEntry = useCallback(() => {
+      handleFieldChange('timelineEntryId', undefined);
+    }, [handleFieldChange]);
+
     return (
-      <Card className={cn('w-full border-l-4 border-l-primary/50', className)}>
+      <Card data-testid="scene-metadata-panel" className={cn('w-full border-l-4 border-l-primary/50', className)}>
         <CardHeader className="flex flex-row items-center justify-between py-2">
           <CardTitle className="text-sm font-medium">Scene Details: {scene.sceneRef}</CardTitle>
           <div className="flex items-center gap-1">
@@ -199,10 +273,27 @@ export const SceneMetadataPanel = memo(
               />
             </div>
 
-            {/* Story Arc Integration - Stub for Scene Arc Linker */}
+            {/* Story Arc Integration */}
             <div className="grid gap-1.5">
-              <span className="text-xs font-medium text-muted-foreground">Story Arc Integration</span>
-              <p className="text-xs text-muted-foreground">Link story arcs in the Knowledge Base panel</p>
+              <span className="text-xs font-medium text-muted-foreground">Story Arcs</span>
+              <SceneArcLinker
+                linkedArcIds={formData.storyArcIds ?? []}
+                availableArcs={availableStoryArcs}
+                isLoading={isLoadingStoryArcs}
+                onLink={handleLinkStoryArc}
+                onUnlink={handleUnlinkStoryArc}
+              />
+            </div>
+
+            <div className="grid gap-1.5">
+              <span className="text-xs font-medium text-muted-foreground">Timeline</span>
+              <SceneTimelineLinker
+                linkedEntryId={formData.timelineEntryId}
+                availableEntries={availableTimelineEntries}
+                isLoading={isLoadingTimelineEntries}
+                onLink={handleLinkTimelineEntry}
+                onUnlink={handleUnlinkTimelineEntry}
+              />
             </div>
           </CardContent>
         ) : null}

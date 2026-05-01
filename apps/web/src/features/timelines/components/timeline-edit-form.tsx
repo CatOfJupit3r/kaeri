@@ -1,3 +1,5 @@
+import { useQueries } from '@tanstack/react-query';
+
 import { EditPanelWrapper } from '@~/components/forms';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
 import {
@@ -9,6 +11,7 @@ import {
   DialogTitle,
 } from '@~/components/ui/dialog';
 import { useAppForm } from '@~/components/ui/field';
+import { sceneDetailQueryOptions } from '@~/features/scenes/hooks/queries/use-scene';
 import { useAutoSave } from '@~/hooks/use-auto-save';
 import type { EditFormMode } from '@~/types/form.types';
 import { EDIT_FORM_MODES } from '@~/types/form.types';
@@ -38,6 +41,19 @@ interface iTimelineEditFormProps {
  */
 export function TimelineEditForm({ mode, seriesId, initialData, onClose, open, onOpenChange }: iTimelineEditFormProps) {
   const { updateTimeline, isPending } = useUpdateTimeline();
+  const linkedSceneIds = (initialData.links ?? [])
+    .filter((link) => link.entityType === 'scene')
+    .map((link) => link.entityId);
+  const linkedSceneQueries = useQueries({
+    queries: linkedSceneIds.map((sceneId) => ({
+      ...sceneDetailQueryOptions(sceneId),
+      enabled: !!sceneId,
+    })),
+  });
+  const isLinkedScenesPending = linkedSceneQueries.some((query) => query.isPending);
+  const linkedSceneHeadings = linkedSceneQueries
+    .map((query, index) => query.data?.heading ?? `Scene ${linkedSceneIds[index]}`)
+    .filter(Boolean);
 
   const form = useAppForm({
     defaultValues: {
@@ -76,10 +92,34 @@ export function TimelineEditForm({ mode, seriesId, initialData, onClose, open, o
 
   const handleBlur = mode === EDIT_FORM_MODES.panel ? handleAutoSave : undefined;
 
+  const linkedScenesContent = (
+    <Card>
+      <CardHeader className="pb-4">
+        <CardTitle className="text-base">Linked Scenes</CardTitle>
+        <CardDescription>Scenes linked from the script editor scene metadata panel</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLinkedScenesPending ? <p className="text-sm text-muted-foreground">Loading linked scenes...</p> : null}
+        {!isLinkedScenesPending && linkedSceneHeadings.length > 0 ? (
+          <div className="space-y-3">
+            {linkedSceneHeadings.map((linkedSceneHeading) => (
+              <div key={linkedSceneHeading} className="rounded-md border border-border bg-background/50 p-3">
+                <p className="text-sm font-medium text-foreground">{linkedSceneHeading}</p>
+              </div>
+            ))}
+          </div>
+        ) : null}
+        {!isLinkedScenesPending && linkedSceneHeadings.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No scenes linked to this timeline entry</p>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+
   // Panel mode content - wrapped in Card for consistent styling
   const panelFormContent = (
     <form.AppForm>
-      <form.Form className="p-4">
+      <form.Form className="space-y-6 p-4">
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="text-base">Timeline Entry Details</CardTitle>
@@ -89,6 +129,7 @@ export function TimelineEditForm({ mode, seriesId, initialData, onClose, open, o
             <TimelineFormFields form={form} handleBlur={handleBlur} />
           </CardContent>
         </Card>
+        {linkedScenesContent}
       </form.Form>
     </form.AppForm>
   );
@@ -98,6 +139,7 @@ export function TimelineEditForm({ mode, seriesId, initialData, onClose, open, o
     <form.AppForm>
       <form.Form className="space-y-4 p-0">
         <TimelineFormFields form={form} />
+        {linkedScenesContent}
 
         <DialogFooter>
           <form.FormActions

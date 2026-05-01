@@ -66,7 +66,7 @@ function extractAppearancesFromDoc(editor: Editor): iAppearance[] {
 
       // Check for location link in scene heading
       const locationId = node.attrs.locationId as string | undefined;
-      if (locationId) {
+      if (locationId && currentSceneRef) {
         appearances.push({
           entityType: 'location',
           entityId: locationId,
@@ -80,7 +80,7 @@ function extractAppearancesFromDoc(editor: Editor): iAppearance[] {
     // Track character blocks with linked IDs
     if (node.type.name === SCRIPT_BLOCK_TYPES.character) {
       const characterId = node.attrs.characterId as string | undefined;
-      if (characterId) {
+      if (characterId && currentSceneRef) {
         appearances.push({
           entityType: 'character',
           entityId: characterId,
@@ -93,11 +93,11 @@ function extractAppearancesFromDoc(editor: Editor): iAppearance[] {
 
     // Track mentions in inline text
     node.marks.forEach((mark) => {
-      if (mark.type.name === 'mentionMark') {
+      if (mark.type.name === 'mention') {
         const entityId = mark.attrs.entityId as string;
         const entityType = mark.attrs.entityType as 'character' | 'prop';
 
-        if (entityType === 'character' || entityType === 'prop') {
+        if (currentSceneRef && (entityType === 'character' || entityType === 'prop')) {
           appearances.push({
             entityType,
             entityId,
@@ -213,37 +213,39 @@ export function getAppearancesFromScenes(scenes: iSceneInfo[]): iAppearance[] {
   const appearances: iAppearance[] = [];
 
   for (const scene of scenes) {
-    // Characters from the scene
-    for (const characterId of scene.characterIds) {
-      appearances.push({
-        entityType: 'character',
-        entityId: characterId,
-        sceneRef: scene.sceneRef,
-        sceneId: scene.sceneId ?? undefined,
-        linkType: 'mention',
-      });
-    }
+    if (scene.sceneRef.trim()) {
+      // Characters from the scene
+      for (const characterId of scene.characterIds) {
+        appearances.push({
+          entityType: 'character',
+          entityId: characterId,
+          sceneRef: scene.sceneRef,
+          sceneId: scene.sceneId ?? undefined,
+          linkType: 'mention',
+        });
+      }
 
-    // Props from the scene
-    for (const propId of scene.propIds) {
-      appearances.push({
-        entityType: 'prop',
-        entityId: propId,
-        sceneRef: scene.sceneRef,
-        sceneId: scene.sceneId ?? undefined,
-        linkType: 'mention',
-      });
-    }
+      // Props from the scene
+      for (const propId of scene.propIds) {
+        appearances.push({
+          entityType: 'prop',
+          entityId: propId,
+          sceneRef: scene.sceneRef,
+          sceneId: scene.sceneId ?? undefined,
+          linkType: 'mention',
+        });
+      }
 
-    // Location from the scene
-    if (scene.locationId) {
-      appearances.push({
-        entityType: 'location',
-        entityId: scene.locationId,
-        sceneRef: scene.sceneRef,
-        sceneId: scene.sceneId ?? undefined,
-        linkType: 'primary',
-      });
+      // Location from the scene
+      if (scene.locationId) {
+        appearances.push({
+          entityType: 'location',
+          entityId: scene.locationId,
+          sceneRef: scene.sceneRef,
+          sceneId: scene.sceneId ?? undefined,
+          linkType: 'primary',
+        });
+      }
     }
   }
 

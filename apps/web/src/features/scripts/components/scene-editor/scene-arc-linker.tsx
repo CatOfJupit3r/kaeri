@@ -76,11 +76,12 @@ export const SceneArcLinker = memo(
     );
 
     return (
-      <div className={cn('flex flex-wrap items-center gap-1.5', className)}>
+      <div data-testid="scene-arc-linker" className={cn('flex flex-wrap items-center gap-1.5', className)}>
         {/* Linked Arcs */}
         {linkedArcs.map((arc) => (
           <Badge
             key={arc._id}
+            data-testid={`scene-arc-linked-${arc._id}`}
             variant="outline"
             className="gap-1 pr-1"
             style={arc.color ? { borderColor: arc.color, color: arc.color } : undefined}
@@ -104,7 +105,13 @@ export const SceneArcLinker = memo(
         {!disabled ? (
           <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
-              <Button size="sm" variant="ghost" className="h-6 gap-1 px-2 text-xs" disabled={isLoading}>
+              <Button
+                data-testid="scene-arc-link-trigger"
+                size="sm"
+                variant="ghost"
+                className="h-6 gap-1 px-2 text-xs"
+                disabled={isLoading}
+              >
                 <LuPlus className="size-3" />
                 Link Arc
               </Button>
@@ -123,6 +130,7 @@ export const SceneArcLinker = memo(
                         {linkedArcs.map((arc) => (
                           <Button
                             key={arc._id}
+                            data-testid={`scene-arc-option-${arc._id}`}
                             variant="ghost"
                             size="sm"
                             className="w-full justify-start gap-2 text-xs"
@@ -140,6 +148,7 @@ export const SceneArcLinker = memo(
                         {unlinkedArcs.map((arc) => (
                           <Button
                             key={arc._id}
+                            data-testid={`scene-arc-option-${arc._id}`}
                             variant="ghost"
                             size="sm"
                             className="w-full justify-start gap-2 text-xs"

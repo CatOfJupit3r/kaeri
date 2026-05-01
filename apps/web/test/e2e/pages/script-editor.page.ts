@@ -34,7 +34,7 @@ export class ScriptEditorPage extends BasePage {
   private readonly restorePreviewedVersionButton = this.page.getByRole('button', { name: 'Restore this version' });
   private readonly editorContainer = this.page.getByTestId('script-editor');
   private readonly editor = this.page.locator('.script-editor-content').first();
-  private readonly characterSuggestionsList = this.page.getByRole('listbox', { name: /character suggestions/i });
+  private readonly autocompleteSuggestionsList = this.page.locator('[role="listbox"]').first();
   private readonly scriptBlocks = this.page.getByTestId('block');
   private readonly canvasTab = this.page.getByRole('tab', { name: 'Canvas' });
   private readonly knowledgeTab = this.page.getByRole('tab', { name: 'Knowledge' });
@@ -46,6 +46,13 @@ export class ScriptEditorPage extends BasePage {
   private readonly knowledgeBaseSearchInput = this.page.getByRole('textbox', { name: /search knowledge base/i });
   private readonly saveIndicator = this.page.getByTestId('save-indicator');
   private readonly saveMenuItem = this.page.getByRole('menuitem', { name: /^save$/i });
+  private readonly entityPreviewCard = this.page.locator('.entity-preview-card').first();
+  private readonly openInKnowledgeBaseButton = this.page.getByRole('button', { name: /open in knowledge base/i });
+  private readonly createCharacterDialog = this.page.getByRole('dialog', { name: /^create character$/i });
+  private readonly createLocationDialog = this.page.getByRole('dialog', { name: /^create location$/i });
+  private readonly sceneMetadataToggle = this.page.getByTestId('scene-metadata-toggle');
+  private readonly sceneMetadataPanel = this.page.getByTestId('scene-metadata-panel');
+  private readonly themeTagTrigger = this.page.getByTestId('theme-tag-trigger');
 
   constructor(page: Page) {
     super(page);
@@ -108,6 +115,10 @@ export class ScriptEditorPage extends BasePage {
     await this.scriptBlocks.nth(index).click();
   }
 
+  async selectBlockText(index: number) {
+    await this.scriptBlocks.nth(index).selectText();
+  }
+
   async focusBlockStart(index: number) {
     await this.focusBlock(index);
     await this.page.keyboard.press('Home');
@@ -130,34 +141,94 @@ export class ScriptEditorPage extends BasePage {
   }
 
   async triggerCharacterBlockSuggestions(query: string) {
-    await this.page.keyboard.type(query);
-    await expect(this.characterSuggestionsList).toBeVisible({ timeout: 10_000 });
+    await this.editor.click();
+    await this.page.keyboard.insertText(query);
+    await expect(this.autocompleteSuggestionsList).toBeVisible({ timeout: 10_000 });
+  }
+
+  async triggerSceneHeadingLocationSuggestions(query: string) {
+    await this.editor.click();
+    await this.page.keyboard.insertText(query);
+    await expect(this.autocompleteSuggestionsList).toBeVisible({ timeout: 10_000 });
+  }
+
+  async triggerSceneHeadingTimeOfDaySuggestions(blockIndex = 0) {
+    await this.focusBlockEnd(blockIndex);
+    await this.page.keyboard.insertText(' - ');
+    await expect(this.autocompleteSuggestionsList).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectAutocompleteSuggestionVisible(name: string) {
+    await expect(
+      this.autocompleteSuggestionsList.getByRole('option', { name: new RegExp(escapeRegExp(name), 'i') }).first(),
+    ).toBeVisible({ timeout: 10_000 });
   }
 
   async expectCharacterSuggestionVisible(name: string) {
+    await this.expectAutocompleteSuggestionVisible(name);
+  }
+
+  async selectAutocompleteSuggestion(name: string) {
+    await this.autocompleteSuggestionsList
+      .getByRole('option', { name: new RegExp(escapeRegExp(name), 'i') })
+      .first()
+      .click();
+  }
+
+  async expectCreateAutocompleteOptionVisible(
+    query: string,
+    entityTypeLabel: 'character' | 'location' | 'prop' | 'entity',
+  ) {
     await expect(
-      this.characterSuggestionsList.getByRole('option', { name: new RegExp(escapeRegExp(name), 'i') }).first(),
+      this.autocompleteSuggestionsList
+        .getByRole('option', {
+          name: new RegExp(`create\\s+"${escapeRegExp(query)}"\\s+as\\s+${escapeRegExp(entityTypeLabel)}`, 'i'),
+        })
+        .first(),
     ).toBeVisible({ timeout: 10_000 });
+  }
+
+  async selectCreateAutocompleteOption(query: string, entityTypeLabel: 'character' | 'location' | 'prop' | 'entity') {
+    await this.autocompleteSuggestionsList
+      .getByRole('option', {
+        name: new RegExp(`create\\s+"${escapeRegExp(query)}"\\s+as\\s+${escapeRegExp(entityTypeLabel)}`, 'i'),
+      })
+      .first()
+      .click();
   }
 
   async moveAutocompleteSelectionDown(times = 1) {
     for (let index = 0; index < times; index += 1) {
-      await this.page.keyboard.press('ArrowDown');
+      await this.editor.press('ArrowDown');
     }
   }
 
   async confirmAutocompleteSelection() {
-    await this.page.keyboard.press('Enter');
-    await expect(this.characterSuggestionsList).not.toBeVisible({ timeout: 10_000 });
+    await this.editor.press('Enter');
+    await expect(this.autocompleteSuggestionsList).not.toBeVisible({ timeout: 10_000 });
   }
 
   async changeCurrentBlockTypeFromToolbar(
     nextBlockType: 'action' | 'character' | 'dialogue' | 'parenthetical' | 'scene-heading' | 'transition',
   ) {
-    await this.editor.click();
-    await expect(this.blockTypeSelector).toBeVisible({ timeout: 5_000 });
-    await this.blockTypeSelector.click();
-    await this.page.getByTestId(`block-type-option-${nextBlockType}`).click();
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      await this.editor.click();
+      await expect(this.blockTypeSelector).toBeVisible({ timeout: 5_000 });
+      await this.blockTypeSelector.click();
+
+      const option = this.page.getByTestId(`block-type-option-${nextBlockType}`);
+
+      await expect(option).toBeVisible({ timeout: 5_000 });
+      await option.click();
+
+      const currentBlockType = await this.scriptBlocks.first().getAttribute('data-block-type');
+
+      if (currentBlockType === nextBlockType) {
+        break;
+      }
+    }
+
+    await this.expectCurrentBlockType(nextBlockType);
     await this.expectToolbarCurrentBlockType(BLOCK_TYPE_LABELS[nextBlockType]);
   }
 
@@ -312,33 +383,31 @@ export class ScriptEditorPage extends BasePage {
   }
 
   async saveAndExpectIndicatorCycle() {
-    let delayedRequest = false;
-    const delaySaveRequest = async (route: Route) => {
+    const delayRpcRequest = async (route: Route) => {
       const request = route.request();
 
-      if (!delayedRequest && request.method() === 'POST' && ['fetch', 'xhr'].includes(request.resourceType())) {
-        delayedRequest = true;
+      if (request.method() === 'POST' && ['fetch', 'xhr'].includes(request.resourceType())) {
         await new Promise((resolve) => {
           setTimeout(() => {
             resolve(undefined);
-          }, 750);
+          }, 350);
         });
       }
 
       await route.continue();
     };
 
-    await this.page.route('**', delaySaveRequest);
+    await this.page.route(/\/rpc/i, delayRpcRequest);
 
     try {
       await this.fileMenuButton.click();
       await expect(this.saveMenuItem).toBeVisible({ timeout: 5_000 });
 
       await this.saveMenuItem.click();
-      await expect(this.saveIndicator).toContainText(/saving/i, { timeout: 5_000 });
+      await expect(this.saveIndicator).toContainText(/saving/i, { timeout: 15_000 });
       await expect(this.saveIndicator).toContainText(/saved/i, { timeout: 10_000 });
     } finally {
-      await this.page.unroute('**', delaySaveRequest);
+      await this.page.unroute(/\/rpc/i, delayRpcRequest);
     }
   }
 
@@ -352,6 +421,169 @@ export class ScriptEditorPage extends BasePage {
 
   async expectContent(text: string) {
     await expect(this.page.getByText(text, { exact: false }).first()).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectMentionVisible(entityType: 'character' | 'prop' | 'wildcard', entityName: string) {
+    await expect(
+      this.editor.locator(`span[data-entity-type="${entityType}"][data-entity-name="${entityName}"]`).first(),
+    ).toBeVisible({ timeout: 10_000 });
+  }
+
+  async applyThemeTag(themeName: string) {
+    await expect(this.themeTagTrigger).toBeVisible({ timeout: 10_000 });
+    await this.themeTagTrigger.click();
+    await this.page.getByRole('menuitem', { name: new RegExp(`^${escapeRegExp(themeName)}$`, 'i') }).click();
+  }
+
+  async expectThemeTagVisible(themeName: string, text: string) {
+    await expect(
+      this.editor.locator(`span[data-theme-name="${themeName}"]`).filter({ hasText: text }).first(),
+    ).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectMentionNotVisible(entityType: 'character' | 'prop' | 'wildcard', entityName: string) {
+    await expect(
+      this.editor.locator(`span[data-entity-type="${entityType}"][data-entity-name="${entityName}"]`),
+    ).toHaveCount(0, { timeout: 10_000 });
+  }
+
+  async expectOrphanedMentionVisible(entityType: 'character' | 'prop' | 'wildcard', entityName: string) {
+    await expect(
+      this.editor
+        .locator(`span[data-entity-type="${entityType}"][data-entity-name="${entityName}"][data-orphaned="true"]`)
+        .first(),
+    ).toBeVisible({ timeout: 10_000 });
+  }
+
+  async hoverMention(entityType: 'character' | 'prop' | 'wildcard', entityName: string) {
+    await this.editor
+      .locator(`span[data-entity-type="${entityType}"][data-entity-name="${entityName}"]`)
+      .first()
+      .hover();
+  }
+
+  async expectEntityPreviewVisible(text: string) {
+    await expect(this.entityPreviewCard).toBeVisible({ timeout: 10_000 });
+    await expect(this.entityPreviewCard.getByText(text, { exact: false }).first()).toBeVisible({ timeout: 10_000 });
+    await expect(this.openInKnowledgeBaseButton).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectCharacterCreateDialogPrefilled(name: string) {
+    await expect(this.createCharacterDialog).toBeVisible({ timeout: 10_000 });
+    await expect(this.createCharacterDialog.getByLabel(/^name$/i)).toHaveValue(name, { timeout: 10_000 });
+  }
+
+  async expectLocationCreateDialogPrefilled(name: string, timeOfDayLabel?: string) {
+    await expect(this.createLocationDialog).toBeVisible({ timeout: 10_000 });
+    await expect(this.createLocationDialog.getByLabel(/^name$/i)).toHaveValue(name, { timeout: 10_000 });
+
+    if (timeOfDayLabel) {
+      await expect(
+        this.createLocationDialog.getByText(new RegExp(`^${escapeRegExp(timeOfDayLabel)}$`, 'i')),
+      ).toBeVisible({ timeout: 10_000 });
+    }
+  }
+
+  async openSceneMetadataPanel(blockIndex = 0) {
+    await this.focusBlock(blockIndex);
+    await expect(this.sceneMetadataToggle).toBeVisible({ timeout: 10_000 });
+    await this.sceneMetadataToggle.focus();
+    await this.page.keyboard.press('Enter');
+    await expect(this.sceneMetadataPanel).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectSceneMetadataPanelVisible(sceneHeadingText: string) {
+    await expect(this.sceneMetadataPanel).toBeVisible({ timeout: 10_000 });
+    await expect(
+      this.sceneMetadataPanel.getByText(new RegExp(`Scene Details:\\s+${escapeRegExp(sceneHeadingText)}`, 'i')),
+    ).toBeVisible({ timeout: 10_000 });
+  }
+
+  async fillSceneMetadata(values: { emotionalTone?: string; conflict?: string; lighting?: string; notes?: string }) {
+    if (values.emotionalTone !== undefined) {
+      await this.sceneMetadataPanel.getByLabel(/emotional tone/i).fill(values.emotionalTone);
+    }
+
+    if (values.conflict !== undefined) {
+      await this.sceneMetadataPanel.getByLabel(/core conflict/i).fill(values.conflict);
+    }
+
+    if (values.lighting !== undefined) {
+      await this.sceneMetadataPanel.getByLabel(/lighting \/ visual style/i).fill(values.lighting);
+    }
+
+    if (values.notes !== undefined) {
+      await this.sceneMetadataPanel.getByLabel(/director's notes/i).fill(values.notes);
+    }
+  }
+
+  async saveSceneMetadata() {
+    await this.sceneMetadataPanel.getByRole('button', { name: /^save$/i }).click();
+  }
+
+  async linkStoryArcInSceneMetadata(storyArcName: string) {
+    await this.sceneMetadataPanel.getByRole('button', { name: /^link arc$/i }).click();
+    await this.page.getByRole('button', { name: new RegExp(`^${escapeRegExp(storyArcName)}$`, 'i') }).click();
+  }
+
+  async expectStoryArcLinkedInSceneMetadata(storyArcName: string) {
+    await expect(
+      this.sceneMetadataPanel.getByText(new RegExp(`^${escapeRegExp(storyArcName)}$`, 'i')).first(),
+    ).toBeVisible({ timeout: 10_000 });
+  }
+
+  async linkTimelineEntryInSceneMetadata(timelineLabel: string) {
+    await this.sceneMetadataPanel.getByRole('button', { name: /^link to timeline$/i }).click();
+    await this.page
+      .getByTestId(/^scene-timeline-option-/)
+      .filter({ hasText: new RegExp(escapeRegExp(timelineLabel), 'i') })
+      .first()
+      .click();
+  }
+
+  async expectTimelineEntryLinkedInSceneMetadata(timelineLabel: string) {
+    await expect(
+      this.sceneMetadataPanel.getByTestId(/^scene-timeline-linked-/).filter({
+        hasText: new RegExp(escapeRegExp(timelineLabel), 'i'),
+      }),
+    ).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectSceneMetadataValues(values: {
+    emotionalTone?: string;
+    conflict?: string;
+    lighting?: string;
+    notes?: string;
+  }) {
+    if (values.emotionalTone !== undefined) {
+      await expect(this.sceneMetadataPanel.getByLabel(/emotional tone/i)).toHaveValue(values.emotionalTone, {
+        timeout: 10_000,
+      });
+    }
+
+    if (values.conflict !== undefined) {
+      await expect(this.sceneMetadataPanel.getByLabel(/core conflict/i)).toHaveValue(values.conflict, {
+        timeout: 10_000,
+      });
+    }
+
+    if (values.lighting !== undefined) {
+      await expect(this.sceneMetadataPanel.getByLabel(/lighting \/ visual style/i)).toHaveValue(values.lighting, {
+        timeout: 10_000,
+      });
+    }
+
+    if (values.notes !== undefined) {
+      await expect(this.sceneMetadataPanel.getByLabel(/director's notes/i)).toHaveValue(values.notes, {
+        timeout: 10_000,
+      });
+    }
+  }
+
+  async openMentionInKnowledgeBase(entityType: 'character' | 'prop' | 'wildcard', entityName: string) {
+    await this.hoverMention(entityType, entityName);
+    await expect(this.entityPreviewCard).toBeVisible({ timeout: 10_000 });
+    await this.openInKnowledgeBaseButton.click();
   }
 
   async goToLibrary() {

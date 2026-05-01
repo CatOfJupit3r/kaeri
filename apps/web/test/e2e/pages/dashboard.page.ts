@@ -4,7 +4,8 @@ import { BasePage } from './base.page';
 
 export class DashboardPage extends BasePage {
   private readonly pageHeading = this.page.getByRole('heading', { name: /my projects/i });
-  private readonly createProjectButton = this.page.getByTestId('create-series-button');
+  private readonly createProjectHeaderButton = this.page.getByRole('button', { name: /^new project$/i });
+  private readonly createFirstProjectButton = this.page.getByRole('button', { name: /create your first project/i });
   private readonly emptyState = this.page.getByTestId('empty-series');
   private readonly seriesGrid = this.page.getByTestId('series-grid');
   private readonly createProjectDialog = this.page.getByRole('dialog', { name: /create new project/i });
@@ -37,22 +38,32 @@ export class DashboardPage extends BasePage {
   }
 
   async createProject(title: string) {
-    const triggers = [this.createProjectButton.first(), this.createProjectButton.last()];
+    const trigger = (await this.emptyState.isVisible().catch(() => false))
+      ? this.createFirstProjectButton
+      : this.createProjectHeaderButton;
 
-    for (const trigger of triggers) {
-      await this.page.waitForTimeout(1_000);
-      await trigger.click({ force: true });
+    await expect(trigger).toBeVisible({ timeout: 10_000 });
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      await trigger.click();
+
+      if (await this.createProjectDialog.isVisible({ timeout: 1_500 }).catch(() => false)) {
+        break;
+      }
+
+      await this.waitForNetworkIdle();
+      await trigger.focus();
+      await this.page.keyboard.press('Enter');
 
       if (await this.createProjectDialog.isVisible({ timeout: 1_500 }).catch(() => false)) {
         break;
       }
     }
 
-    if (!(await this.createProjectDialog.isVisible({ timeout: 1_000 }).catch(() => false))) {
+    if (!(await this.createProjectDialog.isVisible({ timeout: 1_500 }).catch(() => false))) {
       await this.page.keyboard.press('Control+N');
     }
 
-    await this.waitForDialog();
+    await expect(this.createProjectDialog).toBeVisible({ timeout: 10_000 });
     await this.page.getByLabel(/^title$/i).fill(title);
     await this.page.getByRole('button', { name: /^create project$/i }).click();
     await this.waitForDialogClose();

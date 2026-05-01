@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 
 import { ExportPdfModal } from '@~/features/export';
 import { ScriptEditor, ScriptSettingsModal } from '@~/features/scripts/components';
+import type { EntityType } from '@~/features/scripts/extensions/entity-mention';
 import { useSaveScriptContent } from '@~/features/scripts/hooks/mutations/use-save-script-content';
 import { scriptQueryOptions, useScript } from '@~/features/scripts/hooks/queries/use-script';
 import '@~/features/scripts/script-editor.css';
@@ -55,6 +56,41 @@ function ScriptEditorPage() {
     [saveContentImmediate, scriptId],
   );
 
+  const handleOpenEntityInKnowledgeBase = useCallback(
+    (entityId: string, entityType: EntityType) => {
+      switch (entityType) {
+        case 'character': {
+          void navigate({
+            to: '/series/$seriesId/knowledge-base/characters/$characterId',
+            params: { seriesId, characterId: entityId },
+            search: { tab: 'characters' },
+          });
+          break;
+        }
+        case 'prop': {
+          void navigate({
+            to: '/series/$seriesId/knowledge-base',
+            params: { seriesId },
+            search: { tab: 'props' },
+          });
+          break;
+        }
+        case 'wildcard': {
+          void navigate({
+            to: '/series/$seriesId/knowledge-base',
+            params: { seriesId },
+            search: { tab: 'wildcards' },
+          });
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    },
+    [navigate, seriesId],
+  );
+
   // Keyboard shortcuts
   useHotkey('Mod+E', handleExport, { preventDefault: true });
   useHotkey('Mod+,', handleOpenSettings, { preventDefault: true });
@@ -97,6 +133,7 @@ function ScriptEditorPage() {
         onSave={handleSave}
         isSaving={isSaving}
         lastEditedAt={script.lastEditedAt}
+        onOpenEntityInKnowledgeBase={handleOpenEntityInKnowledgeBase}
       />
       <ExportPdfModal
         scriptId={scriptId}

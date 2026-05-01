@@ -155,7 +155,7 @@ export function useSceneHeadingSuggestionRenderer({
             query={locationQuery}
             isLoading={isLoadingRef.current}
             suggestions={filteredSuggestions}
-            entityType="character" // Using character type for rendering, but data is locations
+            entityType="location"
             onSelect={(entity) => {
               onSelectRef.current(entity);
               props.command(entity);
@@ -202,7 +202,7 @@ export function useSceneHeadingSuggestionRenderer({
               query={locationQuery}
               isLoading={isLoadingRef.current}
               suggestions={filteredSuggestions}
-              entityType="character" // Using character type for rendering, but data is locations
+              entityType="location"
               onSelect={(entity) => {
                 onSelectRef.current(entity);
                 props.command(entity);

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { LuX } from 'react-icons/lu';
 
 import { Badge } from '@~/components/ui/badge';
@@ -29,9 +30,16 @@ interface iCharacterCreateFormProps {
   characters: Array<{ _id: string; name: string }>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialName?: string;
 }
 
-export function CharacterCreateForm({ seriesId, characters, open, onOpenChange }: iCharacterCreateFormProps) {
+export function CharacterCreateForm({
+  seriesId,
+  characters,
+  open,
+  onOpenChange,
+  initialName,
+}: iCharacterCreateFormProps) {
   const { createCharacter, isPending } = useCreateCharacter();
 
   const form = useAppForm({
@@ -68,6 +76,28 @@ export function CharacterCreateForm({ seriesId, characters, open, onOpenChange }
       onSubmit: characterFormSchema,
     },
   });
+
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        name: initialName ?? '',
+        description: '',
+        avatarUrl: '',
+        traits: [] as string[],
+        relationships: [] as Relationship[],
+        appearances: [] as Appearance[],
+      });
+    } else {
+      form.reset({
+        name: '',
+        description: '',
+        avatarUrl: '',
+        traits: [] as string[],
+        relationships: [] as Relationship[],
+        appearances: [] as Appearance[],
+      });
+    }
+  }, [form, initialName, open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

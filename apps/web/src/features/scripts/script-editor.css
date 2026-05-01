@@ -246,3 +246,25 @@
 .mention[data-entity-type='wildcard']:hover {
   background-color: color-mix(in srgb, var(--block-scene-heading) 25%, transparent);
 }
+
+.mention[data-orphaned='true'] {
+  color: var(--destructive);
+  background-color: color-mix(in srgb, var(--destructive) 12%, transparent);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--destructive) 55%, transparent);
+  text-decoration: line-through;
+  text-decoration-style: wavy;
+}
+
+.mention[data-orphaned='true']:hover {
+  background-color: color-mix(in srgb, var(--destructive) 20%, transparent);
+}
+
+.theme-tag {
+  border-radius: 0.2rem;
+  background-color: color-mix(in srgb, var(--theme-tag-color, var(--primary)) 18%, transparent);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--theme-tag-color, var(--primary)) 45%, transparent);
+}
+
+.theme-tag:hover {
+  background-color: color-mix(in srgb, var(--theme-tag-color, var(--primary)) 24%, transparent);
+}

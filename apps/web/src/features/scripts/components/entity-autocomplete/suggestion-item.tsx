@@ -1,16 +1,18 @@
 import { memo } from 'react';
-import { LuUser, LuMapPin, LuBox } from 'react-icons/lu';
+import { LuBox, LuClock3, LuGlobe, LuMapPin, LuUser } from 'react-icons/lu';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@~/components/ui/avatar';
 import { cn } from '@~/lib/utils';
 
 import type { iEntitySuggestion, EntityType } from '../../extensions/entity-mention';
 
+type AutocompleteEntityType = EntityType | 'location' | 'time-of-day';
+
 export interface iSuggestionItemProps {
   /** The suggestion to render */
   suggestion: iEntitySuggestion;
   /** Entity type for styling */
-  entityType: EntityType;
+  entityType: AutocompleteEntityType;
   /** Whether this item is currently selected */
   isSelected: boolean;
   /** Click handler */
@@ -26,13 +28,17 @@ export type SuggestionItemProps = iSuggestionItemProps;
 
 const ENTITY_TYPE_ICONS = {
   character: LuUser,
+  location: LuGlobe,
   prop: LuBox,
+  'time-of-day': LuClock3,
   wildcard: LuMapPin,
 } as const;
 
 const ENTITY_TYPE_COLORS = {
   character: 'text-blue-500',
+  location: 'text-cyan-600',
   prop: 'text-amber-500',
+  'time-of-day': 'text-orange-500',
   wildcard: 'text-emerald-500',
 } as const;
 

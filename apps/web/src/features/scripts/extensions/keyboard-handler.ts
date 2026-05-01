@@ -1,8 +1,20 @@
 import { Extension } from '@tiptap/core';
+import type { Editor } from '@tiptap/core';
 import { Selection, TextSelection } from '@tiptap/pm/state';
 
 import { BLOCK_TYPE_CYCLE_ORDER, NEXT_BLOCK_TYPE_MAP } from '../types';
 import type { ScriptBlockType } from '../types';
+import { characterBlockSuggestionKey } from './character-block-suggestion';
+import { sceneHeadingSuggestionKey } from './scene-heading-suggestion';
+import { sceneTimeOfDaySuggestionKey } from './scene-time-of-day-suggestion';
+
+function isScriptAutocompleteActive(editor: Editor) {
+  return (
+    characterBlockSuggestionKey.getState(editor.state)?.active === true ||
+    sceneHeadingSuggestionKey.getState(editor.state)?.active === true ||
+    sceneTimeOfDaySuggestionKey.getState(editor.state)?.active === true
+  );
+}
 
 /**
  * Extension for custom keyboard behavior in the script editor
@@ -14,6 +26,10 @@ export const ScriptKeyboardHandler = Extension.create({
   addKeyboardShortcuts() {
     return {
       Enter: ({ editor }) => {
+        if (isScriptAutocompleteActive(editor)) {
+          return false;
+        }
+
         const { state } = editor;
         const { $from } = state.selection;
         const currentNode = $from.parent;
@@ -70,6 +86,10 @@ export const ScriptKeyboardHandler = Extension.create({
       },
 
       Tab: ({ editor }) => {
+        if (isScriptAutocompleteActive(editor)) {
+          return false;
+        }
+
         const { state } = editor;
         const { $from } = state.selection;
         const currentNode = $from.parent;
@@ -93,6 +113,10 @@ export const ScriptKeyboardHandler = Extension.create({
       },
 
       'Shift-Tab': ({ editor }) => {
+        if (isScriptAutocompleteActive(editor)) {
+          return false;
+        }
+
         const { state } = editor;
         const { $from } = state.selection;
         const currentNode = $from.parent;
@@ -116,6 +140,10 @@ export const ScriptKeyboardHandler = Extension.create({
       },
 
       ArrowUp: ({ editor }) => {
+        if (isScriptAutocompleteActive(editor)) {
+          return false;
+        }
+
         const { state } = editor;
         const { $from, empty: isEmpty } = state.selection;
 
@@ -144,6 +172,10 @@ export const ScriptKeyboardHandler = Extension.create({
       },
 
       ArrowDown: ({ editor }) => {
+        if (isScriptAutocompleteActive(editor)) {
+          return false;
+        }
+
         const { state } = editor;
         const { $from, empty: isEmpty } = state.selection;
 

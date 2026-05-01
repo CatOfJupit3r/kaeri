@@ -1,4 +1,4 @@
-import { type Page, expect } from '@playwright/test';
+import { type Locator, type Page, expect } from '@playwright/test';
 
 import { BasePage } from './base.page';
 
@@ -189,6 +189,13 @@ export class KnowledgeBasePage extends BasePage {
       .locator('xpath=ancestor::*[contains(@class,"border")][1]');
   }
 
+  private async addMultiSelectOption(dialog: Locator, fieldName: RegExp, optionLabel: string) {
+    const select = dialog.getByText(fieldName).locator('xpath=following::*[@role="combobox"][1]');
+
+    await select.click({ force: true });
+    await this.page.getByRole('option', { name: optionLabel, exact: true }).click({ force: true });
+  }
+
   async navigateToKnowledgeBase(seriesId: string, search = '') {
     await this.goto(`/series/${seriesId}/knowledge-base${search}`);
     await this.expectLoaded();
@@ -268,7 +275,7 @@ export class KnowledgeBasePage extends BasePage {
     await this.expectCharacterNotVisible(name);
   }
 
-  async createLocation(data: { name: string; description?: string }) {
+  async createLocation(data: { name: string; description?: string; timeOfDay?: string[] }) {
     await expect(this.newLocationButton).toBeVisible({ timeout: 10_000 });
     await this.newLocationButton.click();
     await expect(this.createLocationDialog).toBeVisible({ timeout: 10_000 });
@@ -276,6 +283,10 @@ export class KnowledgeBasePage extends BasePage {
 
     if (data.description != null) {
       await this.createLocationDialog.getByLabel(/^description$/i).fill(data.description);
+    }
+
+    for (const timeOfDay of data.timeOfDay ?? []) {
+      await this.addMultiSelectOption(this.createLocationDialog, /^time of day$/i, timeOfDay);
     }
 
     await this.createLocationDialog.getByRole('button', { name: /^create location$/i }).click();
@@ -489,6 +500,10 @@ export class KnowledgeBasePage extends BasePage {
     await expect(this.page.getByText(data.evolutionNotes, { exact: false })).toBeVisible({ timeout: 10_000 });
   }
 
+  async expectThemeAppearanceVisible(quote: string) {
+    await expect(this.page.getByText(quote, { exact: false }).first()).toBeVisible({ timeout: 10_000 });
+  }
+
   async closeThemeEditPanel() {
     await expect(this.editThemeBackButton).toBeVisible({ timeout: 10_000 });
     await this.editThemeBackButton.click();
@@ -581,6 +596,15 @@ export class KnowledgeBasePage extends BasePage {
   async openTimelineEntryForEdit(label: string) {
     await this.getEditTimelineButton(label).click();
     await expect(this.editTimelineDialog).toBeVisible({ timeout: 10_000 });
+  }
+
+  async openTimelineEntry(label: string) {
+    await this.getTimelineEntryCard(label).click();
+    await expect(this.page.getByRole('heading', { name: /^edit timeline entry$/i })).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectTimelineLinkedSceneVisible(sceneHeading: string) {
+    await expect(this.page.getByText(sceneHeading, { exact: false }).first()).toBeVisible({ timeout: 10_000 });
   }
 
   async updateTimelineEntryLabel(text: string) {
@@ -774,6 +798,10 @@ export class KnowledgeBasePage extends BasePage {
     await expect(this.page.getByText(data.characterName, { exact: true })).toBeVisible({ timeout: 10_000 });
     await expect(this.page.getByText(data.role, { exact: false })).toBeVisible({ timeout: 10_000 });
     await expect(this.page.getByText(data.themeName, { exact: true })).toBeVisible({ timeout: 10_000 });
+  }
+
+  async expectStoryArcKeyBeatVisible(description: string) {
+    await expect(this.page.getByText(description, { exact: false }).first()).toBeVisible({ timeout: 10_000 });
   }
 
   async closeStoryArcEditPanel() {

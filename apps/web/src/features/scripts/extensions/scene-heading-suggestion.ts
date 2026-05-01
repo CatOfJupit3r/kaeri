@@ -11,6 +11,7 @@ export interface iLocationBlockSuggestion {
   name: string;
   avatarUrl?: string;
   preview?: string;
+  timeOfDay?: string[];
 }
 
 // Type alias for external use

@@ -1,3 +1,5 @@
+import { useQueryClient } from '@tanstack/react-query';
+import type { Editor as TiptapEditor } from '@tiptap/core';
 import Bold from '@tiptap/extension-bold';
 import Document from '@tiptap/extension-document';
 import Dropcursor from '@tiptap/extension-dropcursor';
@@ -7,6 +9,7 @@ import Italic from '@tiptap/extension-italic';
 import Placeholder from '@tiptap/extension-placeholder';
 import Text from '@tiptap/extension-text';
 import Underline from '@tiptap/extension-underline';
+import type { Mark } from '@tiptap/pm/model';
 import { Selection } from '@tiptap/pm/state';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -26,7 +29,12 @@ import { Button } from '@~/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@~/components/ui/tooltip';
 import { CanvasBoard } from '@~/features/canvas/components/board';
+import { useStoryArcList } from '@~/features/story-arcs/hooks/queries/use-story-arc-list';
+import { useThemeList } from '@~/features/themes/hooks/queries/use-theme-list';
+import { useTimelineList } from '@~/features/timelines/hooks/queries/use-timeline-list';
 import { cn } from '@~/lib/utils';
+import client from '@~/utils/orpc';
+import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import {
   Action,
@@ -38,14 +46,20 @@ import {
   Transition,
 } from '../extensions';
 import { CharacterBlockSuggestion } from '../extensions/character-block-suggestion';
+import type { EntityType } from '../extensions/entity-mention';
 import { CharacterMention, PropMention, WildcardMention } from '../extensions/entity-mention';
 import { SceneHeadingSuggestion } from '../extensions/scene-heading-suggestion';
+import type { iLocationBlockSuggestion } from '../extensions/scene-heading-suggestion';
+import { SceneTimeOfDaySuggestion } from '../extensions/scene-time-of-day-suggestion';
+import { ThemeMark } from '../extensions/theme-mark';
 import { BLOCK_CONFIG } from '../helpers/block-config';
 import {
+  useAppearanceTracker,
   useKBIntegration,
   useCharacterSuggestions,
   useLocationSuggestions,
   usePropSuggestions,
+  useValidateEntityLinks,
   useWildcardSuggestions,
   useSuggestionRenderer,
   useCharacterBlockSuggestionRenderer,
@@ -56,8 +70,9 @@ import {
   useScriptVersions,
   useRestoreScriptVersion,
 } from '../hooks';
+import { useSceneTimeOfDaySuggestionRenderer } from '../hooks/use-scene-time-of-day-suggestion-renderer';
 import type { ScriptBlockType } from '../types';
-import { BLOCK_TYPE_CYCLE_ORDER } from '../types';
+import { BLOCK_TYPE_CYCLE_ORDER, SCRIPT_BLOCK_TYPES } from '../types';
 import { BlockMenu } from './block-menu';
 import { BreakdownModal } from './breakdown-modal';
 import { EditorToolbar } from './editor-toolbar';
@@ -87,6 +102,8 @@ interface iScriptEditorProps {
   isSaving?: boolean;
   /** Last edit timestamp */
   lastEditedAt?: Date;
+  /** Called when an entity preview should open in the knowledge base */
+  onOpenEntityInKnowledgeBase?: (entityId: string, entityType: EntityType) => void;
 }
 
 /**
@@ -101,6 +118,31 @@ const DEFAULT_CONTENT = {
     },
   ],
 };
+
+const LOCATION_TIME_OF_DAY_VALUES = new Set(['dawn', 'morning', 'afternoon', 'evening', 'dusk', 'night']);
+
+interface iTextSelectionRange {
+  from: number;
+  to: number;
+}
+
+interface iThemeAppearanceSyncRecord {
+  themeId: string;
+  sceneId: string;
+  quote: string;
+}
+
+interface iStoryArcBeatSyncRecord {
+  storyArcId: string;
+  sceneId: string;
+  description: string;
+  sceneNumber: number;
+}
+
+interface iTimelineSceneLinkRecord {
+  timelineEntryId: string;
+  sceneId: string;
+}
 
 /**
  * Parse content string to tiptap JSON
@@ -147,6 +189,342 @@ function convertPlainTextToDoc(text: string): Record<string, unknown> {
   return { type: 'doc', content };
 }
 
+function parseSceneHeadingLocationCreateQuery(query: string) {
+  const [rawName, rawTimeOfDay] = query.split(/\s*-\s*/, 2);
+  const name = rawName?.trim() ?? '';
+  const normalizedTimeOfDay = rawTimeOfDay?.trim().toLowerCase() ?? '';
+
+  return {
+    name,
+    timeOfDay: LOCATION_TIME_OF_DAY_VALUES.has(normalizedTimeOfDay) ? [normalizedTimeOfDay] : [],
+  };
+}
+
+function getActiveSceneHeadingLocationId(editor: TiptapEditor) {
+  const { $from } = editor.state.selection;
+
+  if ($from.parent.type.name !== SCRIPT_BLOCK_TYPES['scene-heading']) {
+    return null;
+  }
+
+  const { locationId } = $from.parent.attrs;
+
+  return typeof locationId === 'string' && locationId.length > 0 ? locationId : null;
+}
+
+function normalizeLocationTimeOfDayOptions(values: string[] | undefined) {
+  return Array.from(new Set((values ?? []).map((value) => value.trim().toLowerCase()).filter(Boolean)));
+}
+
+function formatSceneTimeOfDaySuggestion(value: string) {
+  return value.toUpperCase();
+}
+
+function getSceneHeadingTimeOfDay(sceneRef: string) {
+  const [, rawTimeOfDay] = sceneRef.split(/\s*-\s*/, 2);
+  const timeOfDay = rawTimeOfDay?.trim();
+
+  return timeOfDay || undefined;
+}
+
+function getEntityLinkKey(entityType: string, entityId: string) {
+  return `${entityType}:${entityId}`;
+}
+
+function getSceneIdsFromDoc(editor: TiptapEditor) {
+  const sceneIds = new Set<string>();
+
+  editor.state.doc.descendants((node) => {
+    if (node.type.name !== SCRIPT_BLOCK_TYPES['scene-heading']) {
+      return true;
+    }
+
+    if (typeof node.attrs.sceneId === 'string' && node.attrs.sceneId.length > 0) {
+      sceneIds.add(node.attrs.sceneId);
+    }
+
+    return true;
+  });
+
+  return sceneIds;
+}
+
+function extractThemeAppearancesFromDoc(editor: TiptapEditor): iThemeAppearanceSyncRecord[] {
+  const themeMarkType = editor.state.schema.marks.theme;
+
+  if (!themeMarkType) {
+    return [];
+  }
+
+  const seen = new Set<string>();
+  const appearances: iThemeAppearanceSyncRecord[] = [];
+  let currentSceneId: string | null = null;
+
+  editor.state.doc.descendants((node) => {
+    if (node.type.name === SCRIPT_BLOCK_TYPES['scene-heading']) {
+      currentSceneId =
+        typeof node.attrs.sceneId === 'string' && node.attrs.sceneId.length > 0 ? node.attrs.sceneId : null;
+      return true;
+    }
+
+    if (!currentSceneId || !node.isText || node.text == null) {
+      return true;
+    }
+
+    const quote = node.text.trim();
+
+    if (!quote) {
+      return true;
+    }
+
+    const themeMark = node.marks.find((mark) => mark.type === themeMarkType);
+
+    if (!themeMark || typeof themeMark.attrs.themeId !== 'string' || themeMark.attrs.themeId.length === 0) {
+      return true;
+    }
+
+    const key = `${themeMark.attrs.themeId}:${currentSceneId}:${quote}`;
+
+    if (seen.has(key)) {
+      return true;
+    }
+
+    seen.add(key);
+    appearances.push({
+      themeId: themeMark.attrs.themeId,
+      sceneId: currentSceneId,
+      quote,
+    });
+
+    return true;
+  });
+
+  return appearances;
+}
+
+function normalizeThemeAppearances(
+  appearances: Array<{
+    sceneId: string;
+    quote?: string;
+    notes?: string;
+  }>,
+) {
+  return [...appearances].sort((left, right) => {
+    const leftKey = `${left.sceneId}:${left.quote ?? ''}:${left.notes ?? ''}`;
+    const rightKey = `${right.sceneId}:${right.quote ?? ''}:${right.notes ?? ''}`;
+
+    return leftKey.localeCompare(rightKey);
+  });
+}
+
+function extractStoryArcBeatsFromDoc(editor: TiptapEditor): iStoryArcBeatSyncRecord[] {
+  const storyArcBeats: iStoryArcBeatSyncRecord[] = [];
+  const seen = new Set<string>();
+  let sceneNumber = 0;
+
+  editor.state.doc.descendants((node) => {
+    if (node.type.name !== SCRIPT_BLOCK_TYPES['scene-heading']) {
+      return true;
+    }
+
+    sceneNumber += 1;
+
+    const sceneId = typeof node.attrs.sceneId === 'string' && node.attrs.sceneId.length > 0 ? node.attrs.sceneId : null;
+    const description = node.textContent.trim();
+    const storyArcIds = Array.isArray(node.attrs.storyArcIds)
+      ? node.attrs.storyArcIds.filter((storyArcId): storyArcId is string => typeof storyArcId === 'string')
+      : [];
+
+    if (!sceneId || !description || storyArcIds.length === 0) {
+      return true;
+    }
+
+    for (const storyArcId of storyArcIds) {
+      const key = `${storyArcId}:${sceneId}`;
+
+      if (!seen.has(key)) {
+        seen.add(key);
+        storyArcBeats.push({
+          storyArcId,
+          sceneId,
+          description,
+          sceneNumber,
+        });
+      }
+    }
+
+    return true;
+  });
+
+  return storyArcBeats;
+}
+
+function normalizeStoryArcKeyBeats(
+  keyBeats: Array<{
+    id: string;
+    order: number;
+    description: string;
+    scriptId?: string;
+    sceneId?: string;
+  }>,
+) {
+  return [...keyBeats]
+    .sort((left, right) => left.order - right.order || left.id.localeCompare(right.id))
+    .map((keyBeat, index) => ({
+      ...keyBeat,
+      order: index,
+    }));
+}
+
+function extractTimelineSceneLinksFromDoc(editor: TiptapEditor): iTimelineSceneLinkRecord[] {
+  const links: iTimelineSceneLinkRecord[] = [];
+  const seen = new Set<string>();
+
+  editor.state.doc.descendants((node) => {
+    if (node.type.name !== SCRIPT_BLOCK_TYPES['scene-heading']) {
+      return true;
+    }
+
+    const sceneId = typeof node.attrs.sceneId === 'string' && node.attrs.sceneId.length > 0 ? node.attrs.sceneId : null;
+    const timelineEntryId =
+      typeof node.attrs.timelineEntryId === 'string' && node.attrs.timelineEntryId.length > 0
+        ? node.attrs.timelineEntryId
+        : null;
+
+    if (!sceneId || !timelineEntryId) {
+      return true;
+    }
+
+    const key = `${timelineEntryId}:${sceneId}`;
+
+    if (!seen.has(key)) {
+      seen.add(key);
+      links.push({ timelineEntryId, sceneId });
+    }
+
+    return true;
+  });
+
+  return links;
+}
+
+function normalizeTimelineLinks(links: Array<{ entityType: string; entityId: string }>) {
+  return [...links].sort((left, right) => {
+    const leftKey = `${left.entityType}:${left.entityId}`;
+    const rightKey = `${right.entityType}:${right.entityId}`;
+
+    return leftKey.localeCompare(rightKey);
+  });
+}
+
+function getMentionEntityLinks(editor: TiptapEditor): Array<{ entityType: EntityType; entityId: string }> {
+  const seenLinks = new Set<string>();
+  const links: Array<{ entityType: EntityType; entityId: string }> = [];
+
+  editor.state.doc.descendants((node) => {
+    node.marks.forEach((mark) => {
+      if (mark.type.name !== 'mention') {
+        return;
+      }
+
+      const { entityId, entityType } = mark.attrs;
+
+      if (
+        typeof entityId !== 'string' ||
+        (entityType !== 'character' && entityType !== 'prop' && entityType !== 'wildcard')
+      ) {
+        return;
+      }
+
+      const key = `${entityType}:${entityId}`;
+
+      if (seenLinks.has(key)) {
+        return;
+      }
+
+      seenLinks.add(key);
+      links.push({ entityType, entityId });
+    });
+
+    return true;
+  });
+
+  return links;
+}
+
+function syncMentionMarks(
+  editor: TiptapEditor,
+  orphanedEntityIds: Set<string>,
+  resolvedEntityNamesByKey: Map<string, string>,
+) {
+  const mentionMarkType = editor.state.schema.marks.mention;
+
+  if (!mentionMarkType) {
+    return false;
+  }
+
+  const updates: Array<{ from: number; to: number; text: string; marks: Mark[] }> = [];
+
+  editor.state.doc.descendants((node, pos) => {
+    if (!node.isText || node.text == null || node.text.length === 0) {
+      return true;
+    }
+
+    const mentionMark = node.marks.find((mark) => mark.type === mentionMarkType);
+
+    if (
+      !mentionMark ||
+      typeof mentionMark.attrs.entityId !== 'string' ||
+      typeof mentionMark.attrs.entityType !== 'string'
+    ) {
+      return true;
+    }
+
+    const entityKey = getEntityLinkKey(mentionMark.attrs.entityType, mentionMark.attrs.entityId);
+    const resolvedEntityName = resolvedEntityNamesByKey.get(entityKey);
+    const nextEntityName = resolvedEntityName ?? mentionMark.attrs.entityName ?? node.text;
+    const isOrphaned = orphanedEntityIds.has(mentionMark.attrs.entityId);
+    const nextText = resolvedEntityName && !isOrphaned ? resolvedEntityName : node.text;
+    const isCurrentlyOrphaned = mentionMark.attrs.orphaned === true;
+    const isNameChanged = nextEntityName !== (mentionMark.attrs.entityName ?? node.text);
+    const isTextChanged = nextText !== node.text;
+
+    if (!isTextChanged && !isNameChanged && isOrphaned === isCurrentlyOrphaned) {
+      return true;
+    }
+
+    updates.push({
+      from: pos,
+      to: pos + node.nodeSize,
+      text: nextText,
+      marks: node.marks.map((mark) =>
+        mark.type === mentionMark.type
+          ? mentionMark.type.create({
+              ...mentionMark.attrs,
+              entityName: nextEntityName,
+              orphaned: isOrphaned,
+            })
+          : mark,
+      ),
+    });
+
+    return true;
+  });
+
+  if (updates.length === 0) {
+    return false;
+  }
+
+  const transaction = editor.state.tr;
+
+  for (const update of [...updates].reverse()) {
+    transaction.replaceWith(update.from, update.to, editor.state.schema.text(update.text, update.marks));
+  }
+
+  editor.view.dispatch(transaction);
+  return true;
+}
+
 export function ScriptEditor({
   content,
   onContentChange,
@@ -158,8 +536,11 @@ export function ScriptEditor({
   onSave,
   isSaving,
   lastEditedAt,
+  onOpenEntityInKnowledgeBase,
 }: iScriptEditorProps) {
+  const queryClient = useQueryClient();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mentionValidationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editorScrollRef = useRef<HTMLDivElement>(null);
   const isPreviewingRef = useRef(false);
   const [rightPanelTab, setRightPanelTab] = useState('knowledge');
@@ -168,6 +549,19 @@ export function ScriptEditor({
   const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
   const [isTableReadOpen, setIsTableReadOpen] = useState(false);
   const [previewingVersionId, setPreviewingVersionId] = useState<string | null>(null);
+  const [textSelectionRange, setTextSelectionRange] = useState<iTextSelectionRange | null>(null);
+  const [characterCreateRequest, setCharacterCreateRequest] = useState<{ requestId: number; name: string } | null>(
+    null,
+  );
+  const [locationCreateRequest, setLocationCreateRequest] = useState<{
+    requestId: number;
+    name: string;
+    timeOfDay: string[];
+  } | null>(null);
+  const [activeSceneHeadingLocationId, setActiveSceneHeadingLocationId] = useState<string | null>(null);
+  const [sceneHeadingTimeOfDayByLocationId, setSceneHeadingTimeOfDayByLocationId] = useState<Record<string, string[]>>(
+    {},
+  );
 
   // Auto-version on tab blur / page close
   const { markContentChanged } = useAutoVersion({ scriptId, enabled: !!scriptId });
@@ -176,6 +570,10 @@ export function ScriptEditor({
   const { data: versions } = useScriptVersions(scriptId);
   const { data: previewVersion } = useScriptVersion(scriptId, previewingVersionId ?? '');
   const { restoreVersion, isPending: isRestoringVersion } = useRestoreScriptVersion();
+  const { data: storyArcListData } = useStoryArcList(seriesId, { limit: 100, offset: 0 });
+  const { data: timelineListData } = useTimelineList(seriesId, 100, 0);
+  const { validateLinksAsync } = useValidateEntityLinks();
+  const { data: themeListData } = useThemeList(seriesId, 100, 0);
 
   // Entity mention suggestion query states
   const [characterQuery, setCharacterQuery] = useState('');
@@ -187,6 +585,22 @@ export function ScriptEditor({
 
   // Scene heading suggestion query (auto-trigger for locations)
   const [locationQuery, setLocationQuery] = useState('');
+
+  const sceneTimeOfDaySuggestions = useMemo(() => {
+    if (!activeSceneHeadingLocationId) {
+      return [];
+    }
+
+    return (sceneHeadingTimeOfDayByLocationId[activeSceneHeadingLocationId] ?? []).map((value) => ({
+      _id: value,
+      name: formatSceneTimeOfDaySuggestion(value),
+    }));
+  }, [activeSceneHeadingLocationId, sceneHeadingTimeOfDayByLocationId]);
+
+  const themeOptions = useMemo(
+    () => (themeListData?.items ?? []).map((theme) => ({ id: theme._id, name: theme.name, color: theme.color })),
+    [themeListData?.items],
+  );
 
   // Fetch entity suggestions for autocomplete
   const { suggestions: characterSuggestions, isLoading: isLoadingCharacters } = useCharacterSuggestions(
@@ -248,6 +662,36 @@ export function ScriptEditor({
     },
   });
 
+  const handleCharacterQuickCreateRequest = useCallback((name: string) => {
+    setRightPanelTab('knowledge');
+    setIsRightPanelCollapsed(false);
+    setCharacterCreateRequest({ requestId: Date.now(), name });
+  }, []);
+
+  const handleLocationQuickCreateRequest = useCallback((query: string) => {
+    const parsedLocation = parseSceneHeadingLocationCreateQuery(query);
+
+    if (!parsedLocation.name) {
+      return;
+    }
+
+    setRightPanelTab('knowledge');
+    setIsRightPanelCollapsed(false);
+    setLocationCreateRequest({ requestId: Date.now(), ...parsedLocation });
+  }, []);
+
+  const handleSceneHeadingLocationSelect = useCallback((location: iLocationBlockSuggestion) => {
+    setActiveSceneHeadingLocationId(location._id);
+    setSceneHeadingTimeOfDayByLocationId((current) => ({
+      ...current,
+      [location._id]: normalizeLocationTimeOfDayOptions(location.timeOfDay),
+    }));
+  }, []);
+
+  const syncActiveSceneHeadingLocationId = useCallback((nextEditor: TiptapEditor) => {
+    setActiveSceneHeadingLocationId(getActiveSceneHeadingLocationId(nextEditor));
+  }, []);
+
   // Character block suggestion config (auto-triggers in character blocks)
   const characterBlockSuggestionConfig = useCharacterBlockSuggestionRenderer({
     suggestions: characterBlockSuggestions,
@@ -256,6 +700,7 @@ export function ScriptEditor({
     onSelect: () => {
       // Character is linked by the extension command
     },
+    onCreate: handleCharacterQuickCreateRequest,
   });
 
   // Scene heading suggestion config (auto-triggers for locations)
@@ -263,16 +708,88 @@ export function ScriptEditor({
     suggestions: locationSuggestions,
     isLoading: isLoadingLocations,
     onQueryChange: setLocationQuery,
+    onSelect: handleSceneHeadingLocationSelect,
+    onCreate: handleLocationQuickCreateRequest,
+  });
+
+  const sceneTimeOfDaySuggestionConfig = useSceneTimeOfDaySuggestionRenderer({
+    suggestions: sceneTimeOfDaySuggestions,
+    isLoading: false,
     onSelect: () => {
-      // Location is linked by the extension command
+      // Time of day is inserted by the extension command
     },
   });
 
+  let requestedKnowledgeBaseTab: 'characters' | 'locations' | undefined;
+
+  if (characterCreateRequest) {
+    requestedKnowledgeBaseTab = 'characters';
+  } else if (locationCreateRequest) {
+    requestedKnowledgeBaseTab = 'locations';
+  }
+
   // KB integration for scene tracking and entity mentions
-  const { extensions: kbExtensions } = useKBIntegration({
+  const { extensions: kbExtensions, scenes } = useKBIntegration({
     seriesId,
     scriptId,
   });
+
+  const validateMentionLinks = useCallback(
+    async (nextEditor: TiptapEditor) => {
+      const mentionLinks = getMentionEntityLinks(nextEditor);
+
+      if (mentionLinks.length === 0) {
+        syncMentionMarks(nextEditor, new Set(), new Map());
+        return;
+      }
+
+      const validationResult = await validateLinksAsync({
+        seriesId,
+        links: mentionLinks,
+      });
+
+      syncMentionMarks(
+        nextEditor,
+        new Set(validationResult.orphaned),
+        new Map(
+          validationResult.resolved.map((entity) => [
+            getEntityLinkKey(entity.entityType, entity.entityId),
+            entity.entityName,
+          ]),
+        ),
+      );
+    },
+    [seriesId, validateLinksAsync],
+  );
+
+  const scheduleMentionValidation = useCallback(
+    (nextEditor: TiptapEditor) => {
+      if (mentionValidationRef.current) {
+        clearTimeout(mentionValidationRef.current);
+      }
+
+      mentionValidationRef.current = setTimeout(() => {
+        void validateMentionLinks(nextEditor);
+      }, 200);
+    },
+    [validateMentionLinks],
+  );
+
+  const syncTextSelectionRange = useCallback((nextEditor: TiptapEditor) => {
+    const { selection, doc } = nextEditor.state;
+
+    if (
+      selection.empty ||
+      !selection.$from.sameParent(selection.$to) ||
+      !selection.$from.parent.isTextblock ||
+      doc.textBetween(selection.from, selection.to, ' ').trim().length === 0
+    ) {
+      setTextSelectionRange(null);
+      return;
+    }
+
+    setTextSelectionRange({ from: selection.from, to: selection.to });
+  }, []);
 
   // Memoize all extensions to prevent unnecessary re-renders
   const editorExtensions = useMemo(
@@ -304,6 +821,7 @@ export function ScriptEditor({
       ScriptKeyboardHandler,
       // KB integration extensions (scene metadata, mention marks)
       ...kbExtensions,
+      ThemeMark,
       // Entity mention extensions with configured autocomplete
       CharacterMention.configure({
         suggestion: characterSuggestionConfig,
@@ -322,6 +840,10 @@ export function ScriptEditor({
       SceneHeadingSuggestion.configure({
         suggestion: sceneHeadingSuggestionConfig,
       }),
+      // Scene heading time-of-day autocomplete (auto-triggers after typing ` - `)
+      SceneTimeOfDaySuggestion.configure({
+        suggestion: sceneTimeOfDaySuggestionConfig,
+      }),
     ],
     [
       kbExtensions,
@@ -330,6 +852,7 @@ export function ScriptEditor({
       wildcardSuggestionConfig,
       characterBlockSuggestionConfig,
       sceneHeadingSuggestionConfig,
+      sceneTimeOfDaySuggestionConfig,
     ],
   );
 
@@ -343,6 +866,10 @@ export function ScriptEditor({
       },
     },
     onUpdate: ({ editor: e }) => {
+      syncActiveSceneHeadingLocationId(e);
+      syncTextSelectionRange(e);
+      scheduleMentionValidation(e);
+
       // Skip autosave when previewing a version — the content is read-only and not the user's work
       if (isPreviewingRef.current) return;
 
@@ -354,12 +881,285 @@ export function ScriptEditor({
       }, 300);
       markContentChanged();
     },
+    onSelectionUpdate: ({ editor: e }) => {
+      syncActiveSceneHeadingLocationId(e);
+      syncTextSelectionRange(e);
+    },
   });
+
+  const handleApplyTheme = useCallback(
+    (theme: { id: string; name: string; color?: string }) => {
+      if (!editor || !textSelectionRange) {
+        return;
+      }
+
+      editor
+        .chain()
+        .focus()
+        .setTextSelection(textSelectionRange)
+        .setTheme({
+          themeId: theme.id,
+          themeName: theme.name,
+          themeColor: theme.color,
+        })
+        .run();
+    },
+    [editor, textSelectionRange],
+  );
+
+  const { sync: syncAppearances } = useAppearanceTracker({
+    editor,
+    scriptId,
+    seriesId,
+  });
+
+  const syncThemeAppearances = useCallback(async () => {
+    if (!editor) {
+      return;
+    }
+
+    const currentSceneIds = getSceneIdsFromDoc(editor);
+    const themeAppearances = extractThemeAppearancesFromDoc(editor);
+    const themes = themeListData?.items ?? [];
+
+    if (themes.length === 0) {
+      return;
+    }
+
+    const updates = themes.flatMap((theme) => {
+      const existingOtherAppearances = (theme.appearances ?? []).filter(
+        (appearance) => !currentSceneIds.has(appearance.sceneId),
+      );
+      const nextAppearances = normalizeThemeAppearances([
+        ...existingOtherAppearances,
+        ...themeAppearances
+          .filter((appearance) => appearance.themeId === theme._id)
+          .map((appearance) => ({
+            sceneId: appearance.sceneId,
+            quote: appearance.quote,
+          })),
+      ]);
+      const currentAppearances = normalizeThemeAppearances(theme.appearances ?? []);
+
+      if (JSON.stringify(currentAppearances) === JSON.stringify(nextAppearances)) {
+        return [];
+      }
+
+      return [
+        client.theme.updateTheme({
+          themeId: theme._id,
+          patch: {
+            appearances: nextAppearances,
+          },
+        }),
+      ];
+    });
+
+    if (updates.length === 0) {
+      return;
+    }
+
+    await Promise.all(updates);
+    await queryClient.invalidateQueries({
+      queryKey: tanstackRPC.theme.listThemesBySeries.queryKey({
+        input: { seriesId, limit: 100, offset: 0 },
+      }),
+    });
+    await queryClient.invalidateQueries({
+      predicate: (query) => Array.isArray(query.queryKey) && JSON.stringify(query.queryKey).includes('"theme"'),
+    });
+  }, [editor, queryClient, seriesId, themeListData?.items]);
+
+  const syncStoryArcBeats = useCallback(async () => {
+    if (!editor) {
+      return;
+    }
+
+    const currentSceneIds = getSceneIdsFromDoc(editor);
+    const storyArcBeats = extractStoryArcBeatsFromDoc(editor);
+    const storyArcs = storyArcListData?.items ?? [];
+
+    if (storyArcs.length === 0) {
+      return;
+    }
+
+    const updates = storyArcs.flatMap((storyArc) => {
+      const retainedKeyBeats = (storyArc.keyBeats ?? []).filter(
+        (keyBeat) => !keyBeat.sceneId || !currentSceneIds.has(keyBeat.sceneId),
+      );
+      const derivedKeyBeats = storyArcBeats
+        .filter((storyArcBeat) => storyArcBeat.storyArcId === storyArc._id)
+        .sort((left, right) => left.sceneNumber - right.sceneNumber || left.sceneId.localeCompare(right.sceneId))
+        .map((storyArcBeat, index) => ({
+          id: `scene-link:${storyArcBeat.sceneId}`,
+          order: retainedKeyBeats.length + index,
+          description: storyArcBeat.description,
+          scriptId,
+          sceneId: storyArcBeat.sceneId,
+        }));
+      const nextKeyBeats = normalizeStoryArcKeyBeats([...retainedKeyBeats, ...derivedKeyBeats]);
+      const currentKeyBeats = normalizeStoryArcKeyBeats(storyArc.keyBeats ?? []);
+
+      if (JSON.stringify(currentKeyBeats) === JSON.stringify(nextKeyBeats)) {
+        return [];
+      }
+
+      return [
+        client.storyArc.updateStoryArc({
+          storyArcId: storyArc._id,
+          patch: {
+            keyBeats: nextKeyBeats,
+          },
+        }),
+      ];
+    });
+
+    if (updates.length === 0) {
+      return;
+    }
+
+    await Promise.all(updates);
+    await queryClient.invalidateQueries({
+      queryKey: tanstackRPC.storyArc.listStoryArcs.queryKey({
+        input: { seriesId, limit: 100, offset: 0 },
+      }),
+    });
+    await queryClient.invalidateQueries({
+      predicate: (query) => Array.isArray(query.queryKey) && JSON.stringify(query.queryKey).includes('"storyArc"'),
+    });
+  }, [editor, queryClient, scriptId, seriesId, storyArcListData?.items]);
+
+  const syncTimelineLinks = useCallback(async () => {
+    if (!editor) {
+      return;
+    }
+
+    const currentSceneIds = getSceneIdsFromDoc(editor);
+    const timelineSceneLinks = extractTimelineSceneLinksFromDoc(editor);
+    const timelineEntries = timelineListData?.items ?? [];
+
+    if (timelineEntries.length === 0) {
+      return;
+    }
+
+    const updates = timelineEntries.flatMap((timelineEntry) => {
+      const retainedLinks = (timelineEntry.links ?? []).filter(
+        (link) => link.entityType !== 'scene' || !currentSceneIds.has(link.entityId),
+      );
+      const derivedLinks = timelineSceneLinks
+        .filter((timelineSceneLink) => timelineSceneLink.timelineEntryId === timelineEntry._id)
+        .map((timelineSceneLink) => ({
+          entityType: 'scene',
+          entityId: timelineSceneLink.sceneId,
+        }));
+      const nextLinks = normalizeTimelineLinks([...retainedLinks, ...derivedLinks]);
+      const currentLinks = normalizeTimelineLinks(timelineEntry.links ?? []);
+
+      if (JSON.stringify(currentLinks) === JSON.stringify(nextLinks)) {
+        return [];
+      }
+
+      return [
+        client.knowledgeBase.timeline.update({
+          id: timelineEntry._id,
+          seriesId,
+          patch: {
+            links: nextLinks,
+          },
+        }),
+      ];
+    });
+
+    if (updates.length === 0) {
+      return;
+    }
+
+    await Promise.all(updates);
+    await queryClient.invalidateQueries({
+      queryKey: tanstackRPC.knowledgeBase.timeline.list.queryKey({
+        input: { seriesId, limit: 100, offset: 0 },
+      }),
+    });
+    await queryClient.invalidateQueries({
+      predicate: (query) => Array.isArray(query.queryKey) && JSON.stringify(query.queryKey).includes('"timeline"'),
+    });
+  }, [editor, queryClient, seriesId, timelineListData?.items]);
+
+  const ensureSceneEntities = useCallback(async () => {
+    if (!editor) {
+      return;
+    }
+
+    const scenesToEnsure = scenes
+      .map((scene) => {
+        const sceneRef = scene.sceneRef.trim();
+
+        return sceneRef ? { ...scene, sceneRef } : null;
+      })
+      .filter((scene): scene is (typeof scenes)[number] & { sceneRef: string } => scene !== null);
+
+    if (scenesToEnsure.length === 0) {
+      return;
+    }
+
+    const ensuredScenes = await Promise.all(
+      scenesToEnsure.map(async (scene) => {
+        const result = await client.scriptKBIntegration.ensureScene({
+          scriptId,
+          seriesId,
+          heading: scene.sceneRef,
+          sceneNumber: scene.sceneNumber,
+          locationId: scene.locationId ?? undefined,
+          timeOfDay: getSceneHeadingTimeOfDay(scene.sceneRef),
+        });
+
+        return {
+          pos: scene.pos,
+          sceneId: result.scene._id,
+          sceneRef: scene.sceneRef,
+        };
+      }),
+    );
+
+    const transaction = editor.state.tr;
+    let hasChanges = false;
+
+    for (const ensuredScene of ensuredScenes) {
+      const node = transaction.doc.nodeAt(ensuredScene.pos);
+
+      if (
+        node?.type.name === SCRIPT_BLOCK_TYPES['scene-heading'] &&
+        (node.attrs.sceneId !== ensuredScene.sceneId || node.attrs.sceneRef !== ensuredScene.sceneRef)
+      ) {
+        transaction.setNodeMarkup(ensuredScene.pos, undefined, {
+          ...node.attrs,
+          sceneId: ensuredScene.sceneId,
+          sceneRef: ensuredScene.sceneRef,
+        });
+        hasChanges = true;
+      }
+    }
+
+    if (hasChanges) {
+      editor.view.dispatch(transaction);
+    }
+  }, [editor, scenes, scriptId, seriesId]);
+
+  useEffect(() => {
+    if (!editor) {
+      return;
+    }
+
+    syncActiveSceneHeadingLocationId(editor);
+    syncTextSelectionRange(editor);
+    scheduleMentionValidation(editor);
+  }, [editor, scheduleMentionValidation, syncActiveSceneHeadingLocationId, syncTextSelectionRange]);
 
   // Cleanup debounce on unmount
   useEffect(
     () => () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (mentionValidationRef.current) clearTimeout(mentionValidationRef.current);
     },
     [],
   );
@@ -463,6 +1263,7 @@ export function ScriptEditor({
   const { previewState, hidePreview, handleOpenInKB, onCardMouseEnter, onCardMouseLeave } = useMentionHoverPreview({
     editor,
     delay: 500,
+    onNavigateToKB: onOpenEntityInKnowledgeBase,
   });
 
   return (
@@ -475,8 +1276,16 @@ export function ScriptEditor({
         onSave={
           editor == null
             ? undefined
-            : () => {
-                onSave?.(JSON.stringify(editor.getJSON()));
+            : async () => {
+                try {
+                  await ensureSceneEntities();
+                  await syncAppearances();
+                  await syncStoryArcBeats();
+                  await syncTimelineLinks();
+                  await syncThemeAppearances();
+                } finally {
+                  onSave?.(JSON.stringify(editor.getJSON()));
+                }
               }
         }
         onBreakdown={() => setIsBreakdownOpen(true)}
@@ -492,6 +1301,9 @@ export function ScriptEditor({
           setRightPanelTab('versions');
           setIsRightPanelCollapsed(false);
         }}
+        canApplyTheme={textSelectionRange !== null}
+        themeOptions={themeOptions}
+        onApplyTheme={handleApplyTheme}
       />
 
       {/* Breakdown Modal */}
@@ -536,7 +1348,7 @@ export function ScriptEditor({
 
           {/* Editor Content */}
           <div ref={editorScrollRef} data-testid="script-editor" className="relative flex-1 overflow-y-auto pl-16">
-            {editor ? <BlockMenu editor={editor} containerRef={editorScrollRef} /> : null}
+            {editor ? <BlockMenu editor={editor} containerRef={editorScrollRef} seriesId={seriesId} /> : null}
             <EditorContent editor={editor} className="h-full" />
           </div>
 
@@ -700,7 +1512,14 @@ export function ScriptEditor({
             </TabsList>
 
             <TabsContent value="knowledge" data-testid="knowledge-base-panel" className="mt-0 flex-1 overflow-hidden">
-              <KnowledgeBasePanel seriesId={seriesId} />
+              <KnowledgeBasePanel
+                seriesId={seriesId}
+                requestedTab={requestedKnowledgeBaseTab}
+                characterCreateRequest={characterCreateRequest}
+                onCharacterCreateRequestHandled={() => setCharacterCreateRequest(null)}
+                locationCreateRequest={locationCreateRequest}
+                onLocationCreateRequestHandled={() => setLocationCreateRequest(null)}
+              />
             </TabsContent>
 
             <TabsContent value="canvas" data-testid="canvas-panel" className="mt-0 flex-1 overflow-hidden">

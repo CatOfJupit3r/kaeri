@@ -34,6 +34,16 @@ export class CharacterPage extends BasePage {
     await expect(this.editDialog).not.toBeVisible({ timeout: 10_000 });
   }
 
+  async updateName(name: string) {
+    await expect(this.editButton).toBeVisible({ timeout: 10_000 });
+    await this.editButton.click();
+    await expect(this.editDialog).toBeVisible({ timeout: 10_000 });
+    await this.editDialog.getByLabel(/^name$/i).fill(name);
+    await this.editDialog.getByRole('button', { name: /^update character$/i }).click();
+    await expect(this.editDialog).not.toBeVisible({ timeout: 10_000 });
+    await this.expectLoaded(name);
+  }
+
   async addRelationship(data: { targetName: string; relationshipType: string; note?: string }) {
     await expect(this.editButton).toBeVisible({ timeout: 10_000 });
     await this.editButton.click();

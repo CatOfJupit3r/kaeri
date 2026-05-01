@@ -9,6 +9,20 @@ export interface iSceneHeadingAttributes {
   sceneId: string | null;
   /** Scene reference string (e.g., "INT. APARTMENT - DAY") */
   sceneRef: string | null;
+  /** Scene quick-editor emotional tone */
+  emotionalTone: string;
+  /** Scene quick-editor conflict summary */
+  conflict: string;
+  /** Scene quick-editor beats */
+  beats: string[];
+  /** Scene quick-editor lighting notes */
+  lighting: string;
+  /** Scene quick-editor director notes */
+  notes: string;
+  /** Linked story arc IDs for the scene */
+  storyArcIds: string[];
+  /** Linked timeline entry ID for the scene */
+  timelineEntryId: string | null;
   class: string;
 }
 
@@ -63,6 +77,27 @@ export const SceneHeading = Node.create({
         parseHTML: (element) => element.dataset.sceneRef,
         renderHTML: (attributes: iSceneHeadingAttributes) =>
           attributes.sceneRef ? { 'data-scene-ref': attributes.sceneRef } : {},
+      },
+      emotionalTone: {
+        default: '',
+      },
+      conflict: {
+        default: '',
+      },
+      beats: {
+        default: [],
+      },
+      lighting: {
+        default: '',
+      },
+      notes: {
+        default: '',
+      },
+      storyArcIds: {
+        default: [],
+      },
+      timelineEntryId: {
+        default: null,
       },
       class: {
         default: 'script-block script-block--scene-heading',

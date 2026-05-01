@@ -94,7 +94,7 @@ function detectScenes(doc: ProseMirrorNode): iSceneInfo[] {
     if (currentScene !== null) {
       const scene = currentScene;
       node.marks.forEach((mark) => {
-        if (mark.type.name === 'mentionMark') {
+        if (mark.type.name === 'mention') {
           const entityId = mark.attrs.entityId as string;
           const entityType = mark.attrs.entityType as string;
 

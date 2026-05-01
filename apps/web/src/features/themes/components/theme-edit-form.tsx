@@ -237,6 +237,34 @@ export function ThemeEditForm({ mode, seriesId, initialData, onClose, open, onOp
             </form.AppField>
           </CardContent>
         </Card>
+
+        <Card className="mb-6">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base">Appearances in Scripts</CardTitle>
+            <CardDescription>Passages tagged with this theme from the script editor</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {initialData.appearances && initialData.appearances.length > 0 ? (
+              <div className="space-y-3">
+                {initialData.appearances.map((appearance, index) => (
+                  <div
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={`${appearance.sceneId}-${appearance.quote ?? 'appearance'}-${index}`}
+                    className="rounded-md border border-border bg-background/50 p-3"
+                  >
+                    <p className="text-xs font-medium text-foreground">Scene {appearance.sceneId}</p>
+                    {appearance.quote ? (
+                      <p className="mt-1 text-sm text-muted-foreground italic">&quot;{appearance.quote}&quot;</p>
+                    ) : null}
+                    {appearance.notes ? <p className="mt-1 text-sm text-muted-foreground">{appearance.notes}</p> : null}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No appearances recorded for this theme</p>
+            )}
+          </CardContent>
+        </Card>
       </form.Form>
     </form.AppForm>
   );

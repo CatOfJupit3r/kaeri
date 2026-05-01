@@ -44,6 +44,7 @@ export const autocompleteSuggestionSchema = z.object({
   avatarUrl: z.string().url().optional(),
   preview: z.string().optional(),
   usageCount: z.number().int().min(0).optional(),
+  timeOfDay: z.array(z.string()).optional(),
 });
 export type AutocompleteSuggestion = z.infer<typeof autocompleteSuggestionSchema>;
 
@@ -325,7 +326,8 @@ const validateEntityLinks = authProcedure
     path: '/validate-links',
     method: 'POST',
     summary: 'Validate entity links exist',
-    description: 'Checks array of entity references and returns which ones no longer exist (orphaned).',
+    description:
+      'Checks array of entity references, returns which ones no longer exist (orphaned), and resolves current names for valid links.',
   })
   .input(
     z.object({
@@ -342,6 +344,13 @@ const validateEntityLinks = authProcedure
     z.object({
       orphaned: z.array(z.string()),
       valid: z.array(z.string()),
+      resolved: z.array(
+        z.object({
+          entityType: z.string(),
+          entityId: z.string(),
+          entityName: z.string(),
+        }),
+      ),
     }),
   );
 

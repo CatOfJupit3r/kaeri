@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LuPencil, LuTrash2, LuUsers } from 'react-icons/lu';
 
 import {
@@ -30,6 +30,10 @@ interface iCharacterListProps {
   seriesId: string;
   /** Optional callback for when a character is selected. If not provided, navigates to character page. */
   onCharacterSelect?: (characterId: string) => void;
+  /** External request to open the create form with a prefilled name. */
+  createRequest?: { requestId: number; name: string } | null;
+  /** Called after the external create request has been consumed. */
+  onCreateRequestHandled?: () => void;
 }
 
 function CharacterListPending() {
@@ -58,14 +62,38 @@ function CharacterListPending() {
   );
 }
 
-export function CharacterList({ seriesId, onCharacterSelect }: iCharacterListProps) {
+export function CharacterList({
+  seriesId,
+  onCharacterSelect,
+  createRequest,
+  onCreateRequestHandled,
+}: iCharacterListProps) {
   const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [initialCreateName, setInitialCreateName] = useState('');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [characterToDelete, setCharacterToDelete] = useState<CharacterListItem | undefined>(undefined);
   const { state: paginationState, controls: paginationControls, queryParams } = usePagination();
   const { data, isPending, error, refetch } = useCharacterList(seriesId, queryParams.limit, queryParams.offset);
   const { deleteCharacter, isPending: isDeleting } = useDeleteCharacter();
+
+  useEffect(() => {
+    if (!createRequest) {
+      return;
+    }
+
+    setInitialCreateName(createRequest.name);
+    setIsFormOpen(true);
+    onCreateRequestHandled?.();
+  }, [createRequest, onCreateRequestHandled]);
+
+  const handleCreateFormOpenChange = (open: boolean) => {
+    setIsFormOpen(open);
+
+    if (!open) {
+      setInitialCreateName('');
+    }
+  };
 
   const handleCardClick = (characterId: string) => {
     // If onCharacterSelect is provided, use it instead of navigating
@@ -126,14 +154,22 @@ export function CharacterList({ seriesId, onCharacterSelect }: iCharacterListPro
             <EmptyDescription>Create your first character to start building your story&apos;s cast.</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={() => setIsFormOpen(true)}>New Character</Button>
+            <Button
+              onClick={() => {
+                setInitialCreateName('');
+                setIsFormOpen(true);
+              }}
+            >
+              New Character
+            </Button>
           </EmptyContent>
         </Empty>
         <CharacterCreateForm
           seriesId={seriesId}
           characters={characters}
           open={isFormOpen}
-          onOpenChange={setIsFormOpen}
+          onOpenChange={handleCreateFormOpenChange}
+          initialName={initialCreateName}
         />
       </>
     );
@@ -146,7 +182,14 @@ export function CharacterList({ seriesId, onCharacterSelect }: iCharacterListPro
           <p className="text-sm text-muted-foreground">
             {data?.total ?? 0} {data?.total === 1 ? 'character' : 'characters'}
           </p>
-          <Button onClick={() => setIsFormOpen(true)}>New Character</Button>
+          <Button
+            onClick={() => {
+              setInitialCreateName('');
+              setIsFormOpen(true);
+            }}
+          >
+            New Character
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -248,7 +291,13 @@ export function CharacterList({ seriesId, onCharacterSelect }: iCharacterListPro
           className="mt-6"
         />
       </div>
-      <CharacterCreateForm seriesId={seriesId} characters={characters} open={isFormOpen} onOpenChange={setIsFormOpen} />
+      <CharacterCreateForm
+        seriesId={seriesId}
+        characters={characters}
+        open={isFormOpen}
+        onOpenChange={handleCreateFormOpenChange}
+        initialName={initialCreateName}
+      />
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

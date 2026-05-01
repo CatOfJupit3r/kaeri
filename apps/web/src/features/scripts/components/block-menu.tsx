@@ -4,10 +4,11 @@
  * Appears next to the currently focused block
  * Shows inline type selector when block is empty
  */
+import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { Selection } from '@tiptap/pm/state';
 import type { Editor } from '@tiptap/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LuChevronDown, LuPlus, LuTrash2 } from 'react-icons/lu';
+import { LuBookOpen, LuChevronDown, LuPlus, LuTrash2 } from 'react-icons/lu';
 
 import { Button } from '@~/components/ui/button';
 import {
@@ -22,6 +23,8 @@ import { cn } from '@~/lib/utils';
 import { BLOCK_CONFIG } from '../helpers/block-config';
 import type { ScriptBlockType } from '../types';
 import { BLOCK_TYPE_CYCLE_ORDER, SCRIPT_BLOCK_TYPES } from '../types';
+import { SceneMetadataPanel } from './scene-editor';
+import type { iSceneMetadataPanelData } from './scene-editor';
 
 /** Height of the convert bar including padding */
 const CONVERT_BAR_HEIGHT = 52;
@@ -31,6 +34,7 @@ const CONVERT_BAR_MARGIN = 8;
 interface iBlockMenuProps {
   editor: Editor;
   containerRef: React.RefObject<HTMLDivElement | null>;
+  seriesId: string;
 }
 
 /**
@@ -49,15 +53,63 @@ function getCurrentBlockInfo(editor: Editor): { type: ScriptBlockType | null; is
   return { type: null, isEmpty };
 }
 
+function readSceneMetadataValue(value: unknown) {
+  return typeof value === 'string' ? value : '';
+}
+
+function readSceneMetadataList(value: unknown) {
+  return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === 'string') : [];
+}
+
+function getSceneMetadataPanelData(node: ProseMirrorNode): iSceneMetadataPanelData {
+  const attrs = node.attrs as Record<string, unknown>;
+
+  return {
+    heading: node.textContent.trim(),
+    emotionalTone: readSceneMetadataValue(attrs.emotionalTone),
+    conflict: readSceneMetadataValue(attrs.conflict),
+    beats: readSceneMetadataList(attrs.beats),
+    lighting: readSceneMetadataValue(attrs.lighting),
+    notes: readSceneMetadataValue(attrs.notes),
+    storyArcIds: readSceneMetadataList(attrs.storyArcIds),
+    timelineEntryId: typeof attrs.timelineEntryId === 'string' ? attrs.timelineEntryId : undefined,
+  };
+}
+
+function getCurrentSceneHeadingNode(editor: Editor) {
+  const { $from } = editor.state.selection;
+
+  if ($from.parent.type.name !== SCRIPT_BLOCK_TYPES['scene-heading']) {
+    return null;
+  }
+
+  return {
+    node: $from.parent,
+    nodePos: $from.before($from.depth),
+  };
+}
+
+function getSceneHeadingNodeAtPosition(editor: Editor, nodePos: number) {
+  const node = editor.state.doc.nodeAt(nodePos);
+
+  if (node?.type.name !== SCRIPT_BLOCK_TYPES['scene-heading']) {
+    return null;
+  }
+
+  return node;
+}
+
 /**
  * Block control menu that floats next to the currently focused block
  * Shows inline type selector popup when block is empty
  */
-export function BlockMenu({ editor, containerRef }: iBlockMenuProps) {
+export function BlockMenu({ editor, containerRef, seriesId }: iBlockMenuProps) {
   const [currentType, setCurrentType] = useState<ScriptBlockType | null>(null);
   const [isEmpty, setIsEmpty] = useState(false);
   const [position, setPosition] = useState<{ top: number; blockHeight: number } | null>(null);
   const [isConvertBarFlipped, setIsConvertBarFlipped] = useState(false);
+  const [isSceneMetadataOpen, setIsSceneMetadataOpen] = useState(false);
+  const [activeSceneMetadataPos, setActiveSceneMetadataPos] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const updatePosition = useCallback(() => {
@@ -125,6 +177,13 @@ export function BlockMenu({ editor, containerRef }: iBlockMenuProps) {
     };
   }, [editor, containerRef, updatePosition]);
 
+  useEffect(() => {
+    if (currentType !== SCRIPT_BLOCK_TYPES['scene-heading']) {
+      setIsSceneMetadataOpen(false);
+      setActiveSceneMetadataPos(null);
+    }
+  }, [currentType]);
+
   const handleChangeType = (type: ScriptBlockType) => {
     editor.chain().focus().setNode(type).run();
   };
@@ -172,17 +231,68 @@ export function BlockMenu({ editor, containerRef }: iBlockMenuProps) {
       .run();
   };
 
+  const handleOpenSceneMetadata = () => {
+    const currentSceneHeading = getCurrentSceneHeadingNode(editor);
+
+    if (!currentSceneHeading) {
+      return;
+    }
+
+    setActiveSceneMetadataPos(currentSceneHeading.nodePos);
+    setIsSceneMetadataOpen(true);
+  };
+
+  const handleSaveSceneMetadata = useCallback(
+    (data: iSceneMetadataPanelData) => {
+      if (activeSceneMetadataPos === null) {
+        return;
+      }
+
+      editor
+        .chain()
+        .focus()
+        .command(({ tr }) => {
+          const node = tr.doc.nodeAt(activeSceneMetadataPos);
+
+          if (node?.type.name !== SCRIPT_BLOCK_TYPES['scene-heading']) {
+            return false;
+          }
+
+          tr.setNodeMarkup(activeSceneMetadataPos, undefined, {
+            ...node.attrs,
+            sceneRef: data.heading || null,
+            emotionalTone: data.emotionalTone ?? '',
+            conflict: data.conflict ?? '',
+            beats: data.beats ?? [],
+            lighting: data.lighting ?? '',
+            notes: data.notes ?? '',
+            storyArcIds: data.storyArcIds ?? [],
+            timelineEntryId: data.timelineEntryId ?? null,
+          });
+          tr.setSelection(Selection.near(tr.doc.resolve(activeSceneMetadataPos + 1)));
+
+          return true;
+        })
+        .run();
+    },
+    [activeSceneMetadataPos, editor],
+  );
+
   if (!position || !currentType) {
     return null;
   }
 
   const currentConfig = BLOCK_CONFIG[currentType];
   const canDelete = editor.state.doc.childCount > 1;
+  const activeSceneHeadingNode =
+    activeSceneMetadataPos === null ? null : getSceneHeadingNodeAtPosition(editor, activeSceneMetadataPos);
+  const activeSceneMetadata = activeSceneHeadingNode ? getSceneMetadataPanelData(activeSceneHeadingNode) : null;
 
   // Calculate convert bar position - flip above if it would overflow
   const convertBarTop = isConvertBarFlipped
     ? position.top - CONVERT_BAR_HEIGHT - CONVERT_BAR_MARGIN
     : position.top + position.blockHeight + CONVERT_BAR_MARGIN;
+  const sceneMetadataTop = position.top + position.blockHeight + CONVERT_BAR_MARGIN;
 
   return (
     <>
@@ -251,6 +361,26 @@ export function BlockMenu({ editor, containerRef }: iBlockMenuProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+
+        {currentType === SCRIPT_BLOCK_TYPES['scene-heading'] && !isEmpty ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  aria-label="Scene details"
+                  data-testid="scene-metadata-toggle"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 w-7 border-2 border-foreground p-0 shadow-[2px_2px_0px_rgb(0,0,0)]"
+                  onClick={handleOpenSceneMetadata}
+                >
+                  <LuBookOpen className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Open scene details</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : null}
 
         {/* Add Block After Button */}
         <TooltipProvider>
@@ -337,6 +467,19 @@ export function BlockMenu({ editor, containerRef }: iBlockMenuProps) {
             })}
             <span className="ml-auto text-[10px] text-muted-foreground">Tab to cycle • Ctrl+1-6 shortcuts</span>
           </div>
+        </div>
+      ) : null}
+
+      {isSceneMetadataOpen && activeSceneMetadata ? (
+        <div className="pointer-events-auto absolute right-4 left-16 z-40" style={{ top: `${sceneMetadataTop}px` }}>
+          <SceneMetadataPanel
+            key={activeSceneMetadataPos ?? 'scene-metadata-panel'}
+            scene={{ sceneRef: activeSceneMetadata.heading }}
+            seriesId={seriesId}
+            initialData={activeSceneMetadata}
+            onSave={handleSaveSceneMetadata}
+            onClose={() => setIsSceneMetadataOpen(false)}
+          />
         </div>
       ) : null}
     </>
